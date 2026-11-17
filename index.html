@@ -215,18 +215,27 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 #mushafPageImage{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:none!important;object-fit:contain!important;object-position:center!important;margin:0 auto!important}
 @media(max-width:600px){#mushafSwipeArea{padding:2px!important}#mushafPageImage{width:100%!important;height:auto!important;max-height:none!important}}
 
-/* شريط الأذكار المتحرك */
-.azkar-ticker{position:sticky;top:0;z-index:1100;display:block;width:100%;min-height:44px;overflow:hidden;background:linear-gradient(90deg,#0d3d30,#17654c,#0d3d30);color:#fff;border-block:1px solid #ffffff22;box-shadow:0 3px 12px #00000022}
-.azkar-ticker-track{display:flex;width:max-content;align-items:center;animation:azkarTickerMove 58s linear infinite;will-change:transform}
-.azkar-ticker:hover .azkar-ticker-track{animation-play-state:paused}
-.azkar-ticker-group{display:flex;flex:0 0 auto;align-items:center;gap:34px;padding:12px 17px;white-space:nowrap;font-size:14px;font-weight:700}
-.azkar-ticker-group span:before{content:'۞';color:#f5d98b;margin-left:10px}
+/* شريط الأذكار المتحرك - أعلى الموقع */
+.azkar-ticker{position:sticky;top:0;z-index:1500;display:block;width:100%;min-height:48px;overflow:hidden;background:linear-gradient(100deg,#263b78,#4056a6,#263b78);color:#fff;border-block:1px solid #d9c47b;box-shadow:0 4px 15px #101c4638}
+.azkar-ticker-track{display:flex;width:max-content;align-items:center;animation:azkarTickerMove 105s linear infinite;will-change:transform}
+.azkar-ticker-group{display:flex;flex:0 0 auto;align-items:center;gap:30px;padding:12px 18px;white-space:nowrap;font-size:14px;font-weight:700}
+.azkar-ticker-group span:before{content:'✦';color:#f6d978;margin-left:10px}
 @keyframes azkarTickerMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@media(prefers-reduced-motion:reduce){.azkar-ticker-track{animation:none}}
-
+@media(max-width:600px){.azkar-ticker{min-height:44px}.azkar-ticker-group{gap:22px;padding:10px 14px;font-size:13px}}
 </style>
 </head>
 <body>
+<div class="azkar-ticker" role="region" aria-label="أذكار متحركة">
+  <div class="azkar-ticker-track">
+    <div class="azkar-ticker-group">
+      <span>سبحان الله وبحمده، سبحان الله العظيم</span><span>أستغفر الله العظيم وأتوب إليه</span><span>لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير</span><span>اللهم صلِّ وسلم على نبينا محمد</span><span>لا حول ولا قوة إلا بالله</span><span>سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر</span><span>رضيت بالله ربًّا، وبالإسلام دينًا، وبمحمد ﷺ نبيًّا</span><span>حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم</span><span>اللهم إنك عفو تحب العفو فاعف عني</span><span>رب اغفر لي وتب علي إنك أنت التواب الرحيم</span><span>اللهم أعني على ذكرك وشكرك وحسن عبادتك</span><span>يا مقلب القلوب ثبت قلبي على دينك</span><span>اللهم إني أسألك العفو والعافية في الدنيا والآخرة</span><span>اللهم إني أسألك الهدى والتقى والعفاف والغنى</span><span>ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار</span><span>سبحان الله وبحمده عدد خلقه ورضا نفسه وزنة عرشه ومداد كلماته</span><span>اللهم اغفر للمؤمنين والمؤمنات والمسلمين والمسلمات الأحياء منهم والأموات</span><span>اللهم صلِّ على محمد وعلى آل محمد</span><span>أعوذ بكلمات الله التامات من شر ما خلق</span><span>بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم</span><span>اللهم إني أعوذ بك من الهم والحزن والعجز والكسل</span><span>رب اشرح لي صدري ويسر لي أمري</span><span>لا إله إلا أنت سبحانك إني كنت من الظالمين</span><span>اللهم اجعل القرآن ربيع قلبي ونور صدري</span><span>اللهم أحسن عاقبتنا في الأمور كلها وأجرنا من خزي الدنيا وعذاب الآخرة</span>
+    </div>
+    <div class="azkar-ticker-group" aria-hidden="true">
+      <span>سبحان الله وبحمده، سبحان الله العظيم</span><span>أستغفر الله العظيم وأتوب إليه</span><span>لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير</span><span>اللهم صلِّ وسلم على نبينا محمد</span><span>لا حول ولا قوة إلا بالله</span><span>سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر</span><span>رضيت بالله ربًّا، وبالإسلام دينًا، وبمحمد ﷺ نبيًّا</span><span>حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم</span><span>اللهم إنك عفو تحب العفو فاعف عني</span><span>رب اغفر لي وتب علي إنك أنت التواب الرحيم</span><span>اللهم أعني على ذكرك وشكرك وحسن عبادتك</span><span>يا مقلب القلوب ثبت قلبي على دينك</span><span>اللهم إني أسألك العفو والعافية في الدنيا والآخرة</span><span>اللهم إني أسألك الهدى والتقى والعفاف والغنى</span><span>ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار</span><span>سبحان الله وبحمده عدد خلقه ورضا نفسه وزنة عرشه ومداد كلماته</span><span>اللهم اغفر للمؤمنين والمؤمنات والمسلمين والمسلمات الأحياء منهم والأموات</span><span>اللهم صلِّ على محمد وعلى آل محمد</span><span>أعوذ بكلمات الله التامات من شر ما خلق</span><span>بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم</span><span>اللهم إني أعوذ بك من الهم والحزن والعجز والكسل</span><span>رب اشرح لي صدري ويسر لي أمري</span><span>لا إله إلا أنت سبحانك إني كنت من الظالمين</span><span>اللهم اجعل القرآن ربيع قلبي ونور صدري</span><span>اللهم أحسن عاقبتنا في الأمور كلها وأجرنا من خزي الدنيا وعذاب الآخرة</span>
+    </div>
+  </div>
+</div>
+
 <header class="hero">
   <div class="top">
     <div class="brand"><span class="brand-mark">۞</span><span>زاد المسلم</span></div>
@@ -262,13 +271,6 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
     </div>
   </div>
 </header>
-
-<div class="azkar-ticker" role="region" aria-label="أذكار متحركة">
-  <div class="azkar-ticker-track">
-    <div class="azkar-ticker-group"><span>سبحان الله وبحمده، سبحان الله العظيم</span><span>أستغفر الله العظيم وأتوب إليه</span><span>لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير</span><span>اللهم صلِّ وسلم على نبينا محمد</span><span>لا حول ولا قوة إلا بالله</span><span>سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر</span></div>
-    <div class="azkar-ticker-group" aria-hidden="true"><span>سبحان الله وبحمده، سبحان الله العظيم</span><span>أستغفر الله العظيم وأتوب إليه</span><span>لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير</span><span>اللهم صلِّ وسلم على نبينا محمد</span><span>لا حول ولا قوة إلا بالله</span><span>سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر</span></div>
-  </div>
-</div>
 
 <main class="wrap">
   <div class="date-strip">
