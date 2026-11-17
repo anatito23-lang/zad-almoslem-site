@@ -130,8 +130,10 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 
 /* سبحة عائمة متاحة من أي مكان في الموقع */
 .tasbeeh-float{position:fixed;right:18px;bottom:18px;z-index:1200;direction:rtl}
-.tasbeeh-fab{display:flex;align-items:center;justify-content:center;gap:8px;min-width:94px;padding:12px 16px;border:1px solid #ffffff55;border-radius:999px;background:linear-gradient(135deg,#0b3c2e,#176149);color:#fff;font:inherit;font-weight:800;box-shadow:0 8px 24px #082d2740;cursor:pointer}
-.tasbeeh-fab-icon{display:grid;place-items:center;width:27px;height:27px;border-radius:50%;background:#ffffff1c;color:#f2d99e;font-size:20px}
+.tasbeeh-fab{--fab-progress:0%;position:relative;isolation:isolate;width:78px;height:78px;min-width:78px;padding:6px;border:0;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:conic-gradient(#d8b76d var(--fab-progress),#ffffff65 0);color:#fff;font:inherit;font-weight:800;box-shadow:0 8px 24px #082d2740;cursor:pointer}
+.tasbeeh-fab:before{content:"";position:absolute;inset:5px;z-index:-1;border-radius:50%;background:linear-gradient(145deg,#0b3c2e,#176149);box-shadow:inset 0 0 0 1px #ffffff28}
+.tasbeeh-fab-count{font-size:23px;line-height:1.2;font-weight:900;font-variant-numeric:tabular-nums;direction:ltr}
+.tasbeeh-fab-label{font-size:11px;line-height:1.4;color:#f3d99e}
 .tasbeeh-fab:focus-visible,.tasbeeh-panel button:focus-visible,.tasbeeh-panel select:focus-visible{outline:3px solid #d6b76f;outline-offset:3px}
 .tasbeeh-panel{position:absolute;right:0;bottom:68px;width:min(330px,calc(100vw - 28px));padding:17px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 55px #102d2450}
 .tasbeeh-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
@@ -746,8 +748,8 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 </button>
 
 <div class="tasbeeh-float">
-  <button class="tasbeeh-fab" id="tasbeehFab" type="button" aria-controls="tasbeehPanel" aria-expanded="false">
-    <span class="tasbeeh-fab-icon" aria-hidden="true">۞</span><span>السبحة</span>
+  <button class="tasbeeh-fab" id="tasbeehFab" type="button" aria-label="فتح السبحة الإلكترونية" aria-controls="tasbeehPanel" aria-expanded="false">
+    <span class="tasbeeh-fab-count" id="tasbeehFabCount">0</span><span class="tasbeeh-fab-label">السبحة</span>
   </button>
   <div class="tasbeeh-panel hidden" id="tasbeehPanel" role="dialog" aria-label="السبحة الإلكترونية">
     <div class="tasbeeh-panel-head">
@@ -761,7 +763,9 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
     </select>
     <label for="tasbeehGoal" style="margin-top:11px">اختر عدد التسبيحات</label>
     <select id="tasbeehGoal">
+      <option value="10">10 مرات</option>
       <option value="33">33 مرة – بعد الصلاة</option>
+      <option value="34">34 مرة – قبل النوم</option>
       <option value="100">100 مرة</option>
       <option value="1000">1000 مرة – ورد يومي</option>
     </select>
@@ -1108,11 +1112,13 @@ $('getQibla').addEventListener('click',()=>{
 let count=Number(localStorage.getItem('zad_tasbeeh')||0);
 if(!Number.isFinite(count)||count<0)count=0;
 let tasbeehGoal=Number(localStorage.getItem('zad_tasbeeh_goal')||33);
-if(![33,100,1000].includes(tasbeehGoal))tasbeehGoal=33;
+if(![10,33,34,100,1000].includes(tasbeehGoal))tasbeehGoal=33;
 $('tasbeehGoal').value=String(tasbeehGoal);
 function updateTasbeehDisplay(){
  const progress=Math.min(100,(count/tasbeehGoal)*100);
  $('counter').textContent=count;
+ $('tasbeehFabCount').textContent=count;
+ $('tasbeehFab').style.setProperty('--fab-progress',progress+'%');
  $('tasbeehGoalLabel').textContent=tasbeehGoal;
  $('tasbeehRing').style.setProperty('--progress',progress+'%');
  $('tasbeehRing').setAttribute('aria-valuemax',String(tasbeehGoal));
