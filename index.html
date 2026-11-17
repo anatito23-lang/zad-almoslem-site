@@ -173,6 +173,10 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 .mushaf-page-frame{max-width:650px;margin:12px auto 0;padding:8px;background:#f4efe2;border:1px solid #d8c9a8;border-radius:8px;box-shadow:0 8px 24px #47371b18;text-align:center}
 .mushaf-page-frame img{display:block;width:100%;height:auto;margin:0 auto;background:#fff;object-fit:contain}
 .mushaf-source{margin-top:14px}
+.mushaf-floating-button{position:fixed;left:12px;bottom:92px;z-index:1300;display:flex;align-items:center;gap:8px;padding:12px 15px;border:1px solid #ffffff70;border-radius:999px;background:linear-gradient(135deg,#123f32,#1d7055);color:#fff;font:inherit;font-weight:800;box-shadow:0 8px 24px #082d2740;cursor:pointer}
+.mushaf-floating-button span:first-child{font-size:21px;color:#f3d99b}
+.mushaf-floating-button:focus-visible{outline:3px solid #d6b76f;outline-offset:3px}
+@media(max-width:600px){.mushaf-floating-button{left:10px;bottom:86px;padding:10px 12px;font-size:13px}}
 @media(max-width:600px){
  .mushaf-card{padding:13px}
  .mushaf-controls{grid-template-columns:1fr}
@@ -728,6 +732,10 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
   </main>
 
 
+<button type="button" id="mushafFloatingButton" class="mushaf-floating-button" aria-controls="mushafContent" aria-expanded="false" title="فتح المصحف">
+  <span aria-hidden="true">۞</span><span id="mushafFloatingLabel">المصحف</span>
+</button>
+
 <div class="tasbeeh-float">
   <button class="tasbeeh-fab" id="tasbeehFab" type="button" aria-controls="tasbeehPanel" aria-expanded="false">
     <span class="tasbeeh-fab-icon" aria-hidden="true">۞</span><span>السبحة</span>
@@ -834,7 +842,24 @@ function loadMushafPage(number){
   if(request!==mushafRequestNumber)return;
   $('mushafStatus').textContent='تعذر تحميل الصفحة الآن. تحقق من اتصال الإنترنت ثم حاول مرة أخرى أو انتقل لصفحة أخرى.';
  };
- image.src='https://raw.githubusercontent.com/Miftah-Fentaw/Quran-Images/main/png/'+page+'.png';
+ const pageSources=[
+  'https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran-Images@main/png/'+page+'.png',
+  'https://raw.githubusercontent.com/Miftah-Fentaw/Quran-Images/main/png/'+page+'.png',
+  'https://ummah.su/img/mushaf/'+page+'.jpg'
+ ];
+ image.dataset.sourceIndex='0';
+ image.onerror=()=>{
+  if(request!==mushafRequestNumber)return;
+  const nextSource=Number(image.dataset.sourceIndex||0)+1;
+  if(nextSource<pageSources.length){
+   image.dataset.sourceIndex=String(nextSource);
+   $('mushafStatus').textContent='نجرب مصدرًا بديلًا لتحميل الصفحة...';
+   image.src=pageSources[nextSource];
+   return;
+  }
+  $('mushafStatus').textContent='تعذر تحميل الصفحة من المصادر المتاحة. تحقق من الإنترنت ثم حاول مرة أخرى.';
+ };
+ image.src=pageSources[0];
 }
 async function loadMushafSurah(number){
  const surahNumber=Number(number);
@@ -887,15 +912,27 @@ async function loadMushafIndex(){
 }
 const mushafToggle=$('mushafToggle');
 const mushafContent=$('mushafContent');
+const mushafFloatingButton=$('mushafFloatingButton');
+const mushafFloatingLabel=$('mushafFloatingLabel');
+function syncMushafFloatingButton(isOpen){
+ mushafFloatingButton.setAttribute('aria-expanded',String(isOpen));
+ mushafFloatingButton.title=isOpen?'إغلاق المصحف':'فتح المصحف';
+ mushafFloatingLabel.textContent=isOpen?'إغلاق المصحف':'المصحف';
+}
 mushafToggle.addEventListener('click',()=>{
  const opening=mushafContent.classList.contains('hidden');
  mushafContent.classList.toggle('hidden');
  mushafToggle.setAttribute('aria-expanded',String(opening));
  mushafToggle.textContent=opening?'إغلاق المصحف':'فتح المصحف';
+ syncMushafFloatingButton(opening);
  if(opening&&!mushafInitialized){
   mushafInitialized=true;
   loadMushafIndex();
  }
+});
+mushafFloatingButton.addEventListener('click',()=>{
+ mushafToggle.click();
+ $('mushaf').scrollIntoView({behavior:'smooth',block:'start'});
 });
 $('mushafSurahSelect').addEventListener('change',event=>loadMushafSurah(event.target.value));
 $('mushafGoPage').addEventListener('click',()=>loadMushafPage($('mushafPageNumber').value));
