@@ -170,7 +170,7 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 .mushaf-page-jump{display:grid;grid-template-columns:auto minmax(72px,1fr) auto;align-items:center;gap:8px}
 .mushaf-page-jump label{font-size:13px;color:var(--muted);white-space:nowrap}
 .mushaf-page-jump input{width:100%;text-align:center;direction:ltr}
-.mushaf-page-frame{max-width:650px;margin:12px auto 0;padding:8px;background:#f4efe2;border:1px solid #d8c9a8;border-radius:8px;box-shadow:0 8px 24px #47371b18;text-align:center;touch-action:pan-y;user-select:none;-webkit-user-select:none;overscroll-behavior-x:contain}
+.mushaf-page-frame{max-width:650px;margin:12px auto 0;padding:8px;background:#f4efe2;border:1px solid #d8c9a8;border-radius:8px;box-shadow:0 8px 24px #47371b18;text-align:center;touch-action:pan-y pinch-zoom;user-select:none;-webkit-user-select:none;overscroll-behavior-x:contain}
 .mushaf-page-frame img{display:block;width:100%;height:auto;margin:0 auto;background:#fff;object-fit:contain;pointer-events:none;-webkit-user-drag:none;user-select:none}
 .mushaf-swipe-hint{text-align:center;margin:8px 0 0;color:var(--muted);font-size:12px}
 .mushaf-source{margin-top:14px}
@@ -944,29 +944,43 @@ $('mushafPageNumber').addEventListener('keydown',event=>{
 $('mushafPrev').addEventListener('click',()=>loadMushafPage(mushafCurrentPage-1));
 $('mushafNext').addEventListener('click',()=>loadMushafPage(mushafCurrentPage+1));
 
-// تقليب صفحات المصحف بالسحب على الهاتف والماوس
+// تقليب صفحات المصحف بالسحب: لمس مباشر للهاتف، وسحب بالماوس للكمبيوتر
 const mushafSwipeArea=$('mushafSwipeArea');
-let mushafSwipeStart=null;
-mushafSwipeArea.addEventListener('pointerdown',event=>{
- if(!event.isPrimary)return;
- if(event.pointerType==='mouse'&&event.button!==0)return;
- mushafSwipeStart={x:event.clientX,y:event.clientY,pointerId:event.pointerId};
- try{mushafSwipeArea.setPointerCapture(event.pointerId);}catch(error){}
-});
-mushafSwipeArea.addEventListener('pointerup',event=>{
- if(!mushafSwipeStart||mushafSwipeStart.pointerId!==event.pointerId)return;
- const deltaX=event.clientX-mushafSwipeStart.x;
- const deltaY=event.clientY-mushafSwipeStart.y;
- mushafSwipeStart=null;
+let mushafTouchStart=null;
+let mushafMouseStart=null;
+function turnMushafBySwipe(deltaX,deltaY){
  if(mushafContent.classList.contains('hidden'))return;
- if(Math.abs(deltaX)<45||Math.abs(deltaX)<Math.abs(deltaY)*1.25)return;
+ if(Math.abs(deltaX)<35||Math.abs(deltaX)<Math.abs(deltaY)*1.15)return;
  if(deltaX<0&&mushafCurrentPage<604){
   loadMushafPage(mushafCurrentPage+1);
  }else if(deltaX>0&&mushafCurrentPage>1){
   loadMushafPage(mushafCurrentPage-1);
  }
+}
+mushafSwipeArea.addEventListener('touchstart',event=>{
+ if(!event.touches||event.touches.length!==1)return;
+ const touch=event.touches[0];
+ mushafTouchStart={x:touch.clientX,y:touch.clientY};
+},{passive:true});
+mushafSwipeArea.addEventListener('touchend',event=>{
+ if(!mushafTouchStart||!event.changedTouches||!event.changedTouches.length)return;
+ const touch=event.changedTouches[0];
+ const start=mushafTouchStart;
+ mushafTouchStart=null;
+ turnMushafBySwipe(touch.clientX-start.x,touch.clientY-start.y);
+},{passive:true});
+mushafSwipeArea.addEventListener('touchcancel',()=>{mushafTouchStart=null;},{passive:true});
+mushafSwipeArea.addEventListener('pointerdown',event=>{
+ if(event.pointerType!=='mouse'||event.button!==0)return;
+ mushafMouseStart={x:event.clientX,y:event.clientY};
 });
-mushafSwipeArea.addEventListener('pointercancel',()=>{mushafSwipeStart=null;});
+mushafSwipeArea.addEventListener('pointerup',event=>{
+ if(event.pointerType!=='mouse'||!mushafMouseStart)return;
+ const start=mushafMouseStart;
+ mushafMouseStart=null;
+ turnMushafBySwipe(event.clientX-start.x,event.clientY-start.y);
+});
+mushafSwipeArea.addEventListener('pointercancel',()=>{mushafMouseStart=null;});
 
 async function loadOldEgyptianReciters(){
  try{
