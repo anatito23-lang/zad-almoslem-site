@@ -307,8 +307,9 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
         <img id="mushafPageImage" alt="صفحة 1 من المصحف الشريف" decoding="async">
       </div>
       <div class="notice mushaf-source">
-        يعرض هذا القسم صفحات مصحف المدينة النبوية كاملة، بنفس ترتيب الصفحات والزخارف وأرقام الصفحات، وعددها 604 صفحة.
-        <br>مصدر صور الصفحات: <a href="https://github.com/Miftah-Fentaw/Quran-Images" target="_blank" rel="noopener">Quran Images</a> — مرخصة وفق MIT، مع الإشارة إلى المصدر الأصلي للصور.
+        يعرض هذا القسم صفحات المصحف كاملة بصورها الأصلية، مع ترتيب الصفحات والزخارف وأرقامها، وعددها 604 صفحة.
+        <br>مصدر النسخة: <a href="https://github.com/Miftah-Fentaw/Quran-Images" target="_blank" rel="noopener">Quran Images</a> — ترخيص MIT. حقوق النسخة: Copyright © 2026 Miftah Fentaw.
+        <br>المصدر الأصلي للصور: <a href="https://github.com/GovarJabbar/Quran-PNG" target="_blank" rel="noopener">Quran-PNG</a>، المولّد بواسطة <a href="https://github.com/quran/quran.com-images" target="_blank" rel="noopener">quran.com-images</a>.
         <br>يلزم الاتصال بالإنترنت لتحميل الصفحة التي تختارها.
       </div>
       </div>
@@ -831,7 +832,7 @@ function loadMushafPage(number){
  };
  image.onerror=()=>{
   if(request!==mushafRequestNumber)return;
-  $('mushafStatus').textContent='تعذر تحميل الصفحة الآن. تحقق من الإنترنت ثم اضغط «إعادة المحاولة» أو انتقل لصفحة أخرى.';
+  $('mushafStatus').textContent='تعذر تحميل الصفحة الآن. تحقق من اتصال الإنترنت ثم حاول مرة أخرى أو انتقل لصفحة أخرى.';
  };
  image.src='https://raw.githubusercontent.com/Miftah-Fentaw/Quran-Images/main/png/'+page+'.png';
 }
