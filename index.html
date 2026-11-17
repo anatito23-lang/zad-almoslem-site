@@ -149,6 +149,9 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 
 /* المصحف الشريف */
 .mushaf-card{padding:20px}
+.mushaf-toggle{width:100%;margin-bottom:0}
+.mushaf-content-open{margin-top:14px}
+#mushafContent:not(.hidden){margin-top:14px}
 .mushaf-controls{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(220px,1.2fr);gap:10px}
 .mushaf-controls select,.mushaf-controls input{width:100%}
 .mushaf-navigation{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 12px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -273,6 +276,8 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
       <div><h2>المصحف الشريف كاملًا</h2><p>قراءة القرآن الكريم كاملًا بالرسم العثماني، من سورة الفاتحة إلى سورة الناس</p></div>
     </div>
     <div class="card mushaf-card">
+      <button class="btn green mushaf-toggle" id="mushafToggle" type="button" aria-expanded="false" aria-controls="mushafContent">فتح المصحف</button>
+      <div id="mushafContent" class="hidden">
       <div class="mushaf-controls">
         <select id="mushafSurahSelect" aria-label="اختر سورة من القرآن">
           <option value="">جارٍ تحميل أسماء السور...</option>
@@ -296,6 +301,7 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
         <br>حقوق النص: Tanzil Quran Text، Copyright © 2007–2021 Tanzil Project، ترخيص Creative Commons Attribution 3.0.
         <br><a href="https://tanzil.net" target="_blank" rel="noopener">Tanzil.net</a> · <a href="https://alquran.cloud/api" target="_blank" rel="noopener">AlQuran Cloud API</a>
         <br>يلزم الاتصال بالإنترنت لتحميل السور.
+      </div>
       </div>
     </div>
   </section>
@@ -792,6 +798,7 @@ let mushafSurahs=[];
 let mushafAyahs=[];
 let mushafCurrentSurah=1;
 let mushafRequestNumber=0;
+let mushafInitialized=false;
 function normalizeMushafSearch(value){
  return (value||'').toLocaleLowerCase('ar')
   .replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي')
@@ -880,11 +887,24 @@ async function loadMushafIndex(){
   if(!mushafSurahs.some(surah=>surah.number===saved))saved=1;
   await loadMushafSurah(saved);
  }catch(error){
+  mushafInitialized=false;
   $('mushafSurahSelect').innerHTML='<option value="">تعذر تحميل قائمة السور</option>';
   $('mushafStatus').textContent='تعذر الاتصال بمصدر المصحف. تحقق من الإنترنت ثم أعد تحميل الصفحة.';
   $('mushafText').textContent='المصحف غير متاح مؤقتًا.';
  }
 }
+const mushafToggle=$('mushafToggle');
+const mushafContent=$('mushafContent');
+mushafToggle.addEventListener('click',()=>{
+ const opening=mushafContent.classList.contains('hidden');
+ mushafContent.classList.toggle('hidden');
+ mushafToggle.setAttribute('aria-expanded',String(opening));
+ mushafToggle.textContent=opening?'إغلاق المصحف':'فتح المصحف';
+ if(opening&&!mushafInitialized){
+  mushafInitialized=true;
+  loadMushafIndex();
+ }
+});
 $('mushafSurahSelect').addEventListener('change',event=>loadMushafSurah(event.target.value));
 $('mushafSearch').addEventListener('input',renderMushafAyahs);
 $('mushafPrev').addEventListener('click',()=>loadMushafSurah(mushafCurrentSurah-1));
@@ -973,7 +993,7 @@ $('showSurah').addEventListener('click',()=>{
  $('quranStatus').textContent=`تلاوة سورة ${surahs.find(s=>s.number===id)?.name||''} بصوت ${reciter.name}.`;
  $('audio').play().catch(()=>{$('quranStatus').textContent+=' اضغط زر التشغيل في مشغل الصوت.';});
 });
-loadSurahs();loadOldEgyptianReciters();loadMushafIndex();
+loadSurahs();loadOldEgyptianReciters();
 const azkar={
  morning:{title:'أذكار الصباح',items:[['أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.',1],['اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت وإليك النشور.',1],['رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا.',3],['سبحان الله وبحمده.',100],['أستغفر الله وأتوب إليه.',100]]},
  evening:{title:'أذكار المساء',items:[['أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.',1],['اللهم بك أمسينا وبك أصبحنا وبك نحيا وبك نموت وإليك المصير.',1],['رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا.',3],['سبحان الله وبحمده.',100],['أستغفر الله وأتوب إليه.',100]]},
