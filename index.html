@@ -112,21 +112,56 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 #written-sermons .section-head{border-bottom-color:#e0e4d9}
 @media(max-width:700px){.sermon-grid{grid-template-columns:1fr}#written-sermons{padding:13px}.sermon-card summary{padding:15px}.sermon-body{padding:15px}.sermon-body p{font-size:14px}}
 
+
+/* ترتيب أوضح وتنقل أسهل */
+.top{align-items:flex-start;flex-direction:column;gap:13px}
+.top nav{display:flex;gap:7px;flex-wrap:wrap;width:100%}
+.top nav a{padding:7px 11px;border:1px solid #ffffff24;background:#ffffff10;border-radius:10px;white-space:nowrap}
+.top nav a:hover{background:#ffffff22;color:#f5dfad}
+.hero-content{margin-top:30px}
+.section-divider{display:flex;align-items:center;gap:13px;margin:38px 0 18px;color:var(--muted);font-size:14px;font-weight:800}
+.section-divider:before,.section-divider:after{content:"";height:1px;background:var(--line);flex:1}
+@media(max-width:800px){
+  .top nav{flex-wrap:nowrap;overflow-x:auto;overscroll-behavior-x:contain;padding:5px 0 10px;scrollbar-width:thin}
+  .top nav a{flex:0 0 auto}
+  .hero-content{margin-top:24px}
+}
+
 </style>
 </head>
 <body>
 <header class="hero">
   <div class="top">
     <div class="brand"><span class="brand-mark">۞</span><span>زاد المسلم</span></div>
-    <nav>
-      <a href="#prayer">مواقيت الصلاة</a><a href="#reminders">التنبيهات</a><a href="#friday-wird">ورد الجمعة</a><a href="#quran">القرآن الكريم</a><a href="#radio-egypt">إذاعة القرآن</a><a href="#kids">ركن الأطفال</a><a href="#ruqyah">الرقية الشرعية</a><a href="#azkar">الأذكار</a><a href="#qibla">القبلة</a><a href="#hadith-dua">السنة والدعاء</a><a href="#daily-wird">وردي اليومي</a><a href="#library">المكتبة</a><a href="#written-sermons">الخطب المكتوبة</a><a href="#khutbah-encyclopedia">موسوعة خطب الجمعة</a><a href="#seerah-books">كتب السيرة النبوية</a>
+    <nav aria-label="التنقل الرئيسي">
+      <a href="#prayer">مواقيت الصلاة</a>
+      <a href="#quran">استماع القرآن</a>
+      <a href="#ruqyah">الرقية الشرعية</a>
+      <a href="#radio-egypt">إذاعة القرآن</a>
+      <a href="#azkar">الأذكار</a>
+      <a href="#written-sermons">الخطب المكتوبة</a>
+      <a href="#khutbah-encyclopedia">موسوعة الخطب</a>
+      <a href="#seerah-books">كتب السيرة</a>
+      <a href="#kids">ركن الأطفال</a>
+      <a href="#reminders">التنبيهات</a>
+      <a href="#qibla">القبلة</a>
+      <a href="#tasbeeh">المسبحة</a>
+      <a href="#hadith-dua">السنة والدعاء</a>
+      <a href="#daily-wird">وردي اليومي</a>
+      <a href="#friday-wird">ورد الجمعة</a>
+      <a href="#library">المكتبة</a>
     </nav>
   </div>
   <div class="hero-content">
     <div class="eyebrow">رفيقك إلى الطاعة والطمأنينة</div>
     <h1>اجعل يومك عامرًا بذكر الله</h1>
-    <p>القرآن الكريم، مواقيت الصلاة، الأذكار، الأحاديث، اتجاه القبلة، والتقويم الهجري؛ كل ما تحتاجه في مكان واحد.</p>
-    <div class="hero-actions"><a class="btn" href="#prayer">ابدأ يومك</a><a class="btn ghost" href="#quran">استمع للقرآن</a><a class="btn ghost" href="#radio-egypt">إذاعة القرآن</a><a class="btn ghost" href="#kids">ركن الأطفال</a><a class="btn ghost" href="#written-sermons">الخطب المكتوبة</a><a class="btn ghost" href="#khutbah-encyclopedia">موسوعة خطب الجمعة</a><a class="btn ghost" href="#seerah-books">كتب السيرة النبوية</a></div>
+    <p>مواقيت الصلاة، والاستماع للقرآن والرقية الشرعية، وإذاعة القرآن الكريم، والأذكار والخطب والسيرة، وركن خاص للأطفال؛ في مكان واحد وبخطوات سهلة.</p>
+    <div class="hero-actions">
+      <a class="btn" href="#prayer">مواقيت الصلاة</a>
+      <a class="btn ghost" href="#quran">استمع للقرآن</a>
+      <a class="btn ghost" href="#ruqyah">الرقية الشرعية</a>
+      <a class="btn ghost" href="#radio-egypt">إذاعة القرآن</a>
+    </div>
   </div>
 </header>
 
@@ -158,7 +193,80 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
     <div class="small">المواقيت تُجلب عبر الإنترنت من خدمة مواقيت الصلاة، وقد تختلف دقائق قليلة حسب طريقة الحساب والجهة المحلية.</div>
   </section>
 
+  
 
+  <section class="section" id="quran">
+    <div class="section-head"><div><h2>القرآن الكريم — استماع فقط</h2><p>تلاوات لشيوخ مصر القدامى، من غير عرض نص الآيات أو البحث فيها</p></div></div>
+    <div class="card">
+      <div class="quran-tools">
+        <select id="reciter" aria-label="اختر الشيخ">
+          <option value="basit">الشيخ عبد الباسط عبد الصمد</option>
+          <option value="minshawi">الشيخ محمد صديق المنشاوي</option>
+          <option value="husary">الشيخ محمود خليل الحصري</option>
+          <option value="mustafa">الشيخ مصطفى إسماعيل</option>
+          <option value="banna">الشيخ محمود علي البنا</option>
+          <option value="shuaisha">الشيخ أبو العينين شعيشع — 12 سورة متاحة</option>
+          <option value="ezzat">الشيخ عزت السيد راشد — 9 تلاوات متاحة</option>
+        </select>
+        <select id="surahSelect" aria-label="اختر السورة"><option value="">جارٍ تحميل السور...</option></select>
+        <button class="btn green" id="showSurah">استمع الآن</button>
+      </div>
+      <button class="btn light" id="ezzatShortcut" type="button" style="margin-top:10px;width:100%">استمع إلى تلاوات الشيخ عزت السيد راشد</button>
+      <p id="quranStatus" class="small" role="status" style="margin:8px 0 12px">جارٍ تحميل قائمة التسجيلات الصوتية...</p>
+      <audio id="audio" controls class="hidden" preload="none" style="width:100%;margin-top:8px"></audio>
+      <div id="shuaishaTracks" class="list hidden" style="margin-top:12px"></div>
+      <div class="notice">القسم مخصص للاستماع فقط. التسجيلات المتاحة للشيوخ الخمسة الأولى تُجلب من مكتبة MP3Quran، أما الشيخ أبو العينين شعيشع فالمتاح حاليًا له 12 سورة على موقع السبيل. يلزم الاتصال بالإنترنت للتشغيل.</div>
+    </div>
+  </section>
+
+  
+
+  <section class="section" id="ruqyah">
+    <div class="section-head"><div><h2>الرقية الشرعية — استماع مباشر</h2><p>بصوت الشيخ محمود خليل الحصري، من خلال مشغّل صوت داخل الموقع</p></div></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div class="icon">♫</div>
+        <div><h3 style="margin:0">الرقية الشرعية — الشيخ محمود خليل الحصري</h3><p class="small" style="margin:4px 0 0">تسجيل صوتي MP3</p></div>
+      </div>
+      <audio id="ruqyahAudio" controls preload="none" style="width:100%;margin-top:8px">
+        <source src="https://archive.org/download/20240228_20240228_1849/041%20%2011%20%20%20%D8%A7%D9%84%D8%B1%D9%82%D9%8A%D8%A9%20%D8%A7%D9%84%D8%B4%D8%B1%D8%B9%D9%8A%D8%A9%20%D9%84%D8%B9%D9%84%D8%A7%D8%AC%20%D8%A7%D9%84%D8%B3%D8%AD%D8%B1%20%D8%A7%D9%84%D9%85%D8%B3%20%D8%A7%D9%84%D8%AD%D8%B3%D8%AF%20%D8%A8%D8%B5%D9%88%D8%AA%20%D8%A7%D9%84%D8%B4%D9%8A%D8%AE%20%D9%85%D8%AD%D9%85%D9%88%D8%AF%20%D8%AE%D9%84%D9%8A%D9%84%20%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%89%20%D8%B1%D8%AD%D9%85%D9%87%20%D8%A7%D9%84%D9%84%D9%87%20%D8%AC%D9%88%D8%AF%D8%A9%20%D8%B9%D8%A7%D9%84%D9%8A%D8%A9.mp3" type="audio/mpeg">
+        متصفحك لا يدعم تشغيل الصوت.
+      </audio>
+      <p class="small" style="margin-top:10px">اضغط تشغيل للاستماع مباشرة من هنا. لا حاجة لفتح يوتيوب، ويلزم الاتصال بالإنترنت.</p>
+    </div>
+  </section>
+
+  
+
+  <section class="section" id="radio-egypt">
+    <div class="section-head"><div><h2>إذاعة القرآن الكريم من القاهرة</h2><p>بث مباشر — استمع إلى الإذاعة المصرية من داخل موقع زاد المسلم</p></div></div>
+    <div class="card">
+      <div class="row" style="align-items:center;margin-bottom:12px">
+        <div class="icon">📻</div>
+        <div><h3 style="margin:0">إذاعة القرآن الكريم — مصر</h3><p class="small" style="margin:3px 0 0">البث المباشر على مدار الساعة</p></div>
+      </div>
+      <audio id="egyptQuranRadio" controls preload="none" style="width:100%">
+        <source src="https://stream.radiojar.com/8s5u5tpdtwzuv" type="audio/mpeg">
+        متصفحك لا يدعم تشغيل الصوت.
+      </audio>
+      <p class="small" style="margin-top:10px">اضغط تشغيل لبدء الاستماع. قد يتوقف البث مؤقتًا إذا حدث عطل لدى مصدر الإذاعة؛ جرّب إعادة التشغيل بعد قليل.</p>
+      <a href="https://misrquran.gov.eg/" target="_blank" rel="noopener" class="small">زيارة الموقع الرسمي لإذاعة القرآن الكريم</a>
+    </div>
+  </section>
+
+  
+
+  <section class="section" id="azkar">
+    <div class="section-head"><div><h2>الأذكار اليومية</h2><p>أذكار مختارة للصباح والمساء وبعد الصلاة</p></div></div>
+    <div class="grid">
+      <div class="card"><div class="icon">☀</div><h3>أذكار الصباح</h3><p>ابدأ صباحك بذكر الله وتحصين نفسك.</p><button class="btn light" style="margin-top:13px" onclick="showAzkar('morning')">افتح الأذكار</button></div>
+      <div class="card"><div class="icon">☾</div><h3>أذكار المساء</h3><p>اختم يومك بالاستغفار والحمد والذكر.</p><button class="btn light" style="margin-top:13px" onclick="showAzkar('evening')">افتح الأذكار</button></div>
+      <div class="card"><div class="icon">🤲</div><h3>أذكار بعد الصلاة</h3><p>أذكار ثابتة تقال بعد الصلوات المفروضة.</p><button class="btn light" style="margin-top:13px" onclick="showAzkar('prayer')">افتح الأذكار</button></div>
+    </div>
+    <div id="azkarList" class="card hidden" style="margin-top:14px"><div class="section-head"><h3 id="azkarTitle">الأذكار</h3><button class="btn light" onclick="document.getElementById('azkarList').classList.add('hidden')">إغلاق</button></div><div id="azkarItems" class="list"></div></div>
+  </section>
+
+  
 
   <section class="section" id="written-sermons">
     <div class="section-head">
@@ -229,6 +337,8 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
     <p class="small" style="margin-top:12px">هذه نصوص أصلية للموقع، ويمكن تطويرها وإضافة خطب أخرى. راجع النصوص والتخريج عند إعداد أي خطبة للإلقاء.</p>
   </section>
 
+  
+
   <section class="section" id="khutbah-encyclopedia">
     <div class="section-head">
       <div><h2>فهرس موضوعات خطب الجمعة</h2><p>ابحث عن موضوعات إضافية ومحاور تساعدك في إعداد خطبة جديدة.</p></div>
@@ -256,6 +366,8 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
       <p class="small" style="margin-top:10px">للاستفادة من نصوص جاهزة، انتقل إلى قسم «خطب جمعة مكتوبة كاملة» أعلى هذه الصفحة. وتحقق من تخريج الأحاديث والآثار قبل الإلقاء.</p>
     </div>
   </section>
+
+  
 
   <section class="section" id="seerah-books">
     <div class="section-head">
@@ -315,72 +427,7 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
     <div class="notice">روابط الكتب تفتح صفحات المكتبة الوقفية؛ قد تتوفر القراءة أو ملفات PDF بحسب النسخة. يُستحسن الرجوع إلى طبعة محققة، ومقارنة الروايات عند دراسة أحداث السيرة.</div>
   </section>
 
-
-  <section class="section" id="reminders">
-    <div class="section-head"><div><h2>التذكير والتنبيه الصوتي</h2><p>فعّل التنبيهات لتسمع التذكير عند دخول وقت الصلاة، أو الصلاة على النبي ﷺ كل نصف ساعة</p></div></div>
-    <div class="grid">
-      <div class="card">
-        <div class="icon">🔔</div><h3>تنبيه مواعيد الصلاة</h3>
-        <p>ينطق الموقع عند دخول وقت كل صلاة: «حان الآن وقت صلاة ...»، ويرسل إشعارًا إذا سمحت للمتصفح بذلك.</p>
-        <div class="row" style="margin-top:13px">
-          <button class="btn green" id="enablePrayerAlerts">تشغيل تنبيه الصلاة</button>
-          <button class="btn light" id="disablePrayerAlerts">إيقاف</button>
-        </div>
-        <p class="small" id="prayerAlertStatus" style="margin-top:9px">تنبيه الصلاة متوقف.</p>
-      </div>
-      <div class="card">
-        <div class="icon">ﷺ</div><h3>الصلاة على النبي كل نصف ساعة</h3>
-        <p>يردد الموقع بصوت مسموع: «صلِّ على سيدنا محمد ﷺ» كل 30 دقيقة.</p>
-        <div class="row" style="margin-top:13px">
-          <button class="btn green" id="enableSalawat">تشغيل التذكير الصوتي</button>
-          <button class="btn light" id="disableSalawat">إيقاف</button>
-        </div>
-        <button class="btn light" id="testVoice" style="margin-top:9px">تجربة الصوت الآن</button>
-        <p class="small" id="salawatStatus" style="margin-top:9px">التذكير الصوتي متوقف.</p>
-      </div>
-    </div>
-    <div class="notice">مهم: اسمح بالإشعارات والصوت عند الطلب. تعمل التنبيهات ما دامت صفحة الموقع مفتوحة ولم يوقفها نظام الهاتف؛ قد يؤخر الهاتف التنبيه إذا أغلق المتصفح أو قيّد عمله في الخلفية.</div>
-  </section>
-
-  <section class="section" id="quran">
-    <div class="section-head"><div><h2>القرآن الكريم — استماع فقط</h2><p>تلاوات لشيوخ مصر القدامى، من غير عرض نص الآيات أو البحث فيها</p></div></div>
-    <div class="card">
-      <div class="quran-tools">
-        <select id="reciter" aria-label="اختر الشيخ">
-          <option value="basit">الشيخ عبد الباسط عبد الصمد</option>
-          <option value="minshawi">الشيخ محمد صديق المنشاوي</option>
-          <option value="husary">الشيخ محمود خليل الحصري</option>
-          <option value="mustafa">الشيخ مصطفى إسماعيل</option>
-          <option value="banna">الشيخ محمود علي البنا</option>
-          <option value="shuaisha">الشيخ أبو العينين شعيشع — 12 سورة متاحة</option>
-          <option value="ezzat">الشيخ عزت السيد راشد — 9 تلاوات متاحة</option>
-        </select>
-        <select id="surahSelect" aria-label="اختر السورة"><option value="">جارٍ تحميل السور...</option></select>
-        <button class="btn green" id="showSurah">استمع الآن</button>
-      </div>
-      <button class="btn light" id="ezzatShortcut" type="button" style="margin-top:10px;width:100%">استمع إلى تلاوات الشيخ عزت السيد راشد</button>
-      <p id="quranStatus" class="small" role="status" style="margin:8px 0 12px">جارٍ تحميل قائمة التسجيلات الصوتية...</p>
-      <audio id="audio" controls class="hidden" preload="none" style="width:100%;margin-top:8px"></audio>
-      <div id="shuaishaTracks" class="list hidden" style="margin-top:12px"></div>
-      <div class="notice">القسم مخصص للاستماع فقط. التسجيلات المتاحة للشيوخ الخمسة الأولى تُجلب من مكتبة MP3Quran، أما الشيخ أبو العينين شعيشع فالمتاح حاليًا له 12 سورة على موقع السبيل. يلزم الاتصال بالإنترنت للتشغيل.</div>
-    </div>
-  </section>
-
-  <section class="section" id="radio-egypt">
-    <div class="section-head"><div><h2>إذاعة القرآن الكريم من القاهرة</h2><p>بث مباشر — استمع إلى الإذاعة المصرية من داخل موقع زاد المسلم</p></div></div>
-    <div class="card">
-      <div class="row" style="align-items:center;margin-bottom:12px">
-        <div class="icon">📻</div>
-        <div><h3 style="margin:0">إذاعة القرآن الكريم — مصر</h3><p class="small" style="margin:3px 0 0">البث المباشر على مدار الساعة</p></div>
-      </div>
-      <audio id="egyptQuranRadio" controls preload="none" style="width:100%">
-        <source src="https://stream.radiojar.com/8s5u5tpdtwzuv" type="audio/mpeg">
-        متصفحك لا يدعم تشغيل الصوت.
-      </audio>
-      <p class="small" style="margin-top:10px">اضغط تشغيل لبدء الاستماع. قد يتوقف البث مؤقتًا إذا حدث عطل لدى مصدر الإذاعة؛ جرّب إعادة التشغيل بعد قليل.</p>
-      <a href="https://misrquran.gov.eg/" target="_blank" rel="noopener" class="small">زيارة الموقع الرسمي لإذاعة القرآن الكريم</a>
-    </div>
-  </section>
+  
 
   <section class="section" id="kids">
     <div class="section-head"><div><h2>ركن الأطفال — نتعلم ونمرح</h2><p>حكايات سهلة وخطوات مبسطة تساعد أطفالنا على تعلم الوضوء والصلاة</p></div></div>
@@ -453,30 +500,37 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
     </div>
   </section>
 
-  <section class="section" id="ruqyah">
-    <div class="section-head"><div><h2>الرقية الشرعية — استماع مباشر</h2><p>بصوت الشيخ محمود خليل الحصري، من خلال مشغّل صوت داخل الموقع</p></div></div>
-    <div class="card">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-        <div class="icon">♫</div>
-        <div><h3 style="margin:0">الرقية الشرعية — الشيخ محمود خليل الحصري</h3><p class="small" style="margin:4px 0 0">تسجيل صوتي MP3</p></div>
+  
+
+  <div class="section-divider"><span>أدوات ومحتوى إضافي</span></div>
+
+  <section class="section" id="reminders">
+    <div class="section-head"><div><h2>التذكير والتنبيه الصوتي</h2><p>فعّل التنبيهات لتسمع التذكير عند دخول وقت الصلاة، أو الصلاة على النبي ﷺ كل نصف ساعة</p></div></div>
+    <div class="grid">
+      <div class="card">
+        <div class="icon">🔔</div><h3>تنبيه مواعيد الصلاة</h3>
+        <p>ينطق الموقع عند دخول وقت كل صلاة: «حان الآن وقت صلاة ...»، ويرسل إشعارًا إذا سمحت للمتصفح بذلك.</p>
+        <div class="row" style="margin-top:13px">
+          <button class="btn green" id="enablePrayerAlerts">تشغيل تنبيه الصلاة</button>
+          <button class="btn light" id="disablePrayerAlerts">إيقاف</button>
+        </div>
+        <p class="small" id="prayerAlertStatus" style="margin-top:9px">تنبيه الصلاة متوقف.</p>
       </div>
-      <audio id="ruqyahAudio" controls preload="none" style="width:100%;margin-top:8px">
-        <source src="https://archive.org/download/20240228_20240228_1849/041%20%2011%20%20%20%D8%A7%D9%84%D8%B1%D9%82%D9%8A%D8%A9%20%D8%A7%D9%84%D8%B4%D8%B1%D8%B9%D9%8A%D8%A9%20%D9%84%D8%B9%D9%84%D8%A7%D8%AC%20%D8%A7%D9%84%D8%B3%D8%AD%D8%B1%20%D8%A7%D9%84%D9%85%D8%B3%20%D8%A7%D9%84%D8%AD%D8%B3%D8%AF%20%D8%A8%D8%B5%D9%88%D8%AA%20%D8%A7%D9%84%D8%B4%D9%8A%D8%AE%20%D9%85%D8%AD%D9%85%D9%88%D8%AF%20%D8%AE%D9%84%D9%8A%D9%84%20%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%89%20%D8%B1%D8%AD%D9%85%D9%87%20%D8%A7%D9%84%D9%84%D9%87%20%D8%AC%D9%88%D8%AF%D8%A9%20%D8%B9%D8%A7%D9%84%D9%8A%D8%A9.mp3" type="audio/mpeg">
-        متصفحك لا يدعم تشغيل الصوت.
-      </audio>
-      <p class="small" style="margin-top:10px">اضغط تشغيل للاستماع مباشرة من هنا. لا حاجة لفتح يوتيوب، ويلزم الاتصال بالإنترنت.</p>
+      <div class="card">
+        <div class="icon">ﷺ</div><h3>الصلاة على النبي كل نصف ساعة</h3>
+        <p>يردد الموقع بصوت مسموع: «صلِّ على سيدنا محمد ﷺ» كل 30 دقيقة.</p>
+        <div class="row" style="margin-top:13px">
+          <button class="btn green" id="enableSalawat">تشغيل التذكير الصوتي</button>
+          <button class="btn light" id="disableSalawat">إيقاف</button>
+        </div>
+        <button class="btn light" id="testVoice" style="margin-top:9px">تجربة الصوت الآن</button>
+        <p class="small" id="salawatStatus" style="margin-top:9px">التذكير الصوتي متوقف.</p>
+      </div>
     </div>
+    <div class="notice">مهم: اسمح بالإشعارات والصوت عند الطلب. تعمل التنبيهات ما دامت صفحة الموقع مفتوحة ولم يوقفها نظام الهاتف؛ قد يؤخر الهاتف التنبيه إذا أغلق المتصفح أو قيّد عمله في الخلفية.</div>
   </section>
 
-  <section class="section" id="azkar">
-    <div class="section-head"><div><h2>الأذكار اليومية</h2><p>أذكار مختارة للصباح والمساء وبعد الصلاة</p></div></div>
-    <div class="grid">
-      <div class="card"><div class="icon">☀</div><h3>أذكار الصباح</h3><p>ابدأ صباحك بذكر الله وتحصين نفسك.</p><button class="btn light" style="margin-top:13px" onclick="showAzkar('morning')">افتح الأذكار</button></div>
-      <div class="card"><div class="icon">☾</div><h3>أذكار المساء</h3><p>اختم يومك بالاستغفار والحمد والذكر.</p><button class="btn light" style="margin-top:13px" onclick="showAzkar('evening')">افتح الأذكار</button></div>
-      <div class="card"><div class="icon">🤲</div><h3>أذكار بعد الصلاة</h3><p>أذكار ثابتة تقال بعد الصلوات المفروضة.</p><button class="btn light" style="margin-top:13px" onclick="showAzkar('prayer')">افتح الأذكار</button></div>
-    </div>
-    <div id="azkarList" class="card hidden" style="margin-top:14px"><div class="section-head"><h3 id="azkarTitle">الأذكار</h3><button class="btn light" onclick="document.getElementById('azkarList').classList.add('hidden')">إغلاق</button></div><div id="azkarItems" class="list"></div></div>
-  </section>
+  
 
   <section class="section" id="qibla">
     <div class="section-head"><div><h2>اتجاه القبلة</h2><p>احسب اتجاه الكعبة من موقعك الحالي</p></div></div>
@@ -489,6 +543,8 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
     </div>
   </section>
 
+  
+
   <section class="section" id="tasbeeh">
     <div class="section-head"><div><h2>المسبحة الإلكترونية</h2><p>سبّح واستغفر، واجعل لسانك رطبًا بذكر الله</p></div></div>
     <div class="card" style="max-width:520px;margin:auto;text-align:center">
@@ -500,6 +556,7 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
     </div>
   </section>
 
+  
 
   <section class="section" id="hadith-dua">
     <div class="section-head"><div><h2>السنة النبوية والأدعية</h2><p>أحاديث صحيحة وأدعية من القرآن الكريم</p></div></div>
@@ -525,6 +582,8 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
     </div>
   </section>
 
+  
+
   <section class="section" id="daily-wird">
     <div class="section-head"><div><h2>وردي اليومي</h2><p>تابع إنجازك اليومي في أعمال الخير</p></div></div>
     <div class="card">
@@ -544,6 +603,7 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
     </div>
   </section>
 
+  
 
   <section class="section" id="friday-wird">
     <div class="section-head"><div><h2>ورد يوم الجمعة</h2><p>أعمال مستحبة تملأ يوم الجمعة بالصلاة والذكر والدعاء</p></div><span class="badge" id="fridayBadge" style="color:var(--green);background:var(--soft);padding:6px 10px;border-radius:9px;font-size:12px">ورد أسبوعي</span></div>
@@ -565,6 +625,7 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
     </div>
   </section>
 
+  
 
   <section class="section" id="library">
     <div class="section-head"><div><h2>من المكتبة الإيمانية</h2><p>آية وحديث وموعظة تذكّرك بالله</p></div></div>
@@ -580,7 +641,8 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
       <div class="article"><h3>التوبة والاستغفار</h3><p>باب التوبة مفتوح، فلا يقنط عبد من رحمة الله، وليُتبع السيئة حسنة تمحها.</p></div>
     </div>
   </section>
-</main>
+
+  </main>
 <footer><div class="brand" style="justify-content:center"><span class="brand-mark">۞</span><span>زاد المسلم</span></div><p>اللهم اجعل هذا العمل خالصًا لوجهك، وانفع به من قرأه أو نشره.</p><p class="small" style="color:#a9c1b5">موقع توعوي؛ تُراجع النصوص الشرعية ومصادرها قبل اعتمادها أو نشرها.</p></footer>
 
 <script>
