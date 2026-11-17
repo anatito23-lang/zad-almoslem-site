@@ -51,6 +51,21 @@ footer{background:#092f28;color:#d8e6de;padding:28px 18px;text-align:center}foot
 @media(max-width:800px){.prayer-grid{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr 1fr}.top{align-items:flex-start;flex-direction:column}.top nav{display:flex;flex-wrap:nowrap;overflow-x:auto;width:100%;gap:8px;padding:5px 0 10px;scrollbar-width:thin}.top nav a{flex:0 0 auto;white-space:nowrap;padding:6px 10px;background:#ffffff14;border:1px solid #ffffff26;border-radius:10px;font-size:13px}.hero-content{margin-top:30px}}
 @media(max-width:520px){.grid{grid-template-columns:1fr}.quran-tools{grid-template-columns:1fr}.date-strip{align-items:flex-start}.hero{padding-bottom:48px}.section h2{font-size:21px}.prayer .ptime{font-size:18px}}
 .kids-card summary{list-style:none;cursor:pointer}.kids-card summary::-webkit-details-marker{display:none}.kids-card[open] summary{margin-bottom:13px}.kid-steps{padding-right:22px;margin:10px 0;color:var(--ink);font-size:14px}.kid-steps li{margin:7px 0}.kid-story{background:#f7f4e9;border:1px solid #eee5cd;border-radius:13px;padding:12px;margin:10px 0;color:#5f512e;font-size:14px}.kids-card summary h3{margin:0 0 6px}.kids-card summary p{margin:0 0 6px}
+.khutbah-tools{display:grid;grid-template-columns:1.4fr .8fr;gap:10px;margin-bottom:14px}
+.khutbah-card{display:flex;flex-direction:column;gap:9px}
+.khutbah-card .topic-tag{display:inline-block;background:var(--soft);color:var(--green);padding:4px 9px;border-radius:20px;font-size:12px;width:max-content}
+.khutbah-card details{border-top:1px solid var(--line);padding-top:9px;margin-top:2px}
+.khutbah-card summary{cursor:pointer;color:var(--green);font-weight:700;font-size:13px}
+.khutbah-card ul{margin:7px 0 0;padding-right:20px;color:var(--muted);font-size:13px}
+.book-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.book-card{display:flex;flex-direction:column;gap:8px}
+.book-card .book-author{font-size:12px;color:var(--muted)}
+.book-card .book-level{font-size:12px;color:#987b43}
+.book-card a{display:inline-block;text-decoration:none;margin-top:auto}
+.library-links{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+@media(max-width:800px){.book-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.khutbah-tools{grid-template-columns:1fr}.book-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -58,7 +73,7 @@ footer{background:#092f28;color:#d8e6de;padding:28px 18px;text-align:center}foot
   <div class="top">
     <div class="brand"><span class="brand-mark">۞</span><span>زاد المسلم</span></div>
     <nav>
-      <a href="#prayer">مواقيت الصلاة</a><a href="#reminders">التنبيهات</a><a href="#friday-wird">ورد الجمعة</a><a href="#quran">القرآن الكريم</a><a href="#radio-egypt">إذاعة القرآن</a><a href="#kids">ركن الأطفال</a><a href="#ruqyah">الرقية الشرعية</a><a href="#azkar">الأذكار</a><a href="#qibla">القبلة</a><a href="#hadith-dua">السنة والدعاء</a><a href="#daily-wird">وردي اليومي</a><a href="#library">المكتبة</a>
+      <a href="#prayer">مواقيت الصلاة</a><a href="#reminders">التنبيهات</a><a href="#friday-wird">ورد الجمعة</a><a href="#quran">القرآن الكريم</a><a href="#radio-egypt">إذاعة القرآن</a><a href="#kids">ركن الأطفال</a><a href="#ruqyah">الرقية الشرعية</a><a href="#azkar">الأذكار</a><a href="#qibla">القبلة</a><a href="#hadith-dua">السنة والدعاء</a><a href="#daily-wird">وردي اليومي</a><a href="#library">المكتبة</a><a href="#khutbah-encyclopedia">موسوعة خطب الجمعة</a><a href="#seerah-books">كتب السيرة النبوية</a>
     </nav>
   </div>
   <div class="hero-content">
@@ -333,6 +348,93 @@ footer{background:#092f28;color:#d8e6de;padding:28px 18px;text-align:center}foot
       <div style="margin-top:14px"><div class="row" style="justify-content:space-between"><strong>إنجاز ورد الجمعة</strong><strong id="fridayPercent">0%</strong></div><div style="height:10px;background:var(--soft);border-radius:20px;overflow:hidden;margin-top:7px"><div id="fridayProgress" style="height:100%;width:0%;background:var(--green2);border-radius:20px;transition:width .2s"></div></div></div>
       <p class="small" style="margin-top:10px">هذه قائمة تذكيرية بالأعمال، وليست كل بنودها واجبة، ولا يلزم عدد محدد للصلاة على النبي ﷺ.</p>
     </div>
+  </section>
+
+
+  <section class="section" id="khutbah-encyclopedia">
+    <div class="section-head">
+      <div><h2>موسوعة خطب الجمعة</h2><p>فهرس موضوعي يساعدك على اختيار موضوع الخطبة، مع روابط لمكتبات الخطب المكتوبة وأرشيف وزارة الأوقاف المصرية.</p></div>
+    </div>
+    <div class="card">
+      <div class="khutbah-tools">
+        <input id="khutbahSearch" type="search" placeholder="ابحث عن موضوع الخطبة..." aria-label="ابحث في موضوعات خطب الجمعة">
+        <select id="khutbahCategory" aria-label="اختر مجال الخطبة">
+          <option value="">كل المجالات</option>
+          <option value="العقيدة">العقيدة والإيمان</option>
+          <option value="العبادات">العبادات والطاعات</option>
+          <option value="الأخلاق">الأخلاق والسلوك</option>
+          <option value="الأسرة">الأسرة والتربية</option>
+          <option value="المجتمع">المجتمع والحقوق</option>
+          <option value="الآخرة">الموت والآخرة</option>
+          <option value="السيرة">السيرة النبوية</option>
+        </select>
+      </div>
+      <p class="small" id="khutbahCount" aria-live="polite">موضوعات مقترحة للخطباء.</p>
+      <div class="grid" id="khutbahTopics"></div>
+      <div class="library-links">
+        <a class="btn green" href="https://awkafonline.gov.eg/friday-sermon" target="_blank" rel="noopener noreferrer">أرشيف خطب وزارة الأوقاف المصرية ↗</a>
+        <a class="btn light" href="https://e-quran.com/khutab/" target="_blank" rel="noopener noreferrer">مكتبة الخطب المكتوبة ↗</a>
+      </div>
+      <p class="small" style="margin-top:10px">هذا الفهرس يجمع موضوعات وأفكارًا للخطبة، أما النصوص الكاملة فتُفتح من المكتبات المشار إليها. راجع تخريج الأحاديث وصحة الآثار قبل إلقاء أي خطبة.</p>
+    </div>
+  </section>
+
+  <section class="section" id="seerah-books">
+    <div class="section-head">
+      <div><h2>مكتبة كتب السيرة النبوية</h2><p>كتب تراثية ومعاصرة للتعرّف على حياة النبي ﷺ، وأحداث الدعوة، وشمائله وهديه.</p></div>
+    </div>
+    <div class="book-grid">
+      <article class="card book-card">
+        <div class="icon">📘</div><h3>الرحيق المختوم</h3>
+        <div class="book-author">صفي الرحمن المباركفوري</div>
+        <p>عرض مرتب وميسر لأحداث السيرة من أحوال العرب قبل البعثة حتى وفاة النبي ﷺ. مناسب كبداية لمن يريد قراءة السيرة كاملة.</p>
+        <div class="book-level">مناسب للمبتدئ</div>
+        <a class="btn green" href="https://www.waqfeya.net/books/الرحيق-المختوم--ARRAHEEQ-ALMAKHTUM-e7cfdd10db504f92aad4528b0b41065c" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+      <article class="card book-card">
+        <div class="icon">📗</div><h3>السيرة النبوية — سيرة ابن هشام</h3>
+        <div class="book-author">عبد الملك بن هشام</div>
+        <p>من أشهر المصادر المبكرة في السيرة، جمع فيه ابن هشام روايات سيرة ابن إسحاق وهذّبها.</p>
+        <div class="book-level">مصدر تراثي موسّع</div>
+        <a class="btn green" href="https://www.waqfeya.net/books/السيرة-النبوية-سيرة-ابن-هشام-ط-الحلبي-f6efd41bb75a43e2a000ece33188d397" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+      <article class="card book-card">
+        <div class="icon">📙</div><h3>زاد المعاد في هدي خير العباد</h3>
+        <div class="book-author">ابن قيم الجوزية</div>
+        <p>يتناول هدي النبي ﷺ في عباداته ومعاملاته وأخلاقه وسفره وغزواته، ويجمع بين السيرة والفقه.</p>
+        <div class="book-level">للقراءة المتعمقة</div>
+        <a class="btn green" href="https://waqfeya.net/books/زاد-المعاد-في-هدي-خير-العباد-ت-الأرناؤوط-36a130f089414edea8e9cdb95b71ddfe" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+      <article class="card book-card">
+        <div class="icon">📕</div><h3>الشمائل المحمدية</h3>
+        <div class="book-author">الإمام الترمذي</div>
+        <p>كتاب في صفات النبي ﷺ الخَلقية والخُلقية، ولباسه وطعامه وعبادته وتواضعه ومعاملته.</p>
+        <div class="book-level">في محبة النبي ومعرفة شمائله</div>
+        <a class="btn green" href="https://waqfeya.net/books/الشمائل-المحمدية-ت-الدعاس/d609fc72e24e433d8f1c2f1a8d30d0ae" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+      <article class="card book-card">
+        <div class="icon">📒</div><h3>فقه السيرة</h3>
+        <div class="book-author">الشيخ محمد الغزالي</div>
+        <p>قراءة تربوية في أحداث السيرة، تستخرج الدروس والمعاني والعبر من مواقف حياة النبي ﷺ.</p>
+        <div class="book-level">للتدبر واستخراج الدروس</div>
+        <a class="btn green" href="https://waqfeya.net/books/فقه-السيرة-ت-الألباني/399aa4825a1f4bd5ab19498c71bfb3fd" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+      <article class="card book-card">
+        <div class="icon">📚</div><h3>السيرة النبوية لابن كثير</h3>
+        <div class="book-author">الحافظ ابن كثير</div>
+        <p>قسم السيرة من كتاب البداية والنهاية، وفيه سرد تاريخي لأحداث السيرة النبوية.</p>
+        <div class="book-level">مصدر تراثي</div>
+        <a class="btn green" href="https://www.waqfeya.net/books/السيرة-النبوية-fe65ca402c8d45a2a0067da412adbed1" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+      <article class="card book-card">
+        <div class="icon">📖</div><h3>البداية والنهاية — قسم السيرة</h3>
+        <div class="book-author">الحافظ ابن كثير</div>
+        <p>موسوعة تاريخية واسعة، وتضم أجزاءً تتناول السيرة النبوية وأحداثها وما بعدها.</p>
+        <div class="book-level">مرجع موسّع</div>
+        <a class="btn green" href="https://waqfeya.net/books/البداية-والنهاية-ت-التركي-6e3d24f1f63a4057ad76457c02a3eab5" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+    </div>
+    <div class="notice">روابط الكتب تفتح صفحات المكتبة الوقفية؛ قد تتوفر القراءة أو ملفات PDF بحسب النسخة. يُستحسن الرجوع إلى طبعة محققة، ومقارنة الروايات عند دراسة أحداث السيرة.</div>
   </section>
 
   <section class="section" id="library">
@@ -625,6 +727,54 @@ $('openKahf').addEventListener('click',()=>{
  const select=$('surahSelect');if(select){select.value='18';$('showSurah').click();$('quran').scrollIntoView({behavior:'smooth'});}
 });
 if(new Date().getDay()===5){$('fridayBadge').textContent='اليوم يوم الجمعة';$('fridayBadge').style.background='#f6edd9';$('fridayBadge').style.color='#87652a';}
+
+ 
+// فهرس موسوعة خطب الجمعة: بحث وتصنيف داخل الموقع
+const khutbahData = [
+ ['التوحيد وإخلاص العبادة','العقيدة','ترسيخ معنى عبادة الله وحده والتحذير من الشرك والرياء.','معنى التوحيد؛ إخلاص النية؛ أثر التوحيد في حياة المسلم'],
+ ['الإيمان بالله وحسن الظن به','العقيدة','تقوية اليقين بالله، والجمع بين حسن الظن به والأخذ بالأسباب.','أسماء الله وصفاته؛ التوكل؛ الرجاء والخوف'],
+ ['الثبات في زمن الفتن','العقيدة','وسائل الثبات عند كثرة الشبهات والشهوات وتقلب الأحوال.','الاعتصام بالقرآن والسنة؛ الصحبة الصالحة؛ الدعاء بالثبات'],
+ ['المحافظة على الصلاة','العبادات','مكانة الصلاة وخطر التهاون بها وأثرها في إصلاح القلب والسلوك.','الصلاة عماد الدين؛ المحافظة على الوقت؛ الخشوع'],
+ ['التوبة الصادقة والرجوع إلى الله','العبادات','فتح باب الرجاء، وبيان شروط التوبة وعدم تأجيلها.','الإقلاع عن الذنب؛ الندم؛ رد الحقوق؛ الاستقامة بعد التوبة'],
+ ['القرآن الكريم نور الحياة','العبادات','صلة المسلم بالقرآن تلاوةً وتدبرًا وعملاً.','هجر القرآن؛ التدبر؛ العمل بالأوامر واجتناب النواهي'],
+ ['اغتنام العمر قبل فوات الأوان','الآخرة','تذكير الناس بقصر الدنيا والاستعداد للقاء الله.','قيمة الوقت؛ المبادرة بالطاعات؛ محاسبة النفس'],
+ ['الموت والقبر والاستعداد للآخرة','الآخرة','تذكير مؤثر بالرحيل والعمل الصالح من غير تهويل ولا يأس.','حقيقة الموت؛ العمل الباقي؛ حقوق العباد'],
+ ['الجنة والنار وأثر الإيمان بالآخرة','الآخرة','ربط القلب بالآخرة، وتحفيز النفس على الطاعة وترك المعصية.','نعيم الجنة؛ التحذير من النار؛ التوازن بين الخوف والرجاء'],
+ ['بر الوالدين','الأسرة','بيان فضل بر الوالدين وصور البر في حياتهما وبعد وفاتهما.','خفض الجناح؛ الكلمة الطيبة؛ الدعاء لهما؛ صلة أرحامهما'],
+ ['تربية الأبناء على الإيمان والصلاة','الأسرة','مسؤولية الأسرة في التربية بالقدوة والرفق والمتابعة.','القدوة الحسنة؛ تعليم الصلاة؛ الحوار والرحمة'],
+ ['الأسرة المسلمة والمودة والرحمة','الأسرة','بناء بيت مستقر على حسن العشرة والحقوق والرحمة.','المعاشرة بالمعروف؛ حفظ الأسرار؛ حل الخلافات'],
+ ['حفظ اللسان من الغيبة والنميمة','الأخلاق','خطورة الكلمة وأثرها في الأفراد والمجتمع.','الغيبة؛ النميمة؛ الكذب؛ الصمت عن الشر'],
+ ['الصدق والأمانة','الأخلاق','إحياء خلق الصدق والأمانة في البيع والعمل والعلاقات.','الصدق مع الله؛ الأمانة في العمل؛ الوفاء بالعهد'],
+ ['التواضع وترك الكبر','الأخلاق','التحذير من الكبر وبيان منزلة التواضع وحسن الخلق.','التواضع؛ قبول النصيحة؛ احترام الناس'],
+ ['الصبر عند البلاء والشكر عند الرخاء','الأخلاق','تربية النفس على الصبر والشكر والرضا بقضاء الله.','الصبر الجميل؛ شكر النعم؛ عدم اليأس'],
+ ['حقوق الجار','المجتمع','بيان حق الجار وصور الإحسان إليه والتحذير من إيذائه.','كف الأذى؛ تفقد المحتاج؛ حفظ الخصوصية'],
+ ['إتقان العمل والكسب الحلال','المجتمع','ربط العبادة بالأمانة والإتقان في العمل وطلب الرزق الحلال.','الإتقان؛ تحري الحلال؛ الوفاء بالعقود'],
+ ['الرحمة بالضعفاء والمحتاجين','المجتمع','الحث على التكافل والصدقة وجبر الخواطر.','اليتيم؛ الفقير؛ المريض؛ قضاء حوائج الناس'],
+ ['وحدة المسلمين وترك التعصب','المجتمع','الدعوة إلى الأخوة وإصلاح ذات البين واجتناب الفرقة.','الأخوة الإيمانية؛ العفو؛ إصلاح الخصومات'],
+ ['النبي ﷺ قدوة ورحمة للعالمين','السيرة','التعريف بأخلاق النبي ورحمته وكيفية اتباع سنته.','رحمته بالصغير؛ عفوه؛ تواضعه؛ حسن معاملته'],
+ ['الهجرة النبوية ودروس التوكل','السيرة','استخراج معاني التخطيط والصبر والتضحية والثقة بالله من الهجرة.','الأخذ بالأسباب؛ الصحبة؛ التضحية؛ اليقين بنصر الله'],
+ ['غزوة بدر ودروس النصر والثبات','السيرة','التعرف على أسباب النصر الحقيقية ودروس الإيمان والثبات.','الشورى؛ الدعاء؛ الطاعة؛ الثبات'],
+ ['فتح مكة والعفو عند المقدرة','السيرة','إبراز عفو النبي ﷺ وتواضعه عند النصر.','العفو؛ ترك الانتقام؛ شكر النعمة؛ جمع القلوب'],
+ ['محبة النبي ﷺ واتباع سنته','السيرة','بيان أن المحبة الصادقة تظهر في الاتباع والعمل لا في الدعوى وحدها.','تعظيم السنة؛ الصلاة عليه؛ الاقتداء بأخلاقه']
+];
+const khutbahBox = $('khutbahTopics');
+if (khutbahBox) {
+ const normalizeSearch = value => (value || '').toLocaleLowerCase('ar').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').trim();
+ function renderKhutbahTopics() {
+  const query = normalizeSearch($('khutbahSearch').value);
+  const category = $('khutbahCategory').value;
+  const filtered = khutbahData.filter(item => (!category || item[1] === category) && (!query || normalizeSearch(item.join(' ')).includes(query)));
+  khutbahBox.innerHTML = filtered.map(item => {
+   const points = item[3].split('؛').map(point => '<li>'+point+'</li>').join('');
+   return '<article class="card khutbah-card"><span class="topic-tag">'+item[1]+'</span><h3>'+item[0]+'</h3><p>'+item[2]+'</p><details><summary>محاور مقترحة للخطبة</summary><ul>'+points+'</ul></details></article>';
+  }).join('');
+  $('khutbahCount').textContent = 'عدد الموضوعات الظاهرة: ' + filtered.length + ' من ' + khutbahData.length;
+  if (!filtered.length) khutbahBox.innerHTML = '<div class="card"><p>لا توجد نتائج مطابقة. جرّب كلمة بحث أخرى أو اختر كل المجالات.</p></div>';
+ }
+ $('khutbahSearch').addEventListener('input', renderKhutbahTopics);
+ $('khutbahCategory').addEventListener('change', renderKhutbahTopics);
+ renderKhutbahTopics();
+}
 
 </script>
 </body>
