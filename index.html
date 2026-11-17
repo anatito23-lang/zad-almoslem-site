@@ -80,7 +80,7 @@ footer{background:#092f28;color:#d8e6de;padding:28px 18px;text-align:center}foot
     <div class="eyebrow">رفيقك إلى الطاعة والطمأنينة</div>
     <h1>اجعل يومك عامرًا بذكر الله</h1>
     <p>القرآن الكريم، مواقيت الصلاة، الأذكار، الأحاديث، اتجاه القبلة، والتقويم الهجري؛ كل ما تحتاجه في مكان واحد.</p>
-    <div class="hero-actions"><a class="btn" href="#prayer">ابدأ يومك</a><a class="btn ghost" href="#quran">استمع للقرآن</a><a class="btn ghost" href="#radio-egypt">إذاعة القرآن</a><a class="btn ghost" href="#kids">ركن الأطفال</a></div>
+    <div class="hero-actions"><a class="btn" href="#prayer">ابدأ يومك</a><a class="btn ghost" href="#quran">استمع للقرآن</a><a class="btn ghost" href="#radio-egypt">إذاعة القرآن</a><a class="btn ghost" href="#kids">ركن الأطفال</a><a class="btn ghost" href="#khutbah-encyclopedia">موسوعة خطب الجمعة</a><a class="btn ghost" href="#seerah-books">كتب السيرة النبوية</a></div>
   </div>
 </header>
 
@@ -98,6 +98,93 @@ footer{background:#092f28;color:#d8e6de;padding:28px 18px;text-align:center}foot
       <div class="prayer"><div class="pname">الفجر</div><div class="ptime">--:--</div></div><div class="prayer"><div class="pname">الشروق</div><div class="ptime">--:--</div></div><div class="prayer"><div class="pname">الظهر</div><div class="ptime">--:--</div></div><div class="prayer"><div class="pname">العصر</div><div class="ptime">--:--</div></div><div class="prayer"><div class="pname">المغرب</div><div class="ptime">--:--</div></div><div class="prayer"><div class="pname">العشاء</div><div class="ptime">--:--</div></div>
     </div>
     <div class="small">المواقيت تُجلب عبر الإنترنت من خدمة مواقيت الصلاة، وقد تختلف دقائق قليلة حسب طريقة الحساب والجهة المحلية.</div>
+  </section>
+
+
+  <section class="section" id="khutbah-encyclopedia">
+    <div class="section-head">
+      <div><h2>موسوعة خطب الجمعة</h2><p>فهرس موضوعي يساعدك على اختيار موضوع الخطبة، مع روابط لمكتبات الخطب المكتوبة وأرشيف وزارة الأوقاف المصرية.</p></div>
+    </div>
+    <div class="card">
+      <div class="khutbah-tools">
+        <input id="khutbahSearch" type="search" placeholder="ابحث عن موضوع الخطبة..." aria-label="ابحث في موضوعات خطب الجمعة">
+        <select id="khutbahCategory" aria-label="اختر مجال الخطبة">
+          <option value="">كل المجالات</option>
+          <option value="العقيدة">العقيدة والإيمان</option>
+          <option value="العبادات">العبادات والطاعات</option>
+          <option value="الأخلاق">الأخلاق والسلوك</option>
+          <option value="الأسرة">الأسرة والتربية</option>
+          <option value="المجتمع">المجتمع والحقوق</option>
+          <option value="الآخرة">الموت والآخرة</option>
+          <option value="السيرة">السيرة النبوية</option>
+        </select>
+      </div>
+      <p class="small" id="khutbahCount" aria-live="polite">موضوعات مقترحة للخطباء.</p>
+      <div class="grid" id="khutbahTopics"></div>
+      <div class="library-links">
+        <a class="btn green" href="https://awkafonline.gov.eg/friday-sermon" target="_blank" rel="noopener noreferrer">أرشيف خطب وزارة الأوقاف المصرية ↗</a>
+        <a class="btn light" href="https://e-quran.com/khutab/" target="_blank" rel="noopener noreferrer">مكتبة الخطب المكتوبة ↗</a>
+      </div>
+      <p class="small" style="margin-top:10px">هذا الفهرس يجمع موضوعات وأفكارًا للخطبة، أما النصوص الكاملة فتُفتح من المكتبات المشار إليها. راجع تخريج الأحاديث وصحة الآثار قبل إلقاء أي خطبة.</p>
+    </div>
+  </section>
+
+  <section class="section" id="seerah-books">
+    <div class="section-head">
+      <div><h2>مكتبة كتب السيرة النبوية</h2><p>كتب تراثية ومعاصرة للتعرّف على حياة النبي ﷺ، وأحداث الدعوة، وشمائله وهديه.</p></div>
+    </div>
+    <div class="book-grid">
+      <article class="card book-card">
+        <div class="icon">📘</div><h3>الرحيق المختوم</h3>
+        <div class="book-author">صفي الرحمن المباركفوري</div>
+        <p>عرض مرتب وميسر لأحداث السيرة من أحوال العرب قبل البعثة حتى وفاة النبي ﷺ. مناسب كبداية لمن يريد قراءة السيرة كاملة.</p>
+        <div class="book-level">مناسب للمبتدئ</div>
+        <a class="btn green" href="https://www.waqfeya.net/books/الرحيق-المختوم--ARRAHEEQ-ALMAKHTUM-e7cfdd10db504f92aad4528b0b41065c" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+      <article class="card book-card">
+        <div class="icon">📗</div><h3>السيرة النبوية — سيرة ابن هشام</h3>
+        <div class="book-author">عبد الملك بن هشام</div>
+        <p>من أشهر المصادر المبكرة في السيرة، جمع فيه ابن هشام روايات سيرة ابن إسحاق وهذّبها.</p>
+        <div class="book-level">مصدر تراثي موسّع</div>
+        <a class="btn green" href="https://www.waqfeya.net/books/السيرة-النبوية-سيرة-ابن-هشام-ط-الحلبي-f6efd41bb75a43e2a000ece33188d397" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+      <article class="card book-card">
+        <div class="icon">📙</div><h3>زاد المعاد في هدي خير العباد</h3>
+        <div class="book-author">ابن قيم الجوزية</div>
+        <p>يتناول هدي النبي ﷺ في عباداته ومعاملاته وأخلاقه وسفره وغزواته، ويجمع بين السيرة والفقه.</p>
+        <div class="book-level">للقراءة المتعمقة</div>
+        <a class="btn green" href="https://waqfeya.net/books/زاد-المعاد-في-هدي-خير-العباد-ت-الأرناؤوط-36a130f089414edea8e9cdb95b71ddfe" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+      <article class="card book-card">
+        <div class="icon">📕</div><h3>الشمائل المحمدية</h3>
+        <div class="book-author">الإمام الترمذي</div>
+        <p>كتاب في صفات النبي ﷺ الخَلقية والخُلقية، ولباسه وطعامه وعبادته وتواضعه ومعاملته.</p>
+        <div class="book-level">في محبة النبي ومعرفة شمائله</div>
+        <a class="btn green" href="https://waqfeya.net/books/الشمائل-المحمدية-ت-الدعاس/d609fc72e24e433d8f1c2f1a8d30d0ae" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+      <article class="card book-card">
+        <div class="icon">📒</div><h3>فقه السيرة</h3>
+        <div class="book-author">الشيخ محمد الغزالي</div>
+        <p>قراءة تربوية في أحداث السيرة، تستخرج الدروس والمعاني والعبر من مواقف حياة النبي ﷺ.</p>
+        <div class="book-level">للتدبر واستخراج الدروس</div>
+        <a class="btn green" href="https://waqfeya.net/books/فقه-السيرة-ت-الألباني/399aa4825a1f4bd5ab19498c71bfb3fd" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+      <article class="card book-card">
+        <div class="icon">📚</div><h3>السيرة النبوية لابن كثير</h3>
+        <div class="book-author">الحافظ ابن كثير</div>
+        <p>قسم السيرة من كتاب البداية والنهاية، وفيه سرد تاريخي لأحداث السيرة النبوية.</p>
+        <div class="book-level">مصدر تراثي</div>
+        <a class="btn green" href="https://www.waqfeya.net/books/السيرة-النبوية-fe65ca402c8d45a2a0067da412adbed1" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+      <article class="card book-card">
+        <div class="icon">📖</div><h3>البداية والنهاية — قسم السيرة</h3>
+        <div class="book-author">الحافظ ابن كثير</div>
+        <p>موسوعة تاريخية واسعة، وتضم أجزاءً تتناول السيرة النبوية وأحداثها وما بعدها.</p>
+        <div class="book-level">مرجع موسّع</div>
+        <a class="btn green" href="https://waqfeya.net/books/البداية-والنهاية-ت-التركي-6e3d24f1f63a4057ad76457c02a3eab5" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
+      </article>
+    </div>
+    <div class="notice">روابط الكتب تفتح صفحات المكتبة الوقفية؛ قد تتوفر القراءة أو ملفات PDF بحسب النسخة. يُستحسن الرجوع إلى طبعة محققة، ومقارنة الروايات عند دراسة أحداث السيرة.</div>
   </section>
 
 
@@ -350,92 +437,6 @@ footer{background:#092f28;color:#d8e6de;padding:28px 18px;text-align:center}foot
     </div>
   </section>
 
-
-  <section class="section" id="khutbah-encyclopedia">
-    <div class="section-head">
-      <div><h2>موسوعة خطب الجمعة</h2><p>فهرس موضوعي يساعدك على اختيار موضوع الخطبة، مع روابط لمكتبات الخطب المكتوبة وأرشيف وزارة الأوقاف المصرية.</p></div>
-    </div>
-    <div class="card">
-      <div class="khutbah-tools">
-        <input id="khutbahSearch" type="search" placeholder="ابحث عن موضوع الخطبة..." aria-label="ابحث في موضوعات خطب الجمعة">
-        <select id="khutbahCategory" aria-label="اختر مجال الخطبة">
-          <option value="">كل المجالات</option>
-          <option value="العقيدة">العقيدة والإيمان</option>
-          <option value="العبادات">العبادات والطاعات</option>
-          <option value="الأخلاق">الأخلاق والسلوك</option>
-          <option value="الأسرة">الأسرة والتربية</option>
-          <option value="المجتمع">المجتمع والحقوق</option>
-          <option value="الآخرة">الموت والآخرة</option>
-          <option value="السيرة">السيرة النبوية</option>
-        </select>
-      </div>
-      <p class="small" id="khutbahCount" aria-live="polite">موضوعات مقترحة للخطباء.</p>
-      <div class="grid" id="khutbahTopics"></div>
-      <div class="library-links">
-        <a class="btn green" href="https://awkafonline.gov.eg/friday-sermon" target="_blank" rel="noopener noreferrer">أرشيف خطب وزارة الأوقاف المصرية ↗</a>
-        <a class="btn light" href="https://e-quran.com/khutab/" target="_blank" rel="noopener noreferrer">مكتبة الخطب المكتوبة ↗</a>
-      </div>
-      <p class="small" style="margin-top:10px">هذا الفهرس يجمع موضوعات وأفكارًا للخطبة، أما النصوص الكاملة فتُفتح من المكتبات المشار إليها. راجع تخريج الأحاديث وصحة الآثار قبل إلقاء أي خطبة.</p>
-    </div>
-  </section>
-
-  <section class="section" id="seerah-books">
-    <div class="section-head">
-      <div><h2>مكتبة كتب السيرة النبوية</h2><p>كتب تراثية ومعاصرة للتعرّف على حياة النبي ﷺ، وأحداث الدعوة، وشمائله وهديه.</p></div>
-    </div>
-    <div class="book-grid">
-      <article class="card book-card">
-        <div class="icon">📘</div><h3>الرحيق المختوم</h3>
-        <div class="book-author">صفي الرحمن المباركفوري</div>
-        <p>عرض مرتب وميسر لأحداث السيرة من أحوال العرب قبل البعثة حتى وفاة النبي ﷺ. مناسب كبداية لمن يريد قراءة السيرة كاملة.</p>
-        <div class="book-level">مناسب للمبتدئ</div>
-        <a class="btn green" href="https://www.waqfeya.net/books/الرحيق-المختوم--ARRAHEEQ-ALMAKHTUM-e7cfdd10db504f92aad4528b0b41065c" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-      <article class="card book-card">
-        <div class="icon">📗</div><h3>السيرة النبوية — سيرة ابن هشام</h3>
-        <div class="book-author">عبد الملك بن هشام</div>
-        <p>من أشهر المصادر المبكرة في السيرة، جمع فيه ابن هشام روايات سيرة ابن إسحاق وهذّبها.</p>
-        <div class="book-level">مصدر تراثي موسّع</div>
-        <a class="btn green" href="https://www.waqfeya.net/books/السيرة-النبوية-سيرة-ابن-هشام-ط-الحلبي-f6efd41bb75a43e2a000ece33188d397" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-      <article class="card book-card">
-        <div class="icon">📙</div><h3>زاد المعاد في هدي خير العباد</h3>
-        <div class="book-author">ابن قيم الجوزية</div>
-        <p>يتناول هدي النبي ﷺ في عباداته ومعاملاته وأخلاقه وسفره وغزواته، ويجمع بين السيرة والفقه.</p>
-        <div class="book-level">للقراءة المتعمقة</div>
-        <a class="btn green" href="https://waqfeya.net/books/زاد-المعاد-في-هدي-خير-العباد-ت-الأرناؤوط-36a130f089414edea8e9cdb95b71ddfe" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-      <article class="card book-card">
-        <div class="icon">📕</div><h3>الشمائل المحمدية</h3>
-        <div class="book-author">الإمام الترمذي</div>
-        <p>كتاب في صفات النبي ﷺ الخَلقية والخُلقية، ولباسه وطعامه وعبادته وتواضعه ومعاملته.</p>
-        <div class="book-level">في محبة النبي ومعرفة شمائله</div>
-        <a class="btn green" href="https://waqfeya.net/books/الشمائل-المحمدية-ت-الدعاس/d609fc72e24e433d8f1c2f1a8d30d0ae" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-      <article class="card book-card">
-        <div class="icon">📒</div><h3>فقه السيرة</h3>
-        <div class="book-author">الشيخ محمد الغزالي</div>
-        <p>قراءة تربوية في أحداث السيرة، تستخرج الدروس والمعاني والعبر من مواقف حياة النبي ﷺ.</p>
-        <div class="book-level">للتدبر واستخراج الدروس</div>
-        <a class="btn green" href="https://waqfeya.net/books/فقه-السيرة-ت-الألباني/399aa4825a1f4bd5ab19498c71bfb3fd" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-      <article class="card book-card">
-        <div class="icon">📚</div><h3>السيرة النبوية لابن كثير</h3>
-        <div class="book-author">الحافظ ابن كثير</div>
-        <p>قسم السيرة من كتاب البداية والنهاية، وفيه سرد تاريخي لأحداث السيرة النبوية.</p>
-        <div class="book-level">مصدر تراثي</div>
-        <a class="btn green" href="https://www.waqfeya.net/books/السيرة-النبوية-fe65ca402c8d45a2a0067da412adbed1" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-      <article class="card book-card">
-        <div class="icon">📖</div><h3>البداية والنهاية — قسم السيرة</h3>
-        <div class="book-author">الحافظ ابن كثير</div>
-        <p>موسوعة تاريخية واسعة، وتضم أجزاءً تتناول السيرة النبوية وأحداثها وما بعدها.</p>
-        <div class="book-level">مرجع موسّع</div>
-        <a class="btn green" href="https://waqfeya.net/books/البداية-والنهاية-ت-التركي-6e3d24f1f63a4057ad76457c02a3eab5" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-    </div>
-    <div class="notice">روابط الكتب تفتح صفحات المكتبة الوقفية؛ قد تتوفر القراءة أو ملفات PDF بحسب النسخة. يُستحسن الرجوع إلى طبعة محققة، ومقارنة الروايات عند دراسة أحداث السيرة.</div>
-  </section>
 
   <section class="section" id="library">
     <div class="section-head"><div><h2>من المكتبة الإيمانية</h2><p>آية وحديث وموعظة تذكّرك بالله</p></div></div>
