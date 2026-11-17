@@ -216,13 +216,13 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 @media(max-width:600px){#mushafSwipeArea{padding:2px!important}#mushafPageImage{width:100%!important;height:auto!important;max-height:none!important}}
 
 /* شريط أذكار هادئ أعلى الصفحة */
-.azkar-ticker{position:relative!important;z-index:9999!important;display:block!important;width:100%!important;height:auto!important;min-height:52px;overflow:hidden!important;background:linear-gradient(100deg,#10234f,#244b91,#10234f)!important;color:#fff!important;border-top:2px solid #e6c76a;border-bottom:2px solid #e6c76a;box-shadow:0 4px 14px #101c4640;direction:ltr!important}
+body{padding-top:56px!important}.azkar-ticker{position:fixed!important;top:0!important;left:0!important;right:0!important;z-index:99999!important;display:block!important;width:100%!important;height:auto!important;min-height:52px;overflow:hidden!important;background:linear-gradient(100deg,#10234f,#244b91,#10234f)!important;color:#fff!important;border-top:2px solid #e6c76a;border-bottom:2px solid #e6c76a;box-shadow:0 4px 14px #101c4640;direction:ltr!important}
 .azkar-ticker-track{display:flex!important;flex-wrap:nowrap!important;flex-direction:row!important;align-items:center!important;width:max-content!important;min-width:max-content!important;animation:azkarTickerMove 900s linear infinite!important;-webkit-animation:azkarTickerMove 900s linear infinite!important;will-change:transform!important}
 .azkar-ticker-group{display:flex!important;flex:0 0 auto!important;flex-direction:row!important;direction:rtl!important;align-items:center!important;gap:30px!important;padding:14px 20px!important;white-space:nowrap!important;font-size:14px!important;line-height:1.7!important;font-weight:700!important}
 .azkar-ticker-group span:before{content:'✦';color:#f6d978;margin-left:10px}
 @keyframes azkarTickerMove{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(-50%,0,0)}}
 @-webkit-keyframes azkarTickerMove{0%{-webkit-transform:translate3d(0,0,0)}100%{-webkit-transform:translate3d(-50%,0,0)}}
-@media(max-width:600px){.azkar-ticker{min-height:48px}.azkar-ticker-group{gap:24px!important;padding:12px 16px!important;font-size:13px!important}}
+@media(max-width:600px){body{padding-top:52px!important}.azkar-ticker{min-height:48px}.azkar-ticker-group{gap:24px!important;padding:12px 16px!important;font-size:13px!important}}
 </style>
 </head>
 <body>
@@ -241,7 +241,6 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
       <a href="#books-library">مكتبة الكتب</a>
       <a href="#kids">ركن الأطفال</a>
       <a href="#reminders">التنبيهات</a>
-      <a href="#qibla">القبلة</a>
       <a href="#hadith-dua">السنة والدعاء</a>
       <a href="#daily-wird">وردي اليومي</a>
       <a href="#friday-wird">ورد الجمعة</a>
@@ -621,16 +620,7 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 
   
 
-  <section class="section" id="qibla">
-    <div class="section-head"><div><h2>اتجاه القبلة</h2><p>احسب اتجاه الكعبة من موقعك الحالي</p></div></div>
-    <div class="card qibla-box">
-      <div class="compass"><span class="needle" id="needle">⬆</span></div>
-      <div class="compass-label" id="qiblaDegree">اضغط لتحديد موقعك واتجاه القبلة</div>
-      <p class="small">السهم يوضح اتجاه القبلة بالنسبة إلى الشمال الجغرافي، وليس بوصلة الهاتف الحية.</p>
-      <button class="btn green" id="getQibla">تحديد موقعي وحساب القبلة</button>
-      <div id="qiblaStatus" class="small" style="margin-top:8px"></div>
-    </div>
-  </section>
+
 
 
   
@@ -1080,18 +1070,7 @@ const azkar={
  prayer:{title:'أذكار بعد الصلاة',items:[['أستغفر الله.',3],['اللهم أنت السلام ومنك السلام، تباركت يا ذا الجلال والإكرام.',1],['سبحان الله.',33],['الحمد لله.',33],['الله أكبر.',33],['لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.',1]]}
 };
 function showAzkar(type){const data=azkar[type];$('azkarTitle').textContent=data.title;$('azkarItems').innerHTML=data.items.map(([t,n])=>`<div class="zikr-item"><div><div>${t}</div><div class="small">عدد التكرار: ${n}</div></div><div class="zikr-count">${n}×</div></div>`).join('');$('azkarList').classList.remove('hidden');$('azkarList').scrollIntoView({behavior:'smooth'});}
-$('getQibla').addEventListener('click',()=>{
- if(!navigator.geolocation){$('qiblaStatus').textContent='المتصفح لا يدعم تحديد الموقع.';return}
- $('qiblaStatus').textContent='يرجى السماح بالوصول إلى الموقع...';
- navigator.geolocation.getCurrentPosition(pos=>{
-  const lat=pos.coords.latitude,lon=pos.coords.longitude,kaabaLat=21.4225,kaabaLon=39.8262;
-  const rad=x=>x*Math.PI/180,deg=x=>x*180/Math.PI;
-  const y=Math.sin(rad(kaabaLon-lon)),x=Math.cos(rad(lat))*Math.tan(rad(kaabaLat))-Math.sin(rad(lat))*Math.cos(rad(kaabaLon-lon));
-  const bearing=(deg(Math.atan2(y,x))+360)%360;
-  $('needle').style.transform=`rotate(${bearing}deg)`;$('qiblaDegree').textContent=`اتجاه القبلة: ${bearing.toFixed(1)}° من الشمال`;
-  $('qiblaStatus').textContent='تم حساب الاتجاه من موقعك الحالي.';
- },err=>{$('qiblaStatus').textContent='لم نتمكن من تحديد موقعك. فعّل خدمة الموقع واسمح للمتصفح بالوصول إليها.'},{enableHighAccuracy:true,timeout:12000});
-});
+
 let count=Number(localStorage.getItem('zad_tasbeeh')||0);
 if(!Number.isFinite(count)||count<0)count=0;
 let tasbeehGoal=Number(localStorage.getItem('zad_tasbeeh_goal')||33);
