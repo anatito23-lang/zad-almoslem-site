@@ -276,7 +276,7 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
           <option value="mustafa">الشيخ مصطفى إسماعيل</option>
           <option value="banna">الشيخ محمود علي البنا</option>
           <option value="shuaisha">الشيخ أبو العينين شعيشع — 12 سورة متاحة</option>
-          <option value="ezzat">الشيخ عزت السيد راشد — 5 تلاوات متاحة داخل المشغّل</option>
+          <option value="ezzat">الشيخ عزت السيد راشد — 5 تلاوات تفتح خارجيًا</option>
         </select>
         <select id="surahSelect" aria-label="اختر السورة"><option value="">جارٍ تحميل السور...</option></select>
         <button class="btn green" id="showSurah">استمع الآن</button>
@@ -285,7 +285,7 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
       <p id="quranStatus" class="small" role="status" style="margin:8px 0 12px">جارٍ تحميل قائمة التسجيلات الصوتية...</p>
       <audio id="audio" controls class="hidden" preload="none" style="width:100%;margin-top:8px"></audio>
       <div id="shuaishaTracks" class="list hidden" style="margin-top:12px"></div>
-      <div class="notice">القسم مخصص للاستماع فقط. التسجيلات المتاحة للشيوخ الخمسة الأولى تُجلب من مكتبة MP3Quran، أما الشيخ أبو العينين شعيشع فالمتاح حاليًا له 12 سورة على موقع السبيل، والشيخ عزت السيد راشد له خمس تلاوات تُشغَّل من مشغّل الموقع مباشرة. يلزم الاتصال بالإنترنت للتشغيل.</div>
+      <div class="notice">القسم مخصص للاستماع فقط. التسجيلات المتاحة للشيوخ الخمسة الأولى تُجلب من مكتبة MP3Quran، أما الشيخ أبو العينين شعيشع فالمتاح حاليًا له 12 سورة على موقع السبيل، والشيخ عزت السيد راشد له خمس تلاوات تفتح صفحة الاستماع الخارجية مؤقتًا. يلزم الاتصال بالإنترنت للتشغيل.</div>
     </div>
   </section>
 
@@ -1052,16 +1052,8 @@ function showEzzatTracks(){
  player.pause();player.removeAttribute('src');player.load();player.classList.add('hidden');
  $('surahSelect').classList.add('hidden');$('showSurah').classList.add('hidden');
  $('reciter').value='ezzat';
- $('quranStatus').textContent='اختر التلاوة؛ ستظهر صفحة الاستماع داخل موقع زاد المسلم. اضغط تشغيل من المشغّل الظاهر.';
- $('shuaishaTracks').innerHTML=tracks.map(([name,duration,url])=>`<div class="surah-item"><span><b>سورة ${name}</b><span class="small" style="display:block">المدة: ${duration}</span></span><button type="button" class="ezzat-play" data-title="${name}" data-page="${url}">استمع</button></div>`).join('')+`<div id="ezzatInlinePlayer" style="margin-top:14px"></div>`;
- $('shuaishaTracks').querySelectorAll('.ezzat-play').forEach(button=>{
-  button.addEventListener('click',()=>{
-   const page=button.dataset.page;
-   $('ezzatInlinePlayer').innerHTML=`<iframe title="تلاوة الشيخ عزت السيد راشد - ${button.dataset.title}" src="${page}" loading="lazy" allow="autoplay" referrerpolicy="strict-origin-when-cross-origin" style="display:block;width:100%;height:390px;border:1px solid var(--line);border-radius:14px;background:#fff"></iframe><p class="small" style="margin-top:8px">إذا لم يظهر مشغّل التلاوة داخل الإطار، <a href="${page}" target="_blank" rel="noopener">افتح صفحة الاستماع</a>.</p>`;
-   $('quranStatus').textContent='تم اختيار تلاوة الشيخ عزت السيد راشد: '+button.dataset.title+' — اضغط تشغيل داخل الإطار.';
-   $('ezzatInlinePlayer').scrollIntoView({behavior:'smooth',block:'nearest'});
-  });
- });
+ $('quranStatus').textContent='اختر التلاوة؛ ستُفتح صفحة الاستماع الخارجية في تبويب جديد.';
+ $('shuaishaTracks').innerHTML=tracks.map(([name,duration,url])=>'<a class="surah-item" href="'+url+'" target="_blank" rel="noopener noreferrer"><span><b>سورة '+name+'</b><span class="small" style="display:block">المدة: '+duration+'</span></span><strong>استمع ↗</strong></a>').join('');
  $('shuaishaTracks').classList.remove('hidden');
 }
 function resetQuranPlayer(){
