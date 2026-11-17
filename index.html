@@ -216,7 +216,7 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 @media(max-width:600px){#mushafSwipeArea{padding:2px!important}#mushafPageImage{width:100%!important;height:auto!important;max-height:none!important}}
 
 /* شريط الأذكار المتحرك */
-.azkar-ticker{width:100%;overflow:hidden;background:linear-gradient(90deg,#0d3d30,#17654c,#0d3d30);color:#fff;border-block:1px solid #ffffff22;box-shadow:0 3px 12px #00000012}
+.azkar-ticker{position:sticky;top:0;z-index:1100;display:block;width:100%;min-height:44px;overflow:hidden;background:linear-gradient(90deg,#0d3d30,#17654c,#0d3d30);color:#fff;border-block:1px solid #ffffff22;box-shadow:0 3px 12px #00000022}
 .azkar-ticker-track{display:flex;width:max-content;align-items:center;animation:azkarTickerMove 58s linear infinite;will-change:transform}
 .azkar-ticker:hover .azkar-ticker-track{animation-play-state:paused}
 .azkar-ticker-group{display:flex;flex:0 0 auto;align-items:center;gap:34px;padding:12px 17px;white-space:nowrap;font-size:14px;font-weight:700}
