@@ -122,6 +122,7 @@ footer{background:#092f28;color:#d8e6de;padding:28px 18px;text-align:center}foot
           <option value="mustafa">الشيخ مصطفى إسماعيل</option>
           <option value="banna">الشيخ محمود علي البنا</option>
           <option value="shuaisha">الشيخ أبو العينين شعيشع — 12 سورة متاحة</option>
+          <option value="ezzat">الشيخ عزت السيد راشد — 9 تلاوات متاحة</option>
         </select>
         <select id="surahSelect" aria-label="اختر السورة"><option value="">جارٍ تحميل السور...</option></select>
         <button class="btn green" id="showSurah">استمع الآن</button>
@@ -330,12 +331,20 @@ function showShuaishaTracks(){
  $('shuaishaTracks').innerHTML=tracks.map(([id,name,slug])=>`<a class="surah-item" href="https://ar.assabile.com/abul-ainain-shu-aisha/quran/${slug}" rel="noopener"><span>${id}. سورة ${name}</span><strong>استمع ↗</strong></a>`).join('');
  $('shuaishaTracks').classList.remove('hidden');
 }
+function showEzzatTracks(){
+ $('audio').pause();$('audio').removeAttribute('src');$('audio').classList.add('hidden');
+ $('surahSelect').classList.add('hidden');$('showSurah').classList.add('hidden');
+ $('quranStatus').textContent='المتاح حاليًا للشيخ عزت السيد راشد 9 تلاوات مسجلة. افتح صفحة الشيخ واختر التلاوة التي تريد الاستماع إليها.';
+ $('shuaishaTracks').innerHTML='<div class="card"><p style="margin-bottom:10px">تتوفر للشيخ تسع تلاوات، منها: البقرة، والتوبة، والأحزاب، والدخان، والفرقان، وطه، وفاطر، ومريم وطه.</p><a class="btn green" href="https://tilawah.net/authors/aazt-alsyd-rashd" target="_blank" rel="noopener" style="display:inline-block;text-decoration:none">استمع إلى تلاوات الشيخ عزت السيد راشد ↗</a><p class="small" style="margin-top:10px">سيُفتح مصدر التسجيلات في صفحة مستقلة، ومن هناك تختار التلاوة وتشغّلها.</p></div>';
+ $('shuaishaTracks').classList.remove('hidden');
+}
 function resetQuranPlayer(){
  $('shuaishaTracks').classList.add('hidden');
  $('surahSelect').classList.remove('hidden');$('showSurah').classList.remove('hidden');
 }
 $('reciter').addEventListener('change',()=>{
  if($('reciter').value==='shuaisha'){showShuaishaTracks();}
+ else if($('reciter').value==='ezzat'){showEzzatTracks();}
  else{resetQuranPlayer();$('quranStatus').textContent='اختر السورة ثم اضغط «استمع الآن».';}
 });
 $('showSurah').addEventListener('click',()=>{
