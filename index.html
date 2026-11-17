@@ -197,6 +197,35 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
  .mushaf-bismillah{font-size:26px}
 }
 
+
+/* مكتبة الكتب وقارئها داخل الموقع */
+.book-library-filters,.nasheed-artist-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.book-filter-btn,.nasheed-artist-btn{border:1px solid var(--line);background:#fff;color:var(--green);border-radius:12px;padding:10px 16px;font:inherit;font-weight:800;cursor:pointer}
+.book-filter-btn.active,.nasheed-artist-btn.active{background:var(--green);border-color:var(--green);color:#fff}
+.book-open{width:100%;margin-top:8px}
+.book-reader-modal{position:fixed;inset:0;z-index:1600;display:none;align-items:center;justify-content:center;padding:14px;background:#071b17d9}
+.book-reader-modal.active{display:flex}
+.book-reader-dialog{width:min(1120px,100%);height:min(92dvh,900px);display:flex;flex-direction:column;overflow:hidden;background:#fff;border-radius:18px;box-shadow:0 20px 70px #0005}
+.book-reader-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;background:var(--paper);border-bottom:1px solid var(--line)}
+.book-reader-head strong,.book-reader-head span{display:block}
+.book-reader-head strong{color:var(--green);font-size:16px}
+.book-reader-head span{font-size:12px;color:var(--muted);margin-top:3px}
+#bookReaderFrame{display:block;flex:1;min-height:0;width:100%;border:0;background:#f8f8f5}
+.nasheed-player-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--paper);margin:12px 0}
+.nasheed-player-card .icon{margin:0;flex:0 0 44px}
+.nasheed-player-card strong{color:var(--green)}
+.nasheed-player-card p{margin:4px 0 0}
+.nasheed-track-btn{width:100%;text-align:right;cursor:pointer;font:inherit}
+.nasheed-track-btn strong{white-space:nowrap}
+.nasheed-track-btn.active{border-color:var(--gold);background:#fbf7eb}
+@media(max-width:600px){
+ .book-reader-modal{padding:0}
+ .book-reader-dialog{width:100%;height:100dvh;border-radius:0}
+ .book-reader-head{padding:10px}
+ .book-reader-head strong{font-size:14px}
+ .book-filter-btn,.nasheed-artist-btn{flex:1 1 auto;padding:9px 10px;font-size:13px}
+}
+
 </style>
 </head>
 <body>
@@ -210,27 +239,28 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
       <a href="#ruqyah">الرقية الشرعية</a>
       <a href="#radio-egypt">إذاعة القرآن</a>
       <a href="#azkar">الأذكار</a>
-      <a href="#written-sermons">الخطب المكتوبة</a>
-      <a href="#khutbah-encyclopedia">موسوعة الخطب</a>
-      <a href="#seerah-books">كتب السيرة</a>
+      <a href="#books-library">مكتبة الكتب</a>
       <a href="#kids">ركن الأطفال</a>
       <a href="#reminders">التنبيهات</a>
       <a href="#qibla">القبلة</a>
       <a href="#hadith-dua">السنة والدعاء</a>
       <a href="#daily-wird">وردي اليومي</a>
       <a href="#friday-wird">ورد الجمعة</a>
-      <a href="#library">المكتبة</a>
+      <a href="#nasheed">الإنشاد الديني</a>
+      <a href="#library">نفحات إيمانية</a>
     </nav>
   </div>
   <div class="hero-content">
     <div class="eyebrow">رفيقك إلى الطاعة والطمأنينة</div>
     <h1>اجعل يومك عامرًا بذكر الله</h1>
-    <p>مواقيت الصلاة، وقراءة المصحف كاملًا، والاستماع للقرآن والرقية الشرعية، وإذاعة القرآن الكريم، والأذكار والخطب والسيرة، وركن خاص للأطفال؛ في مكان واحد وبخطوات سهلة.</p>
+    <p>مواقيت الصلاة، والمصحف، والاستماع للقرآن والرقية والإنشاد الديني، ومكتبة للفقه والسيرة والتفسير، والأذكار وركن خاص للأطفال؛ في مكان واحد وبخطوات سهلة.</p>
     <div class="hero-actions">
       <a class="btn" href="#prayer">مواقيت الصلاة</a>
       <a class="btn ghost" href="#quran">استمع للقرآن</a>
       <a class="btn ghost" href="#ruqyah">الرقية الشرعية</a>
       <a class="btn ghost" href="#radio-egypt">إذاعة القرآن</a>
+      <a class="btn ghost" href="#books-library">مكتبة الكتب</a>
+      <a class="btn ghost" href="#nasheed">الإنشاد الديني</a>
     </div>
   </div>
 </header>
@@ -288,6 +318,26 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
       <div class="notice">القسم مخصص للاستماع فقط. التسجيلات المتاحة للشيوخ الخمسة الأولى تُجلب من مكتبة MP3Quran، أما الشيخ أبو العينين شعيشع فالمتاح حاليًا له 12 سورة على موقع السبيل، والشيخ عزت السيد راشد له خمس تلاوات تفتح صفحة الاستماع الخارجية مؤقتًا. يلزم الاتصال بالإنترنت للتشغيل.</div>
     </div>
   </section>
+
+
+  <section class="section" id="nasheed">
+    <div class="section-head"><div><h2>الإنشاد الديني والابتهالات</h2><p>استمع إلى مختارات من ابتهالات الشيخ نصر الدين طوبار والشيخ سيد النقشبندي من مشغّل داخل الموقع.</p></div></div>
+    <div class="card">
+      <div class="nasheed-artist-tabs" role="group" aria-label="اختر المنشد">
+        <button type="button" class="nasheed-artist-btn active" data-munshid="tobar" aria-pressed="true">نصر الدين طوبار</button>
+        <button type="button" class="nasheed-artist-btn" data-munshid="naqshbandi" aria-pressed="false">سيد النقشبندي</button>
+      </div>
+      <div class="nasheed-player-card">
+        <div class="icon">♫</div>
+        <div><strong id="nasheedNowTitle">اختر ابتهالًا للاستماع</strong><p class="small" id="nasheedStatus" role="status">اختر المنشد ثم اختر التسجيل.</p></div>
+      </div>
+      <audio id="nasheedAudio" controls preload="none" style="width:100%;margin:8px 0 14px"></audio>
+      <div id="nasheedTracks" class="list" aria-label="قائمة الابتهالات"></div>
+      <div class="notice" style="margin-top:12px">التسجيلات الصوتية تُشغّل من مشغّل زاد المسلم مباشرة، ويحتاج التشغيل إلى اتصال بالإنترنت.</div>
+    </div>
+  </section>
+
+
 
   
 
@@ -378,168 +428,98 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 
   
 
-  <section class="section" id="written-sermons">
-    <div class="section-head">
-      <div><h2>خطب جمعة مكتوبة كاملة</h2><p class="sermon-intro">خطب أصلية مكتوبة للقراءة والإلقاء، تشمل الخطبة الأولى والثانية، مع الاستشهاد بالقرآن الكريم والأحاديث الثابتة.</p></div>
-    </div>
-    <div class="sermon-grid">
-      <details class="card sermon-card">
-        <summary><span><span class="sermon-label">خطبة كاملة — العبادات</span>المحافظة على الصلاة: صلة العبد بربه</span></summary>
-        <div class="sermon-body">
-          <h4>الخطبة الأولى</h4>
-          <p>الحمد لله الذي فرض الصلاة على عباده، وجعلها صلةً بين العبد وربه، ونورًا للقلوب، وراحةً للنفوس، وسببًا لمغفرة الذنوب. نحمده سبحانه ونستعينه ونستغفره، ونعوذ بالله من شرور أنفسنا ومن سيئات أعمالنا. من يهده الله فلا مضل له، ومن يضلل فلا هادي له. وأشهد أن لا إله إلا الله وحده لا شريك له، وأشهد أن سيدنا محمدًا عبده ورسوله، صلى الله وسلم وبارك عليه وعلى آله وصحبه أجمعين.</p>
-          <p>أما بعد، فيا عباد الله، أوصيكم ونفسي بتقوى الله، واعلموا أن من أعظم ما يتقرب به العبد إلى مولاه المحافظة على الصلاة. قال الله تعالى: ﴿حَافِظُوا عَلَى الصَّلَوَاتِ وَالصَّلَاةِ الْوُسْطَى وَقُومُوا لِلَّهِ قَانِتِينَ﴾.</p>
-          <p>أيها المسلمون، الصلاة ليست حركات يؤديها الإنسان ثم ينصرف، وليست أمرًا نؤجله حتى نفرغ من أعمالنا؛ بل هي أعظم لقاء يتكرر في يوم المسلم، يقف فيه العبد بين يدي ربه، يشكو إليه ضعفه، ويسأله هدايته ورحمته. فإذا ضاقت بك الدنيا فافزع إلى الصلاة، وإذا أثقلتك الهموم فاسجد لربك، وإذا كثرت ذنوبك فلا تبتعد عن باب الله؛ بل ارجع إليه بقلب صادق.</p>
-          <p>وقد ضرب لنا رسول الله ﷺ مثلًا عظيمًا يبين أثر الصلوات الخمس، فقال: «أرأيتم لو أن نهرًا بباب أحدكم يغتسل منه كل يوم خمس مرات، هل يبقى من درنه شيء؟» قالوا: لا يبقى من درنه شيء، قال: «فذلك مثل الصلوات الخمس، يمحو الله بهن الخطايا». متفق عليه. فكما ينظف الماء الجسد، تطهر الصلاة القلب من آثار الذنوب إذا أداها العبد بإيمان وإخلاص.</p>
-          <p>عباد الله، ليست المشكلة أن نعرف أن الصلاة واجبة؛ فكلنا يعلم ذلك، ولكن الخطر أن نعرف ثم نتكاسل، وأن نسمع النداء ثم نؤخر، وأن تمر الأيام ونحن نعتذر لأنفسنا مرة بعد مرة. كم من إنسان يحافظ على مواعيد دنياه، فإذا جاء موعد الصلاة تساهل! وكم من بيت يسمع أهله الأذان، فلا يتحرك فيهم قلب ولا قدم! فليحاسب كل واحد منا نفسه: أين الفجر من يومي؟ وأين الصلاة من بيتي؟ وهل أعلّم أبنائي الصلاة بالقدوة والرحمة، أم أكتفي بالكلام؟</p>
-          <p>واعلموا أن الصلاة تنهى عن الفحشاء والمنكر، كما قال تعالى: ﴿إِنَّ الصَّلَاةَ تَنْهَىٰ عَنِ الْفَحْشَاءِ وَالْمُنْكَرِ﴾. فمن أراد أن يصلح قلبه ولسانه وبيته، فليبدأ بإصلاح صلاته. حافظوا عليها في أوقاتها، وأحسنوا الوضوء، وأقبلوا على الله فيها بقلوب حاضرة، ولا تجعلوا تقصير الأمس سببًا لترك اليوم؛ فمن قصّر فليتب، ومن انقطع فليعد، فباب الله مفتوح.</p>
-          <p>أقول قولي هذا، وأستغفر الله العظيم لي ولكم، فاستغفروه؛ إنه هو الغفور الرحيم.</p>
-          <h4>الخطبة الثانية</h4>
-          <p>الحمد لله رب العالمين، حمدًا كثيرًا طيبًا مباركًا فيه، وأشهد أن لا إله إلا الله وحده لا شريك له، وأشهد أن محمدًا عبده ورسوله، صلى الله عليه وعلى آله وصحبه وسلم تسليمًا كثيرًا.</p>
-          <p>أما بعد، فاتقوا الله عباد الله، واعلموا أن المحافظة على الصلاة تبدأ بقرار صادق، ثم بخطوات ثابتة: لا تؤخر صلاة عن وقتها بغير عذر، واجعل لأهل بيتك نصيبًا من التذكير والرفق، وإذا فاتتك صلاة فبادر إلى التوبة وأداء ما يلزمك، واسأل أهل العلم عما أشكل عليك. ولا تحتقر عملًا صالحًا تبدأ به اليوم؛ فرب خطوة صادقة يفتح الله بها على صاحبها أبواب الخير.</p>
-          <p>اللهم اجعلنا من المحافظين على الصلاة، الخاشعين فيها، القائمين بحقها. اللهم أعنا على ذكرك وشكرك وحسن عبادتك. اللهم أصلح قلوبنا وأعمالنا وبيوتنا، واهد أبناءنا وبناتنا، واجعل الصلاة قرة أعيننا. اللهم اغفر للمؤمنين والمؤمنات، الأحياء منهم والأموات، واشف مرضانا، وارحم موتانا، وفرّج هم المهمومين، ونفّس كرب المكروبين، واقض الدين عن المدينين، وارزقنا رزقًا حلالًا طيبًا.</p>
-          <p>وصلوا وسلموا على نبيكم محمد، فقد أمركم الله بذلك فقال: ﴿إِنَّ اللَّهَ وَمَلَائِكَتَهُ يُصَلُّونَ عَلَى النَّبِيِّ يَا أَيُّهَا الَّذِينَ آمَنُوا صَلُّوا عَلَيْهِ وَسَلِّمُوا تَسْلِيمًا﴾. اللهم صل وسلم وبارك على سيدنا محمد وعلى آله وصحبه أجمعين، وأقم الصلاة.</p>
-          <div class="sermon-source">التوثيق: سورة البقرة (238)، وسورة العنكبوت (45)، وحديث النهر في صحيح البخاري (528) وصحيح مسلم (667).</div>
-        </div>
-      </details>
-
-      <details class="card sermon-card">
-        <summary><span><span class="sermon-label">خطبة كاملة — التوبة والرجاء</span>لا تؤجل التوبة: باب الله مفتوح</span></summary>
-        <div class="sermon-body">
-          <h4>الخطبة الأولى</h4>
-          <p>الحمد لله الغفور الرحيم، يقبل التوبة عن عباده ويعفو عن السيئات، ويفرح برجوع عبده إليه، نحمده سبحانه ونشكره، ونستغفره ونتوب إليه. وأشهد أن لا إله إلا الله وحده لا شريك له، واسع المغفرة، عظيم الرحمة، وأشهد أن سيدنا محمدًا عبده ورسوله، دلّ الأمة على طريق النجاة، صلى الله وسلم وبارك عليه وعلى آله وصحبه.</p>
-          <p>أما بعد، فيا عباد الله، اتقوا الله، واعلموا أن كل ابن آدم خطّاء، وأن خير الخطائين التوابون. لا يوجد إنسان لم يخطئ، ولكن الخطر ليس في وقوع الذنب وحده؛ إنما الخطر أن يصر الإنسان عليه، وأن يألفه قلبه، وأن يطول ابتعاده عن الله حتى يظن أن الرجوع لم يعد ممكنًا.</p>
-          <p>اسمعوا إلى نداء الرحمة من رب العالمين، يقول سبحانه: ﴿قُلْ يَا عِبَادِيَ الَّذِينَ أَسْرَفُوا عَلَىٰ أَنْفُسِهِمْ لَا تَقْنَطُوا مِنْ رَحْمَةِ اللَّهِ إِنَّ اللَّهَ يَغْفِرُ الذُّنُوبَ جَمِيعًا إِنَّهُ هُوَ الْغَفُورُ الرَّحِيمُ﴾. تأملوا: لم يقل يا أصحاب الذنوب الصغيرة، بل قال: ﴿الَّذِينَ أَسْرَفُوا عَلَىٰ أَنْفُسِهِمْ﴾، ثم نهاهم عن القنوط، وفتح لهم باب الرجاء.</p>
-          <p>عباد الله، لا تقل: سأعود إلى الله عندما أكبر، ولا تقل: سأترك المعصية عندما تتحسن ظروفي؛ فمن يضمن لك غدًا؟ وكم من إنسان خرج من بيته ولم يعد، وكم من صحيح نام ولم يستيقظ! لا تجعل الشيطان يخدعك بكلمة «بعد ذلك»، فالعمر لا ينتظر أحدًا، والتوبة لا تحتاج إلى موعد، وإنما تحتاج إلى قلب صادق يقول: يا رب، أخطأت فاغفر لي، وضعفت فقوّني، وابتعدت فردّني إليك ردًا جميلًا.</p>
-          <p>وقد أخبرنا النبي ﷺ أن الله أشد فرحًا بتوبة عبده من رجل وجد راحلته بعد أن فقدها في أرض مهلكة، كما في صحيح مسلم. فكيف ييأس عبد من رب هذا شأنه؟ ولكن التوبة الصادقة ليست كلمة باللسان فقط؛ بل يترك العبد الذنب، ويندم على ما مضى، ويعزم ألا يعود إليه، وإذا كان الذنب متعلقًا بحق إنسان ردّ إليه حقه أو طلب مسامحته بقدر استطاعته.</p>
-          <p>يا من قصّرت في الصلاة، ابدأ من الصلاة القادمة. ويا من ظلم إنسانًا، بادر برد المظلمة. ويا من قطعت رحمًا، افتح باب الصلة. ويا من أطلق لسانه في أعراض الناس، أمسك لسانك واستغفر لمن ظلمته، وأصلح ما استطعت. لا تحتقر دمعة ندم، ولا ركعتين في جوف الليل، ولا صدقة خفية؛ فقد تكون بداية طريق جديد مع الله.</p>
-          <p>أقول قولي هذا، وأستغفر الله العظيم لي ولكم، فاستغفروه وتوبوا إليه؛ إنه هو التواب الرحيم.</p>
-          <h4>الخطبة الثانية</h4>
-          <p>الحمد لله الذي جعل التوبة حياةً للقلوب، وفتح لعباده أبواب رحمته، وأشهد أن لا إله إلا الله، وأشهد أن محمدًا عبده ورسوله، صلى الله عليه وعلى آله وصحبه وسلم.</p>
-          <p>عباد الله، لا تجعلوا التوبة أمنية مؤجلة؛ جدّدوا توبتكم كل يوم، وأكثروا من الاستغفار، وأحسنوا اختيار الصحبة، وابتعدوا عن الأسباب التي تعيدكم إلى الذنب. ومن صدق مع الله أعانه الله، ومن أقبل عليه لم يخيّبه. قال تعالى: ﴿يَا أَيُّهَا الَّذِينَ آمَنُوا تُوبُوا إِلَى اللَّهِ تَوْبَةً نَصُوحًا﴾.</p>
-          <p>اللهم تب علينا توبة نصوحًا، واغسل حوبتنا، واستر عيوبنا، وآمن روعاتنا، واغفر ذنوبنا، ما علمنا منها وما لم نعلم. اللهم لا تجعل في قلوبنا إصرارًا على معصية، ولا يأسًا من رحمتك. اللهم ردّنا إليك ردًا جميلًا، وأصلح شباب المسلمين ونساءهم، واهد أبناءنا، واشف مرضانا، وارحم موتانا، وفرّج كروبنا، واقض حوائجنا، واختم لنا بخير.</p>
-          <p>وصلوا وسلموا على رسول الله ﷺ، اللهم صل وسلم وبارك على سيدنا محمد وعلى آله وصحبه أجمعين، وأقم الصلاة.</p>
-          <div class="sermon-source">التوثيق: سورة الزمر (53)، وسورة التحريم (8)، وحديث فرح الله بتوبة عبده في صحيح مسلم (2747).</div>
-        </div>
-      </details>
-
-      <details class="card sermon-card">
-        <summary><span><span class="sermon-label">خطبة كاملة — الأسرة والأخلاق</span>بر الوالدين: باب من أبواب الجنة</span></summary>
-        <div class="sermon-body">
-          <h4>الخطبة الأولى</h4>
-          <p>الحمد لله الذي أمر بالإحسان، وجعل بر الوالدين من أعظم القربات، وقرن حقهما بحقه سبحانه، نحمده ونستعينه ونستغفره، ونعوذ به من شرور أنفسنا وسيئات أعمالنا. وأشهد أن لا إله إلا الله وحده لا شريك له، وأشهد أن سيدنا محمدًا عبده ورسوله، صلى الله وسلم عليه وعلى آله وصحبه أجمعين.</p>
-          <p>أما بعد، فيا عباد الله، اتقوا الله في أنفسكم، واتقوه في والديكم؛ فإن الوالدين باب عظيم من أبواب الرحمة، وحقهما ليس كلمة تقال في مناسبة، ولا هدية تقدم في يوم من الأيام، وإنما هو إحسان وصبر ورحمة وسؤال ودعاء، في حياتهما وبعد موتهما.</p>
-          <p>قال الله تعالى: ﴿وَقَضَىٰ رَبُّكَ أَلَّا تَعْبُدُوا إِلَّا إِيَّاهُ وَبِالْوَالِدَيْنِ إِحْسَانًا إِمَّا يَبْلُغَنَّ عِنْدَكَ الْكِبَرَ أَحَدُهُمَا أَوْ كِلَاهُمَا فَلَا تَقُلْ لَهُمَا أُفٍّ وَلَا تَنْهَرْهُمَا وَقُلْ لَهُمَا قَوْلًا كَرِيمًا﴾. تأملوا كيف نهانا الله حتى عن كلمة تضجر صغيرة، فكيف بمن يرفع صوته؟ وكيف بمن يكسر قلب أمه أو أبيه؟ وكيف بمن يتركهما في حاجتهما ثم لا يسأل عنهما؟</p>
-          <p>أيها المسلمون، قد يتعب الأب ويخفي تعبه، وقد تسهر الأم ولا تخبر أحدًا بسهرها، وقد يكبر الوالدان فتضعف قوتهما ويحتاجان إلى من يصبر على تكرار الكلام، وعلى بطء الحركة، وعلى كثرة الطلب. فلا تجعلوا كبرهما عبئًا تتضجرون منه؛ تذكروا يوم كنتم صغارًا، لا تملكون لأنفسكم نفعًا ولا دفعًا، فكانا يصبران ويرحمان ويقومان على أمركم.</p>
-          <p>وقال رسول الله ﷺ: «رغم أنفه، ثم رغم أنفه، ثم رغم أنفه». قيل: من يا رسول الله؟ قال: «من أدرك والديه عند الكبر، أحدهما أو كليهما، ثم لم يدخل الجنة». رواه مسلم. إنه تحذير عظيم لمن وجد أبويه أو أحدهما في الكبر، ثم ضيّع هذه الفرصة ولم يجعل برهما طريقًا إلى الجنة.</p>
-          <p>ومن البر أن تخاطبهما بلين، وأن تسمع لهما، وأن تقضي حاجتهما بقدر استطاعتك، وأن تدخل السرور عليهما، وألا تذكر فضلك عليهما؛ فما تقدمه اليوم لا يساوي شيئًا أمام ما قدماه لك. وإذا اختلفت معهما في أمر، فاجمع بين طاعة الله وحسن الأدب، ولا تجعل الخلاف سببًا للعقوق أو الإهانة.</p>
-          <p>ومن كان والداه قد ماتا، فلا يغلق باب البر في وجهه؛ فليكثر من الدعاء لهما، وليستغفر لهما، وليصل رحمهما، وليكرم من كانا يحبانه، وليتصدق عنهما بما تيسر. فالمحبة الصادقة لا تنتهي بالموت، والدعاء باب خير لا ينقطع.</p>
-          <p>أقول قولي هذا، وأستغفر الله العظيم لي ولكم، فاستغفروه؛ إنه هو الغفور الرحيم.</p>
-          <h4>الخطبة الثانية</h4>
-          <p>الحمد لله حمدًا يليق بجلال وجهه وعظيم سلطانه، وأشهد أن لا إله إلا الله، وأشهد أن محمدًا عبده ورسوله، صلى الله عليه وعلى آله وصحبه وسلم.</p>
-          <p>عباد الله، فلينظر كل واحد منا اليوم: هل يحتاج أبوه إلى زيارة؟ هل تنتظر أمه اتصالًا أو كلمة طيبة؟ هل هناك حق تأخرنا في أدائه، أو قلب كسرناه بكلمة؟ لا تؤجلوا الإحسان؛ فقد يأتي يوم نتمنى فيه مكالمة واحدة أو دعوة واحدة فلا نجد إلى ذلك سبيلًا. اغتنموا وجود والديكم، واطلبوا رضاهما فيما يرضي الله، وأحسنوا إليهما في السر والعلن.</p>
-          <p>اللهم اغفر لآبائنا وأمهاتنا، وارحمهما كما ربيانا صغارًا. اللهم من كان منهما حيًا فألبسه ثوب الصحة والعافية، وأطل عمره على طاعتك، ومن كان منهما ميتًا فأنزل على قبره نورًا ورحمة، واجزه عنّا خير الجزاء. اللهم أعنا على برهما، ولا تجعلنا من العاقين، وأصلح أبناءنا وبيوتنا، واجعلنا مفاتيح للخير مغاليق للشر.</p>
-          <p>وصلوا وسلموا على نبي الرحمة محمد ﷺ، اللهم صل وسلم وبارك عليه وعلى آله وصحبه أجمعين، وأقم الصلاة.</p>
-          <div class="sermon-source">التوثيق: سورة الإسراء (23–24)، وسورة لقمان (14)، وحديث بر الوالدين في صحيح مسلم (2551).</div>
-        </div>
-      </details>
-    </div>
-    <p class="small" style="margin-top:12px">هذه نصوص أصلية للموقع، ويمكن تطويرها وإضافة خطب أخرى. راجع النصوص والتخريج عند إعداد أي خطبة للإلقاء.</p>
-  </section>
-
   
-
-  <section class="section" id="khutbah-encyclopedia">
+  <section class="section" id="books-library">
     <div class="section-head">
-      <div><h2>فهرس موضوعات خطب الجمعة</h2><p>ابحث عن موضوعات إضافية ومحاور تساعدك في إعداد خطبة جديدة.</p></div>
+      <div><h2>مكتبة الكتب الإسلامية</h2><p>مكتبة واحدة تضم كتب الفقه والسيرة النبوية والتفسير، وتقرأ الكتاب داخل زاد المسلم دون الانتقال إلى صفحة أخرى.</p></div>
     </div>
     <div class="card">
-      <div class="khutbah-tools">
-        <input id="khutbahSearch" type="search" placeholder="ابحث عن موضوع الخطبة..." aria-label="ابحث في موضوعات خطب الجمعة">
-        <select id="khutbahCategory" aria-label="اختر مجال الخطبة">
-          <option value="">كل المجالات</option>
-          <option value="العقيدة">العقيدة والإيمان</option>
-          <option value="العبادات">العبادات والطاعات</option>
-          <option value="الأخلاق">الأخلاق والسلوك</option>
-          <option value="الأسرة">الأسرة والتربية</option>
-          <option value="المجتمع">المجتمع والحقوق</option>
-          <option value="الآخرة">الموت والآخرة</option>
-          <option value="السيرة">السيرة النبوية</option>
-        </select>
+      <div class="book-library-filters" role="group" aria-label="تصنيف الكتب">
+        <button type="button" class="book-filter-btn active" data-book-filter="all" aria-pressed="true">كل الكتب</button>
+        <button type="button" class="book-filter-btn" data-book-filter="fiqh" aria-pressed="false">كتب الفقه</button>
+        <button type="button" class="book-filter-btn" data-book-filter="seerah" aria-pressed="false">كتب السيرة</button>
+        <button type="button" class="book-filter-btn" data-book-filter="tafsir" aria-pressed="false">كتب التفسير</button>
       </div>
-      <p class="small" id="khutbahCount" aria-live="polite">موضوعات مقترحة للخطباء.</p>
-      <div class="grid" id="khutbahTopics"></div>
-      <div class="library-links">
-        <a class="btn green" href="https://awkafonline.gov.eg/friday-sermon" target="_blank" rel="noopener noreferrer">أرشيف خطب وزارة الأوقاف المصرية ↗</a>
-        <a class="btn light" href="https://e-quran.com/khutab/" target="_blank" rel="noopener noreferrer">مكتبة الخطب المكتوبة ↗</a>
+      <p class="small" id="bookLibraryCount" aria-live="polite">كل الكتب المتاحة في المكتبة.</p>
+      <div class="book-grid" id="bookLibraryGrid">
+        <article class="card book-card" data-book-category="fiqh">
+          <div class="icon">📘</div><h3>الفقه الميسر في ضوء الكتاب والسنة</h3>
+          <div class="book-author">وزارة الشؤون الإسلامية والدعوة والإرشاد</div>
+          <p>مدخل واضح إلى أبواب الطهارة والصلاة وأحكام العبادات، مناسب للقراءة والتعلّم.</p>
+          <div class="book-level">كتاب تمهيدي</div>
+          <button class="btn green book-open" type="button" data-book-id="FP93430" data-book-title="الفقه الميسر في ضوء الكتاب والسنة">اقرأ داخل الموقع</button>
+        </article>
+        <article class="card book-card" data-book-category="fiqh">
+          <div class="icon">📗</div><h3>منهاج المسلم</h3>
+          <div class="book-author">أبو بكر جابر الجزائري</div>
+          <p>كتاب جامع في العقيدة والآداب والعبادات والمعاملات، مرتب في أبواب سهلة الرجوع إليها.</p>
+          <div class="book-level">مرجع عام للمسلم</div>
+          <button class="btn green book-open" type="button" data-book-id="FP170221" data-book-title="منهاج المسلم">اقرأ داخل الموقع</button>
+        </article>
+        <article class="card book-card" data-book-category="fiqh">
+          <div class="icon">📙</div><h3>المغني</h3>
+          <div class="book-author">الإمام ابن قدامة المقدسي</div>
+          <p>من الموسوعات الفقهية المعروفة، يعرض المسائل وأدلتها وأقوال أهل العلم.</p>
+          <div class="book-level">مرجع فقهي موسّع</div>
+          <button class="btn green book-open" type="button" data-book-id="FPelmoghni" data-book-title="المغني — ابن قدامة">اقرأ داخل الموقع</button>
+        </article>
+
+        <article class="card book-card" data-book-category="seerah">
+          <div class="icon">📘</div><h3>الرحيق المختوم</h3>
+          <div class="book-author">صفي الرحمن المباركفوري</div>
+          <p>عرض مرتب لأحداث السيرة النبوية من أحوال العرب قبل البعثة إلى وفاة النبي ﷺ.</p>
+          <div class="book-level">مناسب للمبتدئ</div>
+          <button class="btn green book-open" type="button" data-book-id="waq34663" data-book-title="الرحيق المختوم">اقرأ داخل الموقع</button>
+        </article>
+        <article class="card book-card" data-book-category="seerah">
+          <div class="icon">📗</div><h3>السيرة النبوية — ابن هشام</h3>
+          <div class="book-author">عبد الملك بن هشام</div>
+          <p>من أمهات المصادر التراثية في أخبار السيرة ومغازي النبي ﷺ.</p>
+          <div class="book-level">مصدر تراثي موسّع</div>
+          <button class="btn green book-open" type="button" data-book-id="FP30626" data-book-title="السيرة النبوية — ابن هشام">اقرأ داخل الموقع</button>
+        </article>
+        <article class="card book-card" data-book-category="seerah">
+          <div class="icon">📙</div><h3>زاد المعاد في هدي خير العباد</h3>
+          <div class="book-author">ابن قيم الجوزية</div>
+          <p>يتناول هدي النبي ﷺ في عباداته ومعاملاته وأخلاقه وسفره وغزواته.</p>
+          <div class="book-level">للقراءة المتعمقة</div>
+          <button class="btn green book-open" type="button" data-book-id="80184s" data-book-title="زاد المعاد في هدي خير العباد">اقرأ داخل الموقع</button>
+        </article>
+        <article class="card book-card" data-book-category="seerah">
+          <div class="icon">📕</div><h3>الشمائل المحمدية</h3>
+          <div class="book-author">الإمام الترمذي</div>
+          <p>كتاب في صفات النبي ﷺ وأخلاقه ولباسه وطعامه وعبادته وتواضعه.</p>
+          <div class="book-level">في معرفة شمائل النبي ﷺ</div>
+          <button class="btn green book-open" type="button" data-book-id="3840waq" data-book-title="الشمائل المحمدية">اقرأ داخل الموقع</button>
+        </article>
+
+        <article class="card book-card" data-book-category="tafsir">
+          <div class="icon">📘</div><h3>تفسير القرآن العظيم — ابن كثير</h3>
+          <div class="book-author">الحافظ ابن كثير</div>
+          <p>تفسير مشهور يجمع الآيات والأحاديث والآثار وأقوال أهل العلم في بيان معاني القرآن.</p>
+          <div class="book-level">تفسير موسّع</div>
+          <button class="btn green book-open" type="button" data-book-id="72411" data-book-title="تفسير القرآن العظيم — ابن كثير">اقرأ داخل الموقع</button>
+        </article>
+        <article class="card book-card" data-book-category="tafsir">
+          <div class="icon">📗</div><h3>تيسير الكريم الرحمن — تفسير السعدي</h3>
+          <div class="book-author">الشيخ عبد الرحمن بن ناصر السعدي</div>
+          <p>تفسير واضح العبارة، يقرّب معاني الآيات ويبرز الهدايات والفوائد.</p>
+          <div class="book-level">مناسب للقراءة العامة</div>
+          <button class="btn green book-open" type="button" data-book-id="WAQ100585" data-book-title="تفسير السعدي">اقرأ داخل الموقع</button>
+        </article>
+        <article class="card book-card" data-book-category="tafsir">
+          <div class="icon">📙</div><h3>جامع البيان — تفسير الطبري</h3>
+          <div class="book-author">الإمام ابن جرير الطبري</div>
+          <p>من أمهات كتب التفسير بالمأثور، يعرض الروايات وأقوال السلف في تفسير الآيات.</p>
+          <div class="book-level">مرجع تراثي موسّع</div>
+          <button class="btn green book-open" type="button" data-book-id="FP59561" data-book-title="جامع البيان — تفسير الطبري">اقرأ داخل الموقع</button>
+        </article>
       </div>
-      <p class="small" style="margin-top:10px">للاستفادة من نصوص جاهزة، انتقل إلى قسم «خطب جمعة مكتوبة كاملة» أعلى هذه الصفحة. وتحقق من تخريج الأحاديث والآثار قبل الإلقاء.</p>
+      <div class="notice" style="margin-top:14px">تُفتح الكتب داخل نافذة قراءة في زاد المسلم، وتُحمّل صفحاتها من أرشيف الكتب الرقمي؛ لذلك يلزم الاتصال بالإنترنت، لكنك لن تنتقل إلى صفحة خارجية لمجرد فتح الكتاب.</div>
     </div>
   </section>
 
-  
-
-  <section class="section" id="seerah-books">
-    <div class="section-head">
-      <div><h2>مكتبة كتب السيرة النبوية</h2><p>كتب تراثية ومعاصرة للتعرّف على حياة النبي ﷺ، وأحداث الدعوة، وشمائله وهديه.</p></div>
-    </div>
-    <div class="book-grid">
-      <article class="card book-card">
-        <div class="icon">📘</div><h3>الرحيق المختوم</h3>
-        <div class="book-author">صفي الرحمن المباركفوري</div>
-        <p>عرض مرتب وميسر لأحداث السيرة من أحوال العرب قبل البعثة حتى وفاة النبي ﷺ. مناسب كبداية لمن يريد قراءة السيرة كاملة.</p>
-        <div class="book-level">مناسب للمبتدئ</div>
-        <a class="btn green" href="https://www.waqfeya.net/books/الرحيق-المختوم--ARRAHEEQ-ALMAKHTUM-e7cfdd10db504f92aad4528b0b41065c" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-      <article class="card book-card">
-        <div class="icon">📗</div><h3>السيرة النبوية — سيرة ابن هشام</h3>
-        <div class="book-author">عبد الملك بن هشام</div>
-        <p>من أشهر المصادر المبكرة في السيرة، جمع فيه ابن هشام روايات سيرة ابن إسحاق وهذّبها.</p>
-        <div class="book-level">مصدر تراثي موسّع</div>
-        <a class="btn green" href="https://www.waqfeya.net/books/السيرة-النبوية-سيرة-ابن-هشام-ط-الحلبي-f6efd41bb75a43e2a000ece33188d397" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-      <article class="card book-card">
-        <div class="icon">📙</div><h3>زاد المعاد في هدي خير العباد</h3>
-        <div class="book-author">ابن قيم الجوزية</div>
-        <p>يتناول هدي النبي ﷺ في عباداته ومعاملاته وأخلاقه وسفره وغزواته، ويجمع بين السيرة والفقه.</p>
-        <div class="book-level">للقراءة المتعمقة</div>
-        <a class="btn green" href="https://waqfeya.net/books/زاد-المعاد-في-هدي-خير-العباد-ت-الأرناؤوط-36a130f089414edea8e9cdb95b71ddfe" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-      <article class="card book-card">
-        <div class="icon">📕</div><h3>الشمائل المحمدية</h3>
-        <div class="book-author">الإمام الترمذي</div>
-        <p>كتاب في صفات النبي ﷺ الخَلقية والخُلقية، ولباسه وطعامه وعبادته وتواضعه ومعاملته.</p>
-        <div class="book-level">في محبة النبي ومعرفة شمائله</div>
-        <a class="btn green" href="https://waqfeya.net/books/الشمائل-المحمدية-ت-الدعاس/d609fc72e24e433d8f1c2f1a8d30d0ae" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-      <article class="card book-card">
-        <div class="icon">📒</div><h3>فقه السيرة</h3>
-        <div class="book-author">الشيخ محمد الغزالي</div>
-        <p>قراءة تربوية في أحداث السيرة، تستخرج الدروس والمعاني والعبر من مواقف حياة النبي ﷺ.</p>
-        <div class="book-level">للتدبر واستخراج الدروس</div>
-        <a class="btn green" href="https://waqfeya.net/books/فقه-السيرة-ت-الألباني/399aa4825a1f4bd5ab19498c71bfb3fd" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-      <article class="card book-card">
-        <div class="icon">📚</div><h3>السيرة النبوية لابن كثير</h3>
-        <div class="book-author">الحافظ ابن كثير</div>
-        <p>قسم السيرة من كتاب البداية والنهاية، وفيه سرد تاريخي لأحداث السيرة النبوية.</p>
-        <div class="book-level">مصدر تراثي</div>
-        <a class="btn green" href="https://www.waqfeya.net/books/السيرة-النبوية-fe65ca402c8d45a2a0067da412adbed1" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-      <article class="card book-card">
-        <div class="icon">📖</div><h3>البداية والنهاية — قسم السيرة</h3>
-        <div class="book-author">الحافظ ابن كثير</div>
-        <p>موسوعة تاريخية واسعة، وتضم أجزاءً تتناول السيرة النبوية وأحداثها وما بعدها.</p>
-        <div class="book-level">مرجع موسّع</div>
-        <a class="btn green" href="https://waqfeya.net/books/البداية-والنهاية-ت-التركي-6e3d24f1f63a4057ad76457c02a3eab5" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميله ↗</a>
-      </article>
-    </div>
-    <div class="notice">روابط الكتب تفتح صفحات المكتبة الوقفية؛ قد تتوفر القراءة أو ملفات PDF بحسب النسخة. يُستحسن الرجوع إلى طبعة محققة، ومقارنة الروايات عند دراسة أحداث السيرة.</div>
-  </section>
-
-  
-
-  <section class="section" id="kids">
+<section class="section" id="kids">
     <div class="section-head"><div><h2>ركن الأطفال — نتعلم ونمرح</h2><p>حكايات سهلة وخطوات مبسطة تساعد أطفالنا على تعلم الوضوء والصلاة</p></div></div>
     <div class="grid">
       <details class="card kids-card">
@@ -742,6 +722,17 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 
   </main>
 
+
+
+<div class="book-reader-modal" id="bookReaderModal" aria-hidden="true">
+  <div class="book-reader-dialog" role="dialog" aria-modal="true" aria-labelledby="bookReaderTitle">
+    <div class="book-reader-head">
+      <div><strong id="bookReaderTitle">قارئ الكتب</strong><span>القراءة داخل موقع زاد المسلم</span></div>
+      <button type="button" class="btn light" id="closeBookReader">إغلاق ✕</button>
+    </div>
+    <iframe id="bookReaderFrame" title="قارئ الكتاب" loading="lazy" allowfullscreen></iframe>
+  </div>
+</div>
 
 <button type="button" id="mushafFloatingButton" class="mushaf-floating-button" aria-controls="mushafContent" aria-expanded="false" title="فتح المصحف">
   <span aria-hidden="true">۞</span><span id="mushafFloatingLabel">المصحف</span>
@@ -1297,52 +1288,101 @@ $('openKahf').addEventListener('click',()=>{
 if(new Date().getDay()===5){$('fridayBadge').textContent='اليوم يوم الجمعة';$('fridayBadge').style.background='#f6edd9';$('fridayBadge').style.color='#87652a';}
 
  
-// فهرس موسوعة خطب الجمعة: بحث وتصنيف داخل الموقع
-const khutbahData = [
- ['التوحيد وإخلاص العبادة','العقيدة','ترسيخ معنى عبادة الله وحده والتحذير من الشرك والرياء.','معنى التوحيد؛ إخلاص النية؛ أثر التوحيد في حياة المسلم'],
- ['الإيمان بالله وحسن الظن به','العقيدة','تقوية اليقين بالله، والجمع بين حسن الظن به والأخذ بالأسباب.','أسماء الله وصفاته؛ التوكل؛ الرجاء والخوف'],
- ['الثبات في زمن الفتن','العقيدة','وسائل الثبات عند كثرة الشبهات والشهوات وتقلب الأحوال.','الاعتصام بالقرآن والسنة؛ الصحبة الصالحة؛ الدعاء بالثبات'],
- ['المحافظة على الصلاة','العبادات','مكانة الصلاة وخطر التهاون بها وأثرها في إصلاح القلب والسلوك.','الصلاة عماد الدين؛ المحافظة على الوقت؛ الخشوع'],
- ['التوبة الصادقة والرجوع إلى الله','العبادات','فتح باب الرجاء، وبيان شروط التوبة وعدم تأجيلها.','الإقلاع عن الذنب؛ الندم؛ رد الحقوق؛ الاستقامة بعد التوبة'],
- ['القرآن الكريم نور الحياة','العبادات','صلة المسلم بالقرآن تلاوةً وتدبرًا وعملاً.','هجر القرآن؛ التدبر؛ العمل بالأوامر واجتناب النواهي'],
- ['اغتنام العمر قبل فوات الأوان','الآخرة','تذكير الناس بقصر الدنيا والاستعداد للقاء الله.','قيمة الوقت؛ المبادرة بالطاعات؛ محاسبة النفس'],
- ['الموت والقبر والاستعداد للآخرة','الآخرة','تذكير مؤثر بالرحيل والعمل الصالح من غير تهويل ولا يأس.','حقيقة الموت؛ العمل الباقي؛ حقوق العباد'],
- ['الجنة والنار وأثر الإيمان بالآخرة','الآخرة','ربط القلب بالآخرة، وتحفيز النفس على الطاعة وترك المعصية.','نعيم الجنة؛ التحذير من النار؛ التوازن بين الخوف والرجاء'],
- ['بر الوالدين','الأسرة','بيان فضل بر الوالدين وصور البر في حياتهما وبعد وفاتهما.','خفض الجناح؛ الكلمة الطيبة؛ الدعاء لهما؛ صلة أرحامهما'],
- ['تربية الأبناء على الإيمان والصلاة','الأسرة','مسؤولية الأسرة في التربية بالقدوة والرفق والمتابعة.','القدوة الحسنة؛ تعليم الصلاة؛ الحوار والرحمة'],
- ['الأسرة المسلمة والمودة والرحمة','الأسرة','بناء بيت مستقر على حسن العشرة والحقوق والرحمة.','المعاشرة بالمعروف؛ حفظ الأسرار؛ حل الخلافات'],
- ['حفظ اللسان من الغيبة والنميمة','الأخلاق','خطورة الكلمة وأثرها في الأفراد والمجتمع.','الغيبة؛ النميمة؛ الكذب؛ الصمت عن الشر'],
- ['الصدق والأمانة','الأخلاق','إحياء خلق الصدق والأمانة في البيع والعمل والعلاقات.','الصدق مع الله؛ الأمانة في العمل؛ الوفاء بالعهد'],
- ['التواضع وترك الكبر','الأخلاق','التحذير من الكبر وبيان منزلة التواضع وحسن الخلق.','التواضع؛ قبول النصيحة؛ احترام الناس'],
- ['الصبر عند البلاء والشكر عند الرخاء','الأخلاق','تربية النفس على الصبر والشكر والرضا بقضاء الله.','الصبر الجميل؛ شكر النعم؛ عدم اليأس'],
- ['حقوق الجار','المجتمع','بيان حق الجار وصور الإحسان إليه والتحذير من إيذائه.','كف الأذى؛ تفقد المحتاج؛ حفظ الخصوصية'],
- ['إتقان العمل والكسب الحلال','المجتمع','ربط العبادة بالأمانة والإتقان في العمل وطلب الرزق الحلال.','الإتقان؛ تحري الحلال؛ الوفاء بالعقود'],
- ['الرحمة بالضعفاء والمحتاجين','المجتمع','الحث على التكافل والصدقة وجبر الخواطر.','اليتيم؛ الفقير؛ المريض؛ قضاء حوائج الناس'],
- ['وحدة المسلمين وترك التعصب','المجتمع','الدعوة إلى الأخوة وإصلاح ذات البين واجتناب الفرقة.','الأخوة الإيمانية؛ العفو؛ إصلاح الخصومات'],
- ['النبي ﷺ قدوة ورحمة للعالمين','السيرة','التعريف بأخلاق النبي ورحمته وكيفية اتباع سنته.','رحمته بالصغير؛ عفوه؛ تواضعه؛ حسن معاملته'],
- ['الهجرة النبوية ودروس التوكل','السيرة','استخراج معاني التخطيط والصبر والتضحية والثقة بالله من الهجرة.','الأخذ بالأسباب؛ الصحبة؛ التضحية؛ اليقين بنصر الله'],
- ['غزوة بدر ودروس النصر والثبات','السيرة','التعرف على أسباب النصر الحقيقية ودروس الإيمان والثبات.','الشورى؛ الدعاء؛ الطاعة؛ الثبات'],
- ['فتح مكة والعفو عند المقدرة','السيرة','إبراز عفو النبي ﷺ وتواضعه عند النصر.','العفو؛ ترك الانتقام؛ شكر النعمة؛ جمع القلوب'],
- ['محبة النبي ﷺ واتباع سنته','السيرة','بيان أن المحبة الصادقة تظهر في الاتباع والعمل لا في الدعوى وحدها.','تعظيم السنة؛ الصلاة عليه؛ الاقتداء بأخلاقه']
-];
-const khutbahBox = $('khutbahTopics');
-if (khutbahBox) {
- const normalizeSearch = value => (value || '').toLocaleLowerCase('ar').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').trim();
- function renderKhutbahTopics() {
-  const query = normalizeSearch($('khutbahSearch').value);
-  const category = $('khutbahCategory').value;
-  const filtered = khutbahData.filter(item => (!category || item[1] === category) && (!query || normalizeSearch(item.join(' ')).includes(query)));
-  khutbahBox.innerHTML = filtered.map(item => {
-   const points = item[3].split('؛').map(point => '<li>'+point+'</li>').join('');
-   return '<article class="card khutbah-card"><span class="topic-tag">'+item[1]+'</span><h3>'+item[0]+'</h3><p>'+item[2]+'</p><details><summary>محاور مقترحة للخطبة</summary><ul>'+points+'</ul></details></article>';
-  }).join('');
-  $('khutbahCount').textContent = 'عدد الموضوعات الظاهرة: ' + filtered.length + ' من ' + khutbahData.length;
-  if (!filtered.length) khutbahBox.innerHTML = '<div class="card"><p>لا توجد نتائج مطابقة. جرّب كلمة بحث أخرى أو اختر كل المجالات.</p></div>';
- }
- $('khutbahSearch').addEventListener('input', renderKhutbahTopics);
- $('khutbahCategory').addEventListener('change', renderKhutbahTopics);
- renderKhutbahTopics();
+
+ // تصفية مكتبة الكتب وفتح القارئ داخل الموقع
+const bookFilterButtons=[...document.querySelectorAll('[data-book-filter]')];
+const bookCards=[...document.querySelectorAll('[data-book-category]')];
+function filterBookLibrary(category){
+ bookFilterButtons.forEach(button=>{
+  const active=button.dataset.bookFilter===category;
+  button.classList.toggle('active',active);
+  button.setAttribute('aria-pressed',String(active));
+ });
+ let visible=0;
+ bookCards.forEach(card=>{
+  const show=category==='all'||card.dataset.bookCategory===category;
+  card.hidden=!show;
+  if(show)visible++;
+ });
+ const count=$('bookLibraryCount');
+ if(count)count.textContent='عدد الكتب الظاهرة: '+visible+' من '+bookCards.length;
 }
+bookFilterButtons.forEach(button=>button.addEventListener('click',()=>filterBookLibrary(button.dataset.bookFilter)));
+filterBookLibrary('all');
+
+const bookModal=$('bookReaderModal');
+const bookFrame=$('bookReaderFrame');
+function closeBookReader(){
+ if(!bookModal)return;
+ bookModal.classList.remove('active');
+ bookModal.setAttribute('aria-hidden','true');
+ if(bookFrame)bookFrame.src='about:blank';
+ document.body.style.overflow='';
+}
+document.querySelectorAll('.book-open').forEach(button=>{
+ button.addEventListener('click',()=>{
+  const id=button.dataset.bookId;
+  if(!id||!bookModal||!bookFrame)return;
+  $('bookReaderTitle').textContent=button.dataset.bookTitle||'قارئ الكتب';
+  bookFrame.src='https://archive.org/embed/'+encodeURIComponent(id)+'?ui=embed';
+  bookFrame.title='قراءة '+(button.dataset.bookTitle||'الكتاب');
+  bookModal.classList.add('active');
+  bookModal.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+ });
+});
+$('closeBookReader').addEventListener('click',closeBookReader);
+bookModal.addEventListener('click',event=>{if(event.target===bookModal)closeBookReader();});
+document.addEventListener('keydown',event=>{if(event.key==='Escape'&&bookModal.classList.contains('active'))closeBookReader();});
+
+// مشغّل الابتهالات داخل الموقع
+const nasheedTracks={
+ tobar:[
+  {title:'جل المنادي',url:'https://archive.org/download/20201209_20201209_0854/%D8%AC%D9%84%20%D8%A7%D9%84%D9%85%D9%86%D8%A7%D8%AF%D9%89.mp3'},
+  {title:'يا مالك الملك',url:'https://archive.org/download/20201209_20201209_0854/%D9%8A%D8%A7%20%D9%85%D8%A7%D9%84%D9%83%20%D8%A7%D9%84%D9%85%D9%84%D9%83.mp3'},
+  {title:'حين يهدي الصبح إشراق سناه',url:'https://archive.org/download/20201209_20201209_0854/%D8%AD%D9%8A%D9%86%20%D9%8A%D9%87%D8%AF%D9%8A%20%D8%A7%D9%84%D8%B5%D8%A8%D8%AD%20%D8%A5%D8%B4%D8%B1%D8%A7%D9%82%20%D8%B3%D9%86%D8%A7%D9%87.mp3'}
+ ],
+ naqshbandi:[
+  {title:'مولاي إني ببابك',url:'https://archive.org/download/qr_20201208/01%20-%20%D9%85%D9%88%D9%84%D8%A7%D9%8A.mp3'},
+  {title:'الله يا الله',url:'https://archive.org/download/qr_20201208/02%20-%20%D8%A7%D9%84%D9%84%D9%87%20%D9%8A%D8%A7%20%D8%A7%D9%84%D9%84%D9%87.mp3'},
+  {title:'سيدي يا رسول الله',url:'https://archive.org/download/qr_20201208/%D8%B3%D9%8A%D8%AF%D9%8A%20%D9%8A%D8%A7%20%D8%B1%D8%B3%D9%88%D9%84%20%D8%A7%D9%84%D9%84%D9%87%20_%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%8A.%20%D9%83%D8%A7%D9%85%D9%84%D8%A7%20%D9%8B.mp3'}
+ ]
+};
+const nasheedAudio=$('nasheedAudio');
+const nasheedList=$('nasheedTracks');
+function renderNasheedTracks(artist){
+ document.querySelectorAll('[data-munshid]').forEach(button=>{
+  const active=button.dataset.munshid===artist;
+  button.classList.toggle('active',active);
+  button.setAttribute('aria-pressed',String(active));
+ });
+ if(nasheedAudio){nasheedAudio.pause();nasheedAudio.removeAttribute('src');nasheedAudio.load();}
+ $('nasheedNowTitle').textContent=artist==='tobar'?'ابتهالات الشيخ نصر الدين طوبار':'ابتهالات الشيخ سيد النقشبندي';
+ $('nasheedStatus').textContent='اختر التسجيل الذي تريد الاستماع إليه.';
+ nasheedList.innerHTML=nasheedTracks[artist].map((track,index)=>
+  '<button type="button" class="surah-item nasheed-track-btn" data-track-index="'+index+'"><span><b>'+track.title+'</b><span class="small" style="display:block">تسجيل صوتي</span></span><strong>استمع ▶</strong></button>'
+ ).join('');
+ nasheedList.querySelectorAll('[data-track-index]').forEach(button=>{
+  button.addEventListener('click',()=>{
+   const track=nasheedTracks[artist][Number(button.dataset.trackIndex)];
+   nasheedList.querySelectorAll('.nasheed-track-btn').forEach(item=>item.classList.toggle('active',item===button));
+   nasheedAudio.src=track.url;
+   nasheedAudio.load();
+   $('nasheedNowTitle').textContent=track.title;
+   $('nasheedStatus').textContent='جارٍ تشغيل: '+track.title;
+   nasheedAudio.play().then(()=>{
+    $('nasheedStatus').textContent='يعمل الآن: '+track.title;
+   }).catch(()=>{
+    $('nasheedStatus').textContent='اضغط زر التشغيل في مشغّل الصوت لبدء الاستماع.';
+   });
+  });
+ });
+}
+document.querySelectorAll('[data-munshid]').forEach(button=>button.addEventListener('click',()=>renderNasheedTracks(button.dataset.munshid)));
+renderNasheedTracks('tobar');
+nasheedAudio.addEventListener('error',()=>{
+ $('nasheedStatus').textContent='تعذر تحميل هذا التسجيل الآن. جرّب تسجيلًا آخر أو أعد المحاولة لاحقًا.';
+});
 
 </script>
 </body>
