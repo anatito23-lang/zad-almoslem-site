@@ -170,8 +170,9 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 .mushaf-page-jump{display:grid;grid-template-columns:auto minmax(72px,1fr) auto;align-items:center;gap:8px}
 .mushaf-page-jump label{font-size:13px;color:var(--muted);white-space:nowrap}
 .mushaf-page-jump input{width:100%;text-align:center;direction:ltr}
-.mushaf-page-frame{max-width:650px;margin:12px auto 0;padding:8px;background:#f4efe2;border:1px solid #d8c9a8;border-radius:8px;box-shadow:0 8px 24px #47371b18;text-align:center}
-.mushaf-page-frame img{display:block;width:100%;height:auto;margin:0 auto;background:#fff;object-fit:contain}
+.mushaf-page-frame{max-width:650px;margin:12px auto 0;padding:8px;background:#f4efe2;border:1px solid #d8c9a8;border-radius:8px;box-shadow:0 8px 24px #47371b18;text-align:center;touch-action:pan-y;user-select:none;-webkit-user-select:none;overscroll-behavior-x:contain}
+.mushaf-page-frame img{display:block;width:100%;height:auto;margin:0 auto;background:#fff;object-fit:contain;pointer-events:none;-webkit-user-drag:none;user-select:none}
+.mushaf-swipe-hint{text-align:center;margin:8px 0 0;color:var(--muted);font-size:12px}
 .mushaf-source{margin-top:14px}
 .mushaf-floating-button{position:fixed;left:12px;bottom:92px;z-index:1300;display:flex;align-items:center;gap:8px;padding:12px 15px;border:1px solid #ffffff70;border-radius:999px;background:linear-gradient(135deg,#123f32,#1d7055);color:#fff;font:inherit;font-weight:800;box-shadow:0 8px 24px #082d2740;cursor:pointer}
 .mushaf-floating-button span:first-child{font-size:21px;color:#f3d99b}
@@ -307,9 +308,10 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
         <button class="btn light" id="mushafNext" type="button" disabled>الصفحة التالية</button>
       </div>
       <p id="mushafStatus" class="small" role="status">افتح المصحف لعرض الصفحات.</p>
-      <div class="mushaf-page-frame">
-        <img id="mushafPageImage" alt="صفحة 1 من المصحف الشريف" decoding="async">
+      <div class="mushaf-page-frame" id="mushafSwipeArea" aria-label="منطقة تقليب صفحات المصحف بالسحب">
+        <img id="mushafPageImage" alt="صفحة 1 من المصحف الشريف" decoding="async" draggable="false">
       </div>
+      <p class="mushaf-swipe-hint">اسحب الصفحة إلى اليسار للصفحة التالية، أو إلى اليمين للصفحة السابقة</p>
       <div class="notice mushaf-source">
         يعرض هذا القسم صفحات المصحف كاملة بصورها الأصلية، مع ترتيب الصفحات والزخارف وأرقامها، وعددها 604 صفحة.
         <br>مصدر النسخة: <a href="https://github.com/Miftah-Fentaw/Quran-Images" target="_blank" rel="noopener">Quran Images</a> — ترخيص MIT. حقوق النسخة: Copyright © 2026 Miftah Fentaw.
@@ -941,6 +943,30 @@ $('mushafPageNumber').addEventListener('keydown',event=>{
 });
 $('mushafPrev').addEventListener('click',()=>loadMushafPage(mushafCurrentPage-1));
 $('mushafNext').addEventListener('click',()=>loadMushafPage(mushafCurrentPage+1));
+
+// تقليب صفحات المصحف بالسحب على الهاتف والماوس
+const mushafSwipeArea=$('mushafSwipeArea');
+let mushafSwipeStart=null;
+mushafSwipeArea.addEventListener('pointerdown',event=>{
+ if(!event.isPrimary)return;
+ if(event.pointerType==='mouse'&&event.button!==0)return;
+ mushafSwipeStart={x:event.clientX,y:event.clientY,pointerId:event.pointerId};
+ try{mushafSwipeArea.setPointerCapture(event.pointerId);}catch(error){}
+});
+mushafSwipeArea.addEventListener('pointerup',event=>{
+ if(!mushafSwipeStart||mushafSwipeStart.pointerId!==event.pointerId)return;
+ const deltaX=event.clientX-mushafSwipeStart.x;
+ const deltaY=event.clientY-mushafSwipeStart.y;
+ mushafSwipeStart=null;
+ if(mushafContent.classList.contains('hidden'))return;
+ if(Math.abs(deltaX)<45||Math.abs(deltaX)<Math.abs(deltaY)*1.25)return;
+ if(deltaX<0&&mushafCurrentPage<604){
+  loadMushafPage(mushafCurrentPage+1);
+ }else if(deltaX>0&&mushafCurrentPage>1){
+  loadMushafPage(mushafCurrentPage-1);
+ }
+});
+mushafSwipeArea.addEventListener('pointercancel',()=>{mushafSwipeStart=null;});
 
 async function loadOldEgyptianReciters(){
  try{
