@@ -209,6 +209,21 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
  .book-filter-btn,.nasheed-artist-btn{flex:1 1 auto;padding:9px 10px;font-size:13px}
 }
 
+
+/* عرض صفحة المصحف كاملة بوضوح على الهاتف والكمبيوتر */
+#mushafSwipeArea{width:100%!important;max-width:900px!important;min-height:0!important;height:auto!important;overflow:visible!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:4px!important;box-sizing:border-box!important}
+#mushafPageImage{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:none!important;object-fit:contain!important;object-position:center!important;margin:0 auto!important}
+@media(max-width:600px){#mushafSwipeArea{padding:2px!important}#mushafPageImage{width:100%!important;height:auto!important;max-height:none!important}}
+
+/* شريط الأذكار المتحرك */
+.azkar-ticker{width:100%;overflow:hidden;background:linear-gradient(90deg,#0d3d30,#17654c,#0d3d30);color:#fff;border-block:1px solid #ffffff22;box-shadow:0 3px 12px #00000012}
+.azkar-ticker-track{display:flex;width:max-content;align-items:center;animation:azkarTickerMove 58s linear infinite;will-change:transform}
+.azkar-ticker:hover .azkar-ticker-track{animation-play-state:paused}
+.azkar-ticker-group{display:flex;flex:0 0 auto;align-items:center;gap:34px;padding:12px 17px;white-space:nowrap;font-size:14px;font-weight:700}
+.azkar-ticker-group span:before{content:'۞';color:#f5d98b;margin-left:10px}
+@keyframes azkarTickerMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.azkar-ticker-track{animation:none}}
+
 </style>
 </head>
 <body>
@@ -247,6 +262,13 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
     </div>
   </div>
 </header>
+
+<div class="azkar-ticker" role="region" aria-label="أذكار متحركة">
+  <div class="azkar-ticker-track">
+    <div class="azkar-ticker-group"><span>سبحان الله وبحمده، سبحان الله العظيم</span><span>أستغفر الله العظيم وأتوب إليه</span><span>لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير</span><span>اللهم صلِّ وسلم على نبينا محمد</span><span>لا حول ولا قوة إلا بالله</span><span>سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر</span></div>
+    <div class="azkar-ticker-group" aria-hidden="true"><span>سبحان الله وبحمده، سبحان الله العظيم</span><span>أستغفر الله العظيم وأتوب إليه</span><span>لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير</span><span>اللهم صلِّ وسلم على نبينا محمد</span><span>لا حول ولا قوة إلا بالله</span><span>سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر</span></div>
+  </div>
+</div>
 
 <main class="wrap">
   <div class="date-strip">
