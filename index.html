@@ -140,9 +140,16 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 .tasbeeh-close{width:34px;height:34px;border:0;border-radius:10px;background:var(--soft);color:var(--green);font-size:24px;line-height:1;cursor:pointer}
 .tasbeeh-panel label{display:block;margin-bottom:6px;color:var(--muted);font-size:13px}
 .tasbeeh-panel select{width:100%}
-.tasbeeh-number{font-size:48px;font-weight:800;color:var(--green);text-align:center;margin:8px 0;direction:ltr}
+.tasbeeh-progress-wrap{display:grid;place-items:center;padding:15px 0 4px}
+.tasbeeh-ring{--progress:0%;width:184px;height:184px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--gold) var(--progress),#e8eee8 0);box-shadow:0 5px 18px #12372b12;transition:background .25s ease}
+.tasbeeh-ring-inner{width:150px;height:150px;border-radius:50%;background:linear-gradient(145deg,#fff,#f4f7f2);border:1px solid #e7ece5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+.tasbeeh-ring-inner strong{font-size:43px;line-height:1.25;font-weight:800;color:var(--green);direction:ltr;font-variant-numeric:tabular-nums}
+.tasbeeh-ring-inner span{font-size:13px;color:var(--muted)}
+.tasbeeh-ring-inner b{color:var(--green)}
+.tasbeeh-progress-text{text-align:center;min-height:22px;margin:4px 0 8px}
 .tasbeeh-count-btn,.tasbeeh-reset-btn{width:100%;margin-top:7px}
-.tasbeeh-count-btn{padding:13px 18px;font-size:17px}
+.tasbeeh-count-btn{width:82px;height:82px;padding:0;border-radius:50%;display:block;margin:9px auto 12px;font-size:15px;box-shadow:0 6px 15px #0b3c2e25}
+.tasbeeh-reset-btn{padding:9px 14px}
 .tasbeeh-saved{text-align:center;margin:10px 0 0}
 @media(max-width:520px){.tasbeeh-float{right:13px;bottom:13px}.tasbeeh-panel{bottom:64px}}
 
@@ -752,7 +759,21 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
       <option>سبحان الله</option><option>الحمد لله</option><option>الله أكبر</option>
       <option>أستغفر الله</option><option>لا إله إلا الله</option><option>لا حول ولا قوة إلا بالله</option>
     </select>
-    <div class="tasbeeh-number" id="counter" aria-live="polite">0</div>
+    <label for="tasbeehGoal" style="margin-top:11px">اختر عدد التسبيحات</label>
+    <select id="tasbeehGoal">
+      <option value="33">33 مرة – بعد الصلاة</option>
+      <option value="100">100 مرة</option>
+      <option value="1000">1000 مرة – ورد يومي</option>
+    </select>
+    <div class="tasbeeh-progress-wrap">
+      <div class="tasbeeh-ring" id="tasbeehRing" role="progressbar" aria-label="تقدم التسبيح" aria-valuemin="0" aria-valuemax="33" aria-valuenow="0">
+        <div class="tasbeeh-ring-inner">
+          <strong id="counter" aria-live="polite">0</strong>
+          <span>من <b id="tasbeehGoalLabel">33</b></span>
+        </div>
+      </div>
+    </div>
+    <p class="small tasbeeh-progress-text" id="tasbeehProgressText" aria-live="polite">باقي 33 تسبيحة لإكمال الورد.</p>
     <button class="btn green tasbeeh-count-btn" id="countBtn" type="button">تسبيح +1</button>
     <button class="btn light tasbeeh-reset-btn" id="resetCount" type="button">إعادة العداد</button>
     <p class="small tasbeeh-saved" id="countSaved">يُحفظ العدد على هذا الجهاز.</p>
@@ -1084,9 +1105,37 @@ $('getQibla').addEventListener('click',()=>{
   $('qiblaStatus').textContent='تم حساب الاتجاه من موقعك الحالي.';
  },err=>{$('qiblaStatus').textContent='لم نتمكن من تحديد موقعك. فعّل خدمة الموقع واسمح للمتصفح بالوصول إليها.'},{enableHighAccuracy:true,timeout:12000});
 });
-let count=Number(localStorage.getItem('zad_tasbeeh')||0);$('counter').textContent=count;
-$('countBtn').addEventListener('click',()=>{count++;$('counter').textContent=count;localStorage.setItem('zad_tasbeeh',count)});
-$('resetCount').addEventListener('click',()=>{count=0;$('counter').textContent=count;localStorage.setItem('zad_tasbeeh',count)});
+let count=Number(localStorage.getItem('zad_tasbeeh')||0);
+if(!Number.isFinite(count)||count<0)count=0;
+let tasbeehGoal=Number(localStorage.getItem('zad_tasbeeh_goal')||33);
+if(![33,100,1000].includes(tasbeehGoal))tasbeehGoal=33;
+$('tasbeehGoal').value=String(tasbeehGoal);
+function updateTasbeehDisplay(){
+ const progress=Math.min(100,(count/tasbeehGoal)*100);
+ $('counter').textContent=count;
+ $('tasbeehGoalLabel').textContent=tasbeehGoal;
+ $('tasbeehRing').style.setProperty('--progress',progress+'%');
+ $('tasbeehRing').setAttribute('aria-valuemax',String(tasbeehGoal));
+ $('tasbeehRing').setAttribute('aria-valuenow',String(Math.min(count,tasbeehGoal)));
+ $('tasbeehProgressText').textContent=count>=tasbeehGoal?'أكملت العدد المحدد، تقبّل الله منك.':`باقي ${tasbeehGoal-count} تسبيحة لإكمال الورد.`;
+}
+updateTasbeehDisplay();
+$('tasbeehGoal').addEventListener('change',e=>{
+ tasbeehGoal=Number(e.target.value);
+ localStorage.setItem('zad_tasbeeh_goal',String(tasbeehGoal));
+ updateTasbeehDisplay();
+});
+$('countBtn').addEventListener('click',()=>{
+ count++;
+ $('counter').textContent=count;
+ localStorage.setItem('zad_tasbeeh',String(count));
+ updateTasbeehDisplay();
+});
+$('resetCount').addEventListener('click',()=>{
+ count=0;
+ localStorage.setItem('zad_tasbeeh','0');
+ updateTasbeehDisplay();
+});
 
 
 const tasbeehFab=$('tasbeehFab');
