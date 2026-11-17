@@ -50,6 +50,7 @@ footer{background:#092f28;color:#d8e6de;padding:28px 18px;text-align:center}foot
 .hidden{display:none!important}
 @media(max-width:800px){.prayer-grid{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr 1fr}.top nav{display:none}.hero-content{margin-top:35px}}
 @media(max-width:520px){.grid{grid-template-columns:1fr}.quran-tools{grid-template-columns:1fr}.date-strip{align-items:flex-start}.hero{padding-bottom:48px}.section h2{font-size:21px}.prayer .ptime{font-size:18px}}
+.kids-card summary{list-style:none;cursor:pointer}.kids-card summary::-webkit-details-marker{display:none}.kids-card[open] summary{margin-bottom:13px}.kid-steps{padding-right:22px;margin:10px 0;color:var(--ink);font-size:14px}.kid-steps li{margin:7px 0}.kid-story{background:#f7f4e9;border:1px solid #eee5cd;border-radius:13px;padding:12px;margin:10px 0;color:#5f512e;font-size:14px}.kids-card summary h3{margin:0 0 6px}.kids-card summary p{margin:0 0 6px}
 </style>
 </head>
 <body>
@@ -57,7 +58,7 @@ footer{background:#092f28;color:#d8e6de;padding:28px 18px;text-align:center}foot
   <div class="top">
     <div class="brand"><span class="brand-mark">۞</span><span>زاد المسلم</span></div>
     <nav>
-      <a href="#prayer">مواقيت الصلاة</a><a href="#reminders">التنبيهات</a><a href="#friday-wird">ورد الجمعة</a><a href="#quran">القرآن الكريم</a><a href="#ruqyah">الرقية الشرعية</a><a href="#azkar">الأذكار</a><a href="#qibla">القبلة</a><a href="#hadith-dua">السنة والدعاء</a><a href="#daily-wird">وردي اليومي</a><a href="#library">المكتبة</a>
+      <a href="#prayer">مواقيت الصلاة</a><a href="#reminders">التنبيهات</a><a href="#friday-wird">ورد الجمعة</a><a href="#quran">القرآن الكريم</a><a href="#radio-egypt">إذاعة القرآن</a><a href="#kids">ركن الأطفال</a><a href="#ruqyah">الرقية الشرعية</a><a href="#azkar">الأذكار</a><a href="#qibla">القبلة</a><a href="#hadith-dua">السنة والدعاء</a><a href="#daily-wird">وردي اليومي</a><a href="#library">المكتبة</a>
     </nav>
   </div>
   <div class="hero-content">
@@ -132,6 +133,93 @@ footer{background:#092f28;color:#d8e6de;padding:28px 18px;text-align:center}foot
       <audio id="audio" controls class="hidden" preload="none" style="width:100%;margin-top:8px"></audio>
       <div id="shuaishaTracks" class="list hidden" style="margin-top:12px"></div>
       <div class="notice">القسم مخصص للاستماع فقط. التسجيلات المتاحة للشيوخ الخمسة الأولى تُجلب من مكتبة MP3Quran، أما الشيخ أبو العينين شعيشع فالمتاح حاليًا له 12 سورة على موقع السبيل. يلزم الاتصال بالإنترنت للتشغيل.</div>
+    </div>
+  </section>
+
+  <section class="section" id="radio-egypt">
+    <div class="section-head"><div><h2>إذاعة القرآن الكريم من القاهرة</h2><p>بث مباشر — استمع إلى الإذاعة المصرية من داخل موقع زاد المسلم</p></div></div>
+    <div class="card">
+      <div class="row" style="align-items:center;margin-bottom:12px">
+        <div class="icon">📻</div>
+        <div><h3 style="margin:0">إذاعة القرآن الكريم — مصر</h3><p class="small" style="margin:3px 0 0">البث المباشر على مدار الساعة</p></div>
+      </div>
+      <audio id="egyptQuranRadio" controls preload="none" style="width:100%">
+        <source src="https://stream.radiojar.com/8s5u5tpdtwzuv" type="audio/mpeg">
+        متصفحك لا يدعم تشغيل الصوت.
+      </audio>
+      <p class="small" style="margin-top:10px">اضغط تشغيل لبدء الاستماع. قد يتوقف البث مؤقتًا إذا حدث عطل لدى مصدر الإذاعة؛ جرّب إعادة التشغيل بعد قليل.</p>
+      <a href="https://misrquran.gov.eg/" target="_blank" rel="noopener" class="small">زيارة الموقع الرسمي لإذاعة القرآن الكريم</a>
+    </div>
+  </section>
+
+  <section class="section" id="kids">
+    <div class="section-head"><div><h2>ركن الأطفال — نتعلم ونمرح</h2><p>حكايات سهلة وخطوات مبسطة تساعد أطفالنا على تعلم الوضوء والصلاة</p></div></div>
+    <div class="grid">
+      <details class="card kids-card">
+        <summary>
+          <div class="icon">💧</div>
+          <h3>حكاية الوضوء مع آدم</h3>
+          <p>تعال نتعلم كيف نتوضأ قبل الصلاة خطوة خطوة.</p>
+        </summary>
+        <div class="kid-story"><strong>الحكاية:</strong> نادى الأب آدم وقال له: هيا يا بُني نتوضأ؛ فالله يحب المتطهرين. وقف آدم عند الماء وتعلّم الوضوء بهدوء.</div>
+        <ol class="kid-steps">
+          <li>أنوي الوضوء بقلبي، وأقول: بسم الله.</li>
+          <li>أغسل كفّيّ ثلاث مرات.</li>
+          <li>أتمضمض وأستنشق الماء ثم أستنثره.</li>
+          <li>أغسل وجهي جيدًا.</li>
+          <li>أغسل يديّ إلى المرفقين، وأبدأ باليمنى ثم اليسرى.</li>
+          <li>أمسح رأسي وأذنيّ.</li>
+          <li>أغسل قدميّ إلى الكعبين، وأبدأ باليمنى ثم اليسرى.</li>
+        </ol>
+        <p class="small">نتعلم الوضوء من غير إسراف في الماء، ونتأكد أن الماء وصل إلى الأعضاء.</p>
+      </details>
+
+      <details class="card kids-card">
+        <summary>
+          <div class="icon">🕌</div>
+          <h3>قصة سليم والصلاة</h3>
+          <p>قصة طفل أحب الصلاة وحرص أن يصلي مع أسرته.</p>
+        </summary>
+        <div class="kid-story">
+          كان سليم يسمع الأذان كل يوم، فسأل أمه: لماذا نذهب للصلاة؟ ابتسمت أمه وقالت: لأن الصلاة صلتنا بربنا، وهي من أعظم العبادات. توضأ سليم ووقف بجوار أبيه، وتعلّم أن يحافظ على صلاته في وقتها.
+        </div>
+        <p><strong>ماذا نتعلم من سليم؟</strong></p>
+        <ul class="kid-steps">
+          <li>عندما يحين وقت الصلاة أترك ما يشغلني وأستعد لها.</li>
+          <li>أتوضأ وأرتدي ملابس طاهرة ونظيفة.</li>
+          <li>أستقبل القبلة وأنوي الصلاة بقلبي.</li>
+          <li>أبدأ الصلاة بتكبيرة الإحرام: الله أكبر.</li>
+          <li>أقرأ الفاتحة وما تيسر من القرآن، ثم أركع وأسجد بخشوع.</li>
+          <li>أكمل ركعات الصلاة، وأختمها بالتشهد والسلام.</li>
+        </ul>
+        <p class="small">يتعلم الطفل الصلاة بالتدريب والرفق، ويشجعه أهله دون تعنيف.</p>
+      </details>
+
+      <details class="card kids-card">
+        <summary>
+          <div class="icon">📖</div>
+          <h3>كيف أصلي؟ ترتيب الصلاة</h3>
+          <p>تعرف على الحركات الأساسية للصلاة بالترتيب.</p>
+        </summary>
+        <ol class="kid-steps">
+          <li><strong>القيام والتكبير:</strong> أقف مستقبل القبلة وأقول: الله أكبر.</li>
+          <li><strong>القراءة:</strong> أقرأ سورة الفاتحة وما تيسر من القرآن.</li>
+          <li><strong>الركوع:</strong> أنحني وأقول: سبحان ربي العظيم.</li>
+          <li><strong>الاعتدال:</strong> أرفع من الركوع وأحمد الله.</li>
+          <li><strong>السجود:</strong> أسجد وأقول: سبحان ربي الأعلى.</li>
+          <li><strong>الجلوس:</strong> أجلس بين السجدتين، ثم أسجد مرة ثانية.</li>
+          <li><strong>إكمال الصلاة:</strong> أكرر الركعة حسب الصلاة، ثم أجلس للتشهد وأسلم.</li>
+        </ol>
+        <div class="kid-story"><strong>تذكر:</strong> الصلاة لها أوقات وعدد ركعات محدد، ونتعلمها كاملة مع الوالدين أو المعلم.</div>
+      </details>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>اختبر معلوماتك يا بطل ⭐</h3>
+      <p style="margin-bottom:10px">ما العبادة التي نفعلها قبل الصلاة حتى نكون على طهارة؟</p>
+      <details>
+        <summary style="cursor:pointer;color:var(--green);font-weight:700">اضغط لمعرفة الإجابة</summary>
+        <p style="margin-top:8px">الوضوء. أحسنت! 👏</p>
+      </details>
     </div>
   </section>
 
