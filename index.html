@@ -1105,6 +1105,10 @@ function loadMushafPage(number){
  image.onload=()=>{
   if(request!==mushafRequestNumber)return;
   $('mushafStatus').textContent='صفحة '+page+' من 604 — تم تحميلها.';
+  [page+1,page-1].filter(p=>p>=1&&p<=604).forEach(p=>{
+   const warm=new Image();warm.src='https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran-Images@main/png/'+p+'.png';
+  });
+
  };
  image.onerror=()=>{
   if(request!==mushafRequestNumber)return;
