@@ -116,7 +116,7 @@ public class ReminderReceiver extends BroadcastReceiver {
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
             audio.putExtra("prayer",prayerName);
             audio.putExtra("voice",prefs.getString("adhan_voice","basit"));
-            audio.putExtra("play_dua_after",true);
+            audio.putExtra("play_dua_after",prefs.getBoolean("dua_after_adhan_enabled",true));
             try {
                 if(Build.VERSION.SDK_INT>=26) context.startForegroundService(audio);
                 else context.startService(audio);
