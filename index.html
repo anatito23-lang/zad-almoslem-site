@@ -1011,11 +1011,31 @@ const cityNames={Cairo:"القاهرة",Zagazig:"الزقازيق",Alexandria:"�
 const fmtTime=t=>{if(!t)return"--:--";let v=t.split(" ")[0];let [h,m]=v.split(":");return `${h}:${m}`};
 function gregArabic(){return new Intl.DateTimeFormat('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).format(new Date())}
 $('gregDate').textContent=gregArabic();
+const egyptCityCoordinates={
+ Cairo:[30.0444,31.2357],Zagazig:[30.5877,31.5020],Alexandria:[31.2001,29.9187],Giza:[30.0131,31.2089],
+ Mansoura:[31.0409,31.3785],Tanta:[30.7865,31.0004],Ismailia:[30.5965,32.2715],Suez:[29.9668,32.5498],
+ "Port Said":[31.2653,32.3019],Asyut:[27.1783,31.1859],Luxor:[25.6872,32.6396],Aswan:[24.0889,32.8998]
+};
+function prayerApiDate(day){return String(day.getDate()).padStart(2,'0')+'-'+String(day.getMonth()+1).padStart(2,'0')+'-'+day.getFullYear();}
+async function fetchPrayerJson(url){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
+ try{const response=await fetch(url,{signal:controller.signal,cache:'no-store'});if(!response.ok)throw new Error('HTTP '+response.status);const data=await response.json();if(data.code!==200||!data.data||!data.data.timings)throw new Error('Invalid prayer response');return data;}
+ finally{clearTimeout(timer);}
+}
+async function getPrayerData(city,day=new Date()){
+ const date=prayerApiDate(day);
+ const cityUrl=`https://api.aladhan.com/v1/timingsByCity/${date}?city=${encodeURIComponent(city)}&country=Egypt&method=5`;
+ try{return await fetchPrayerJson(cityUrl);}
+ catch(cityError){
+  const coords=egyptCityCoordinates[city];if(!coords)throw cityError;
+  const coordinateUrl=`https://api.aladhan.com/v1/timings/${date}?latitude=${coords[0]}&longitude=${coords[1]}&method=5`;
+  return await fetchPrayerJson(coordinateUrl);
+ }
+}
 async function loadPrayer(){
- const savedCity=localStorage.getItem('zad_selected_city');if(savedCity&&[...$('city').options].some(o=>o.value===savedCity))$('city').value=savedCity;const city=$('city').value;$('prayerStatus').textContent='جارٍ التحديث...';
+ const savedCity=localStorage.getItem('zad_selected_city');if(savedCity&&[...$('city').options].some(o=>o.value===savedCity))$('city').value=savedCity;const city=$('city').value;$('prayerStatus').textContent='جارٍ تحديث المواقيت...';
  try{
-  const r=await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(city)}&country=Egypt&method=5`);
-  const j=await r.json();if(j.code!==200)throw new Error('تعذر جلب المواقيت');
+  const j=await getPrayerData(city);
   const t=j.data.timings;
   window.zadPrayerTimings=t;
   if(window.ZadAndroid){
@@ -1041,7 +1061,7 @@ const countdownPrayerNames=[['الفجر','Fajr'],['الظهر','Dhuhr'],['ال�
 const localDayKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const apiDate=d=>String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
 function prayerDateTime(day,raw){const parts=(raw||'').split(' ')[0].split(':');if(parts.length<2)return null;const h=Number(parts[0]),m=Number(parts[1]);if(!Number.isFinite(h)||!Number.isFinite(m))return null;return new Date(day.getFullYear(),day.getMonth(),day.getDate(),h,m,0,0);}
-async function getTomorrowPrayerTimings(day,city){const key=localDayKey(day)+'_'+city;if(tomorrowPrayerCache.key===key&&tomorrowPrayerCache.timings)return tomorrowPrayerCache.timings;if(tomorrowPrayerRequest)return tomorrowPrayerRequest;tomorrowPrayerRequest=(async()=>{try{const url='https://api.aladhan.com/v1/timingsByCity/'+apiDate(day)+'?city='+encodeURIComponent(city)+'&country=Egypt&method=5';const response=await fetch(url);const data=await response.json();if(data.code!==200)throw new Error('tomorrow prayer times');tomorrowPrayerCache={key,timings:data.data.timings};return data.data.timings;}finally{tomorrowPrayerRequest=null;}})();return tomorrowPrayerRequest;}
+async function getTomorrowPrayerTimings(day,city){const key=localDayKey(day)+'_'+city;if(tomorrowPrayerCache.key===key&&tomorrowPrayerCache.timings)return tomorrowPrayerCache.timings;if(tomorrowPrayerRequest)return tomorrowPrayerRequest;tomorrowPrayerRequest=(async()=>{try{const data=await getPrayerData(city,day);tomorrowPrayerCache={key,timings:data.data.timings};return data.data.timings;}finally{tomorrowPrayerRequest=null;}})();return tomorrowPrayerRequest;}
 function showCountdown(prayer,target,now){const remaining=Math.max(0,target.getTime()-now.getTime());const total=Math.floor(remaining/1000);const hours=Math.floor(total/3600);const minutes=Math.floor((total%3600)/60);const seconds=total%60;$('nextPrayerName').textContent=prayer;$('nextPrayerAt').textContent='موعد الأذان: '+fmtTime(String(target.getHours()).padStart(2,'0')+':'+String(target.getMinutes()).padStart(2,'0'));$('nextPrayerRemaining').textContent=String(hours).padStart(2,'0')+':'+String(minutes).padStart(2,'0')+':'+String(seconds).padStart(2,'0');$('nextPrayerMessage').textContent='ساعة : دقيقة : ثانية';}
 async function updatePrayerCountdown(){if(!window.zadPrayerTimings)return;const now=new Date();const todayKey=localDayKey(now);if(countdownDayKey&&countdownDayKey!==todayKey){countdownDayKey=todayKey;tomorrowPrayerCache={key:'',timings:null};loadPrayer();}const city=$('city').value;const timings=window.zadPrayerTimings;let next=null;for(const item of countdownPrayerNames){const target=prayerDateTime(now,timings[item[1]]);if(target&&target>now){next={name:item[0],target:target};break;}}if(!next){const tomorrow=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);try{const nextTimings=await getTomorrowPrayerTimings(tomorrow,city);const target=prayerDateTime(tomorrow,nextTimings.Fajr);if(target)next={name:'الفجر',target:target};}catch(e){$('nextPrayerName').textContent='تعذر حساب الصلاة القادمة';$('nextPrayerAt').textContent='تحقق من اتصال الإنترنت';$('nextPrayerRemaining').textContent='--:--:--';return;}}if(next)showCountdown(next.name,next.target,now);}
 countdownDayKey=localDayKey(new Date());
@@ -1818,6 +1838,6 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261118n"></script>
+<script src="./app-pages.js?v=20261118o"></script>
 </body>
 </html>
