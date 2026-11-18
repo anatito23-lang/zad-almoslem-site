@@ -200,10 +200,12 @@ public class MainActivity extends Activity {
         }
         @JavascriptInterface public void setApproachAlertEnabled(boolean enabled) {
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("approach_alert_enabled", enabled).apply();
+            ReminderReceiver.rescheduleApproachAlerts(MainActivity.this);
         }
         @JavascriptInterface public void setApproachAlertMinutes(int minutes) {
             int safe = Math.max(1, Math.min(60, minutes));
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putInt("approach_alert_minutes", safe).apply();
+            ReminderReceiver.rescheduleApproachAlerts(MainActivity.this);
         }
         @JavascriptInterface public void setPrayerSilentEnabled(String prayer, boolean enabled) {
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("prayer_silent_" + prayer, enabled).apply();
