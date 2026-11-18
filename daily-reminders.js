@@ -47,7 +47,7 @@
    const voice=$('adhanVoice'), preview=$('adhanPreview'), previewBtn=$('previewAdhan');
    const adhanSources={basit:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Abdulbasit_Abdusamad_1_-_Egypt_(%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%A8%D8%A7%D8%B3%D8%B7_%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%B5%D9%85%D8%AF_-_%D9%85%D8%B5%D8%B1).mp3',mustafa:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mustafa_Ismail_-_Egypt_(%D9%85%D8%B5%D8%B7%D9%81%D9%89_%D8%A5%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84_-_%D9%85%D8%B5%D8%B1).mp3',husary:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mahmoud_Khalil_Al_Hussary_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%AE%D9%84%D9%8A%D9%84_%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%8A_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',banna:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mahmoud_Ali_Al_Banna_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%B9%D9%84%D9%8A_%D8%A7%D9%84%D8%A8%D9%86%D8%A7_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',naqshbandi:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Sheikh_Al_Naqshbandi_(%D8%A7%D9%84%D8%B4%D9%8A%D8%AE_%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%89).mp3',haram:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(%D8%B9%D9%84%D9%8A_%D8%A8%D9%86_%D8%A3%D8%AD%D9%85%D8%AF_%D9%85%D9%84%D8%A7_-_%D8%A7%D9%84%D8%AD%D8%B1%D9%85_%D8%A7%D9%84%D9%85%D9%83%D9%8A).mp3'};
    const storedVoice=localStorage.getItem('zad_adhan_voice');
-   const supportedVoices=['basit','husary','mustafa','rifaat','banna','naqshbandi','tobar','haram'];
+   const supportedVoices=['basit','husary','mustafa','banna','naqshbandi','haram'];
    const savedVoice=supportedVoices.includes(storedVoice)?storedVoice:'basit';
    if(voice)voice.value=savedVoice;
    const volumeControl=$('adhanVolume'), volumeValue=$('adhanVolumeValue');
@@ -88,7 +88,7 @@
    };
    if(downloadBtn)downloadBtn.addEventListener('click',()=>{
      if(!window.ZadAndroid){$('adhanSettingsStatus').textContent='تنزيل صوت الأذان للعمل دون إنترنت متاح داخل تطبيق أندرويد فقط.';return;}
-     if(voice.value==='tobar'){ $('adhanSettingsStatus').textContent='لم نعثر على ملف موثوق لهذا المؤذن حتى الآن. يمكنك إضافته من جهازك عند توفر التسجيل.'; return; }
+     if(!adhanSources[voice.value]){$('adhanSettingsStatus').textContent='هذا التسجيل غير متاح للتنزيل حاليًا.';return;}
      downloadBtn.disabled=true;
      $('adhanSettingsStatus').textContent='جارٍ تنزيل صوت الأذان...';
      window.ZadAndroid.downloadAdhan(voice.value);
@@ -99,26 +99,13 @@
        else $('adhanSettingsStatus').textContent='حمّل صوت الأذان أولًا ليعمل من داخل التطبيق دون إنترنت.';
        return;
      }
-     if(!adhanSources[voice.value]){$('adhanSettingsStatus').textContent='معاينة هذا المؤذن تحتاج ملفه الصوتي. أضف التسجيل من خانة استيراد المؤذن داخل التطبيق.';return;}
+     if(!adhanSources[voice.value]){$('adhanSettingsStatus').textContent='معاينة هذا التسجيل غير متاحة حاليًا.';return;}
      preview.src=adhanSources[voice.value];
      preview.volume=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0))/100:savedVolume/100;
      preview.play().catch(()=>{$('adhanSettingsStatus').textContent='اضغط مرة أخرى للسماح بتشغيل الصوت.';});
    });
    if(voice)voice.addEventListener('change',()=>{preview.pause();preview.currentTime=0;updateAdhanDownloadState();});
-   const importFile=$('adhanImportFile'), importStatus=$('adhanImportStatus');
-   if(importFile)importFile.addEventListener('change',()=>{
-     const file=importFile.files&&importFile.files[0]; if(!file)return;
-     if(file.type!=='audio/mpeg'&&!/\.mp3$/i.test(file.name)){if(importStatus)importStatus.textContent='اختَر ملفًا صوتيًا صالحًا.';return;}
-     if(file.size>20*1024*1024){if(importStatus)importStatus.textContent='حجم التسجيل أكبر من 20 ميجابايت.';return;}
-     if(!window.ZadAndroid||typeof window.ZadAndroid.saveAdhanAudio!=='function'){if(importStatus)importStatus.textContent='إضافة التسجيلات المحفوظة متاحة داخل تطبيق أندرويد.';return;}
-     if(importStatus)importStatus.textContent='جارٍ حفظ التسجيل داخل التطبيق...';
-     const reader=new FileReader();
-     reader.onload=()=>{
-       try{
-         const encoded=String(reader.result||'').split(',')[1]||'';
-         const ok=window.ZadAndroid.saveAdhanAudio(voice.value,encoded);
-         if(importStatus)importStatus.textContent=ok?'تم حفظ تسجيل '+voice.options[voice.selectedIndex].text+' على الجهاز ويعمل دون إنترنت.':'تعذر حفظ الملف؛ تأكد أنه تسجيل صوتي صالح وأقل من 20 ميجابايت.';
-         updateAdhanDownloadState();
+   updateAdhanDownloadState();
        }catch(e){if(importStatus)importStatus.textContent='تعذر حفظ التسجيل على الجهاز.';}
      };
      reader.onerror=()=>{if(importStatus)importStatus.textContent='تعذر قراءة الملف.';};
