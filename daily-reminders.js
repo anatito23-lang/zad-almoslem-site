@@ -87,7 +87,9 @@
        adhanProgress=document.createElement('div');adhanProgress.id='zadAdhanProgress';adhanProgress.setAttribute('role','progressbar');adhanProgress.setAttribute('aria-label','جاري تحميل صوت الأذان');
        adhanProgress.innerHTML='<span></span>';
      }
-     adhanStatus.insertAdjacentElement('afterend',adhanProgress);
+      const downloadRow=downloadBtn&&downloadBtn.closest('.row');
+      if(downloadRow)downloadRow.insertAdjacentElement('beforebegin',adhanProgress);
+      else adhanStatus.insertAdjacentElement('beforebegin',adhanProgress);
      adhanProgress.style.display='block';
    }
    function hideAdhanProgress(){if(adhanProgress)adhanProgress.style.display='none';}
