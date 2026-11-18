@@ -1401,13 +1401,13 @@ nasheedAudio.addEventListener('error',()=>{
 
 <style>
 #zadLanguagePicker{
- appearance:none!important;-webkit-appearance:none!important;position:fixed!important;
- top:50%!important;right:10px!important;left:auto!important;transform:translateY(-50%)!important;
- z-index:100000!important;display:block!important;visibility:visible!important;opacity:1!important;
- width:43px!important;min-width:43px!important;height:43px!important;padding:0 2px!important;
- border:1px solid #b99a5b!important;border-radius:50%!important;
- background:#f4eedf!important;color:#315548!important;font:700 10px/1 Tahoma,Arial,sans-serif!important;
- text-align:center!important;box-shadow:0 3px 12px #0002!important;cursor:pointer!important;
+ appearance:none!important;-webkit-appearance:none!important;
+ position:static!important;transform:none!important;z-index:5!important;
+ display:inline-block!important;visibility:visible!important;opacity:1!important;
+ flex:0 0 70px!important;width:70px!important;min-width:70px!important;height:34px!important;
+ padding:4px 7px!important;border:1px solid #c9a45c!important;border-radius:9px!important;
+ background:#f4eedf!important;color:#315548!important;font:700 11px/1.3 Tahoma,Arial,sans-serif!important;
+ text-align:center!important;box-shadow:none!important;cursor:pointer!important;
 }
 #zadLanguagePicker option{color:#18332d;background:#fff}
 #google_translate_element{position:fixed!important;left:-9999px!important;top:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
@@ -1418,97 +1418,92 @@ html[dir="ltr"] .article{border-right:0;border-left:3px solid var(--gold)}
 html[dir="ltr"] .section h2:before{margin-left:0;margin-right:10px}
 html[dir="ltr"] .kid-steps{padding-right:0;padding-left:22px}
 html[dir="ltr"] .mushaf-text{direction:rtl}
+@media(max-width:800px){#zadLanguagePicker{flex-basis:66px!important;width:66px!important;min-width:66px!important}}
 </style>
 <script>
 (function(){
  const languages=[
-  {code:'ar',label:'عربي',dir:'rtl'},
-  {code:'en',label:'EN',dir:'ltr'},
-  {code:'fr',label:'FR',dir:'ltr'},
-  {code:'tr',label:'TR',dir:'ltr'},
-  {code:'id',label:'ID',dir:'ltr'},
+  {code:'ar',label:'العربية',dir:'rtl'},
+  {code:'en',label:'English',dir:'ltr'},
+  {code:'fr',label:'Français',dir:'ltr'},
+  {code:'tr',label:'Türkçe',dir:'ltr'},
+  {code:'id',label:'Indonesia',dir:'ltr'},
   {code:'ur',label:'اردو',dir:'rtl'},
-  {code:'es',label:'ES',dir:'ltr'}
+  {code:'es',label:'Español',dir:'ltr'}
  ];
  const picker=document.createElement('select');
  picker.id='zadLanguagePicker';
  picker.setAttribute('aria-label','اختر لغة الموقع');
- picker.title='تغيير اللغة';
+ picker.title='تغيير لغة الموقع';
  languages.forEach(l=>{const o=document.createElement('option');o.value=l.code;o.textContent=l.label;picker.appendChild(o)});
- document.body.appendChild(picker);
+ const nav=document.querySelector('.top nav');
+ (nav||document.querySelector('.top')||document.body).appendChild(picker);
 
- // Preserve the Quran listening section and the Mushaf in Arabic.
- ['quran','mushaf'].forEach(id=>{
-   const el=document.getElementById(id);
-   if(el){el.classList.add('notranslate');el.setAttribute('translate','no');}
+ // Keep Quran listening and the Mushaf in Arabic.
+ ['quran','mushaf','mushafPageImage','mushafSwipeArea'].forEach(id=>{
+  const el=document.getElementById(id);
+  if(el){el.classList.add('notranslate');el.setAttribute('translate','no');}
  });
+ function clearGoogleLanguageCookie(){
+  const expires='expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  document.cookie='googtrans=; '+expires+'; path=/';
+  document.cookie='googtrans=; '+expires+'; path=/; domain='+location.hostname;
+ }
  const saved=localStorage.getItem('zad_language');
  const browser=(navigator.language||'ar').toLowerCase().split('-')[0];
  const initial=saved&&languages.some(l=>l.code===saved)?saved:(languages.some(l=>l.code===browser)?browser:'ar');
  picker.value=initial;
- document.documentElement.lang=initial;
- document.documentElement.dir=(languages.find(l=>l.code===initial)||languages[0]).dir;
+ function setDirection(code){
+  const chosen=languages.find(l=>l.code===code)||languages[0];
+  document.documentElement.lang=chosen.code;
+  document.documentElement.dir=chosen.dir;
+ }
+ setDirection(initial);
 
- function applyLanguage(){
-   const combo=document.querySelector('.goog-te-combo');
-   if(!combo)return false;
-   const target=picker.value==='ar'?'':picker.value;
-   combo.value=target;
-   combo.dispatchEvent(new Event('change',{bubbles:true}));
-   localStorage.setItem('zad_language',picker.value);
-   const chosen=languages.find(l=>l.code===picker.value)||languages[0];
-   document.documentElement.lang=chosen.code;
-   document.documentElement.dir=chosen.dir;
-   return true;
+ let translateInitialized=false;
+ function applyGoogleLanguage(code){
+  const combo=document.querySelector('.goog-te-combo');
+  if(!combo)return false;
+  combo.value=code==='ar'?'':code;
+  combo.dispatchEvent(new Event('change',{bubbles:true}));
+  return true;
  }
  picker.addEventListener('change',()=>{
-   let attempts=0;
-   const retry=setInterval(()=>{
-     attempts++;
-     if(applyLanguage()||attempts>=30)clearInterval(retry);
-   },300);
+  const code=picker.value;
+  localStorage.setItem('zad_language',code);
+  setDirection(code);
+  if(code==='ar'){
+   // Reset Google Translate's saved language as well as the page direction.
+   clearGoogleLanguageCookie();
+   if(applyGoogleLanguage('ar')){setTimeout(()=>location.reload(),450);}
+   else location.reload();
+   return;
+  }
+  let tries=0;
+  const retry=setInterval(()=>{
+   tries++;
+   if(applyGoogleLanguage(code)||tries>=40)clearInterval(retry);
+  },250);
  });
- window.zadGoogleTranslateReady=function(){
-   if(window.google&&google.translate){
-     new google.translate.TranslateElement({
-       pageLanguage:'ar',
-       includedLanguages:'en,fr,tr,id,ur,es',
-       autoDisplay:false,
-       layout:google.translate.TranslateElement.InlineLayout.SIMPLE
-     },'google_translate_element');
-     let attempts=0;
-     const ready=setInterval(()=>{
-       attempts++;
-       if(document.querySelector('.goog-te-combo')){
-         if(initial!=='ar')applyLanguage();
-         clearInterval(ready);
-       }
-       if(attempts>=40)clearInterval(ready);
-     },300);
+ window.googleTranslateElementInit=function(){
+  if(translateInitialized||!window.google||!google.translate)return;
+  translateInitialized=true;
+  new google.translate.TranslateElement({
+   pageLanguage:'ar',
+   includedLanguages:'en,fr,tr,id,ur,es',
+   autoDisplay:false
+  },'google_translate_element');
+  let tries=0;
+  const ready=setInterval(()=>{
+   tries++;
+   if(document.querySelector('.goog-te-combo')){
+    if(initial!=='ar')applyGoogleLanguage(initial);
+    clearInterval(ready);
    }
+   if(tries>=40)clearInterval(ready);
+  },250);
  };
 })();
-</script>
-
-<script>
-// Full-page translation. Quran listening section and Quran page image remain Arabic.
-function googleTranslateElementInit(){
-  if(window.zadGoogleTranslateReady){window.zadGoogleTranslateReady();return;}
-  // Google Translate honors notranslate / translate=no on protected Quran content.
-  ['quran','mushafPageImage','mushafSwipeArea'].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.add('notranslate');el.setAttribute('translate','no');}});
-  if(window.google&&google.translate){
-    new google.translate.TranslateElement({pageLanguage:'ar',includedLanguages:'en,fr,tr,id,ur,es',autoDisplay:false},'google_translate_element');
-    setTimeout(syncZadGoogleLanguage,900);
-  }
-}
-function syncZadGoogleLanguage(){
-  const picker=document.getElementById('zadLanguagePicker');
-  const combo=document.querySelector('.goog-te-combo');
-  if(!picker||!combo)return;
-  const lang=picker.value==='ar'?'':picker.value;
-  if(combo.value!==lang){combo.value=lang;combo.dispatchEvent(new Event('change'));}
-}
-document.addEventListener('change',e=>{if(e.target&&e.target.id==='zadLanguagePicker'){let tries=0;const timer=setInterval(()=>{syncZadGoogleLanguage();if(document.querySelector('.goog-te-combo')||++tries>20)clearInterval(timer);},300);}});
 </script>
 <div id="google_translate_element" aria-hidden="true"></div>
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
