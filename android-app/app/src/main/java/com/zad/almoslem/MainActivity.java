@@ -93,7 +93,7 @@ public class MainActivity extends Activity {
                     int status = connection.getResponseCode();
                     if (status != HttpURLConnection.HTTP_OK) throw new Exception("HTTP " + status);
                     String type = connection.getContentType();
-                    if (type == null || !(type.contains("audio") || type.contains("octet-stream"))) {
+                    if (type == null || !(type.contains("audio") || type.contains("ogg") || type.contains("octet-stream"))) {
                         throw new Exception("نوع الملف غير صحيح");
                     }
                     int length = connection.getContentLength();
