@@ -1,7 +1,16 @@
-const CACHE_NAME = "zad-almoslem-shell-v39";
-const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./daily-reminders.js?v=20261118audiofix2", "./app-pages.js?v=20261118settings5"];
+const CACHE_NAME = "zad-almoslem-shell-v40";
+const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./daily-reminders.js?v=20261118adhan3", "./app-pages.js?v=20261118sync1"];
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await Promise.all(APP_SHELL.map(async path => {
+      try {
+        const response = await fetch(new Request(path, {cache:"reload"}));
+        if (response && response.ok) await cache.put(path, response);
+      } catch (error) {}
+    }));
+    await self.skipWaiting();
+  })());
 });
 self.addEventListener("activate", event => {
   event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME && key !== "zad-mushaf-offline-pages-v2").map(key => caches.delete(key)))).then(() => self.clients.claim()));
@@ -33,6 +42,22 @@ self.addEventListener("fetch", event => {
     return;
   }
   if (url.origin !== self.location.origin) return;
+  const isAppDocument = request.mode === "navigate" || /\/(?:index\.html|app-pages\.js|daily-reminders\.js)$/.test(url.pathname);
+  if (isAppDocument) {
+    event.respondWith((async () => {
+      try {
+        const fresh = await fetch(request, {cache:"no-store"});
+        if (fresh && fresh.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(request, fresh.clone());
+        }
+        return fresh;
+      } catch (error) {
+        return (await caches.match(request)) || (await caches.match("./index.html"));
+      }
+    })());
+    return;
+  }
   event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {
     if (response && response.ok) {
       const copy = response.clone();
