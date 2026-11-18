@@ -2,11 +2,9 @@
 'use strict';
 const $=id=>document.getElementById(id), main=document.querySelector('main.wrap'), header=document.querySelector('header.hero');
 const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp());
-if(nativeApp){document.getElementById('kids')?.remove();document.querySelectorAll('a[href="#kids"]').forEach(link=>link.remove());}
-else {
-  // Keep audio and reminder controls available on the website too.
-  // Browser-only limitations are reported by the controls when native Android APIs are unavailable.
-}
+// Keep the website and Android app section lists identical: the Kids section is disabled in both.
+document.getElementById('kids')?.remove();
+document.querySelectorAll('a[href="#kids"]').forEach(link=>link.remove());
 if(!main||!header||$('zadAppPages'))return;
 document.querySelector('.bottom-nav:not(.zad-bottom-nav)')?.remove();
 const meta=[['prayer','مواقيت الصلاة','🕰️'],['quran','استماع القرآن','📖'],['mushaf','المصحف الشريف','۞'],['ruqyah','الرقية الشرعية','🤲'],['radio-egypt','إذاعة القرآن الكريم','📻'],['azkar','الأذكار اليومية','☀️'],['books-library','مكتبة الكتب الإسلامية','📚'],...(!nativeApp?[['kids','ركن الأطفال','🧒']]:[]),['reminders','تنبيهات الصلاة والأذان','🕌'],['hadith-dua','السنة والدعاء','🌿'],['daily-wird','وردي اليومي','📿'],['friday-wird','ورد الجمعة','🌙'],['qalbi-itmaann','قلبي اطمأن','💚'],['library','نفحات إيمانية','✨'],['khutbahs','خطب الجمعة','🎙️'],['nasheed','الإنشاد والابتهالات','🎵']];
