@@ -1017,10 +1017,18 @@ const egyptCityCoordinates={
  "Port Said":[31.2653,32.3019],Asyut:[27.1783,31.1859],Luxor:[25.6872,32.6396],Aswan:[24.0889,32.8998]
 };
 function prayerApiDate(day){return String(day.getDate()).padStart(2,'0')+'-'+String(day.getMonth()+1).padStart(2,'0')+'-'+day.getFullYear();}
-async function fetchPrayerJson(url){
- const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),10000);
- try{const response=await fetch(url,{signal:controller.signal,cache:'no-store'});if(!response.ok)throw new Error('HTTP '+response.status);const data=await response.json();if(data.code!==200||!data.data||!data.data.timings)throw new Error('Invalid prayer response');return data;}
+async function zadFetchTimeout(url,options={},timeoutMs=8000){
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),timeoutMs);
+ try{return await fetch(url,{...options,signal:controller.signal});}
  finally{clearTimeout(timer);}
+}
+async function fetchPrayerJson(url){
+ const response=await zadFetchTimeout(url,{cache:'no-store'},8000);
+ if(!response.ok)throw new Error('HTTP '+response.status);
+ const data=await response.json();
+ if(data.code!==200||!data.data||!data.data.timings)throw new Error('Invalid prayer response');
+ return data;
 }
 async function getPrayerData(city,day=new Date()){
  const date=prayerApiDate(day);
@@ -1033,7 +1041,10 @@ async function getPrayerData(city,day=new Date()){
  }
 }
 async function loadPrayer(){
- const savedCity=localStorage.getItem('zad_selected_city');if(savedCity&&[...$('city').options].some(o=>o.value===savedCity))$('city').value=savedCity;const city=$('city').value;$('prayerStatus').textContent='جارٍ تحديث المواقيت...';
+ const savedCity=localStorage.getItem('zad_selected_city');if(savedCity&&[...$('city').options].some(o=>o.value===savedCity))$('city').value=savedCity;const city=$('city').value;
+ const cacheKey='zad_prayer_cache_'+city+'_'+localDayKey(new Date());
+ try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&cached.timings){window.zadPrayerTimings=cached.timings;$('prayerGrid').innerHTML=[['الفجر','Fajr'],['الشروق','Sunrise'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']].map(([n,k])=>`<div class="prayer"><div class="pname">${n}</div><div class="ptime">${fmtTime(cached.timings[k])}</div></div>`).join('');if(cached.hijri)$('hijriDate').textContent=cached.hijri;$('prayerStatus').textContent='مواقيت محفوظة لهذا اليوم — جارٍ التحقق من التحديث';countdownDayKey=localDayKey(new Date());}}catch(e){}
+ $('prayerStatus').textContent=window.zadPrayerTimings?'مواقيت محفوظة — جارٍ التحديث...':'جارٍ تحديث المواقيت...';
  try{
   const j=await getPrayerData(city);
   const t=j.data.timings;
@@ -1049,9 +1060,11 @@ async function loadPrayer(){
   const names=[['الفجر','Fajr'],['الشروق','Sunrise'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']];
   $('prayerGrid').innerHTML=names.map(([n,k])=>`<div class="prayer"><div class="pname">${n}</div><div class="ptime">${fmtTime(t[k])}</div></div>`).join('');
   const h=j.data.date.hijri;
-  $('hijriDate').textContent=`${h.weekday.ar} ${h.day} ${h.month.ar} ${h.year} هـ`;
+  const hijriText=`${h.weekday.ar} ${h.day} ${h.month.ar} ${h.year} هـ`;
+  $('hijriDate').textContent=hijriText;
+  try{localStorage.setItem(cacheKey,JSON.stringify({timings:t,hijri:hijriText,savedAt:Date.now()}));}catch(e){}
   $('prayerStatus').textContent=`مواقيت ${cityNames[city]||city}`;
- }catch(e){$('prayerStatus').textContent='تعذر التحديث؛ تحقق من الإنترنت';$('hijriDate').textContent='تعذر تحميل التاريخ الهجري';}
+ }catch(e){if(window.zadPrayerTimings){$('prayerStatus').textContent='تعذر الاتصال — نعرض آخر مواقيت محفوظة لهذا اليوم';}else{$('prayerStatus').textContent='تعذر تحميل المواقيت. أعد المحاولة بعد التأكد من الاتصال.';$('hijriDate').textContent='تعذر تحميل التاريخ الهجري';}$('nextPrayerMessage').textContent='المواقيت المحفوظة تعمل حتى عودة الاتصال';}
 }
 $('loadPrayer').addEventListener('click',loadPrayer);$('city').addEventListener('change',loadPrayer);loadPrayer();
 let countdownDayKey='';
@@ -1061,7 +1074,8 @@ const countdownPrayerNames=[['الفجر','Fajr'],['الظهر','Dhuhr'],['ال�
 const localDayKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const apiDate=d=>String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
 function prayerDateTime(day,raw){const parts=(raw||'').split(' ')[0].split(':');if(parts.length<2)return null;const h=Number(parts[0]),m=Number(parts[1]);if(!Number.isFinite(h)||!Number.isFinite(m))return null;return new Date(day.getFullYear(),day.getMonth(),day.getDate(),h,m,0,0);}
-async function getTomorrowPrayerTimings(day,city){const key=localDayKey(day)+'_'+city;if(tomorrowPrayerCache.key===key&&tomorrowPrayerCache.timings)return tomorrowPrayerCache.timings;if(tomorrowPrayerRequest)return tomorrowPrayerRequest;tomorrowPrayerRequest=(async()=>{try{const data=await getPrayerData(city,day);tomorrowPrayerCache={key,timings:data.data.timings};return data.data.timings;}finally{tomorrowPrayerRequest=null;}})();return tomorrowPrayerRequest;}
+let tomorrowPrayerFailedUntil=0;
+async function getTomorrowPrayerTimings(day,city){const key=localDayKey(day)+'_'+city;if(tomorrowPrayerCache.key===key&&tomorrowPrayerCache.timings)return tomorrowPrayerCache.timings;if(Date.now()<tomorrowPrayerFailedUntil)throw new Error('retry delayed');if(tomorrowPrayerRequest)return tomorrowPrayerRequest;tomorrowPrayerRequest=(async()=>{try{const data=await getPrayerData(city,day);tomorrowPrayerCache={key,timings:data.data.timings};tomorrowPrayerFailedUntil=0;return data.data.timings;}catch(error){tomorrowPrayerFailedUntil=Date.now()+60000;throw error;}finally{tomorrowPrayerRequest=null;}})();return tomorrowPrayerRequest;}
 function showCountdown(prayer,target,now){const remaining=Math.max(0,target.getTime()-now.getTime());const total=Math.floor(remaining/1000);const hours=Math.floor(total/3600);const minutes=Math.floor((total%3600)/60);const seconds=total%60;$('nextPrayerName').textContent=prayer;$('nextPrayerAt').textContent='موعد الأذان: '+fmtTime(String(target.getHours()).padStart(2,'0')+':'+String(target.getMinutes()).padStart(2,'0'));$('nextPrayerRemaining').textContent=String(hours).padStart(2,'0')+':'+String(minutes).padStart(2,'0')+':'+String(seconds).padStart(2,'0');$('nextPrayerMessage').textContent='ساعة : دقيقة : ثانية';}
 async function updatePrayerCountdown(){if(!window.zadPrayerTimings)return;const now=new Date();const todayKey=localDayKey(now);if(countdownDayKey&&countdownDayKey!==todayKey){countdownDayKey=todayKey;tomorrowPrayerCache={key:'',timings:null};loadPrayer();}const city=$('city').value;const timings=window.zadPrayerTimings;let next=null;for(const item of countdownPrayerNames){const target=prayerDateTime(now,timings[item[1]]);if(target&&target>now){next={name:item[0],target:target};break;}}if(!next){const tomorrow=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);try{const nextTimings=await getTomorrowPrayerTimings(tomorrow,city);const target=prayerDateTime(tomorrow,nextTimings.Fajr);if(target)next={name:'الفجر',target:target};}catch(e){$('nextPrayerName').textContent='تعذر حساب الصلاة القادمة';$('nextPrayerAt').textContent='تحقق من اتصال الإنترنت';$('nextPrayerRemaining').textContent='--:--:--';return;}}if(next)showCountdown(next.name,next.target,now);}
 countdownDayKey=localDayKey(new Date());
@@ -1080,7 +1094,7 @@ const normalizeReciterName=s=>(s||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'�
 window.zadReciterData={};
 async function loadSurahs(){
  try{
-  const r=await fetch('https://api.alquran.cloud/v1/surah');const j=await r.json();surahs=j.data;
+  const r=await zadFetchTimeout('https://api.alquran.cloud/v1/surah',{},8000);if(!r.ok)throw new Error('surah list');const j=await r.json();if(!j.data||!Array.isArray(j.data))throw new Error('surah data');surahs=j.data;
   $('surahSelect').innerHTML=surahs.map(s=>`<option value="${s.number}">${s.number}. ${s.name}</option>`).join('');
  }catch(e){$('surahSelect').innerHTML='<option value="">تعذر تحميل السور</option>';}
 }
@@ -1102,7 +1116,7 @@ function loadMushafPage(number){
  $('mushafMeta').textContent='الصفحة '+page+' من 604';
  $('mushafPageTitle').textContent='مصحف المدينة النبوية';
  $('mushafMeta').textContent='الصفحة '+page+' من 604';
- fetch('https://api.alquran.cloud/v1/page/'+page+'/quran-uthmani')
+ zadFetchTimeout('https://api.alquran.cloud/v1/page/'+page+'/quran-uthmani',{},8000)
   .then(response=>{if(!response.ok)throw new Error('page metadata');return response.json();})
   .then(result=>{
    if(request!==mushafRequestNumber||result.code!==200||!result.data||!Array.isArray(result.data.ayahs)||!result.data.ayahs.length)return;
@@ -1159,7 +1173,7 @@ async function loadMushafSurah(number){
  const request=++mushafRequestNumber;
  $('mushafStatus').textContent='جارٍ تحديد أول صفحة من السورة...';
  try{
-  const response=await fetch('https://api.alquran.cloud/v1/surah/'+surahNumber+'/quran-uthmani');
+  const response=await zadFetchTimeout('https://api.alquran.cloud/v1/surah/'+surahNumber+'/quran-uthmani',{},8000);
   if(!response.ok)throw new Error('surah lookup');
   const result=await response.json();
   if(request!==mushafRequestNumber)return;
@@ -1181,7 +1195,7 @@ async function loadMushafIndex(){
  }catch(e){}
  loadMushafPage(savedPage);
  try{
-  const response=await fetch('https://api.alquran.cloud/v1/surah');
+  const response=await zadFetchTimeout('https://api.alquran.cloud/v1/surah',{},8000);
   if(!response.ok)throw new Error('surah index');
   const result=await response.json();
   if(result.code!==200||!Array.isArray(result.data)||result.data.length!==114)throw new Error('surah index');
@@ -1302,7 +1316,7 @@ mushafSwipeArea.addEventListener('pointercancel',()=>{mushafMouseStart=null;});
 
 async function loadOldEgyptianReciters(){
  try{
-  const r=await fetch('https://mp3quran.net/api/v3/reciters?language=ar');
+  const r=await zadFetchTimeout('https://mp3quran.net/api/v3/reciters?language=ar',{},8000);
   if(!r.ok)throw new Error('reciter api');
   const data=await r.json();
   const all=data.reciters||[];
