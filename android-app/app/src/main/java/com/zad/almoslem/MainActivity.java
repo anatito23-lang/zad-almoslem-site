@@ -208,7 +208,7 @@ public class MainActivity extends Activity {
             Intent audio = new Intent(MainActivity.this, AdhanPlaybackService.class);
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
             audio.putExtra("prayer", "تجربة الأذان");
-            audio.putExtra("voice", ("mustafa".equals(voice)||"fajr".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"beautiful".equals(voice)) ? voice : "sabah");
+            audio.putExtra("voice", safeVoice(voice));
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(audio); else startService(audio);
         }
 
