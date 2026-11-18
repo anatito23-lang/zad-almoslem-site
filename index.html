@@ -352,7 +352,14 @@ footer{background:#071522;color:#c9d6e2}
       <div class="small">علّم الصلاة بعد أدائها، ويُحفظ سجل اليوم على جهازك.</div>
     </div>
     <div class="adhan-settings card">
-      <div><h3>اختيار المؤذن</h3><p class="small">اختر صوت الأذان الذي تفضله، ويمكنك الاستماع إليه قبل اعتماده.</p></div>
+      <div><h3>طريقة التنبيه عند دخول الصلاة</h3><p class="small">اختر ما يناسبك: أذان كامل، أو نغمة قصيرة، أو إشعار صامت.</p></div>
+      <label for="adhanAlertMode">نوع التنبيه</label>
+      <select id="adhanAlertMode" aria-label="طريقة التنبيه عند دخول الصلاة">
+        <option value="adhan">أذان كامل بصوت المؤذن المختار</option>
+        <option value="tone">تنبيه صوتي قصير فقط</option>
+        <option value="silent">إشعار صامت بدون صوت</option>
+      </select>
+      <div><h3>صوت المؤذن</h3><p class="small">يُستخدم هذا الصوت عند اختيار الأذان الكامل.</p></div>
       <div class="row">
         <select id="adhanVoice" aria-label="اختيار صوت المؤذن">
           <option value="mustafa">الشيخ مصطفى إسماعيل</option>
@@ -375,7 +382,7 @@ footer{background:#071522;color:#c9d6e2}
         <label><input type="checkbox" class="prayer-alert" data-prayer="المغرب" checked> أذان المغرب</label>
         <label><input type="checkbox" class="prayer-alert" data-prayer="العشاء" checked> أذان العشاء</label>
       </div>
-      <label class="adhan-master"><input id="adhanEnabled" type="checkbox" checked> تفعيل الأذان الصوتي عند دخول الوقت</label>
+      <label class="adhan-master"><input id="adhanEnabled" type="checkbox" checked> تفعيل الصوت عند دخول وقت الصلاة</label>
       <div class="card" style="margin-top:12px">
         <h3>الصامت وقت الصلاة</h3>
         <p class="small">اختر الصلوات التي يتحول فيها الهاتف إلى الصامت لمدة 15 دقيقة، ثم يعود لوضع الصوت السابق تلقائيًا. يتطلب السماح للتطبيق بالتحكم في وضع عدم الإزعاج من إعدادات أندرويد.</p>
@@ -390,7 +397,7 @@ footer{background:#071522;color:#c9d6e2}
         <p class="small" id="silentSettingsStatus" role="status">الخاصية متوقفة حتى تختار الصلوات وتمنح الإذن.</p>
       </div>
       <button class="btn green" id="saveAdhanSettings" type="button">حفظ إعدادات الأذان والصامت</button>
-      <p id="adhanSettingsStatus" class="small" role="status">اختر المؤذن من القائمة، ثم استورد ملفه الصوتي من هاتفك. داخل تطبيق أندرويد يُحفظ التسجيل محليًا ويعمل دون إنترنت، ويمكنك معاينته قبل اعتماده. التسجيلات التي لم تستوردها بعد لن تعمل حتى تختار ملفاتها.</p>
+      <p id="adhanSettingsStatus" class="small" role="status">اختر طريقة التنبيه واحفظ الإعدادات. الأذان الكامل يستخدم صوت المؤذن المختار، والتنبيه القصير يصدر نغمة فقط، ويمكنك اختيار الإشعار الصامت.</p>
     </div>
     <div class="small">المواقيت تُجلب عبر الإنترنت من خدمة مواقيت الصلاة، وقد تختلف دقائق قليلة حسب طريقة الحساب والجهة المحلية.</div>
   </section>
