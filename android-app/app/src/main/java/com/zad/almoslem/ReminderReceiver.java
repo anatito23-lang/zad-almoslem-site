@@ -14,6 +14,7 @@ import java.util.Calendar;
 public class ReminderReceiver extends BroadcastReceiver {
     public static final String CHANNEL_ID = "zad_reminders";
     private static final String PRAYER_CHANNEL_ID = "zad_prayer_alerts";
+    private static final String PRAYER_TONE_CHANNEL_ID = "zad_prayer_tone";
 
     public static void scheduleDaily(Context context, String key, int hour, int minute, String title) {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders", Context.MODE_PRIVATE);
@@ -92,10 +93,11 @@ public class ReminderReceiver extends BroadcastReceiver {
             return;
         }
         boolean adhanEnabled=prefs.getBoolean("adhan_enabled",true);
+        String adhanMode=prefs.getString("adhan_mode","adhan");
         String prayerName = prayer ? key.substring("prayer_".length()) : "";
         boolean thisPrayerEnabled = prayer && prefs.getBoolean("prayer_enabled_" + prayerName, true);
         if (prayer && prefs.getBoolean("prayer_silent_" + prayerName, false)) activateSilentMode(context);
-        if(prayer && adhanEnabled && thisPrayerEnabled) {
+        if(prayer && adhanEnabled && thisPrayerEnabled && "adhan".equals(adhanMode)) {
             Intent audio=new Intent(context,AdhanPlaybackService.class);
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
             audio.putExtra("prayer",prayerName);
@@ -117,13 +119,17 @@ public class ReminderReceiver extends BroadcastReceiver {
             schedule(context,key,next,title,false);
         }
         NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        String channelId=prayer?PRAYER_CHANNEL_ID:CHANNEL_ID;
+        String channelId=prayer?((adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode))?PRAYER_TONE_CHANNEL_ID:PRAYER_CHANNEL_ID):CHANNEL_ID;
         if(Build.VERSION.SDK_INT>=26){
             NotificationChannel ch;
             if(prayer){
-                ch=new NotificationChannel(PRAYER_CHANNEL_ID,"مواعيد الصلاة",NotificationManager.IMPORTANCE_HIGH);
-                ch.setDescription("إشعار دخول وقت الصلاة؛ صوت الأذان يعمل بشكل مستقل");
+                ch=new NotificationChannel(PRAYER_CHANNEL_ID,"إشعارات الصلاة الصامتة",NotificationManager.IMPORTANCE_HIGH);
+                ch.setDescription("إشعار دخول وقت الصلاة بدون صوت");
                 ch.setSound(null,null);
+                nm.createNotificationChannel(ch);
+                NotificationChannel toneCh=new NotificationChannel(PRAYER_TONE_CHANNEL_ID,"تنبيه صوتي للصلاة",NotificationManager.IMPORTANCE_HIGH);
+                toneCh.setDescription("نغمة قصيرة عند دخول وقت الصلاة");
+                nm.createNotificationChannel(toneCh);
             } else {
                 ch=new NotificationChannel(CHANNEL_ID,"تنبيهات زاد المسلم",NotificationManager.IMPORTANCE_HIGH);
                 ch.setDescription("تنبيهات الأذكار وقيام الليل");
@@ -134,7 +140,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         PendingIntent content=PendingIntent.getActivity(context,0,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,channelId):new Notification.Builder(context);
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("قلبي اطمأن – زاد المسلم").setContentText(title==null?"تذكير من زاد المسلم":title).setAutoCancel(true).setContentIntent(content);
-        if(!prayer) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
+        if(!prayer || (prayer && adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode))) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
         nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
             String k=key.replace("daily_","");
