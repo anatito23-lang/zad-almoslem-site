@@ -24,5 +24,5 @@
           audio + pdf + '</article>';
       }).join('');
     })
-    .catch(() => { root.innerHTML = '<div class="card"><p>تعذر تحميل الخطب الآن. حاول تحديث الصفحة بعد قليل.</p></div>'; });
+    .catch(() => { if (!root.children.length) root.innerHTML = '<div class="card"><p>تعذر تحميل الخطب الآن. حاول تحديث الصفحة بعد قليل.</p></div>'; });
 })();
