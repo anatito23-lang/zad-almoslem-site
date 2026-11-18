@@ -9,11 +9,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.os.SystemClock;
 import java.util.Calendar;
 
 public class ReminderReceiver extends BroadcastReceiver {
     public static final String CHANNEL_ID = "zad_reminders";
+    private static final String PRAYER_CHANNEL_ID = "zad_prayer_alerts";
+
     public static void scheduleDaily(Context context, String key, int hour, int minute, String title) {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders", Context.MODE_PRIVATE);
         p.edit().putInt(key+"_hour",hour).putInt(key+"_minute",minute).putString(key+"_title",title).putBoolean(key+"_enabled",true).apply();
@@ -51,17 +52,42 @@ public class ReminderReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context context,Intent intent) {
         String key=intent.getStringExtra("key"),title=intent.getStringExtra("title");
         if(key==null)return;
+        boolean prayer=key.startsWith("prayer_");
+        android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
+        boolean adhanEnabled=prefs.getBoolean("adhan_enabled",true);
+        if(prayer && adhanEnabled) {
+            String prayerName=key.substring("prayer_".length());
+            Intent audio=new Intent(context,AdhanPlaybackService.class);
+            audio.setAction(AdhanPlaybackService.ACTION_PLAY);
+            audio.putExtra("prayer",prayerName);
+            try {
+                if(Build.VERSION.SDK_INT>=26) context.startForegroundService(audio);
+                else context.startService(audio);
+            } catch(Exception ignored) {}
+        }
         NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if(Build.VERSION.SDK_INT>=26){NotificationChannel ch=new NotificationChannel(CHANNEL_ID,"تنبيهات زاد المسلم",NotificationManager.IMPORTANCE_HIGH);ch.setDescription("تنبيهات الصلاة والأذكار وقيام الليل");nm.createNotificationChannel(ch);}
+        String channelId=prayer?PRAYER_CHANNEL_ID:CHANNEL_ID;
+        if(Build.VERSION.SDK_INT>=26){
+            NotificationChannel ch;
+            if(prayer){
+                ch=new NotificationChannel(PRAYER_CHANNEL_ID,"مواعيد الصلاة",NotificationManager.IMPORTANCE_HIGH);
+                ch.setDescription("إشعار دخول وقت الصلاة؛ صوت الأذان يعمل بشكل مستقل");
+                ch.setSound(null,null);
+            } else {
+                ch=new NotificationChannel(CHANNEL_ID,"تنبيهات زاد المسلم",NotificationManager.IMPORTANCE_HIGH);
+                ch.setDescription("تنبيهات الأذكار وقيام الليل");
+            }
+            nm.createNotificationChannel(ch);
+        }
         Intent open=new Intent(context,MainActivity.class);
         PendingIntent content=PendingIntent.getActivity(context,0,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-        Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,CHANNEL_ID):new Notification.Builder(context);
-        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("قلبي اطمأن – زاد المسلم").setContentText(title==null?"تذكير من زاد المسلم":title).setAutoCancel(true).setContentIntent(content).setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
+        Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,channelId):new Notification.Builder(context);
+        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("قلبي اطمأن – زاد المسلم").setContentText(title==null?"تذكير من زاد المسلم":title).setAutoCancel(true).setContentIntent(content);
+        if(!prayer) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
         nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
-            android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
             String k=key.replace("daily_","");
-            if(p.getBoolean(k+"_enabled",false)) scheduleDaily(context,k,p.getInt(k+"_hour",7),p.getInt(k+"_minute",0),p.getString(k+"_title","تذكير من زاد المسلم"));
+            if(prefs.getBoolean(k+"_enabled",false)) scheduleDaily(context,k,prefs.getInt(k+"_hour",7),prefs.getInt(k+"_minute",0),prefs.getString(k+"_title","تذكير من زاد المسلم"));
         }
     }
 }
