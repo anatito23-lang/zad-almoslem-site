@@ -13,7 +13,9 @@ public class BootReceiver extends BroadcastReceiver {
         }
         for(String name:new String[]{"الفجر","الظهر","العصر","المغرب","العشاء"}) {
             long at=p.getLong("prayer_"+name,0L);
-            long now=System.currentTimeMillis();\n            while(at>0L && at<=now) at+=24L*60L*60L*1000L;\n            if(at>now) ReminderReceiver.schedulePrayer(context,name,at);
+            long now=System.currentTimeMillis();
+            while(at>0L && at<=now) at+=24L*60L*60L*1000L;
+            if(at>now) ReminderReceiver.schedulePrayer(context,name,at);
         }
     }
 }
