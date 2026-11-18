@@ -203,6 +203,20 @@ public class MainActivity extends Activity {
             String safe = safeVoice(voice);
             return new File(new File(getFilesDir(), "adhan"), safe + ".ogg");
         }
+        @JavascriptInterface public void playRadio(String stream, String label) {
+            String url = "backup".equals(stream) ? "https://qurango.net/radio/tarateel" :
+                "https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8";
+            Intent radio = new Intent(MainActivity.this, RadioPlaybackService.class);
+            radio.setAction(RadioPlaybackService.ACTION_PLAY);
+            radio.putExtra("url", url);
+            radio.putExtra("label", label == null ? "إذاعة القرآن الكريم" : label);
+            if (Build.VERSION.SDK_INT >= 26) startForegroundService(radio); else startService(radio);
+        }
+        @JavascriptInterface public void stopRadio() {
+            Intent radio = new Intent(MainActivity.this, RadioPlaybackService.class);
+            radio.setAction(RadioPlaybackService.ACTION_STOP);
+            startService(radio);
+        }
         @JavascriptInterface public void previewAdhan(String voice) {
             if (!isAdhanDownloaded(voice)) return;
             Intent audio = new Intent(MainActivity.this, AdhanPlaybackService.class);
