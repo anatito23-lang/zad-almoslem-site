@@ -58,7 +58,6 @@ public class ReminderReceiver extends BroadcastReceiver {
         String prayerName = prayer ? key.substring("prayer_".length()) : "";
         boolean thisPrayerEnabled = prayer && prefs.getBoolean("prayer_enabled_" + prayerName, true);
         if(prayer && adhanEnabled && thisPrayerEnabled) {
-            String prayerName=key.substring("prayer_".length());
             Intent audio=new Intent(context,AdhanPlaybackService.class);
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
             audio.putExtra("prayer",prayerName);
