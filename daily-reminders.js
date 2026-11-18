@@ -100,9 +100,12 @@
      const vals={morning:{enabled:$('morningReminderEnabled').checked,time:$('morningReminderTime').value,title:defaults.morning.title},qiyam:{enabled:$('qiyamReminderEnabled').checked,time:$('qiyamReminderTime').value,title:defaults.qiyam.title}};
      if(!vals.morning.time||!vals.qiyam.time){$('dailyReminderStatus').textContent='اختر وقتًا صحيحًا لكل تنبيه.';return;}
      Object.keys(vals).forEach(k=>{save(k,vals[k]);schedule(k,vals[k]);});
-     const adhanOn=$('adhanEnabled').checked;
-     localStorage.setItem('zad_adhan_enabled',String(adhanOn));
-     if(window.ZadAndroid) window.ZadAndroid.setAdhanEnabled(adhanOn);
+     const adhanControl=$('adhanEnabled');
+     if(adhanControl){
+       const adhanOn=adhanControl.checked;
+       localStorage.setItem('zad_adhan_enabled',String(adhanOn));
+       if(window.ZadAndroid) window.ZadAndroid.setAdhanEnabled(adhanOn);
+     }
      if(window.ZadAndroid){window.ZadAndroid.requestNotificationPermission();}
      else if('Notification' in window && Notification.permission==='default'){try{await Notification.requestPermission()}catch(e){}}
      $('dailyReminderStatus').textContent=window.ZadAndroid?'تم حفظ الإعدادات وجدولة التنبيهات على التطبيق.':'تم حفظ الإعدادات على هذا الجهاز. للتنبيه والتطبيق مغلق يلزم استخدام نسخة أندرويد التي تدعم التنبيهات.';
