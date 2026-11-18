@@ -4,10 +4,8 @@ const $=id=>document.getElementById(id), main=document.querySelector('main.wrap'
 const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp());
 if(nativeApp){document.getElementById('kids')?.remove();document.querySelectorAll('a[href="#kids"]').forEach(link=>link.remove());}
 else {
-  document.querySelectorAll('.adhan-settings').forEach(el=>el.remove());
-  document.querySelectorAll('#daily-reminder-settings .card').forEach(el=>{
-    if(el.querySelector('h3')?.textContent.includes('الأذان'))el.remove();
-  });
+  // Keep audio and reminder controls available on the website too.
+  // Browser-only limitations are reported by the controls when native Android APIs are unavailable.
 }
 if(!main||!header||$('zadAppPages'))return;
 document.querySelector('.bottom-nav:not(.zad-bottom-nav)')?.remove();
@@ -19,7 +17,7 @@ const footer=document.querySelector('footer');
 root.append(home);
 const items=[];
 meta.forEach(([id,title,icon])=>{if($(id))items.push({id,title,icon});});
-home.innerHTML='<div class="zad-home-brand"><span>۞</span><div><h1>زاد المسلم</h1><p>اختر القسم من شريط التنقل أسفل الشاشة</p></div></div><div class="zad-home-welcome"><span>﷽</span><p>زاد المسلم.. رفيقك في الذكر والعبادة وتلاوة القرآن الكريم.</p></div>';
+home.innerHTML='<div class="zad-home-brand"><span>۞</span><div><h1>زاد المسلم</h1><p>رفيقك اليومي للذكر والصلاة والقرآن</p></div></div><div class="zad-home-welcome"><span>﷽</span><h2>أهلًا بك في زاد المسلم</h2><p>اجعل لك من يومك نصيبًا من الصلاة والقرآن والذكر، وابدأ بخطوة تقرّبك إلى الله.</p></div><div class="zad-home-shortcuts"><h2>ابدأ يومك</h2><div class="zad-home-grid"><button type="button" data-home-go="prayer"><span>🕰️</span><b>مواقيت الصلاة</b><small>اعرف مواعيد الصلاة</small></button><button type="button" data-home-go="azkar"><span>☀️</span><b>الأذكار اليومية</b><small>أذكار الصباح والمساء</small></button><button type="button" data-home-go="quran"><span>📖</span><b>استماع القرآن</b><small>استمع إلى التلاوات</small></button><button type="button" data-home-go="mushaf"><span>۞</span><b>المصحف الشريف</b><small>افتح المصحف واقرأ</small></button><button type="button" data-home-go="qibla"><span>🧭</span><b>اتجاه القبلة</b><small>حدد اتجاه الكعبة</small></button><button type="button" data-home-go="reminders"><span>🔔</span><b>التنبيهات</b><small>نظّم تذكيراتك</small></button></div></div><div class="zad-home-daily"><span>🌿 تذكير اليوم</span><p>قال الله تعالى: ﴿أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ﴾</p><small>سورة الرعد — الآية ٢٨</small></div>';
 const more=document.createElement('section');more.className='zad-page';more.id='zad-page-more';more.dataset.page='more';more.innerHTML='<div class="zad-page-heading"><span>✦</span><div><h2>كل خدمات زاد المسلم</h2><p>اختر الخدمة لفتح صفحتها المستقلة.</p></div></div><div class="zad-more-grid" id="zadMoreGrid"></div>';
 root.append(pages,more);document.body.insertBefore(root,document.querySelector('.book-reader-modal')||document.body.firstChild);
 const panel=$('tasbeehPanel');
@@ -30,7 +28,7 @@ q.innerHTML='<div class="zad-page-heading"><span>🧭</span><div><h2>بوصلة 
 const settings=document.createElement('div');settings.className='zad-page';settings.id='zad-page-settings';settings.dataset.page='settings';
 settings.innerHTML='<div class="zad-page-heading"><span>⚙️</span><div><h2>إعدادات البرنامج</h2><p>تحكم في الصوت والتنبيهات والمظهر والكتابة من مكان واحد</p></div></div><section class="zad-settings-group"><h3>🔊 إعدادات الصوت والأذان</h3><p>اختيار المؤذن وإعدادات الأذان والصامت وقت الصلاة.</p><div id="zadAudioSettingsSlot"></div></section><section class="zad-settings-group"><h3>🌅 الأذكار الصوتية والتنبيهات</h3><p>مواعيد أذكار الصباح والمساء وقيام الليل.</p><div id="zadReminderSettingsSlot"></div></section><section class="zad-settings-group"><h3>🎨 المظهر والألوان</h3><p>اختر الشكل والألوان المناسبة لك، وسيتم حفظ اختيارك تلقائيًا.</p><div class="zad-theme-options"><button type="button" data-zad-theme="light">فاتح أخضر</button><button type="button" data-zad-theme="dark">داكن</button><button type="button" data-zad-theme="blue">أزرق</button><button type="button" data-zad-theme="sand">رملي</button></div></section><section class="zad-settings-group"><h3>🔤 الخط والكتابة</h3><label for="zadFontFamily">نوع الخط</label><select id="zadFontFamily"><option value="Tahoma,Arial,sans-serif">Tahoma</option><option value="Arial,sans-serif">Arial</option><option value="system-ui,sans-serif">خط الجهاز</option><option value="Georgia,serif">Georgia</option></select><label for="zadFontSize">حجم الكتابة: <b id="zadFontSizeValue">16</b>px</label><input id="zadFontSize" type="range" min="14" max="22" step="1" value="16"><p class="small">تغيير حجم الخط يطبق على نصوص البرنامج، مع الحفاظ على تنسيق المصحف.</p></section>';
 pages.append(settings);
-const settingsTile=document.createElement('button');settingsTile.type='button';settingsTile.className='zad-more-item';settingsTile.innerHTML='<span>⚙️</span><b>إعدادات البرنامج</b>';settingsTile.addEventListener('click',()=>showPage('settings'));
+home.querySelectorAll('[data-home-go]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.homeGo)));\nconst settingsTile=document.createElement('button');settingsTile.type='button';settingsTile.className='zad-more-item';settingsTile.innerHTML='<span>⚙️</span><b>إعدادات البرنامج</b>';settingsTile.addEventListener('click',()=>showPage('settings'));
 const cities={Cairo:[30.0444,31.2357,'القاهرة'],Zagazig:[30.5877,31.502,'الزقازيق'],Alexandria:[31.2001,29.9187,'الإسكندرية'],Giza:[30.0131,31.2089,'الجيزة'],Mansoura:[31.0409,31.3785,'المنصورة'],Tanta:[30.7865,31.0004,'طنطا'],Ismailia:[30.5965,32.2715,'الإسماعيلية'],Suez:[29.9668,32.5498,'السويس'],'Port Said':[31.2653,32.3019,'بورسعيد'],Asyut:[27.1809,31.1837,'أسيوط'],Luxor:[25.6872,32.6396,'الأقصر'],Aswan:[24.0889,32.8998,'أسوان']};
 const rad=d=>d*Math.PI/180,deg=r=>(r*180/Math.PI+360)%360,kaaba=[21.4225,39.8262];let coords=null,bearing=0,heading=null;
 function calc(lat,lon){const a=rad(lat),b=rad(kaaba[0]),dl=rad(kaaba[1]-lon);return deg(Math.atan2(Math.sin(dl)*Math.cos(b),Math.cos(a)*Math.sin(b)-Math.sin(a)*Math.cos(b)*Math.cos(dl)));}
@@ -82,7 +80,7 @@ body.zad-section-reading main.wrap>.section{padding-left:12px!important;padding-
 .zad-home-welcome p{margin:0;line-height:1.9;font-size:15px}
 `;
 css.textContent+=`
-.zad-settings-group{margin:14px 0;padding:16px;border:1px solid #e2eae2;border-radius:18px;background:var(--paper,#fff);color:var(--ink,#18332d)}
+.zad-home-shortcuts,.zad-home-daily{margin:16px 0;padding:18px;border-radius:20px;background:var(--paper,#fff);color:var(--ink,#18332d);border:1px solid var(--line,#e5ebe5)}.zad-home-shortcuts h2{margin:0 0 14px;font-size:20px}.zad-home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.zad-home-grid button{display:flex;flex-direction:column;align-items:flex-start;gap:5px;text-align:right;padding:15px 12px;border:1px solid var(--line,#e5ebe5);border-radius:16px;background:var(--soft,#eaf2ed);color:var(--ink,#18332d)}.zad-home-grid button span{font-size:25px}.zad-home-grid button b{font-size:14px}.zad-home-grid button small{font-size:11px;color:var(--muted,#71817b)}.zad-home-daily>span{font-weight:800;color:var(--green,#0c3b32)}.zad-home-daily p{font-size:18px;line-height:2;margin:8px 0}.zad-home-daily small{color:var(--muted,#71817b)}.zad-home-welcome h2{margin:5px 0;font-size:20px}.zad-home-welcome p{margin:5px 0}@media(min-width:650px){.zad-home-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}.zad-settings-group{margin:14px 0;padding:16px;border:1px solid #e2eae2;border-radius:18px;background:var(--paper,#fff);color:var(--ink,#18332d)}
 .zad-settings-group h3{margin:0 0 5px;color:var(--green,#0c3b32);font-size:17px}
 .zad-settings-group>p{margin:0 0 13px;color:var(--muted,#71817b);font-size:13px}
 .zad-settings-group label{display:block;margin:10px 0 5px;font-size:13px}
