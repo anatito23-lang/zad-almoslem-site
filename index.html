@@ -429,6 +429,76 @@ footer{background:#071522;color:#c9d6e2}
 
   
 
+
+  <section class="section" id="calendar">
+    <div class="section-head"><div><h2>التقويم الشهري</h2><p>التاريخ الميلادي وما يقابله بالهجري لكل يوم من أيام الشهر</p></div></div>
+    <div class="card monthly-calendar-card">
+      <div class="monthly-calendar-toolbar">
+        <button class="btn light" id="calendarPrev" type="button" aria-label="الشهر السابق">الشهر السابق</button>
+        <strong id="calendarMonthTitle" aria-live="polite">جارٍ تحميل التقويم...</strong>
+        <button class="btn light" id="calendarNext" type="button" aria-label="الشهر التالي">الشهر التالي</button>
+      </div>
+      <div class="monthly-calendar-legend"><span><i class="calendar-greg-dot"></i> ميلادي</span><span><i class="calendar-hijri-dot"></i> هجري</span></div>
+      <div class="monthly-calendar-grid" id="monthlyCalendarGrid" aria-label="أيام الشهر"></div>
+      <p class="small monthly-calendar-note">التاريخ الهجري محسوب بتقويم أم القرى على الجهاز، وقد يختلف يومًا عن إعلان الرؤية الشرعية في بعض البلدان.</p>
+    </div>
+  </section>
+  <style>
+    .monthly-calendar-toolbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-bottom:14px}
+    .monthly-calendar-toolbar strong{text-align:center;color:var(--green);font-size:17px}
+    .monthly-calendar-toolbar button{padding:8px 11px;font-size:12px}
+    .monthly-calendar-legend{display:flex;gap:16px;justify-content:center;margin:8px 0 12px;color:var(--muted);font-size:12px}
+    .monthly-calendar-legend span{display:flex;align-items:center;gap:5px}
+    .calendar-greg-dot,.calendar-hijri-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green)}
+    .calendar-hijri-dot{background:var(--gold)}
+    .monthly-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+    .monthly-calendar-weekday{text-align:center;padding:7px 1px;color:var(--muted);font-size:11px;font-weight:800}
+    .monthly-calendar-day{min-width:0;min-height:78px;padding:7px 3px;border:1px solid var(--line);border-radius:10px;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center}
+    .monthly-calendar-day.empty{visibility:hidden}
+    .monthly-calendar-day.today{border:2px solid var(--gold);background:var(--soft)}
+    .monthly-calendar-day .greg{font-size:17px;font-weight:900;color:var(--green);line-height:1.2}
+    .monthly-calendar-day .hijri{font-size:10px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
+    .monthly-calendar-day.today .greg{color:var(--green2)}
+    .monthly-calendar-note{margin:13px 0 0;text-align:center;line-height:1.7}
+    @media(max-width:420px){.monthly-calendar-grid{gap:3px}.monthly-calendar-day{min-height:68px;padding:5px 1px;border-radius:8px}.monthly-calendar-day .greg{font-size:15px}.monthly-calendar-day .hijri{font-size:9px}.monthly-calendar-weekday{font-size:10px}}
+  </style>
+  <script>
+  (function(){
+    const grid=document.getElementById('monthlyCalendarGrid');
+    if(!grid||grid.dataset.ready)return;
+    grid.dataset.ready='1';
+    const title=document.getElementById('calendarMonthTitle');
+    const today=new Date();
+    let shown=new Date(today.getFullYear(),today.getMonth(),1,12);
+    const weekdays=['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+    const hijriFormatter=new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{day:'numeric',month:'short'});
+    const gregFormatter=new Intl.DateTimeFormat('ar-EG',{month:'long',year:'numeric'});
+    function draw(){
+      const year=shown.getFullYear(),month=shown.getMonth();
+      title.textContent=gregFormatter.format(shown);
+      grid.innerHTML='';
+      weekdays.forEach(day=>{const h=document.createElement('div');h.className='monthly-calendar-weekday';h.textContent=day;grid.append(h);});
+      const firstOffset=(new Date(year,month,1,12).getDay()+1)%7;
+      const count=new Date(year,month+1,0,12).getDate();
+      for(let i=0;i<firstOffset;i++){const blank=document.createElement('div');blank.className='monthly-calendar-day empty';grid.append(blank);}
+      for(let day=1;day<=count;day++){
+        const date=new Date(year,month,day,12);
+        const cell=document.createElement('div');cell.className='monthly-calendar-day'+(date.toDateString()===today.toDateString()?' today':'');
+        const greg=document.createElement('strong');greg.className='greg';greg.textContent=new Intl.NumberFormat('ar-EG').format(day);
+        const hijri=document.createElement('span');hijri.className='hijri';
+        try{hijri.textContent=hijriFormatter.format(date)+' هـ';}catch(e){hijri.textContent='—';}
+        cell.append(greg,hijri);cell.title=new Intl.DateTimeFormat('ar-EG',{dateStyle:'full'}).format(date)+' — '+hijri.textContent;
+        grid.append(cell);
+      }
+      const remainder=grid.children.length%7;
+      if(remainder){for(let i=remainder;i<7;i++){const blank=document.createElement('div');blank.className='monthly-calendar-day empty';grid.append(blank);}}
+    }
+    document.getElementById('calendarPrev').addEventListener('click',()=>{shown.setMonth(shown.getMonth()-1);draw();});
+    document.getElementById('calendarNext').addEventListener('click',()=>{shown.setMonth(shown.getMonth()+1);draw();});
+    draw();
+  })();
+  </script>
+
   <section class="section" id="quran">
     <div class="section-head"><div><h2>القرآن الكريم — استماع فقط</h2><p>تلاوات لشيوخ مصر القدامى، من غير عرض نص الآيات أو البحث فيها</p></div></div>
     <div class="card">
