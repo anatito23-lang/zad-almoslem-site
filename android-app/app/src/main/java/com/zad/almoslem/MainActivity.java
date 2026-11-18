@@ -79,7 +79,7 @@ public class MainActivity extends Activity {
             ReminderReceiver.schedulePrayer(MainActivity.this,name,timestamp);
         }
         @JavascriptInterface public void setAdhanVoice(String voice) {
-            String safe = ("mustafa".equals(voice)||"fajr".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"beautiful".equals(voice)) ? voice : "sabah";
+            String safe = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)) ? voice : "sabah";
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_voice", safe).apply();
         }
         @JavascriptInterface public void setPrayerAdhanEnabled(String prayer, boolean enabled) {
@@ -131,72 +131,60 @@ public class MainActivity extends Activity {
             } catch(Exception e){return false;}
         }
         private String safeVoice(String voice) {
-            return ("mustafa".equals(voice)||"fajr".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"beautiful".equals(voice))?voice:"sabah";
+            return ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice))?voice:"sabah";
         }
         @JavascriptInterface public void downloadAdhan(String voice) {
-            final String safe = "beautiful".equals(voice) ? "beautiful" : "sabah";
+            final String safe = safeVoice(voice);
+            final String source;
+            switch (safe) {
+                case "basit": source = "https://archive.org/download/hay-hat.com_939/46.mp3"; break;
+                case "mustafa": source = "https://archive.org/download/hay-hat.com_939/50.mp3"; break;
+                case "husary": source = "https://archive.org/download/hay-hat.com_774/51.mp3"; break;
+                case "rifaat": source = "https://archive.org/download/hay-hat.com_774/57.mp3"; break;
+                default:
+                    runOnUiThread(() -> {
+                        if (webView != null) webView.evaluateJavascript(
+                            "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "',false,'مصدر هذا التسجيل لم يُعتمد بعد')", null);
+                    });
+                    return;
+            }
             new Thread(() -> {
                 boolean ok = false;
+                String error = "تعذر الاتصال بمصدر الصوت";
                 HttpURLConnection connection = null;
                 File dir = new File(getFilesDir(), "adhan");
                 File temp = new File(dir, safe + ".download");
-                File target = new File(dir, safe + ".ogg");
-                String error = "تعذر الاتصال بمصدر الصوت";
+                File target = new File(dir, safe + ".mp3");
                 try {
                     if (!dir.exists() && !dir.mkdirs()) throw new Exception("تعذر إنشاء مجلد الصوت");
-                    String fileName = "beautiful".equals(safe) ? "Beautiful_adhan.ogg" : "Adhan.ogg";
-                    String[] sources = new String[] {
-                            "https://commons.wikimedia.org/wiki/Special:Redirect/file/" + fileName,
-                            "https://upload.wikimedia.org/wikipedia/commons/" +
-                                    ("beautiful".equals(safe) ? "b/b0/Beautiful_adhan.ogg" : "e/e7/Adhan.ogg")
-                    };
-                    Exception lastError = null;
-                    for (String source : sources) {
-                        try {
-                            if (connection != null) connection.disconnect();
-                            if (temp.exists()) temp.delete();
-                            connection = (HttpURLConnection) new URL(source).openConnection();
-                            connection.setConnectTimeout(25000);
-                            connection.setReadTimeout(45000);
-                            connection.setInstanceFollowRedirects(true);
-                            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) ZadAlmoslem/1.1");
-                            connection.setRequestProperty("Accept", "audio/ogg, application/ogg, application/octet-stream, */*");
-                            int status = connection.getResponseCode();
-                            if (status != HttpURLConnection.HTTP_OK) throw new Exception("استجابة المصدر: " + status);
-                            String type = connection.getContentType();
-                            if (type == null || !(type.toLowerCase().contains("audio") || type.toLowerCase().contains("ogg") || type.toLowerCase().contains("octet-stream"))) {
-                                throw new Exception("المصدر لم يُرجع ملفًا صوتيًا (" + type + ")");
-                            }
-                            int length = connection.getContentLength();
-                            if (length > 8 * 1024 * 1024) throw new Exception("حجم الملف أكبر من المسموح");
-                            try (InputStream in = connection.getInputStream();
-                                 FileOutputStream out = new FileOutputStream(temp)) {
-                                byte[] buffer = new byte[8192];
-                                int count;
-                                long total = 0;
-                                while ((count = in.read(buffer)) != -1) {
-                                    total += count;
-                                    if (total > 8L * 1024L * 1024L) throw new Exception("حجم الملف أكبر من المسموح");
-                                    out.write(buffer, 0, count);
-                                }
-                                out.getFD().sync();
-                                if (total < 10000) throw new Exception("ملف الصوت غير مكتمل");
-                            }
-                            lastError = null;
-                            break;
-                        } catch (Exception attemptError) {
-                            lastError = attemptError;
-                        } finally {
-                            if (connection != null) connection.disconnect();
-                            connection = null;
-                        }
+                    connection = (HttpURLConnection) new URL(source).openConnection();
+                    connection.setConnectTimeout(20000);
+                    connection.setReadTimeout(45000);
+                    connection.setInstanceFollowRedirects(true);
+                    connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
+                    int status = connection.getResponseCode();
+                    if (status != HttpURLConnection.HTTP_OK) throw new Exception("استجابة مصدر الصوت: " + status);
+                    String type = connection.getContentType();
+                    if (type == null || !(type.toLowerCase().contains("audio") || type.toLowerCase().contains("mpeg") || type.toLowerCase().contains("octet-stream"))) {
+                        throw new Exception("المصدر لم يُرجع ملف MP3 صالحًا");
                     }
-                    if (lastError != null) throw lastError;
-                    if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال الملف القديم");
-                    if (!temp.renameTo(target)) throw new Exception("تعذر حفظ ملف الصوت");
+                    long total = 0;
+                    try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
+                        byte[] buffer = new byte[8192];
+                        int count;
+                        while ((count = in.read(buffer)) != -1) {
+                            total += count;
+                            if (total > 12L * 1024L * 1024L) throw new Exception("حجم الملف أكبر من المسموح");
+                            out.write(buffer, 0, count);
+                        }
+                        out.getFD().sync();
+                    }
+                    if (total < 10000) throw new Exception("ملف الصوت غير مكتمل");
+                    if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال التسجيل القديم");
+                    if (!temp.renameTo(target)) throw new Exception("تعذر حفظ التسجيل على الجهاز");
                     ok = true;
                 } catch (Exception e) {
-                    error = e.getMessage() == null ? "فشل تنزيل الملف" : e.getMessage();
+                    error = e.getMessage() == null ? "فشل تنزيل التسجيل" : e.getMessage();
                     if (temp.exists()) temp.delete();
                 } finally {
                     if (connection != null) connection.disconnect();
@@ -205,7 +193,7 @@ public class MainActivity extends Activity {
                 final String reason = error;
                 runOnUiThread(() -> {
                     if (webView != null) webView.evaluateJavascript(
-                            "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "'," + result + "," + org.json.JSONObject.quote(reason) + ")", null);
+                        "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "'," + result + "," + org.json.JSONObject.quote(reason) + ")", null);
                 });
             }).start();
         }
