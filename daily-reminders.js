@@ -25,8 +25,36 @@
    const adhanOn=localStorage.getItem('zad_adhan_enabled');
    if($('adhanEnabled'))$('adhanEnabled').checked=adhanOn===null?true:adhanOn==='true';
    document.querySelectorAll('.prayer-alert').forEach(el=>{const v=localStorage.getItem('zad_prayer_alert_'+el.dataset.prayer);el.checked=v===null?true:v==='true';});
-   if(previewBtn)previewBtn.addEventListener('click',()=>{preview.src=adhanSources[voice.value]||adhanSources.sabah;preview.play().catch(()=>{$('adhanSettingsStatus').textContent='اضغط مرة أخرى للسماح بتشغيل الصوت.';});});
-   if(voice)voice.addEventListener('change',()=>{preview.pause();preview.currentTime=0;});
+   const downloadBtn=$('downloadAdhan');
+   function updateAdhanDownloadState(){
+     if(!window.ZadAndroid||!voice||!downloadBtn)return;
+     const ready=window.ZadAndroid.isAdhanDownloaded(voice.value);
+     downloadBtn.textContent=ready?'تم التحميل ✓ — إعادة التحميل':'تحميل للعمل دون إنترنت';
+     if(ready)$('adhanSettingsStatus').textContent='التسجيل محفوظ على هذا الجهاز ويعمل دون إنترنت.';
+   }
+   window.onAdhanDownloadComplete=function(which,ok){
+     if(!voice||which!==voice.value)return;
+     $('adhanSettingsStatus').textContent=ok?'اكتمل التحميل. أصبح الأذان محفوظًا على الجهاز ويعمل دون إنترنت.':'تعذر التحميل. تحقق من اتصال الإنترنت ثم حاول مرة أخرى.';
+     if(downloadBtn)downloadBtn.disabled=false;
+     updateAdhanDownloadState();
+   };
+   if(downloadBtn)downloadBtn.addEventListener('click',()=>{
+     if(!window.ZadAndroid){$('adhanSettingsStatus').textContent='تحميل الأذان دون إنترنت متاح داخل تطبيق أندرويد فقط.';return;}
+     downloadBtn.disabled=true;
+     $('adhanSettingsStatus').textContent='جارٍ تحميل ملف الأذان وحفظه على الجهاز...';
+     window.ZadAndroid.downloadAdhan(voice.value);
+   });
+   if(previewBtn)previewBtn.addEventListener('click',()=>{
+     if(window.ZadAndroid){
+       if(window.ZadAndroid.isAdhanDownloaded(voice.value)){window.ZadAndroid.previewAdhan(voice.value);$('adhanSettingsStatus').textContent='يتم تشغيل معاينة الأذان من الملف المحفوظ على الجهاز.';}
+       else $('adhanSettingsStatus').textContent='حمّل صوت الأذان أولًا ليعمل من داخل التطبيق دون إنترنت.';
+       return;
+     }
+     preview.src=adhanSources[voice.value]||adhanSources.sabah;
+     preview.play().catch(()=>{$('adhanSettingsStatus').textContent='اضغط مرة أخرى للسماح بتشغيل الصوت.';});
+   });
+   if(voice)voice.addEventListener('change',()=>{preview.pause();preview.currentTime=0;updateAdhanDownloadState();});
+   updateAdhanDownloadState();
    const saveAdhan=$('saveAdhanSettings');
    if(saveAdhan)saveAdhan.addEventListener('click',()=>{
      const enabled=$('adhanEnabled').checked, selected=voice.value;
