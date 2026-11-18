@@ -1,10 +1,10 @@
-const CACHE_NAME = "zad-almoslem-shell-v25";
+const CACHE_NAME = "zad-almoslem-shell-v26";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./daily-reminders.js", "./app-pages.js"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME && key !== "zad-mushaf-offline-pages-v1").map(key => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME && key !== "zad-mushaf-offline-pages-v2").map(key => caches.delete(key)))).then(() => self.clients.claim()));
 });
 self.addEventListener("fetch", event => {
   const request = event.request;
@@ -13,14 +13,14 @@ self.addEventListener("fetch", event => {
   const isMushafPage =
     (url.origin === "https://raw.githubusercontent.com" &&
       (url.pathname.startsWith("/Miftah-Fentaw/Quran_webp/main/png/") ||
-       url.pathname.startsWith("/Miftah-Fentaw/Quran-Images/main/png/")) &&
+       url.pathname.startsWith("/Miftah-Fentaw/Quran_webp/main/png/")) &&
       url.pathname.endsWith(".png")) ||
     (url.origin === "https://cdn.jsdelivr.net" &&
-      url.pathname.startsWith("/gh/Miftah-Fentaw/Quran-Images@main/png/") &&
+      url.pathname.startsWith("/gh/Miftah-Fentaw/Quran_webp@main/png/") &&
       url.pathname.endsWith(".png"));
   if (isMushafPage) {
     event.respondWith((async () => {
-      const cache = await caches.open("zad-mushaf-offline-pages-v1");
+      const cache = await caches.open("zad-mushaf-offline-pages-v2");
       const saved = await cache.match(request);
       if (saved) return saved;
       try {
