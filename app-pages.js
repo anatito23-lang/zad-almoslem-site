@@ -71,7 +71,7 @@ body.zad-virtual-reading{padding:0!important;margin:0!important;overflow:hidden!
 body.zad-virtual-reading #zadAppPages{display:block!important;position:fixed!important;inset:0!important;z-index:99998!important;overflow-y:auto!important;padding:calc(env(safe-area-inset-top) + 54px) 0 calc(env(safe-area-inset-bottom) + 12px)!important;background:#f7f8f5!important;box-sizing:border-box!important}
 body.zad-virtual-reading #zadAppPages .zad-page.is-active{display:block!important;min-height:calc(100dvh - 66px)!important;padding:14px!important}
 
-body.zad-section-reading header.hero,body.zad-section-reading footer,body.zad-section-reading .zad-bottom-nav,body.zad-section-reading .top,body.zad-section-reading .azkar-ticker{display:none!important}
+body.zad-section-reading header.hero,body.zad-section-reading footer,body.zad-section-reading .top,body.zad-section-reading .azkar-ticker{display:none!important}\nbody.zad-section-reading .zad-bottom-nav{display:flex!important;position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:100000!important}
 body.zad-section-reading #zadAppPages{display:none!important}
 body.zad-section-reading main.wrap{display:block!important;position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-width:none!important;margin:0!important;padding:calc(env(safe-area-inset-top) + 54px) 0 calc(env(safe-area-inset-bottom) + 12px)!important;overflow-y:auto!important;overscroll-behavior:contain!important;background:#f7f8f5!important;z-index:99998!important;box-sizing:border-box!important}
 body.zad-section-reading main.wrap>*{max-width:100%!important}
