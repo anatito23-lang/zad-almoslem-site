@@ -34,9 +34,14 @@ public class MainActivity extends Activity {
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setLoadsImagesAutomatically(true);
         s.setAllowFileAccess(false);
+        s.setGeolocationEnabled(true);
         webView.addJavascriptInterface(new ReminderBridge(), "ZadAndroid");
         webView.setWebViewClient(new WebViewClient());
-        webView.setWebChromeClient(new WebChromeClient());
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override public void onGeolocationPermissionsShowPrompt(String origin, android.webkit.GeolocationPermissions.Callback callback) {
+                callback.invoke(origin, true, false);
+            }
+        });
         setContentView(webView);
         webView.loadUrl("https://anatito23-lang.github.io/zad-almoslem-site/");
         requestNotificationPermission();
