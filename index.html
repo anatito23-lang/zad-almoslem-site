@@ -932,7 +932,7 @@ async function loadPrayer(){
   window.zadPrayerTimings=t;
   if(window.ZadAndroid){
    const now=new Date(),prayers=[['الفجر','Fajr'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']];
-   prayers.forEach(([name,key])=>{const parts=t[key].split(' ')[0].split(':').map(Number);const at=new Date(now.getFullYear(),now.getMonth(),now.getDate(),parts[0],parts[1]).getTime();if(at>Date.now())window.ZadAndroid.schedulePrayer(name,at);});
+   prayers.forEach(([name,key])=>{const parts=t[key].split(' ')[0].split(':').map(Number);const at=new Date(now.getFullYear(),now.getMonth(),now.getDate(),parts[0],parts[1]).getTime();if(at>Date.now())window.ZadAndroid.schedulePrayer(name,at);});const tomorrow=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);getTomorrowPrayerTimings(tomorrow,city).then(tt=>prayers.forEach(([name,key])=>{const parts=tt[key].split(' ')[0].split(':').map(Number);const at=new Date(tomorrow.getFullYear(),tomorrow.getMonth(),tomorrow.getDate(),parts[0],parts[1]).getTime();window.ZadAndroid.schedulePrayer(name,at);})).catch(()=>{});
   }
   if($('qiyamReminderTime')&&!$('qiyamReminderTime').dataset.userEdited){const parts=t.Fajr.split(' ')[0].split(':').map(Number);const q=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),parts[0],parts[1]-30);$('qiyamReminderTime').value=String(q.getHours()).padStart(2,'0')+':'+String(q.getMinutes()).padStart(2,'0');if(window.ZadAndroid&&$('qiyamReminderEnabled').checked)window.ZadAndroid.scheduleDailyReminder('qiyam',q.getHours(),q.getMinutes(),'تذكير بقيام الليل');}
   window.zadPrayerDate=j.data.date.gregorian.date;
