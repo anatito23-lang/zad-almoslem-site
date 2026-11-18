@@ -1499,6 +1499,8 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
 <script>
 // Full-page translation. Quran listening section and Quran page image remain Arabic.
 function googleTranslateElementInit(){
+  // Google Translate honors notranslate / translate=no on protected Quran content.
+  ['quran','mushafPageImage','mushafSwipeArea'].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.add('notranslate');el.setAttribute('translate','no');}});
   if(window.google&&google.translate){
     new google.translate.TranslateElement({pageLanguage:'ar',includedLanguages:'en,fr,tr,id,ur,es',autoDisplay:false},'google_translate_element');
     setTimeout(syncZadGoogleLanguage,900);
