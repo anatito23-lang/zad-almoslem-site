@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-almoslem-shell-v20";
+const CACHE_NAME = "zad-almoslem-shell-v21";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./daily-reminders.js", "./app-pages.js"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
@@ -10,9 +10,14 @@ self.addEventListener("fetch", event => {
   const request = event.request;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
-  const isMushafPage = url.origin === "https://cdn.jsdelivr.net" &&
-    url.pathname.startsWith("/gh/Miftah-Fentaw/Quran-Images@main/png/") &&
-    url.pathname.endsWith(".png");
+  const isMushafPage =
+    (url.origin === "https://raw.githubusercontent.com" &&
+      (url.pathname.startsWith("/Miftah-Fentaw/Quran_webp/main/png/") ||
+       url.pathname.startsWith("/Miftah-Fentaw/Quran-Images/main/png/")) &&
+      url.pathname.endsWith(".png")) ||
+    (url.origin === "https://cdn.jsdelivr.net" &&
+      url.pathname.startsWith("/gh/Miftah-Fentaw/Quran-Images@main/png/") &&
+      url.pathname.endsWith(".png"));
   if (isMushafPage) {
     event.respondWith((async () => {
       const cache = await caches.open("zad-mushaf-offline-pages-v1");
