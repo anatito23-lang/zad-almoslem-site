@@ -1402,6 +1402,8 @@ nasheedAudio.addEventListener('error',()=>{
 <style>
 #zadLanguagePicker{appearance:none!important;position:fixed!important;top:62px!important;right:12px!important;z-index:99998!important;display:block!important;visibility:visible!important;opacity:1!important;min-width:108px!important;width:auto!important;padding:6px 25px 6px 9px!important;border:1px solid #c8a96b!important;border-radius:9px!important;background:#f7f1df!important;color:#31584c!important;font-weight:700!important;font-size:12px!important;line-height:1.5!important;box-shadow:0 2px 9px #172f281c!important;cursor:pointer!important;background-image:linear-gradient(45deg,transparent 50%,#31584c 50%),linear-gradient(135deg,#31584c 50%,transparent 50%)!important;background-position:calc(100% - 12px) 50%,calc(100% - 8px) 50%!important;background-size:4px 4px,4px 4px!important;background-repeat:no-repeat!important}
 #zadLanguagePicker option{color:#18332d;background:#fff}
+#quran,.mushaf-page-frame,.mushaf-page-frame img,.ayah-text,.quran-text{translate:no!important;-webkit-translate:no!important}
+#google_translate_element{position:fixed!important;left:-10000px!important;top:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
 html[dir="ltr"] body{direction:ltr}
 html[dir="ltr"] .article{border-right:0;border-left:3px solid var(--gold)}
 html[dir="ltr"] .section h2:before{margin-left:0;margin-right:10px}
@@ -1473,7 +1475,7 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
   textNodes.forEach(node=>{
    const original=originals.get(node);if(original===undefined)return;
    const key=original.trim();
-   const translated=idx<0?key:(phrases[key]&&phrases[key][idx]);
+   const translated=key; // Keep Arabic source text intact; full-page translator handles localization.
    if(translated)node.nodeValue=original.replace(key,translated);
   });
   document.querySelectorAll('[data-i18n-original]').forEach(el=>{
@@ -1493,5 +1495,25 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
  translate(saved&&languages.some(l=>l.code===saved)?saved:supported);
 })();
 </script>
+
+<script>
+// Full-page translation. Quran listening section and Quran page image remain Arabic.
+function googleTranslateElementInit(){
+  if(window.google&&google.translate){
+    new google.translate.TranslateElement({pageLanguage:'ar',includedLanguages:'en,fr,tr,id,ur,es',autoDisplay:false},'google_translate_element');
+    setTimeout(syncZadGoogleLanguage,900);
+  }
+}
+function syncZadGoogleLanguage(){
+  const picker=document.getElementById('zadLanguagePicker');
+  const combo=document.querySelector('.goog-te-combo');
+  if(!picker||!combo)return;
+  const lang=picker.value==='ar'?'':picker.value;
+  if(combo.value!==lang){combo.value=lang;combo.dispatchEvent(new Event('change'));}
+}
+document.addEventListener('change',e=>{if(e.target&&e.target.id==='zadLanguagePicker'){let tries=0;const timer=setInterval(()=>{syncZadGoogleLanguage();if(document.querySelector('.goog-te-combo')||++tries>20)clearInterval(timer);},300);}});
+</script>
+<div id="google_translate_element" aria-hidden="true"></div>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
 </body>
 </html>
