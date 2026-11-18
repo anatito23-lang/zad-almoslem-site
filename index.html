@@ -934,7 +934,7 @@ async function loadPrayer(){
    const now=new Date(),prayers=[['الفجر','Fajr'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']];
    prayers.forEach(([name,key])=>{const parts=t[key].split(' ')[0].split(':').map(Number);const at=new Date(now.getFullYear(),now.getMonth(),now.getDate(),parts[0],parts[1]).getTime();if(at>Date.now())window.ZadAndroid.schedulePrayer(name,at);});
   }
-  if($('qiyamReminderTime')&&!$('qiyamReminderTime').dataset.userEdited){const parts=t.Fajr.split(' ')[0].split(':').map(Number);const q=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),parts[0],parts[1]-30);$('qiyamReminderTime').value=String(q.getHours()).padStart(2,'0')+':'+String(q.getMinutes()).padStart(2,'0');}
+  if($('qiyamReminderTime')&&!$('qiyamReminderTime').dataset.userEdited){const parts=t.Fajr.split(' ')[0].split(':').map(Number);const q=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),parts[0],parts[1]-30);$('qiyamReminderTime').value=String(q.getHours()).padStart(2,'0')+':'+String(q.getMinutes()).padStart(2,'0');if(window.ZadAndroid&&$('qiyamReminderEnabled').checked)window.ZadAndroid.scheduleDailyReminder('qiyam',q.getHours(),q.getMinutes(),'تذكير بقيام الليل');}
   window.zadPrayerDate=j.data.date.gregorian.date;
   countdownDayKey=localDayKey(new Date());
   tomorrowPrayerCache={key:'',timings:null};
