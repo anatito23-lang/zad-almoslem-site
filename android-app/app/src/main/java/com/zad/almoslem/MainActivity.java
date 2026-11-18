@@ -53,6 +53,7 @@ public class MainActivity extends Activity {
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST);
     }
     private class ReminderBridge {
+        @JavascriptInterface public boolean isNativeApp() { return true; }
         @JavascriptInterface public void scheduleDailyReminder(String key,int hour,int minute,String title) {
             ReminderReceiver.scheduleDaily(MainActivity.this,key,hour,minute,title);
         }
