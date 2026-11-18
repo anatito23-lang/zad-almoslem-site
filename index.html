@@ -1398,5 +1398,102 @@ nasheedAudio.addEventListener('error',()=>{
 });
 
 </script>
+
+<style>
+#zadLanguagePicker{appearance:auto;min-width:145px;padding:9px 12px;border:1px solid #ffffff55;border-radius:11px;background:#ffffff16;color:#fff;font-weight:700}
+#zadLanguagePicker option{color:#18332d;background:#fff}
+html[dir="ltr"] body{direction:ltr}
+html[dir="ltr"] .article{border-right:0;border-left:3px solid var(--gold)}
+html[dir="ltr"] .section h2:before{margin-left:0;margin-right:10px}
+html[dir="ltr"] .kid-steps{padding-right:0;padding-left:22px}
+html[dir="ltr"] .mushaf-text{direction:rtl}
+</style>
+<script>
+(function(){
+ const languages=[
+  {code:'ar',label:'العربية',dir:'rtl'},
+  {code:'en',label:'English',dir:'ltr'},
+  {code:'fr',label:'Français',dir:'ltr'},
+  {code:'tr',label:'Türkçe',dir:'ltr'},
+  {code:'id',label:'Bahasa Indonesia',dir:'ltr'},
+  {code:'ur',label:'اردو',dir:'rtl'},
+  {code:'es',label:'Español',dir:'ltr'}
+ ];
+ const phrases={
+ 'مواقيت الصلاة':['Prayer Times','Horaires de prière','Namaz Vakitleri','Waktu Salat','نماز کے اوقات','Horarios de oración'],
+ 'القرآن الكريم — استماع فقط':['The Holy Quran — Audio','Le Saint Coran — Écoute','Kur’an-ı Kerim — Dinleme','Al-Qur’an — Audio','قرآن کریم — سماعت','El Sagrado Corán — Audio'],
+ 'الإنشاد الديني والابتهالات':['Islamic Chants & Supplications','Chants religieux et invocations','İslami İlahi ve Münacatlar','Nasyid & Munajat','نعت و مناجات','Cantos e invocaciones islámicas'],
+ 'المصحف الشريف كاملًا':['Complete Mushaf','Le Mushaf complet','Tam Mushaf','Mushaf Lengkap','مکمل مصحف','Mushaf completo'],
+ 'الرقية الشرعية — استماع مباشر':['Ruqyah — Listen Live','Ruqya — Écoute directe','Rukye — Canlı Dinle','Ruqyah — Dengarkan','شرعی رقیہ — براہِ راست سماعت','Ruqia — Escucha directa'],
+ 'إذاعة القرآن الكريم من القاهرة':['Quran Radio from Cairo','Radio du Coran du Caire','Kahire Kur’an Radyosu','Radio Al-Qur’an Kairo','قاہرہ سے قرآن ریڈیو','Radio del Corán de El Cairo'],
+ 'الأذكار اليومية':['Daily Adhkar','Invocations quotidiennes','Günlük Zikirler','Zikir Harian','روزانہ اذکار','Adhkar diarios'],
+ 'مكتبة الكتب الإسلامية':['Islamic Book Library','Bibliothèque de livres islamiques','İslami Kitaplık','Perpustakaan Buku Islam','اسلامی کتب خانہ','Biblioteca de libros islámicos'],
+ 'ركن الأطفال — نتعلم ونمرح':['Kids’ Corner — Learn & Play','Espace enfants — apprendre et jouer','Çocuk Köşesi — Öğren ve Eğlen','Ruang Anak — Belajar & Bermain','بچوں کا گوشہ — سیکھیں اور کھیلیں','Rincón infantil — aprender y jugar'],
+ 'التذكير والتنبيه الصوتي':['Reminders & Audio Alerts','Rappels et alertes audio','Hatırlatmalar ve Sesli Uyarılar','Pengingat & Notifikasi Suara','یاد دہانی اور صوتی تنبیہ','Recordatorios y alertas de audio'],
+ 'السنة النبوية والأدعية':['Prophetic Sunnah & Duas','Sunna prophétique et invocations','Peygamberimizin Sünneti ve Dualar','Sunnah Nabi & Doa','سنتِ نبوی اور دعائیں','Sunna profética y súplicas'],
+ 'وردي اليومي':['My Daily Wird','Mon wird quotidien','Günlük Virdim','Wirid Harian Saya','میرا روزانہ ورد','Mi wird diario'],
+ 'ورد يوم الجمعة':['Friday Wird','Wird du vendredi','Cuma Virdi','Wirid Jumat','جمعہ کا ورد','Wird del viernes'],
+ 'فتح المصحف':['Open Mushaf','Ouvrir le Mushaf','Mushafı Aç','Buka Mushaf','مصحف کھولیں','Abrir Mushaf'],
+ 'استمع الآن':['Listen Now','Écouter maintenant','Şimdi Dinle','Dengarkan Sekarang','ابھی سنیں','Escuchar ahora'],
+ 'افتح الأذكار':['Open Adhkar','Ouvrir les invocations','Zikirleri Aç','Buka Zikir','اذکار کھولیں','Abrir adhkar'],
+ 'إغلاق':['Close','Fermer','Kapat','Tutup','بند کریں','Cerrar'],
+ 'كل الكتب':['All Books','Tous les livres','Tüm Kitaplar','Semua Buku','تمام کتابیں','Todos los libros'],
+ 'كتب الفقه':['Fiqh Books','Livres de fiqh','Fıkıh Kitapları','Buku Fikih','فقہ کی کتابیں','Libros de fiqh'],
+ 'كتب السيرة':['Seerah Books','Livres de sîra','Siyer Kitapları','Buku Sirah','سیرت کی کتابیں','Libros de sira'],
+ 'كتب التفسير':['Tafsir Books','Livres de tafsir','Tefsir Kitapları','Buku Tafsir','تفسیر کی کتابیں','Libros de tafsir'],
+ 'اقرأ داخل الموقع':['Read on this site','Lire sur ce site','Sitede Oku','Baca di Situs Ini','سائٹ پر پڑھیں','Leer en este sitio'],
+ 'الصفحة السابقة':['Previous Page','Page précédente','Önceki Sayfa','Halaman Sebelumnya','پچھلا صفحہ','Página anterior'],
+ 'الصفحة التالية':['Next Page','Page suivante','Sonraki Sayfa','Halaman Berikutnya','اگلا صفحہ','Página siguiente'],
+ 'رقم الصفحة':['Page Number','Numéro de page','Sayfa Numarası','Nomor Halaman','صفحہ نمبر','Número de página'],
+ 'اذهب':['Go','Aller','Git','Buka','جائیں','Ir'],
+ 'أذكار الصباح':['Morning Adhkar','Invocations du matin','Sabah Zikirleri','Zikir Pagi','صبح کے اذکار','Adhkar de la mañana'],
+ 'أذكار المساء':['Evening Adhkar','Invocations du soir','Akşam Zikirleri','Zikir Petang','شام کے اذکار','Adhkar de la tarde'],
+ 'أذكار بعد الصلاة':['Adhkar After Prayer','Invocations après la prière','Namaz Sonrası Zikirler','Zikir Setelah Salat','نماز کے بعد اذکار','Adhkar después de la oración'],
+ 'حديث آخر':['Another Hadith','Autre hadith','Başka Hadis','Hadis Lainnya','ایک اور حدیث','Otro hadiz'],
+ 'دعاء آخر':['Another Dua','Autre invocation','Başka Dua','Doa Lainnya','ایک اور دعا','Otra súplica'],
+ 'احسب الورد':['Calculate Daily Portion','Calculer la portion','Günlük Okumayı Hesapla','Hitung Bacaan Harian','روزانہ کا حصہ شمار کریں','Calcular la lectura diaria'],
+ 'تشغيل تنبيه الصلاة':['Enable Prayer Alert','Activer l’alerte de prière','Namaz Bildirimini Aç','Aktifkan Pengingat Salat','نماز کی اطلاع چلائیں','Activar aviso de oración'],
+ 'تشغيل التذكير الصوتي':['Enable Audio Reminder','Activer le rappel audio','Sesli Hatırlatmayı Aç','Aktifkan Pengingat Suara','صوتی یاد دہانی چلائیں','Activar recordatorio de audio'],
+ 'تجربة الصوت الآن':['Test Audio Now','Tester le son','Sesi Dene','Uji Suara','ابھی آواز آزمائیں','Probar audio ahora'],
+ 'إيقاف':['Stop','Arrêter','Durdur','Matikan','بند کریں','Detener'],
+ 'أدوات ومحتوى إضافي':['Tools & More Content','Outils et contenu supplémentaire','Araçlar ve Ek İçerik','Alat & Konten Tambahan','اوزار اور اضافی مواد','Herramientas y contenido adicional'],
+ 'السيرة النبوية والأدعية':['Prophetic Sunnah & Duas','Sunna prophétique et invocations','Peygamberimizin Sünneti ve Dualar','Sunnah Nabi & Doa','سنتِ نبوی اور دعائیں','Sunna profética y súplicas']
+ };
+ const langIndex={ar:-1,en:0,fr:1,tr:2,id:3,ur:4,es:5};
+ const originals=new WeakMap();
+ const textNodes=[];
+ const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+ while(walker.nextNode()) textNodes.push(walker.currentNode);
+ textNodes.forEach(node=>{const value=node.nodeValue.trim();if(value)originals.set(node,node.nodeValue)});
+ function translate(code){
+  const idx=langIndex[code];
+  document.documentElement.lang=code;
+  document.documentElement.dir=languages.find(x=>x.code===code).dir;
+  document.title=code==='ar'?'قلبي اطمأن وزاد المسلم | موقع إسلامي شامل':({en:'Qalbi Itma’an | Zad Almoslem',fr:'Qalbi Itma’an | Zad Almoslem',tr:'Qalbi Itma’an | Zad Almoslem',id:'Qalbi Itma’an | Zad Almoslem',ur:'قلبي اطمأن | زاد المسلم',es:'Qalbi Itma’an | Zad Almoslem'}[code]||document.title);
+  textNodes.forEach(node=>{
+   const original=originals.get(node);if(original===undefined)return;
+   const key=original.trim();
+   const translated=idx<0?key:(phrases[key]&&phrases[key][idx]);
+   if(translated)node.nodeValue=original.replace(key,translated);
+  });
+  document.querySelectorAll('[data-i18n-original]').forEach(el=>{
+   const key=el.getAttribute('data-i18n-original');if(key)el.textContent=idx<0?key:((phrases[key]&&phrases[key][idx])||key);
+  });
+  const picker=document.getElementById('zadLanguagePicker');if(picker&&picker.value!==code)picker.value=code;
+  localStorage.setItem('zad_language',code);
+ }
+ const top=document.querySelector('.top');
+ if(!top)return;
+ const picker=document.createElement('select');
+ picker.id='zadLanguagePicker';picker.setAttribute('aria-label','Choose language');
+ languages.forEach(l=>{const option=document.createElement('option');option.value=l.code;option.textContent=l.label;picker.appendChild(option)});
+ top.appendChild(picker);
+ picker.addEventListener('change',()=>translate(picker.value));
+ const saved=localStorage.getItem('zad_language');
+ const browser=(navigator.language||'ar').toLowerCase().split('-')[0];
+ const supported=languages.some(l=>l.code===browser)?browser:'ar';
+ translate(saved&&languages.some(l=>l.code===saved)?saved:supported);
+})();
+</script>
 </body>
 </html>
