@@ -87,9 +87,9 @@ public class ReminderAudioService extends Service {
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
             player.setOnCompletionListener(mp -> finishPlayback());
             player.setOnErrorListener((mp, what, extra) -> { finishPlayback(); return true; });
+            player.setOnPreparedListener(MediaPlayer::start);
             player.setDataSource(file.getAbsolutePath());
             player.prepareAsync();
-            player.setOnPreparedListener(MediaPlayer::start);
         } catch (Exception e) { finishPlayback(); }
     }
 
