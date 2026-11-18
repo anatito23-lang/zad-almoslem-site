@@ -11,6 +11,7 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
+import java.io.File;
 
 public class AdhanPlaybackService extends Service {
     public static final String ACTION_PLAY = "com.zad.almoslem.PLAY_ADHAN";
@@ -73,10 +74,14 @@ public class AdhanPlaybackService extends Service {
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build());
-            String source = "beautiful".equals(voice)
-                    ? "https://upload.wikimedia.org/wikipedia/commons/b/b0/Beautiful_adhan.ogg"
-                    : "https://upload.wikimedia.org/wikipedia/commons/e/e7/Adhan.ogg";
-            player.setDataSource(source);
+            String safeVoice = "beautiful".equals(voice) ? "beautiful" : "sabah";
+            File audioFile = new File(new File(getFilesDir(), "adhan"), safeVoice + ".ogg");
+            if (!audioFile.isFile() || audioFile.length() < 10000) {
+                stopPlayback();
+                showMissingAudioNotification();
+                return;
+            }
+            player.setDataSource(audioFile.getAbsolutePath());
             player.setOnPreparedListener(MediaPlayer::start);
             player.setOnCompletionListener(mp -> stopPlayback());
             player.setOnErrorListener((mp, what, extra) -> {
@@ -87,6 +92,17 @@ public class AdhanPlaybackService extends Service {
         } catch (Exception e) {
             stopPlayback();
         }
+    }
+
+    private void showMissingAudioNotification() {
+        NotificationManager nm = getSystemService(NotificationManager.class);
+        Notification.Builder b = Build.VERSION.SDK_INT >= 26
+                ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this);
+        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+                .setContentTitle("ملف الأذان غير موجود")
+                .setContentText("افتح زاد المسلم واتصل بالإنترنت لتحميل صوت الأذان مرة واحدة.")
+                .setAutoCancel(true);
+        nm.notify(NOTIFICATION_ID + 1, b.build());
     }
 
     private void stopPlayerOnly() {
