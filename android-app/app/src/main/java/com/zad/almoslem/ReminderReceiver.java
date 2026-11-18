@@ -55,11 +55,14 @@ public class ReminderReceiver extends BroadcastReceiver {
         boolean prayer=key.startsWith("prayer_");
         android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
         boolean adhanEnabled=prefs.getBoolean("adhan_enabled",true);
-        String prayerName = prayer ? key.substring("prayer_".length()) : "";\n        boolean thisPrayerEnabled = prayer && prefs.getBoolean("prayer_enabled_" + prayerName, true);\n        if(prayer && adhanEnabled && thisPrayerEnabled) {
+        String prayerName = prayer ? key.substring("prayer_".length()) : "";
+        boolean thisPrayerEnabled = prayer && prefs.getBoolean("prayer_enabled_" + prayerName, true);
+        if(prayer && adhanEnabled && thisPrayerEnabled) {
             String prayerName=key.substring("prayer_".length());
             Intent audio=new Intent(context,AdhanPlaybackService.class);
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
-            audio.putExtra("prayer",prayerName);\n            audio.putExtra("voice",prefs.getString("adhan_voice","sabah"));
+            audio.putExtra("prayer",prayerName);
+            audio.putExtra("voice",prefs.getString("adhan_voice","sabah"));
             try {
                 if(Build.VERSION.SDK_INT>=26) context.startForegroundService(audio);
                 else context.startService(audio);
