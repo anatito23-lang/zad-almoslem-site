@@ -1108,9 +1108,9 @@ async function loadPrayer(){
  }catch(e){if(window.zadPrayerTimings){$('prayerStatus').textContent='تعذر الاتصال — نعرض آخر مواقيت محفوظة لهذا اليوم';}else{$('prayerStatus').textContent='تعذر تحميل المواقيت. أعد المحاولة بعد التأكد من الاتصال.';$('hijriDate').textContent='تعذر تحميل التاريخ الهجري';}$('nextPrayerMessage').textContent='المواقيت المحفوظة تعمل حتى عودة الاتصال';}
 }
 restorePrayerSettings();
-$('loadPrayer').addEventListener('click',()=>{window.zadPrayerLocation=null;localStorage.removeItem('zad_prayer_coordinates');loadPrayer();});
-['city','prayerCountry','prayerMethod','prayerSchool'].forEach(id=>$(id).addEventListener('change',()=>{window.zadPrayerLocation=null;localStorage.removeItem('zad_prayer_coordinates');loadPrayer();}));
-$('prayerCountry').addEventListener('change',()=>{if($('prayerCountry').value.trim().toLowerCase()!=='egypt'&&$('prayerMethod').value==='5')$('prayerMethod').value='auto';});
+$('loadPrayer').addEventListener('click',loadPrayer);
+['city','prayerMethod','prayerSchool'].forEach(id=>$(id).addEventListener('change',()=>{window.zadPrayerLocation=null;localStorage.removeItem('zad_prayer_coordinates');loadPrayer();}));
+$('prayerCountry').addEventListener('change',()=>{if($('prayerCountry').value.trim().toLowerCase()!=='egypt'&&$('prayerMethod').value==='5')$('prayerMethod').value='auto';window.zadPrayerLocation=null;localStorage.removeItem('zad_prayer_coordinates');loadPrayer();});
 $('useMyLocation').addEventListener('click',()=>{if(!navigator.geolocation){$('prayerStatus').textContent='تحديد الموقع غير مدعوم على هذا الجهاز';return;}$('prayerStatus').textContent='جارٍ تحديد موقعك...';navigator.geolocation.getCurrentPosition(pos=>{window.zadPrayerLocation={latitude:pos.coords.latitude,longitude:pos.coords.longitude};localStorage.setItem('zad_prayer_coordinates',JSON.stringify(window.zadPrayerLocation));loadPrayer();},()=>{$('prayerStatus').textContent='لم نتمكن من تحديد الموقع. أدخل الدولة والمدينة يدويًا.';},{enableHighAccuracy:true,timeout:12000,maximumAge:300000});});
 loadPrayer();
 let countdownDayKey='';
