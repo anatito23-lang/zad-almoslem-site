@@ -352,28 +352,15 @@ footer{background:#071522;color:#c9d6e2}
       <div class="small">علّم الصلاة بعد أدائها، ويُحفظ سجل اليوم على جهازك.</div>
     </div>
     <div class="adhan-settings card">
-      <div><h3>طريقة التنبيه عند دخول الصلاة</h3><p class="small">اختر ما يناسبك: أذان كامل، أو نغمة قصيرة، أو إشعار صامت.</p></div>
-      <label for="adhanAlertMode">نوع التنبيه</label>
-      <select id="adhanAlertMode" aria-label="طريقة التنبيه عند دخول الصلاة">
-        <option value="adhan">أذان كامل بصوت المؤذن المختار</option>
-        <option value="tone">تنبيه صوتي قصير فقط</option>
-        <option value="silent">إشعار صامت بدون صوت</option>
-      </select>
-      <div><h3>صوت المؤذن</h3><p class="small">يُستخدم هذا الصوت عند اختيار الأذان الكامل.</p></div>
+      <div><h3>صوت الأذان</h3><p class="small">اختر أحد الصوتين المتاحين حاليًا. يتم تنزيله مرة واحدة ليعمل دون إنترنت داخل التطبيق.</p></div>
       <div class="row">
-        <select id="adhanVoice" aria-label="اختيار صوت المؤذن">
-          <option value="mustafa">الشيخ مصطفى إسماعيل</option>
-          <option value="fajr">أذان الفجر — اسم المؤذن غير محدد</option>
-          <option value="banna">الشيخ محمود علي البنا</option>
-          <option value="basit">الشيخ عبد الباسط عبد الصمد</option>
-          <option value="sabah">أذان عام — CC0</option>
-          <option value="beautiful">أذان عام — CC0</option>
+        <select id="adhanVoice" aria-label="اختيار صوت الأذان">
+          <option value="sabah">أذان عام — التسجيل الأول</option>
+          <option value="beautiful">أذان عام — التسجيل الثاني</option>
         </select>
         <button class="btn light" id="previewAdhan" type="button">استمع للأذان</button>
-        <button class="btn light" id="downloadAdhan" type="button">استيراد التسجيل للعمل دون إنترنت</button>
+        <button class="btn light" id="downloadAdhan" type="button">تنزيل الصوت للعمل دون إنترنت</button>
       </div>
-      <input id="adhanImportFile" type="file" accept="audio/mpeg,audio/mp3,audio/ogg,audio/*" hidden>
-      <p class="small">لإضافة تسجيل الشيخ: اختره من القائمة ثم اضغط «استيراد التسجيل». ملفات التسجيلات الأربعة التي أرسلتها متاحة للتنزيل من المحادثة. بعد الاستيراد تُحفظ داخل التطبيق وتعمل دون إنترنت.</p>
       <audio id="adhanPreview" preload="none"></audio>
       <div class="prayer-alert-list">
         <label><input type="checkbox" class="prayer-alert" data-prayer="الفجر" checked> أذان الفجر</label>
@@ -397,7 +384,7 @@ footer{background:#071522;color:#c9d6e2}
         <p class="small" id="silentSettingsStatus" role="status">الخاصية متوقفة حتى تختار الصلوات وتمنح الإذن.</p>
       </div>
       <button class="btn green" id="saveAdhanSettings" type="button">حفظ إعدادات الأذان والصامت</button>
-      <p id="adhanSettingsStatus" class="small" role="status">اختر طريقة التنبيه واحفظ الإعدادات. الأذان الكامل يستخدم صوت المؤذن المختار، والتنبيه القصير يصدر نغمة فقط، ويمكنك اختيار الإشعار الصامت.</p>
+      <p id="adhanSettingsStatus" class="small" role="status">اختر صوت الأذان، وحدد الصلوات التي تريد تشغيله فيها. يمكنك أيضًا تحديد الصلوات التي يتحول فيها الهاتف إلى الصامت لمدة 15 دقيقة.</p>
     </div>
     <div class="small">المواقيت تُجلب عبر الإنترنت من خدمة مواقيت الصلاة، وقد تختلف دقائق قليلة حسب طريقة الحساب والجهة المحلية.</div>
   </section>
