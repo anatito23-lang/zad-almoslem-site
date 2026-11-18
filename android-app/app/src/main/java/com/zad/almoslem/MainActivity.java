@@ -15,11 +15,16 @@ import android.content.Intent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import android.util.Base64;
+import android.net.Uri;
+import android.webkit.ValueCallback;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class MainActivity extends Activity {
     private WebView webView;
+    private ValueCallback<Uri[]> fileChooserCallback;
+    private static final int AUDIO_FILE_REQUEST = 2402;
     private static final int NOTIFICATION_PERMISSION_REQUEST = 2401;
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +45,16 @@ public class MainActivity extends Activity {
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient() {
+            @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                if (fileChooserCallback != null) fileChooserCallback.onReceiveValue(null);
+                fileChooserCallback = callback;
+                Intent pick = new Intent(Intent.ACTION_GET_CONTENT);
+                pick.setType("audio/*");
+                pick.addCategory(Intent.CATEGORY_OPENABLE);
+                try { startActivityForResult(Intent.createChooser(pick, "اختر تسجيل الأذان"), AUDIO_FILE_REQUEST); }
+                catch (Exception e) { fileChooserCallback = null; callback.onReceiveValue(null); return false; }
+                return true;
+            }
             @Override public void onGeolocationPermissionsShowPrompt(String origin, android.webkit.GeolocationPermissions.Callback callback) {
                 callback.invoke(origin, true, false);
             }
@@ -92,7 +107,27 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> MainActivity.this.requestNotificationPermission());
         }
         @JavascriptInterface public boolean isAdhanDownloaded(String voice) {
-            return adhanFile(voice).isFile() && adhanFile(voice).length() > 10000;
+            File f=adhanFile(voice);
+            if (f.isFile() && f.length()>10000) return true;
+            File mp3=new File(f.getParentFile(),safeVoice(voice)+".mp3");
+            return mp3.isFile() && mp3.length()>10000;
+        }
+        @JavascriptInterface public boolean saveAdhanAudio(String voice,String encoded) {
+            try {
+                String safe=safeVoice(voice);
+                byte[] bytes=Base64.decode(encoded,Base64.DEFAULT);
+                if(bytes.length<10000 || bytes.length>8*1024*1024) return false;
+                File dir=new File(getFilesDir(),"adhan");
+                if(!dir.exists()&&!dir.mkdirs()) return false;
+                File temp=new File(dir,safe+".import");
+                File target=new File(dir,safe+".mp3");
+                try(FileOutputStream out=new FileOutputStream(temp)){out.write(bytes);out.getFD().sync();}
+                if(target.exists()&&!target.delete()){temp.delete();return false;}
+                return temp.renameTo(target);
+            } catch(Exception e){return false;}
+        }
+        private String safeVoice(String voice) {
+            return ("mustafa".equals(voice)||"fajr".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"beautiful".equals(voice))?voice:"sabah";
         }
         @JavascriptInterface public void downloadAdhan(String voice) {
             final String safe = "beautiful".equals(voice) ? "beautiful" : "sabah";
@@ -171,7 +206,7 @@ public class MainActivity extends Activity {
             }).start();
         }
         private File adhanFile(String voice) {
-            String safe = "beautiful".equals(voice) ? "beautiful" : "sabah";
+            String safe = safeVoice(voice);
             return new File(new File(getFilesDir(), "adhan"), safe + ".ogg");
         }
         @JavascriptInterface public void previewAdhan(String voice) {
@@ -183,6 +218,15 @@ public class MainActivity extends Activity {
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(audio); else startService(audio);
         }
 
+    }
+    @Override protected void onActivityResult(int requestCode,int resultCode,Intent data) {
+        super.onActivityResult(requestCode,resultCode,data);
+        if(requestCode==AUDIO_FILE_REQUEST && fileChooserCallback!=null){
+            Uri[] result=null;
+            if(resultCode==RESULT_OK && data!=null && data.getData()!=null) result=new Uri[]{data.getData()};
+            fileChooserCallback.onReceiveValue(result);
+            fileChooserCallback=null;
+        }
     }
     @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK && webView != null && webView.canGoBack()) { webView.goBack(); return true; }
