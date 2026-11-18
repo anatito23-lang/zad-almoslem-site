@@ -16,6 +16,41 @@
    const adhanSaved=localStorage.getItem('zad_adhan_enabled');
    if(adhanToggle) adhanToggle.checked=adhanSaved===null?true:adhanSaved==='true';
    if(window.ZadAndroid && adhanToggle) window.ZadAndroid.setAdhanEnabled(adhanToggle.checked);
+
+   // Adhan voice and per-prayer controls.
+   const voice=$('adhanVoice'), preview=$('adhanPreview'), previewBtn=$('previewAdhan');
+   const adhanSources={sabah:'https://upload.wikimedia.org/wikipedia/commons/2/27/Call_to_prayer_by_Sabah_Fakhry.mp3',beautiful:'https://upload.wikimedia.org/wikipedia/commons/b/b0/Beautiful_adhan.ogg'};
+   const savedVoice=localStorage.getItem('zad_adhan_voice')||'sabah';
+   if(voice)voice.value=savedVoice;
+   const adhanOn=localStorage.getItem('zad_adhan_enabled');
+   if($('adhanEnabled'))$('adhanEnabled').checked=adhanOn===null?true:adhanOn==='true';
+   document.querySelectorAll('.prayer-alert').forEach(el=>{const v=localStorage.getItem('zad_prayer_alert_'+el.dataset.prayer);el.checked=v===null?true:v==='true';});
+   if(previewBtn)previewBtn.addEventListener('click',()=>{preview.src=adhanSources[voice.value]||adhanSources.sabah;preview.play().catch(()=>{$('adhanSettingsStatus').textContent='اضغط مرة أخرى للسماح بتشغيل الصوت.';});});
+   if(voice)voice.addEventListener('change',()=>{preview.pause();preview.currentTime=0;});
+   const saveAdhan=$('saveAdhanSettings');
+   if(saveAdhan)saveAdhan.addEventListener('click',()=>{
+     const enabled=$('adhanEnabled').checked, selected=voice.value;
+     localStorage.setItem('zad_adhan_enabled',String(enabled));
+     localStorage.setItem('zad_adhan_voice',selected);
+     if(window.ZadAndroid){window.ZadAndroid.setAdhanEnabled(enabled);window.ZadAndroid.setAdhanVoice(selected);}
+     document.querySelectorAll('.prayer-alert').forEach(el=>{
+       localStorage.setItem('zad_prayer_alert_'+el.dataset.prayer,String(el.checked));
+       if(window.ZadAndroid)window.ZadAndroid.setPrayerAdhanEnabled(el.dataset.prayer,el.checked);
+     });
+     $('adhanSettingsStatus').textContent='تم حفظ صوت المؤذن وإعدادات الصلوات على هذا الجهاز.';
+   });
+   if(window.ZadAndroid){
+     window.ZadAndroid.setAdhanEnabled(!($('adhanEnabled'))||$('adhanEnabled').checked);
+     window.ZadAndroid.setAdhanVoice(savedVoice);
+     document.querySelectorAll('.prayer-alert').forEach(el=>window.ZadAndroid.setPrayerAdhanEnabled(el.dataset.prayer,el.checked));
+   }
+   // Daily prayer completion tracker, resets automatically on a new date.
+   const todayKey='zad_prayer_tracker_'+new Date().toISOString().slice(0,10);
+   let done={};try{done=JSON.parse(localStorage.getItem(todayKey)||'{}')}catch(e){}
+   const updateTracker=()=>{const boxes=[...document.querySelectorAll('.prayer-done')];boxes.forEach(el=>el.checked=!!done[el.dataset.prayer]);$('prayerTrackerCount').textContent=boxes.filter(el=>el.checked).length+' / 5';};
+   document.querySelectorAll('.prayer-done').forEach(el=>el.addEventListener('change',()=>{done[el.dataset.prayer]=el.checked;localStorage.setItem(todayKey,JSON.stringify(done));updateTracker();}));
+   updateTracker();
+
    const saveBtn=$('saveDailyReminders');
    if(saveBtn)saveBtn.addEventListener('click',async()=>{
      const vals={morning:{enabled:$('morningReminderEnabled').checked,time:$('morningReminderTime').value,title:defaults.morning.title},qiyam:{enabled:$('qiyamReminderEnabled').checked,time:$('qiyamReminderTime').value,title:defaults.qiyam.title}};
