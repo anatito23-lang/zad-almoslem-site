@@ -212,6 +212,20 @@ public class MainActivity extends Activity {
             radio.putExtra("label", label == null ? "إذاعة القرآن الكريم" : label);
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(radio); else startService(radio);
         }
+        @JavascriptInterface public void playQuranAudio(String audioUrl, String trackTitle) {
+            try {
+                android.net.Uri uri = android.net.Uri.parse(audioUrl);
+                String host = uri.getHost();
+                if (!"https".equalsIgnoreCase(uri.getScheme()) || host == null ||
+                    !(host.toLowerCase().endsWith("mp3quran.net") || host.toLowerCase().endsWith("mp3quran.com"))) return;
+                Intent audio = new Intent(MainActivity.this, RadioPlaybackService.class);
+                audio.setAction(RadioPlaybackService.ACTION_PLAY);
+                audio.putExtra("url", uri.toString());
+                audio.putExtra("label", trackTitle == null ? "تلاوة القرآن الكريم" : trackTitle);
+                audio.putExtra("kind", "quran");
+                if (Build.VERSION.SDK_INT >= 26) startForegroundService(audio); else startService(audio);
+            } catch (Exception ignored) {}
+        }
         @JavascriptInterface public void stopRadio() {
             Intent radio = new Intent(MainActivity.this, RadioPlaybackService.class);
             radio.setAction(RadioPlaybackService.ACTION_STOP);
