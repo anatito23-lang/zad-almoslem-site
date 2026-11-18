@@ -59,5 +59,26 @@ body.zad-mushaf-reading #mushafContent.zad-reader-controls-visible .mushaf-navig
 `;
 const swipe=document.getElementById('mushafSwipeArea');
 if(swipe&&!swipe.dataset.readerTapBound){swipe.dataset.readerTapBound='1';swipe.addEventListener('click',()=>{const content=document.getElementById('mushafContent');if(content)content.classList.toggle('zad-reader-controls-visible');});}
+
+/* Radio playback controls are wired only in the native Android app. */
+if(nativeApp){
+ const radio=$('egyptQuranRadio'), fallback=$('radioFallbackBtn'), primary=$('radioPrimaryBtn'), status=$('radioStatus');
+ if(radio&&!radio.dataset.zadRadioBound){
+  radio.dataset.zadRadioBound='1';
+  const cairo='https://stream.radiojar.com/8s5u5tpdtwzuv';
+  const backup='https://qurango.net/radio/tarateel';
+  const setStatus=t=>{if(status)status.textContent=t;};
+  const playSource=async(url,label)=>{
+   radio.pause();radio.src=url;radio.load();setStatus('جارٍ الاتصال بـ'+label+'...');
+   try{await radio.play();}catch(e){setStatus('اضغط زر التشغيل داخل مشغل الإذاعة لبدء الاستماع.');}
+  };
+  fallback?.addEventListener('click',()=>playSource(backup,'البث البديل لتلاوات القرآن'));
+  primary?.addEventListener('click',()=>playSource(cairo,'إذاعة القرآن الكريم من القاهرة'));
+  radio.addEventListener('playing',()=>setStatus('تم الاتصال بالبث. استمتع بالاستماع.'));
+  radio.addEventListener('waiting',()=>setStatus('جارٍ تحميل البث...'));
+  radio.addEventListener('stalled',()=>setStatus('البث متوقف مؤقتًا. جرّب البث البديل.'));
+  radio.addEventListener('error',()=>setStatus('تعذر تشغيل هذا البث. جرّب زر البث البديل.'));
+ }
+}
 document.head.append(css);
 })();
