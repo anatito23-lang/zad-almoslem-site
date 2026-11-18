@@ -116,7 +116,7 @@
        localStorage.setItem('zad_adhan_enabled',String(adhanOn));
        if(window.ZadAndroid) window.ZadAndroid.setAdhanEnabled(adhanOn);
      }
-     if(window.ZadAndroid){window.ZadAndroid.requestNotificationPermission();}
+     if(window.ZadAndroid){window.ZadAndroid.requestExactAlarmPermission();window.ZadAndroid.requestNotificationPermission();}
      else if('Notification' in window && Notification.permission==='default'){try{await Notification.requestPermission()}catch(e){}}
      $('dailyReminderStatus').textContent=window.ZadAndroid?'تم حفظ الإعدادات وجدولة التنبيهات على التطبيق.':'تم حفظ الإعدادات على هذا الجهاز. للتنبيه والتطبيق مغلق يلزم استخدام نسخة أندرويد التي تدعم التنبيهات.';
    });
