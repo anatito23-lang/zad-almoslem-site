@@ -22,6 +22,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix '.new'
+            versionNameSuffix '-new'
+        }
         release {
             signingConfig signingConfigs.release
             minifyEnabled false
