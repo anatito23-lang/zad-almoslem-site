@@ -20,10 +20,11 @@ public class RadioTileService extends TileService {
         android.content.SharedPreferences p=getSharedPreferences("zad_audio",MODE_PRIVATE);
         boolean playing=p.getBoolean("radio_playing",false)&&!"quran".equals(p.getString("active_kind",""));
         Intent i=new Intent(this,RadioPlaybackService.class);
-        if(playing) i.setAction(RadioPlaybackService.ACTION_STOP);
+        if(playing) { p.edit().putBoolean("radio_playing",false).putString("active_kind","").apply(); i.setAction(RadioPlaybackService.ACTION_STOP); }
         else {
             String stream=p.getString("radio_stream","main");
             String url="backup".equals(stream)?"https://qurango.net/radio/tarateel":"https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8";
+            p.edit().putBoolean("radio_playing",true).putString("active_kind","radio").apply();
             i.setAction(RadioPlaybackService.ACTION_PLAY); i.putExtra("url",url); i.putExtra("label",p.getString("radio_label","إذاعة القرآن الكريم")); i.putExtra("kind","radio");
         }
         if(Build.VERSION.SDK_INT>=26) startForegroundService(i); else startService(i);
