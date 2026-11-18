@@ -11,12 +11,12 @@
  }
  function init(){
    const city=$('city'); if(city){const saved=localStorage.getItem('zad_selected_city');if(saved&&[...city.options].some(o=>o.value===saved))city.value=saved;city.addEventListener('change',()=>localStorage.setItem('zad_selected_city',city.value));}
-   ['morning','qiyam'].forEach(k=>{const v=read(k);const t=$(k+'ReminderTime'),e=$(k+'ReminderEnabled');if(t)t.value=v.time;if(e)e.checked=!!v.enabled;});
+   ['morning','qiyam'].forEach(k=>{const v=read(k);const t=$(k+'ReminderTime'),e=$(k+'ReminderEnabled');if(t)t.value=v.time;if(e)e.checked=!!v.enabled;});\n   const adhanToggle=$('adhanEnabled');\n   const adhanSaved=localStorage.getItem('zad_adhan_enabled');\n   if(adhanToggle) adhanToggle.checked=adhanSaved===null?true:adhanSaved==='true';\n   if(window.ZadAndroid && adhanToggle) window.ZadAndroid.setAdhanEnabled(adhanToggle.checked);
    const saveBtn=$('saveDailyReminders');
    if(saveBtn)saveBtn.addEventListener('click',async()=>{
      const vals={morning:{enabled:$('morningReminderEnabled').checked,time:$('morningReminderTime').value,title:defaults.morning.title},qiyam:{enabled:$('qiyamReminderEnabled').checked,time:$('qiyamReminderTime').value,title:defaults.qiyam.title}};
      if(!vals.morning.time||!vals.qiyam.time){$('dailyReminderStatus').textContent='اختر وقتًا صحيحًا لكل تنبيه.';return;}
-     Object.keys(vals).forEach(k=>{save(k,vals[k]);schedule(k,vals[k]);});
+     Object.keys(vals).forEach(k=>{save(k,vals[k]);schedule(k,vals[k]);});\n     const adhanOn=$('adhanEnabled').checked;\n     localStorage.setItem('zad_adhan_enabled',String(adhanOn));\n     if(window.ZadAndroid) window.ZadAndroid.setAdhanEnabled(adhanOn);
      if(window.ZadAndroid){window.ZadAndroid.requestNotificationPermission();}
      else if('Notification' in window && Notification.permission==='default'){try{await Notification.requestPermission()}catch(e){}}
      $('dailyReminderStatus').textContent=window.ZadAndroid?'تم حفظ الإعدادات وجدولة التنبيهات على التطبيق.':'تم حفظ الإعدادات على هذا الجهاز. للتنبيه والتطبيق مغلق يلزم استخدام نسخة أندرويد التي تدعم التنبيهات.';
