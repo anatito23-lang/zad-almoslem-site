@@ -75,6 +75,14 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void cancelDailyReminder(String key) {
             ReminderReceiver.cancelDaily(MainActivity.this,key);
         }
+        @JavascriptInterface public boolean isReminderAudioDownloaded() {
+            File dir = new File(getFilesDir(), "reminders");
+            for (String name : new String[]{"morning", "evening", "dua"}) {
+                File file = new File(dir, name + ".mp3");
+                if (!file.isFile() || file.length() < 10000) return false;
+            }
+            return true;
+        }
         @JavascriptInterface public void downloadReminderAudio() {
             new Thread(() -> {
                 String[][] sources = {
