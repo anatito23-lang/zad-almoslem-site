@@ -49,14 +49,48 @@ public class ReminderReceiver extends BroadcastReceiver {
         PendingIntent pi=PendingIntent.getBroadcast(context,key.hashCode(),i,PendingIntent.FLAG_NO_CREATE|PendingIntent.FLAG_IMMUTABLE);
         if(pi!=null){((AlarmManager)context.getSystemService(Context.ALARM_SERVICE)).cancel(pi);pi.cancel();}
     }
+    private static final String SILENT_PREFS = "zad_reminders";
+    private static void activateSilentMode(Context context) {
+        if (Build.VERSION.SDK_INT < 23) return;
+        NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (nm == null || !nm.isNotificationPolicyAccessGranted()) return;
+        android.content.SharedPreferences prefs=context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE);
+        if (nm.getCurrentInterruptionFilter() != NotificationManager.INTERRUPTION_FILTER_ALL) return;
+        prefs.edit().putInt("silent_previous_filter",NotificationManager.INTERRUPTION_FILTER_ALL).putBoolean("silent_restore_pending",true).apply();
+        nm.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
+        AlarmManager am=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+        Intent restore=new Intent(context,ReminderReceiver.class);
+        restore.putExtra("action","restore_silent");
+        PendingIntent pi=PendingIntent.getBroadcast(context,987654,restore,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+        long at=System.currentTimeMillis()+15L*60L*1000L;
+        if (Build.VERSION.SDK_INT >= 23) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,pi);
+        else am.setExact(AlarmManager.RTC_WAKEUP,at,pi);
+    }
+    private static void restoreSilentMode(Context context) {
+        if (Build.VERSION.SDK_INT < 23) return;
+        android.content.SharedPreferences prefs=context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE);
+        if (!prefs.getBoolean("silent_restore_pending",false)) return;
+        NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (nm != null && nm.isNotificationPolicyAccessGranted()
+                && nm.getCurrentInterruptionFilter()==NotificationManager.INTERRUPTION_FILTER_NONE) {
+            nm.setInterruptionFilter(prefs.getInt("silent_previous_filter",NotificationManager.INTERRUPTION_FILTER_ALL));
+        }
+        prefs.edit().putBoolean("silent_restore_pending",false).remove("silent_previous_filter").apply();
+    }
+
     @Override public void onReceive(Context context,Intent intent) {
         String key=intent.getStringExtra("key"),title=intent.getStringExtra("title");
         if(key==null)return;
         boolean prayer=key.startsWith("prayer_");
         android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
+        if ("restore_silent".equals(intent.getStringExtra("action"))) {
+            restoreSilentMode(context);
+            return;
+        }
         boolean adhanEnabled=prefs.getBoolean("adhan_enabled",true);
         String prayerName = prayer ? key.substring("prayer_".length()) : "";
         boolean thisPrayerEnabled = prayer && prefs.getBoolean("prayer_enabled_" + prayerName, true);
+        if (prayer && prefs.getBoolean("prayer_silent_" + prayerName, false)) activateSilentMode(context);
         if(prayer && adhanEnabled && thisPrayerEnabled) {
             Intent audio=new Intent(context,AdhanPlaybackService.class);
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
