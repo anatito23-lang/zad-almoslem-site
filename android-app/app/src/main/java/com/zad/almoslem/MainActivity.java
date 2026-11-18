@@ -137,10 +137,12 @@ public class MainActivity extends Activity {
             final String safe = safeVoice(voice);
             final String source;
             switch (safe) {
-                case "basit": source = "https://archive.org/download/hay-hat.com_939/46.mp3"; break;
-                case "mustafa": source = "https://archive.org/download/hay-hat.com_939/50.mp3"; break;
-                case "husary": source = "https://archive.org/download/hay-hat.com_774/51.mp3"; break;
-                case "rifaat": source = "https://archive.org/download/hay-hat.com_774/57.mp3"; break;
+                case "basit": source = "https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/041--.mp3"; break;
+                case "mustafa": source = "https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/068-.mp3"; break;
+                case "husary": source = "https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/044--.mp3"; break;
+                case "rifaat": source = "https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/042--.mp3"; break;
+                case "banna": source = "https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/043--.mp3"; break;
+                case "naqshbandi": source = "https://cdn1.esm3.com//music/2603/esm3.com.198098.mp3"; break;
                 default:
                     runOnUiThread(() -> {
                         if (webView != null) webView.evaluateJavascript(
