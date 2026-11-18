@@ -361,12 +361,19 @@ footer{background:#071522;color:#c9d6e2}
           <option value="rifaat">الشيخ محمد رفعت</option>
           <option value="banna">الشيخ محمود علي البنا</option>
           <option value="naqshbandi">الشيخ سيد النقشبندي</option>
-          <option value="tobar" disabled>الشيخ نصر الدين طوبار — جارٍ اعتماد التسجيل</option>
+          <option value="tobar">الشيخ نصر الدين طوبار</option>
+          <option value="haram">أذان الحرم المكي — الشيخ علي أحمد ملا</option>
         </select>
         <button class="btn light" id="previewAdhan" type="button">استمع للأذان</button>
         <button class="btn light" id="downloadAdhan" type="button">تنزيل الصوت للعمل دون إنترنت</button>
       </div>
       <audio id="adhanPreview" preload="none"></audio>
+      <div class="card" style="margin-top:12px">
+        <h3>إضافة تسجيل المؤذن من جهازك</h3>
+        <p class="small">لو التسجيل غير متاح للتنزيل المباشر، اختَر ملف الأذان MP3 من جهازك ليُحفظ داخل التطبيق ويعمل دون إنترنت.</p>
+        <input id="adhanImportFile" type="file" accept="audio/*" aria-label="اختيار ملف أذان من الجهاز">
+        <p class="small" id="adhanImportStatus" role="status">اختر المؤذن أولًا، ثم أضف تسجيله الصوتي.</p>
+      </div>
       <div class="card" style="margin-top:12px">
         <label for="adhanVolume"><strong>مستوى صوت الأذان</strong> <span id="adhanVolumeValue">100%</span></label>
         <input id="adhanVolume" type="range" min="0" max="100" step="1" value="100" style="width:100%;margin:12px 0" aria-label="مستوى صوت الأذان من صفر إلى مئة">
@@ -380,6 +387,22 @@ footer{background:#071522;color:#c9d6e2}
         <label><input type="checkbox" class="prayer-alert" data-prayer="العشاء" checked> أذان العشاء</label>
       </div>
       <label class="adhan-master"><input id="adhanEnabled" type="checkbox" checked> تفعيل الصوت عند دخول وقت الصلاة</label>
+      <div class="card" style="margin-top:12px">
+        <h3>طريقة التنبيه عند الصلاة</h3>
+        <select id="adhanMode" aria-label="طريقة التنبيه عند الصلاة" style="width:100%">
+          <option value="adhan">الأذان كاملًا</option>
+          <option value="tone">نغمة تنبيه</option>
+          <option value="vibrate">اهتزاز فقط</option>
+          <option value="off">بدون صوت أو اهتزاز</option>
+        </select>
+        <p class="small">يمكنك تفعيل أو إيقاف الأذان لكل صلاة من الاختيارات أعلاه.</p>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>التنبيه قبل الصلاة</h3>
+        <label><input id="approachAlertEnabled" type="checkbox" checked> تنبيه قبل موعد الصلاة</label>
+        <label for="approachAlertMinutes">قبل الصلاة بدقائق</label>
+        <input id="approachAlertMinutes" type="number" min="1" max="60" step="1" value="15" style="width:100%">
+      </div>
       <div class="card" style="margin-top:12px">
         <h3>الصامت وقت الصلاة</h3>
         <p class="small">اختر الصلوات التي يتحول فيها الهاتف إلى الصامت لمدة 15 دقيقة، ثم يعود لوضع الصوت السابق تلقائيًا. يتطلب السماح للتطبيق بالتحكم في وضع عدم الإزعاج من إعدادات أندرويد.</p>
@@ -1831,7 +1854,7 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
  audio.addEventListener('stalled',function(){status.textContent='البث متوقف مؤقتًا أو الاتصال بطيء. يمكنك تجربة البث البديل.';});
 })();
 </script>
-<script src="./daily-reminders.js?v=20261118volume1"></script>
+<script src="./daily-reminders.js?v=20261118prayernow2"></script>
 <script>
 if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {})); }
 </script>
