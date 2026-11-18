@@ -180,6 +180,10 @@ public class MainActivity extends Activity {
             String safe = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)) ? voice : "basit";
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_voice", safe).apply();
         }
+        @JavascriptInterface public void setAdhanVolume(int volume) {
+            int safeVolume = Math.max(0, Math.min(100, volume));
+            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putInt("adhan_volume", safeVolume).apply();
+        }
         @JavascriptInterface public void setPrayerAdhanEnabled(String prayer, boolean enabled) {
             String key = "prayer_enabled_" + prayer;
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean(key, enabled).apply();
