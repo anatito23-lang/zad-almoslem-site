@@ -103,6 +103,13 @@
      const vals={morning:{enabled:$('morningReminderEnabled').checked,time:$('morningReminderTime').value,title:defaults.morning.title},evening:{enabled:$('eveningReminderEnabled').checked,time:$('eveningReminderTime').value,title:defaults.evening.title},qiyam:{enabled:$('qiyamReminderEnabled').checked,time:$('qiyamReminderTime').value,title:defaults.qiyam.title}};
      if(!vals.morning.time||!vals.evening.time||!vals.qiyam.time){$('dailyReminderStatus').textContent='اختر وقتًا صحيحًا لكل تنبيه.';return;}
      Object.keys(vals).forEach(k=>{save(k,vals[k]);schedule(k,vals[k]);});
+     if(window.ZadAndroid&&Object.values(vals).some(v=>v.enabled)){
+       window.onReminderAudioDownload=function(ok){
+         $('dailyReminderStatus').textContent=ok?'تم تنزيل أصوات الأذكار ودعاء ما بعد الأذان وحفظها للعمل دون إنترنت.':'تمت جدولة التنبيهات، لكن تعذر تنزيل بعض الملفات الصوتية؛ ستعمل التنبيهات النصية حتى إعادة المحاولة.';
+       };
+       window.ZadAndroid.downloadReminderAudio();
+       $('dailyReminderStatus').textContent='تمت جدولة التنبيهات. جارٍ تنزيل ملفات الصوت للعمل دون إنترنت...';
+     }
      const adhanControl=$('adhanEnabled');
      if(adhanControl){
        const adhanOn=adhanControl.checked;
