@@ -71,7 +71,7 @@ if(nativeApp){
  const radio=$('egyptQuranRadio'), fallback=$('radioFallbackBtn'), primary=$('radioPrimaryBtn'), status=$('radioStatus');
  if(radio&&!radio.dataset.zadRadioBound){
   radio.dataset.zadRadioBound='1';
-  const cairo='https://stream.radiojar.com/8s5u5tpdtwzuv';
+  const cairo='https://radio.xecod.com/station/quran-cairo';
   const backup='https://qurango.net/radio/tarateel';
   const setStatus=t=>{if(status)status.textContent=t;};
   const playSource=async(url,label)=>{
