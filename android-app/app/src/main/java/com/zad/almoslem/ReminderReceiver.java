@@ -30,7 +30,10 @@ public class ReminderReceiver extends BroadcastReceiver {
     }
     private static void scheduleApproachAlert(Context context,String name,long prayerAt) {
         String alertKey="approach_"+name;
-        long alertAt=prayerAt-15L*60L*1000L;
+        android.content.SharedPreferences prefs=context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE);
+        if(!prefs.getBoolean("approach_alert_enabled",true)){cancel(context,alertKey);return;}
+        int minutes=Math.max(1,Math.min(60,prefs.getInt("approach_alert_minutes",15)));
+        long alertAt=prayerAt-minutes*60L*1000L;
         if(alertAt>System.currentTimeMillis()) {
             schedule(context,alertKey,alertAt,"اقتربت صلاة "+name+"، بقي على الصلاة ربع ساعة.",false);
         } else {
@@ -157,8 +160,9 @@ public class ReminderReceiver extends BroadcastReceiver {
         Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,channelId):new Notification.Builder(context);
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("قلبي اطمأن – زاد المسلم").setContentText(title==null?"تذكير من زاد المسلم":title).setAutoCancel(true).setContentIntent(content);
         if(prayer && adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode)) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
+        else if(prayer && adhanEnabled && thisPrayerEnabled && "off".equals(adhanMode)) { /* no alert */ }
         else b.setDefaults(Notification.DEFAULT_VIBRATE);
-        nm.notify(key.hashCode(),b.build());
+        if(!prayer || !"off".equals(adhanMode)) nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
             String k=key.replace("daily_","");
             if(prefs.getBoolean(k+"_enabled",false)) scheduleDaily(context,k,prefs.getInt(k+"_hour",7),prefs.getInt(k+"_minute",0),prefs.getString(k+"_title","تذكير من زاد المسلم"));
