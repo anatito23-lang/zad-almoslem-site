@@ -3,6 +3,12 @@
 const $=id=>document.getElementById(id), main=document.querySelector('main.wrap'), header=document.querySelector('header.hero');
 const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp());
 if(nativeApp){document.getElementById('kids')?.remove();document.querySelectorAll('a[href="#kids"]').forEach(link=>link.remove());}
+else {
+  document.querySelectorAll('.adhan-settings').forEach(el=>el.remove());
+  document.querySelectorAll('#daily-reminder-settings .card').forEach(el=>{
+    if(el.querySelector('h3')?.textContent.includes('الأذان'))el.remove();
+  });
+}
 if(!main||!header||$('zadAppPages'))return;
 document.querySelector('.bottom-nav:not(.zad-bottom-nav)')?.remove();
 const meta=[['prayer','مواقيت الصلاة','🕰️'],['quran','استماع القرآن','📖'],['mushaf','المصحف الشريف','۞'],['ruqyah','الرقية الشرعية','🤲'],['radio-egypt','إذاعة القرآن الكريم','📻'],['azkar','الأذكار اليومية','☀️'],['books-library','مكتبة الكتب الإسلامية','📚'],...(!nativeApp?[['kids','ركن الأطفال','🧒']]:[]),['daily-reminder-settings','إعدادات التذكير','🔔'],['reminders','تنبيهات الصلاة والأذان','🕌'],['hadith-dua','السنة والدعاء','🌿'],['daily-wird','وردي اليومي','📿'],['friday-wird','ورد الجمعة','🌙'],['qalbi-itmaann','قلبي اطمأن','💚'],['library','نفحات إيمانية','✨'],['khutbahs','خطب الجمعة','🎙️'],['nasheed','الإنشاد والابتهالات','🎵']];
