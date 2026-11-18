@@ -461,7 +461,7 @@ footer{background:#071522;color:#c9d6e2}
       <p class="mushaf-swipe-hint">اسحب الصفحة إلى اليسار للصفحة التالية، أو إلى اليمين للصفحة السابقة</p>
       <div class="notice mushaf-source">
         يعرض هذا القسم صفحات المصحف كاملة بصورها الأصلية، مع ترتيب الصفحات والزخارف وأرقامها، وعددها 604 صفحة.
-        <br>مصدر النسخة: <a href="https://github.com/Miftah-Fentaw/Quran-Images" target="_blank" rel="noopener">Quran Images</a> — ترخيص MIT. حقوق النسخة: Copyright © 2026 Miftah Fentaw.
+        <br>مصدر النسخة: <a href="https://github.com/Miftah-Fentaw/Quran_webp" target="_blank" rel="noopener">Quran Images</a> — ترخيص MIT. حقوق النسخة: Copyright © 2026 Miftah Fentaw.
         <br>المصدر الأصلي للصور: <a href="https://github.com/GovarJabbar/Quran-PNG" target="_blank" rel="noopener">Quran-PNG</a>، المولّد بواسطة <a href="https://github.com/quran/quran.com-images" target="_blank" rel="noopener">quran.com-images</a>.
         <br>يلزم الاتصال بالإنترنت لتحميل الصفحة التي تختارها.
       </div>
@@ -1140,7 +1140,7 @@ function loadMushafPage(number){
   if(request!==mushafRequestNumber)return;
   $('mushafStatus').textContent='صفحة '+page+' من 604 — تم تحميلها.';
   [page+1,page-1].filter(p=>p>=1&&p<=604).forEach(p=>{
-   const warm=new Image();warm.src='https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran-Images@main/png/'+p+'.png';
+   const warm=new Image();warm.src='https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran_webp@main/png/'+p+'.png';
   });
 
  };
@@ -1149,8 +1149,8 @@ function loadMushafPage(number){
   $('mushafStatus').textContent='تعذر تحميل الصفحة الآن. تحقق من اتصال الإنترنت ثم حاول مرة أخرى أو انتقل لصفحة أخرى.';
  };
  const pageSources=[
-  'https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran-Images@main/png/'+page+'.png',
-  'https://raw.githubusercontent.com/Miftah-Fentaw/Quran-Images/main/png/'+page+'.png',
+  'https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran_webp@main/png/'+page+'.png',
+  'https://raw.githubusercontent.com/Miftah-Fentaw/Quran_webp/main/png/'+page+'.png',
   'https://raw.githubusercontent.com/GovarJabbar/Quran-PNG/master/'+String(page).padStart(3,'0')+'.png'
  ];
  image.dataset.sourceIndex='0';
@@ -1217,8 +1217,8 @@ async function loadMushafIndex(){
  }
 }
 
-const MUSHAF_OFFLINE_CACHE='zad-mushaf-offline-pages-v1';
-const MUSHAF_CDN='https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran-Images@main/png/';
+const MUSHAF_OFFLINE_CACHE='zad-mushaf-offline-pages-v2';
+const MUSHAF_CDN='https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran_webp@main/png/';
 function mushafPngUrl(page){return MUSHAF_CDN+page+'.png';}
 async function updateMushafOfflineStatus(){
  const label=$('mushafOfflineStatus');if(!label||!('caches'in window))return;
