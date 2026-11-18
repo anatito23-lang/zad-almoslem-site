@@ -19,6 +19,10 @@
 
    // Adhan voice and per-prayer controls.
    const voice=$('adhanVoice'), preview=$('adhanPreview'), previewBtn=$('previewAdhan');
+   const alertMode=$('adhanAlertMode');
+   const savedMode=localStorage.getItem('zad_adhan_mode')||'adhan';
+   if(alertMode)alertMode.value=savedMode;
+   if(window.ZadAndroid && typeof window.ZadAndroid.setAdhanMode==='function') window.ZadAndroid.setAdhanMode(savedMode);
    const adhanSources={sabah:'https://upload.wikimedia.org/wikipedia/commons/e/e7/Adhan.ogg',beautiful:'https://upload.wikimedia.org/wikipedia/commons/b/b0/Beautiful_adhan.ogg'};
    const importedVoices=['mustafa','fajr','banna','basit'];
    const importFile=$('adhanImportFile'); let localPreviewUrl=null;
@@ -100,10 +104,11 @@
    if(window.ZadAndroid&&silentStatus) silentStatus.textContent=window.ZadAndroid.hasSilentPermission()?'الإذن متاح. اختر الصلوات ثم احفظ.':'لم يُمنح إذن التحكم في وضع عدم الإزعاج بعد.';
    const saveAdhan=$('saveAdhanSettings');
    if(saveAdhan)saveAdhan.addEventListener('click',()=>{
-     const enabled=$('adhanEnabled').checked, selected=voice.value;
+     const enabled=$('adhanEnabled').checked, selected=voice.value, mode=alertMode?alertMode.value:'adhan';
+     localStorage.setItem('zad_adhan_mode',mode);
      localStorage.setItem('zad_adhan_enabled',String(enabled));
      localStorage.setItem('zad_adhan_voice',selected);
-     if(window.ZadAndroid){window.ZadAndroid.setAdhanEnabled(enabled);window.ZadAndroid.setAdhanVoice(selected);}
+     if(window.ZadAndroid){window.ZadAndroid.setAdhanEnabled(enabled);window.ZadAndroid.setAdhanVoice(selected);if(typeof window.ZadAndroid.setAdhanMode==='function')window.ZadAndroid.setAdhanMode(mode);}
      document.querySelectorAll('.prayer-alert').forEach(el=>{
        localStorage.setItem('zad_prayer_alert_'+el.dataset.prayer,String(el.checked));
        if(window.ZadAndroid)window.ZadAndroid.setPrayerAdhanEnabled(el.dataset.prayer,el.checked);
