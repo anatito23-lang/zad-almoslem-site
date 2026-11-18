@@ -44,7 +44,7 @@
    };
    $('qiyamReminderTime').addEventListener('input',()=>{$('qiyamReminderTime').dataset.userEdited='1'});
    // Reapply stored daily schedules whenever the app is opened.
-   ['morning','qiyam'].forEach(k=>schedule(k,read(k)));
+   ['morning','qiyam'].forEach(k=>{const stored=localStorage.getItem(keys[k]);if(k==='morning'||stored)schedule(k,read(k));});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
