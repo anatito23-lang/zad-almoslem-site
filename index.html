@@ -1401,12 +1401,13 @@ nasheedAudio.addEventListener('error',()=>{
 
 <style>
 #zadLanguagePicker{
- appearance:none!important;position:fixed!important;top:59px!important;right:9px!important;
+ appearance:none!important;-webkit-appearance:none!important;position:fixed!important;
+ top:50%!important;right:10px!important;left:auto!important;transform:translateY(-50%)!important;
  z-index:100000!important;display:block!important;visibility:visible!important;opacity:1!important;
- width:92px!important;min-width:92px!important;padding:4px 20px 4px 7px!important;
- border:1px solid #b99a5b!important;border-radius:7px!important;
- background:#f4eedf!important;color:#315548!important;font:600 11px/1.4 Tahoma,Arial,sans-serif!important;
- box-shadow:0 1px 5px #0002!important;cursor:pointer!important;
+ width:43px!important;min-width:43px!important;height:43px!important;padding:0 2px!important;
+ border:1px solid #b99a5b!important;border-radius:50%!important;
+ background:#f4eedf!important;color:#315548!important;font:700 10px/1 Tahoma,Arial,sans-serif!important;
+ text-align:center!important;box-shadow:0 3px 12px #0002!important;cursor:pointer!important;
 }
 #zadLanguagePicker option{color:#18332d;background:#fff}
 #google_translate_element{position:fixed!important;left:-9999px!important;top:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
@@ -1421,17 +1422,18 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
 <script>
 (function(){
  const languages=[
-  {code:'ar',label:'العربية',dir:'rtl'},
-  {code:'en',label:'English',dir:'ltr'},
-  {code:'fr',label:'Français',dir:'ltr'},
-  {code:'tr',label:'Türkçe',dir:'ltr'},
-  {code:'id',label:'Indonesia',dir:'ltr'},
+  {code:'ar',label:'عربي',dir:'rtl'},
+  {code:'en',label:'EN',dir:'ltr'},
+  {code:'fr',label:'FR',dir:'ltr'},
+  {code:'tr',label:'TR',dir:'ltr'},
+  {code:'id',label:'ID',dir:'ltr'},
   {code:'ur',label:'اردو',dir:'rtl'},
-  {code:'es',label:'Español',dir:'ltr'}
+  {code:'es',label:'ES',dir:'ltr'}
  ];
  const picker=document.createElement('select');
  picker.id='zadLanguagePicker';
  picker.setAttribute('aria-label','اختر لغة الموقع');
+ picker.title='تغيير اللغة';
  languages.forEach(l=>{const o=document.createElement('option');o.value=l.code;o.textContent=l.label;picker.appendChild(o)});
  document.body.appendChild(picker);
 
