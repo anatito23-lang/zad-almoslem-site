@@ -1400,10 +1400,18 @@ nasheedAudio.addEventListener('error',()=>{
 </script>
 
 <style>
-#zadLanguagePicker{appearance:none!important;position:fixed!important;top:62px!important;right:12px!important;z-index:99998!important;display:block!important;visibility:visible!important;opacity:1!important;min-width:108px!important;width:auto!important;padding:6px 25px 6px 9px!important;border:1px solid #c8a96b!important;border-radius:9px!important;background:#f7f1df!important;color:#31584c!important;font-weight:700!important;font-size:12px!important;line-height:1.5!important;box-shadow:0 2px 9px #172f281c!important;cursor:pointer!important;background-image:linear-gradient(45deg,transparent 50%,#31584c 50%),linear-gradient(135deg,#31584c 50%,transparent 50%)!important;background-position:calc(100% - 12px) 50%,calc(100% - 8px) 50%!important;background-size:4px 4px,4px 4px!important;background-repeat:no-repeat!important}
+#zadLanguagePicker{
+ appearance:none!important;position:fixed!important;top:59px!important;right:9px!important;
+ z-index:100000!important;display:block!important;visibility:visible!important;opacity:1!important;
+ width:92px!important;min-width:92px!important;padding:4px 20px 4px 7px!important;
+ border:1px solid #b99a5b!important;border-radius:7px!important;
+ background:#f4eedf!important;color:#315548!important;font:600 11px/1.4 Tahoma,Arial,sans-serif!important;
+ box-shadow:0 1px 5px #0002!important;cursor:pointer!important;
+}
 #zadLanguagePicker option{color:#18332d;background:#fff}
-#quran,.mushaf-page-frame,.mushaf-page-frame img,.ayah-text,.quran-text{translate:no!important;-webkit-translate:no!important}
-#google_translate_element{position:fixed!important;left:-10000px!important;top:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+#google_translate_element{position:fixed!important;left:-9999px!important;top:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+.goog-te-banner-frame,.skiptranslate iframe{display:none!important}
+body{top:0!important}
 html[dir="ltr"] body{direction:ltr}
 html[dir="ltr"] .article{border-right:0;border-left:3px solid var(--gold)}
 html[dir="ltr"] .section h2:before{margin-left:0;margin-right:10px}
@@ -1417,88 +1425,73 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
   {code:'en',label:'English',dir:'ltr'},
   {code:'fr',label:'Français',dir:'ltr'},
   {code:'tr',label:'Türkçe',dir:'ltr'},
-  {code:'id',label:'Bahasa Indonesia',dir:'ltr'},
+  {code:'id',label:'Indonesia',dir:'ltr'},
   {code:'ur',label:'اردو',dir:'rtl'},
   {code:'es',label:'Español',dir:'ltr'}
  ];
- const phrases={
- 'مواقيت الصلاة':['Prayer Times','Horaires de prière','Namaz Vakitleri','Waktu Salat','نماز کے اوقات','Horarios de oración'],
- 'القرآن الكريم — استماع فقط':['The Holy Quran — Audio','Le Saint Coran — Écoute','Kur’an-ı Kerim — Dinleme','Al-Qur’an — Audio','قرآن کریم — سماعت','El Sagrado Corán — Audio'],
- 'الإنشاد الديني والابتهالات':['Islamic Chants & Supplications','Chants religieux et invocations','İslami İlahi ve Münacatlar','Nasyid & Munajat','نعت و مناجات','Cantos e invocaciones islámicas'],
- 'المصحف الشريف كاملًا':['Complete Mushaf','Le Mushaf complet','Tam Mushaf','Mushaf Lengkap','مکمل مصحف','Mushaf completo'],
- 'الرقية الشرعية — استماع مباشر':['Ruqyah — Listen Live','Ruqya — Écoute directe','Rukye — Canlı Dinle','Ruqyah — Dengarkan','شرعی رقیہ — براہِ راست سماعت','Ruqia — Escucha directa'],
- 'إذاعة القرآن الكريم من القاهرة':['Quran Radio from Cairo','Radio du Coran du Caire','Kahire Kur’an Radyosu','Radio Al-Qur’an Kairo','قاہرہ سے قرآن ریڈیو','Radio del Corán de El Cairo'],
- 'الأذكار اليومية':['Daily Adhkar','Invocations quotidiennes','Günlük Zikirler','Zikir Harian','روزانہ اذکار','Adhkar diarios'],
- 'مكتبة الكتب الإسلامية':['Islamic Book Library','Bibliothèque de livres islamiques','İslami Kitaplık','Perpustakaan Buku Islam','اسلامی کتب خانہ','Biblioteca de libros islámicos'],
- 'ركن الأطفال — نتعلم ونمرح':['Kids’ Corner — Learn & Play','Espace enfants — apprendre et jouer','Çocuk Köşesi — Öğren ve Eğlen','Ruang Anak — Belajar & Bermain','بچوں کا گوشہ — سیکھیں اور کھیلیں','Rincón infantil — aprender y jugar'],
- 'التذكير والتنبيه الصوتي':['Reminders & Audio Alerts','Rappels et alertes audio','Hatırlatmalar ve Sesli Uyarılar','Pengingat & Notifikasi Suara','یاد دہانی اور صوتی تنبیہ','Recordatorios y alertas de audio'],
- 'السنة النبوية والأدعية':['Prophetic Sunnah & Duas','Sunna prophétique et invocations','Peygamberimizin Sünneti ve Dualar','Sunnah Nabi & Doa','سنتِ نبوی اور دعائیں','Sunna profética y súplicas'],
- 'وردي اليومي':['My Daily Wird','Mon wird quotidien','Günlük Virdim','Wirid Harian Saya','میرا روزانہ ورد','Mi wird diario'],
- 'ورد يوم الجمعة':['Friday Wird','Wird du vendredi','Cuma Virdi','Wirid Jumat','جمعہ کا ورد','Wird del viernes'],
- 'فتح المصحف':['Open Mushaf','Ouvrir le Mushaf','Mushafı Aç','Buka Mushaf','مصحف کھولیں','Abrir Mushaf'],
- 'استمع الآن':['Listen Now','Écouter maintenant','Şimdi Dinle','Dengarkan Sekarang','ابھی سنیں','Escuchar ahora'],
- 'افتح الأذكار':['Open Adhkar','Ouvrir les invocations','Zikirleri Aç','Buka Zikir','اذکار کھولیں','Abrir adhkar'],
- 'إغلاق':['Close','Fermer','Kapat','Tutup','بند کریں','Cerrar'],
- 'كل الكتب':['All Books','Tous les livres','Tüm Kitaplar','Semua Buku','تمام کتابیں','Todos los libros'],
- 'كتب الفقه':['Fiqh Books','Livres de fiqh','Fıkıh Kitapları','Buku Fikih','فقہ کی کتابیں','Libros de fiqh'],
- 'كتب السيرة':['Seerah Books','Livres de sîra','Siyer Kitapları','Buku Sirah','سیرت کی کتابیں','Libros de sira'],
- 'كتب التفسير':['Tafsir Books','Livres de tafsir','Tefsir Kitapları','Buku Tafsir','تفسیر کی کتابیں','Libros de tafsir'],
- 'اقرأ داخل الموقع':['Read on this site','Lire sur ce site','Sitede Oku','Baca di Situs Ini','سائٹ پر پڑھیں','Leer en este sitio'],
- 'الصفحة السابقة':['Previous Page','Page précédente','Önceki Sayfa','Halaman Sebelumnya','پچھلا صفحہ','Página anterior'],
- 'الصفحة التالية':['Next Page','Page suivante','Sonraki Sayfa','Halaman Berikutnya','اگلا صفحہ','Página siguiente'],
- 'رقم الصفحة':['Page Number','Numéro de page','Sayfa Numarası','Nomor Halaman','صفحہ نمبر','Número de página'],
- 'اذهب':['Go','Aller','Git','Buka','جائیں','Ir'],
- 'أذكار الصباح':['Morning Adhkar','Invocations du matin','Sabah Zikirleri','Zikir Pagi','صبح کے اذکار','Adhkar de la mañana'],
- 'أذكار المساء':['Evening Adhkar','Invocations du soir','Akşam Zikirleri','Zikir Petang','شام کے اذکار','Adhkar de la tarde'],
- 'أذكار بعد الصلاة':['Adhkar After Prayer','Invocations après la prière','Namaz Sonrası Zikirler','Zikir Setelah Salat','نماز کے بعد اذکار','Adhkar después de la oración'],
- 'حديث آخر':['Another Hadith','Autre hadith','Başka Hadis','Hadis Lainnya','ایک اور حدیث','Otro hadiz'],
- 'دعاء آخر':['Another Dua','Autre invocation','Başka Dua','Doa Lainnya','ایک اور دعا','Otra súplica'],
- 'احسب الورد':['Calculate Daily Portion','Calculer la portion','Günlük Okumayı Hesapla','Hitung Bacaan Harian','روزانہ کا حصہ شمار کریں','Calcular la lectura diaria'],
- 'تشغيل تنبيه الصلاة':['Enable Prayer Alert','Activer l’alerte de prière','Namaz Bildirimini Aç','Aktifkan Pengingat Salat','نماز کی اطلاع چلائیں','Activar aviso de oración'],
- 'تشغيل التذكير الصوتي':['Enable Audio Reminder','Activer le rappel audio','Sesli Hatırlatmayı Aç','Aktifkan Pengingat Suara','صوتی یاد دہانی چلائیں','Activar recordatorio de audio'],
- 'تجربة الصوت الآن':['Test Audio Now','Tester le son','Sesi Dene','Uji Suara','ابھی آواز آزمائیں','Probar audio ahora'],
- 'إيقاف':['Stop','Arrêter','Durdur','Matikan','بند کریں','Detener'],
- 'أدوات ومحتوى إضافي':['Tools & More Content','Outils et contenu supplémentaire','Araçlar ve Ek İçerik','Alat & Konten Tambahan','اوزار اور اضافی مواد','Herramientas y contenido adicional'],
- 'السيرة النبوية والأدعية':['Prophetic Sunnah & Duas','Sunna prophétique et invocations','Peygamberimizin Sünneti ve Dualar','Sunnah Nabi & Doa','سنتِ نبوی اور دعائیں','Sunna profética y súplicas']
- };
- const langIndex={ar:-1,en:0,fr:1,tr:2,id:3,ur:4,es:5};
- const originals=new WeakMap();
- const textNodes=[];
- const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
- while(walker.nextNode()) textNodes.push(walker.currentNode);
- textNodes.forEach(node=>{const value=node.nodeValue.trim();if(value)originals.set(node,node.nodeValue)});
- function translate(code){
-  const idx=langIndex[code];
-  document.documentElement.lang=code;
-  document.documentElement.dir=languages.find(x=>x.code===code).dir;
-  document.title=code==='ar'?'قلبي اطمأن وزاد المسلم | موقع إسلامي شامل':({en:'Qalbi Itma’an | Zad Almoslem',fr:'Qalbi Itma’an | Zad Almoslem',tr:'Qalbi Itma’an | Zad Almoslem',id:'Qalbi Itma’an | Zad Almoslem',ur:'قلبي اطمأن | زاد المسلم',es:'Qalbi Itma’an | Zad Almoslem'}[code]||document.title);
-  textNodes.forEach(node=>{
-   const original=originals.get(node);if(original===undefined)return;
-   const key=original.trim();
-   const translated=key; // Keep Arabic source text intact; full-page translator handles localization.
-   if(translated)node.nodeValue=original.replace(key,translated);
-  });
-  document.querySelectorAll('[data-i18n-original]').forEach(el=>{
-   const key=el.getAttribute('data-i18n-original');if(key)el.textContent=idx<0?key:((phrases[key]&&phrases[key][idx])||key);
-  });
-  const picker=document.getElementById('zadLanguagePicker');if(picker&&picker.value!==code)picker.value=code;
-  localStorage.setItem('zad_language',code);
- }
  const picker=document.createElement('select');
- picker.id='zadLanguagePicker';picker.setAttribute('aria-label','Choose language');
- languages.forEach(l=>{const option=document.createElement('option');option.value=l.code;option.textContent=l.label;picker.appendChild(option)});
+ picker.id='zadLanguagePicker';
+ picker.setAttribute('aria-label','اختر لغة الموقع');
+ languages.forEach(l=>{const o=document.createElement('option');o.value=l.code;o.textContent=l.label;picker.appendChild(o)});
  document.body.appendChild(picker);
- picker.addEventListener('change',()=>translate(picker.value));
+
+ // Preserve the Quran listening section and the Mushaf in Arabic.
+ ['quran','mushaf'].forEach(id=>{
+   const el=document.getElementById(id);
+   if(el){el.classList.add('notranslate');el.setAttribute('translate','no');}
+ });
  const saved=localStorage.getItem('zad_language');
  const browser=(navigator.language||'ar').toLowerCase().split('-')[0];
- const supported=languages.some(l=>l.code===browser)?browser:'ar';
- translate(saved&&languages.some(l=>l.code===saved)?saved:supported);
+ const initial=saved&&languages.some(l=>l.code===saved)?saved:(languages.some(l=>l.code===browser)?browser:'ar');
+ picker.value=initial;
+ document.documentElement.lang=initial;
+ document.documentElement.dir=(languages.find(l=>l.code===initial)||languages[0]).dir;
+
+ function applyLanguage(){
+   const combo=document.querySelector('.goog-te-combo');
+   if(!combo)return false;
+   const target=picker.value==='ar'?'':picker.value;
+   combo.value=target;
+   combo.dispatchEvent(new Event('change',{bubbles:true}));
+   localStorage.setItem('zad_language',picker.value);
+   const chosen=languages.find(l=>l.code===picker.value)||languages[0];
+   document.documentElement.lang=chosen.code;
+   document.documentElement.dir=chosen.dir;
+   return true;
+ }
+ picker.addEventListener('change',()=>{
+   let attempts=0;
+   const retry=setInterval(()=>{
+     attempts++;
+     if(applyLanguage()||attempts>=30)clearInterval(retry);
+   },300);
+ });
+ window.zadGoogleTranslateReady=function(){
+   if(window.google&&google.translate){
+     new google.translate.TranslateElement({
+       pageLanguage:'ar',
+       includedLanguages:'en,fr,tr,id,ur,es',
+       autoDisplay:false,
+       layout:google.translate.TranslateElement.InlineLayout.SIMPLE
+     },'google_translate_element');
+     let attempts=0;
+     const ready=setInterval(()=>{
+       attempts++;
+       if(document.querySelector('.goog-te-combo')){
+         if(initial!=='ar')applyLanguage();
+         clearInterval(ready);
+       }
+       if(attempts>=40)clearInterval(ready);
+     },300);
+   }
+ };
 })();
 </script>
 
 <script>
 // Full-page translation. Quran listening section and Quran page image remain Arabic.
 function googleTranslateElementInit(){
+  if(window.zadGoogleTranslateReady){window.zadGoogleTranslateReady();return;}
   // Google Translate honors notranslate / translate=no on protected Quran content.
   ['quran','mushafPageImage','mushafSwipeArea'].forEach(id=>{const el=document.getElementById(id);if(el){el.classList.add('notranslate');el.setAttribute('translate','no');}});
   if(window.google&&google.translate){
