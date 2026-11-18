@@ -1873,7 +1873,7 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
 </script>
 <script src="./daily-reminders.js?v=20261118adhan3"></script>
 <script>
-if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {})); }
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261118cache40", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
 </script>
 
 <style id="hide-floating-shortcuts">
