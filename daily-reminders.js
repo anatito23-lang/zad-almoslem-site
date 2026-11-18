@@ -35,7 +35,7 @@
              $('qiyamReminderTime').value=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
            }
            if(window.ZadAndroid){
-             names.forEach(([name,key])=>{const a=t[key].split(' ')[0].split(':').map(Number);const at=new Date(now.getFullYear(),now.getMonth(),now.getDate(),a[0],a[1]).getTime();if(at>Date.now())window.ZadAndroid.schedulePrayer(name,at);});
+             names.forEach(([name,key])=>{const a=t[key].split(' ')[0].split(':').map(Number);let at=new Date(now.getFullYear(),now.getMonth(),now.getDate(),a[0],a[1]).getTime();if(at<=Date.now())at+=24*60*60*1000;window.ZadAndroid.schedulePrayer(name,at);});
            }
          }).catch(()=>{});
        }
