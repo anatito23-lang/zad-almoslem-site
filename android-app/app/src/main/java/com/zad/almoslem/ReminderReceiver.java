@@ -65,7 +65,7 @@ public class ReminderReceiver extends BroadcastReceiver {
                 else context.startService(audio);
             } catch(Exception ignored) {}
         }
-        NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if(prayer) {\n            long next=prefs.getLong(key,0L)+24L*60L*60L*1000L;\n            prefs.edit().putLong(key,next).apply();\n            schedule(context,key,next,title,false);\n        }\n        NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
         String channelId=prayer?PRAYER_CHANNEL_ID:CHANNEL_ID;
         if(Build.VERSION.SDK_INT>=26){
             NotificationChannel ch;
