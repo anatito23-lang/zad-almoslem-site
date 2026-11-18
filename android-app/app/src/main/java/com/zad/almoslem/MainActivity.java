@@ -49,7 +49,10 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void schedulePrayer(String name,long timestamp) {
             ReminderReceiver.schedulePrayer(MainActivity.this,name,timestamp);
         }
-        @JavascriptInterface public void setAdhanEnabled(boolean enabled) {\n            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_enabled", enabled).apply();\n        }\n        @JavascriptInterface public void requestNotificationPermission() {
+        @JavascriptInterface public void setAdhanEnabled(boolean enabled) {
+            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_enabled", enabled).apply();
+        }
+        @JavascriptInterface public void requestNotificationPermission() {
             runOnUiThread(() -> MainActivity.this.requestNotificationPermission());
         }
     }
