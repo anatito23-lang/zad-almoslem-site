@@ -80,7 +80,7 @@
      if(!adhanStatus)return;
      if(!document.getElementById('zadAdhanProgressStyle')){
        const style=document.createElement('style');style.id='zadAdhanProgressStyle';
-       style.textContent='@keyframes zadAdhanLoading{0%{transform:translateX(115%)}100%{transform:translateX(-115%)}}#zadAdhanProgress{height:9px;width:100%;margin:10px 0 4px;border-radius:20px;overflow:hidden;background:#e6eee8;direction:ltr}#zadAdhanProgress>span{display:block;width:38%;height:100%;border-radius:20px;background:linear-gradient(90deg,#0c8067,#d6b76f,#0c8067);animation:zadAdhanLoading 1.15s ease-in-out infinite}';
+       style.textContent='@keyframes zadAdhanLoading{0%{transform:translateX(115%)}100%{transform:translateX(-115%)}}#zadAdhanProgress{height:7px;width:100%;margin:8px 0 10px;border-radius:20px;overflow:hidden;background:#e6eee8;direction:ltr}#zadAdhanProgress>span{display:block;width:38%;height:100%;border-radius:20px;background:linear-gradient(90deg,#0c8067,#d6b76f,#0c8067);animation:zadAdhanLoading 1.15s ease-in-out infinite}';
        document.head.appendChild(style);
      }
      if(!adhanProgress){
@@ -113,17 +113,20 @@
      try{window.ZadAndroid.downloadAdhan(voice.value);}catch(error){hideAdhanProgress();downloadBtn.disabled=false;adhanStatus.textContent='تعذر بدء التحميل. حاول مرة أخرى.';}
    });
    if(previewBtn)previewBtn.addEventListener('click',()=>{
-     if(window.ZadAndroid){
-       if(window.ZadAndroid.isAdhanDownloaded(voice.value)){window.ZadAndroid.previewAdhan(voice.value);$('adhanSettingsStatus').textContent='يتم تشغيل معاينة الأذان من الملف المحفوظ على الجهاز.';}
-       else $('adhanSettingsStatus').textContent='حمّل صوت الأذان أولًا ليعمل من داخل التطبيق دون إنترنت.';
+     if(!voice||!preview||!adhanSources[voice.value]){$('adhanSettingsStatus').textContent='معاينة هذا التسجيل غير متاحة حاليًا.';return;}
+     if(window.ZadAndroid&&window.ZadAndroid.isAdhanDownloaded(voice.value)){
+       preview.pause();preview.removeAttribute('src');preview.load();
+       window.ZadAndroid.previewAdhan(voice.value);
+       $('adhanSettingsStatus').textContent='يتم تشغيل معاينة الأذان من الملف المحفوظ على الجهاز.';
        return;
      }
-     if(!adhanSources[voice.value]){$('adhanSettingsStatus').textContent='معاينة هذا التسجيل غير متاحة حاليًا.';return;}
-     preview.src=adhanSources[voice.value];
+     preview.pause();preview.src=adhanSources[voice.value];
      preview.volume=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0))/100:savedVolume/100;
-     preview.play().catch(()=>{$('adhanSettingsStatus').textContent='اضغط مرة أخرى للسماح بتشغيل الصوت.';});
+     preview.load();
+     $('adhanSettingsStatus').textContent='جارٍ تشغيل معاينة الأذان عبر الإنترنت...';
+     preview.play().then(()=>$('adhanSettingsStatus').textContent='يعمل الأذان الآن. للاستماع دون إنترنت نزّل الصوت أولًا.').catch(()=>$('adhanSettingsStatus').textContent='تعذر تشغيل المعاينة. تحقق من اتصال الإنترنت وحاول مرة أخرى.');
    });
-   if(voice)voice.addEventListener('change',()=>{preview.pause();preview.currentTime=0;updateAdhanDownloadState();});
+   if(voice)voice.addEventListener('change',()=>{preview.pause();preview.removeAttribute('src');preview.load();updateAdhanDownloadState();});
    updateAdhanDownloadState();
    document.querySelectorAll('.prayer-silent').forEach(el=>{
      el.checked=localStorage.getItem('zad_prayer_silent_'+el.dataset.prayer)==='true';
