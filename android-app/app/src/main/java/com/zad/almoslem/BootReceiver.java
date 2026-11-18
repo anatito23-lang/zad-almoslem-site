@@ -8,7 +8,7 @@ import java.util.Calendar;
 public class BootReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context context,Intent intent) {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
-        for(String key:new String[]{"morning","qiyam"}) {
+        for(String key:new String[]{"morning","evening","qiyam"}) {
             if(p.getBoolean(key+"_enabled",false))
                 ReminderReceiver.scheduleDaily(context,key,p.getInt(key+"_hour",7),p.getInt(key+"_minute",0),p.getString(key+"_title","تذكير من زاد المسلم"));
         }
