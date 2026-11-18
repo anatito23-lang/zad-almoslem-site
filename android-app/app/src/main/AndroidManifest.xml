@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
     <application android:allowBackup="true" android:label="قلبي اطمأن - زاد المسلم" android:icon="@drawable/ic_launcher_new" android:roundIcon="@drawable/ic_launcher_new" android:usesCleartextTraffic="false" android:theme="@style/AppTheme">
         <activity android:name=".MainActivity" android:exported="true" android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
@@ -14,6 +15,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".RadioTileService" android:label="إذاعة القرآن" android:icon="@drawable/ic_launcher_new" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:exported="true"><intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter></service>
+        <service android:name=".QuranTileService" android:label="استماع القرآن" android:icon="@drawable/ic_launcher_new" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:exported="true"><intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter></service>
         <service android:name=".RadioPlaybackService" android:exported="false" android:foregroundServiceType="mediaPlayback" />\n        <service android:name=".AdhanPlaybackService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
         <receiver android:name=".ReminderReceiver" android:enabled="true" android:exported="false" />
         <receiver android:name=".BootReceiver" android:enabled="true" android:exported="true">
