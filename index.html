@@ -1042,8 +1042,8 @@ async function getPrayerData(city,day=new Date()){
 }
 async function loadPrayer(){
  const savedCity=localStorage.getItem('zad_selected_city');if(savedCity&&[...$('city').options].some(o=>o.value===savedCity))$('city').value=savedCity;const city=$('city').value;
- const cacheKey='zad_prayer_cache_'+city+'_'+localDayKey(new Date());
- try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&cached.timings){window.zadPrayerTimings=cached.timings;$('prayerGrid').innerHTML=[['الفجر','Fajr'],['الشروق','Sunrise'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']].map(([n,k])=>`<div class="prayer"><div class="pname">${n}</div><div class="ptime">${fmtTime(cached.timings[k])}</div></div>`).join('');if(cached.hijri)$('hijriDate').textContent=cached.hijri;$('prayerStatus').textContent='مواقيت محفوظة لهذا اليوم — جارٍ التحقق من التحديث';countdownDayKey=localDayKey(new Date());}}catch(e){}
+ const cacheToday=new Date();const cacheDayKey=cacheToday.getFullYear()+'-'+String(cacheToday.getMonth()+1).padStart(2,'0')+'-'+String(cacheToday.getDate()).padStart(2,'0');const cacheKey='zad_prayer_cache_'+city+'_'+cacheDayKey;
+ try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&cached.timings){window.zadPrayerTimings=cached.timings;$('prayerGrid').innerHTML=[['الفجر','Fajr'],['الشروق','Sunrise'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']].map(([n,k])=>`<div class="prayer"><div class="pname">${n}</div><div class="ptime">${fmtTime(cached.timings[k])}</div></div>`).join('');if(cached.hijri)$('hijriDate').textContent=cached.hijri;$('prayerStatus').textContent='مواقيت محفوظة لهذا اليوم — جارٍ التحقق من التحديث';}}catch(e){}
  $('prayerStatus').textContent=window.zadPrayerTimings?'مواقيت محفوظة — جارٍ التحديث...':'جارٍ تحديث المواقيت...';
  try{
   const j=await getPrayerData(city);
