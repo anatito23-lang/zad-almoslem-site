@@ -68,7 +68,13 @@ public class ReminderReceiver extends BroadcastReceiver {
             } catch(Exception ignored) {}
         }
         if(prayer) {
-            long next=prefs.getLong(key,0L)+24L*60L*60L*1000L;
+            // Advance by one local calendar day, not a fixed 24-hour duration.
+            Calendar nextPrayer = Calendar.getInstance();
+            long previous = prefs.getLong(key, 0L);
+            if (previous <= 0L) previous = System.currentTimeMillis();
+            nextPrayer.setTimeInMillis(previous);
+            nextPrayer.add(Calendar.DAY_OF_YEAR, 1);
+            long next = nextPrayer.getTimeInMillis();
             prefs.edit().putLong(key,next).apply();
             schedule(context,key,next,title,false);
         }
