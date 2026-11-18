@@ -34,6 +34,14 @@
    const adhanSaved=localStorage.getItem('zad_adhan_enabled');
    if(adhanToggle) adhanToggle.checked=adhanSaved===null?true:adhanSaved==='true';
    if(window.ZadAndroid && adhanToggle) window.ZadAndroid.setAdhanEnabled(adhanToggle.checked);
+   const duaAfterAdhan=$('duaAfterAdhanEnabled');
+   const savedDuaAfterAdhan=localStorage.getItem('zad_dua_after_adhan_enabled');
+   if(duaAfterAdhan)duaAfterAdhan.checked=savedDuaAfterAdhan===null?true:savedDuaAfterAdhan==='true';
+   if(window.ZadAndroid&&duaAfterAdhan)window.ZadAndroid.setDuaAfterAdhanEnabled(duaAfterAdhan.checked);
+   if(duaAfterAdhan)duaAfterAdhan.addEventListener('change',()=>{
+     localStorage.setItem('zad_dua_after_adhan_enabled',String(duaAfterAdhan.checked));
+     if(window.ZadAndroid)window.ZadAndroid.setDuaAfterAdhanEnabled(duaAfterAdhan.checked);
+   });
 
    // Adhan voice and per-prayer controls.
    const voice=$('adhanVoice'), preview=$('adhanPreview'), previewBtn=$('previewAdhan');
@@ -125,6 +133,11 @@
      if(window.ZadAndroid&&anyReminderEnabled){
        $('dailyReminderStatus').textContent='تم حفظ مواعيد التذكير. جارٍ التأكد من ملفات الصوت...';
        ensureReminderAudioDownloaded();
+     }
+     const duaControl=$('duaAfterAdhanEnabled');
+     if(duaControl){
+       localStorage.setItem('zad_dua_after_adhan_enabled',String(duaControl.checked));
+       if(window.ZadAndroid)window.ZadAndroid.setDuaAfterAdhanEnabled(duaControl.checked);
      }
      const adhanControl=$('adhanEnabled');
      if(adhanControl){
