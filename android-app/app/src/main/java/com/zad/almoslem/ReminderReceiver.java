@@ -102,6 +102,9 @@ public class ReminderReceiver extends BroadcastReceiver {
             restoreSilentMode(context);
             return;
         }
+        if (!prayer && ("morning".equals(key) || "evening".equals(key) || "qiyam".equals(key))) {
+            try { ReminderAudioService.play(context, key); } catch (Exception ignored) {}
+        }
         boolean adhanEnabled=prefs.getBoolean("adhan_enabled",true);
         String adhanMode=prefs.getString("adhan_mode","adhan");
         String prayerName = prayer ? key.substring("prayer_".length()) : "";
@@ -111,7 +114,8 @@ public class ReminderReceiver extends BroadcastReceiver {
             Intent audio=new Intent(context,AdhanPlaybackService.class);
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
             audio.putExtra("prayer",prayerName);
-            audio.putExtra("voice",prefs.getString("adhan_voice","sabah"));
+            audio.putExtra("voice",prefs.getString("adhan_voice","basit"));
+            audio.putExtra("play_dua_after",true);
             try {
                 if(Build.VERSION.SDK_INT>=26) context.startForegroundService(audio);
                 else context.startService(audio);
@@ -151,7 +155,8 @@ public class ReminderReceiver extends BroadcastReceiver {
         PendingIntent content=PendingIntent.getActivity(context,0,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,channelId):new Notification.Builder(context);
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("قلبي اطمأن – زاد المسلم").setContentText(title==null?"تذكير من زاد المسلم":title).setAutoCancel(true).setContentIntent(content);
-        if(!prayer || (prayer && adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode))) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
+        if(prayer && adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode)) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
+        else b.setDefaults(Notification.DEFAULT_VIBRATE);
         nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
             String k=key.replace("daily_","");
