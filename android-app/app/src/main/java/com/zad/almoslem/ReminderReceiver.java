@@ -65,7 +65,8 @@ public class ReminderReceiver extends BroadcastReceiver {
         restore.putExtra("action","restore_silent");
         PendingIntent pi=PendingIntent.getBroadcast(context,987654,restore,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
         long at=System.currentTimeMillis()+15L*60L*1000L;
-        if (Build.VERSION.SDK_INT >= 23) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,pi);
+        if (Build.VERSION.SDK_INT >= 31 && !am.canScheduleExactAlarms()) am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,pi);
+        else if (Build.VERSION.SDK_INT >= 23) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,pi);
         else am.setExact(AlarmManager.RTC_WAKEUP,at,pi);
     }
     private static void restoreSilentMode(Context context) {
