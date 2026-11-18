@@ -177,7 +177,7 @@ public class MainActivity extends Activity {
             ReminderReceiver.schedulePrayer(MainActivity.this,name,timestamp);
         }
         @JavascriptInterface public void setAdhanVoice(String voice) {
-            String safe = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)) ? voice : "basit";
+            String safe = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"haram".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)) ? voice : "basit";
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_voice", safe).apply();
         }
         @JavascriptInterface public void setAdhanVolume(int volume) {
@@ -195,8 +195,15 @@ public class MainActivity extends Activity {
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("dua_after_adhan_enabled", enabled).apply();
         }
         @JavascriptInterface public void setAdhanMode(String mode) {
-            String safe = ("tone".equals(mode) || "silent".equals(mode)) ? mode : "adhan";
+            String safe = ("tone".equals(mode) || "vibrate".equals(mode) || "off".equals(mode)) ? mode : "adhan";
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_mode", safe).apply();
+        }
+        @JavascriptInterface public void setApproachAlertEnabled(boolean enabled) {
+            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("approach_alert_enabled", enabled).apply();
+        }
+        @JavascriptInterface public void setApproachAlertMinutes(int minutes) {
+            int safe = Math.max(1, Math.min(60, minutes));
+            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putInt("approach_alert_minutes", safe).apply();
         }
         @JavascriptInterface public void setPrayerSilentEnabled(String prayer, boolean enabled) {
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("prayer_silent_" + prayer, enabled).apply();
@@ -240,7 +247,7 @@ public class MainActivity extends Activity {
             try {
                 String safe=safeVoice(voice);
                 byte[] bytes=Base64.decode(encoded,Base64.DEFAULT);
-                if(bytes.length<10000 || bytes.length>8*1024*1024) return false;
+                if(bytes.length<10000 || bytes.length>20*1024*1024) return false;
                 File dir=new File(getFilesDir(),"adhan");
                 if(!dir.exists()&&!dir.mkdirs()) return false;
                 File temp=new File(dir,safe+".import");
@@ -251,7 +258,7 @@ public class MainActivity extends Activity {
             } catch(Exception e){return false;}
         }
         private String safeVoice(String voice) {
-            return ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice))?voice:"basit";
+            return ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"haram".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice))?voice:"basit";
         }
         @JavascriptInterface public void downloadAdhan(String voice) {
             final String safe = safeVoice(voice);
