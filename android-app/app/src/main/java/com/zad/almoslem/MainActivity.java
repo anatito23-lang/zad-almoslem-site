@@ -74,6 +74,20 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void setAdhanEnabled(boolean enabled) {
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_enabled", enabled).apply();
         }
+        @JavascriptInterface public void setPrayerSilentEnabled(String prayer, boolean enabled) {
+            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("prayer_silent_" + prayer, enabled).apply();
+        }
+        @JavascriptInterface public boolean hasSilentPermission() {
+            if (Build.VERSION.SDK_INT < 23) return false;
+            android.app.NotificationManager nm=(android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+            return nm != null && nm.isNotificationPolicyAccessGranted();
+        }
+        @JavascriptInterface public void requestSilentPermission() {
+            if (Build.VERSION.SDK_INT >= 23 && !hasSilentPermission()) {
+                try { startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)); }
+                catch (Exception ignored) {}
+            }
+        }
         @JavascriptInterface public void requestNotificationPermission() {
             runOnUiThread(() -> MainActivity.this.requestNotificationPermission());
         }
