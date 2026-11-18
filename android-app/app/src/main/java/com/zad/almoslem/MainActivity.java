@@ -94,10 +94,17 @@ public class MainActivity extends Activity {
         @JavascriptInterface public boolean isReminderAudioDownloaded() {
             File dir = new File(getFilesDir(), "reminders");
             for (String name : new String[]{"morning", "evening", "dua"}) {
-                File file = new File(dir, name + ".mp3");
-                if (!file.isFile() || file.length() < 10000) return false;
+                if (!isValidReminderAudio(new File(dir, name + ".mp3"))) return false;
             }
             return true;
+        }
+        private boolean isValidReminderAudio(File file) {
+            if (!file.isFile() || file.length() < 10000) return false;
+            try (java.io.FileInputStream in = new java.io.FileInputStream(file)) {
+                int a = in.read(), b = in.read();
+                int c = in.read();
+                return (a == 'I' && b == 'D' && c == '3') || (a == 0xFF && (b & 0xE0) == 0xE0);
+            } catch (Exception ignored) { return false; }
         }
         @JavascriptInterface public void downloadReminderAudio() {
             new Thread(() -> {
@@ -107,46 +114,62 @@ public class MainActivity extends Activity {
                     {"dua", "https://archive.org/download/Islamic_Tape-258_uP_bY_mUSLEm/sharawy_doaa_24.mp3"}
                 };
                 File dir = new File(getFilesDir(), "reminders");
+                StringBuilder report = new StringBuilder();
                 boolean allOk = true;
-                try { if (!dir.exists() && !dir.mkdirs()) throw new Exception("تعذر إنشاء مجلد الصوت"); }
-                catch (Exception e) { allOk = false; }
-                for (String[] item : sources) {
-                    if (!allOk) break;
-                    HttpURLConnection connection = null;
-                    File temp = new File(dir, item[0] + ".download");
-                    File target = new File(dir, item[0] + ".mp3");
-                    try {
-                        connection = (HttpURLConnection) new URL(item[1]).openConnection();
-                        connection.setConnectTimeout(20000);
-                        connection.setReadTimeout(60000);
-                        connection.setInstanceFollowRedirects(true);
-                        connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
-                        int status = connection.getResponseCode();
-                        if (status != HttpURLConnection.HTTP_OK) throw new Exception("HTTP " + status);
-                        String type = connection.getContentType();
-                        if (type == null || !(type.toLowerCase().contains("audio") || type.toLowerCase().contains("mpeg") || type.toLowerCase().contains("octet-stream"))) throw new Exception("المصدر لا يعيد ملفًا صوتيًا");
-                        long total = 0;
-                        try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
-                            byte[] buffer = new byte[8192]; int n;
-                            while ((n = in.read(buffer)) != -1) {
-                                total += n;
-                                if (total > 30L * 1024L * 1024L) throw new Exception("ملف الصوت أكبر من الحد المسموح");
-                                out.write(buffer, 0, n);
+                if (!dir.exists() && !dir.mkdirs()) {
+                    allOk = false;
+                    report.append("تعذر إنشاء مجلد الملفات الصوتية.");
+                } else {
+                    for (String[] item : sources) {
+                        HttpURLConnection connection = null;
+                        File temp = new File(dir, item[0] + ".download");
+                        File target = new File(dir, item[0] + ".mp3");
+                        try {
+                            if (isValidReminderAudio(target)) {
+                                report.append(item[0]).append(": محفوظ بالفعل. ");
+                                continue;
                             }
-                            out.getFD().sync();
+                            connection = (HttpURLConnection) new URL(item[1]).openConnection();
+                            connection.setConnectTimeout(25000);
+                            connection.setReadTimeout(90000);
+                            connection.setInstanceFollowRedirects(true);
+                            connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
+                            int status = connection.getResponseCode();
+                            if (status != HttpURLConnection.HTTP_OK) throw new Exception("استجابة المصدر " + status);
+                            String type = connection.getContentType();
+                            String mime = type == null ? "" : type.toLowerCase(java.util.Locale.ROOT);
+                            if (!(mime.contains("audio") || mime.contains("mpeg") || mime.contains("octet-stream"))) {
+                                throw new Exception("المصدر لم يُرجع ملفًا صوتيًا (" + (type == null ? "نوع غير معروف" : type) + ")");
+                            }
+                            long total = 0;
+                            try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
+                                byte[] buffer = new byte[8192];
+                                int count;
+                                while ((count = in.read(buffer)) != -1) {
+                                    total += count;
+                                    if (total > 30L * 1024L * 1024L) throw new Exception("حجم الملف أكبر من 30 ميجابايت");
+                                    out.write(buffer, 0, count);
+                                }
+                                out.getFD().sync();
+                            }
+                            if (total < 10000 || !isValidReminderAudio(temp)) throw new Exception("الملف الذي وصل ليس تسجيل MP3 مكتملًا");
+                            if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال النسخة القديمة");
+                            if (!temp.renameTo(target)) throw new Exception("تعذر حفظ الملف على الجهاز");
+                            report.append(item[0]).append(": تم التنزيل. ");
+                        } catch (Exception e) {
+                            allOk = false;
+                            if (temp.exists()) temp.delete();
+                            report.append(item[0]).append(": ").append(e.getMessage() == null ? "فشل التنزيل" : e.getMessage()).append(". ");
+                        } finally {
+                            if (connection != null) connection.disconnect();
                         }
-                        if (total < 10000) throw new Exception("ملف الصوت غير مكتمل");
-                        if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال الملف القديم");
-                        if (!temp.renameTo(target)) throw new Exception("تعذر حفظ الملف");
-                    } catch (Exception e) {
-                        allOk = false;
-                        if (temp.exists()) temp.delete();
-                    } finally { if (connection != null) connection.disconnect(); }
+                    }
                 }
-                final boolean result = allOk;
+                final boolean result = allOk && isReminderAudioDownloaded();
+                final String details = report.toString();
                 runOnUiThread(() -> {
                     if (webView != null) webView.evaluateJavascript(
-                        "window.onReminderAudioDownload && window.onReminderAudioDownload(" + result + ")", null);
+                        "window.onReminderAudioDownload && window.onReminderAudioDownload(" + result + "," + org.json.JSONObject.quote(details) + ")", null);
                 });
             }).start();
         }
