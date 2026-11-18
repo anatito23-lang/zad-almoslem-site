@@ -75,7 +75,7 @@ public class AdhanPlaybackService extends Service {
                     .build());
             String source = "beautiful".equals(voice)
                     ? "https://upload.wikimedia.org/wikipedia/commons/b/b0/Beautiful_adhan.ogg"
-                    : "https://upload.wikimedia.org/wikipedia/commons/2/27/Call_to_prayer_by_Sabah_Fakhry.mp3";
+                    : "https://upload.wikimedia.org/wikipedia/commons/e/e7/Adhan.ogg";
             player.setDataSource(source);
             player.setOnPreparedListener(MediaPlayer::start);
             player.setOnCompletionListener(mp -> stopPlayback());
