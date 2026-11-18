@@ -79,7 +79,7 @@ public class MainActivity extends Activity {
             ReminderReceiver.schedulePrayer(MainActivity.this,name,timestamp);
         }
         @JavascriptInterface public void setAdhanVoice(String voice) {
-            String safe = "beautiful".equals(voice) ? "beautiful" : "sabah";
+            String safe = ("mustafa".equals(voice)||"fajr".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"beautiful".equals(voice)) ? voice : "sabah";
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_voice", safe).apply();
         }
         @JavascriptInterface public void setPrayerAdhanEnabled(String prayer, boolean enabled) {
@@ -214,7 +214,7 @@ public class MainActivity extends Activity {
             Intent audio = new Intent(MainActivity.this, AdhanPlaybackService.class);
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
             audio.putExtra("prayer", "تجربة الأذان");
-            audio.putExtra("voice", "beautiful".equals(voice) ? "beautiful" : "sabah");
+            audio.putExtra("voice", ("mustafa".equals(voice)||"fajr".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"beautiful".equals(voice)) ? voice : "sabah");
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(audio); else startService(audio);
         }
 
