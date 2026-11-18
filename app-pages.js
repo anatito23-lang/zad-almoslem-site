@@ -6,6 +6,9 @@ const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='fu
 document.getElementById('kids')?.remove();
 document.querySelectorAll('a[href="#kids"]').forEach(link=>link.remove());
 if(!main||!header||$('zadAppPages'))return;
+const prayerSettings=main.querySelector('.date-strip .prayer-location-settings');
+const prayerSection=$('prayer');
+if(prayerSettings&&prayerSection){prayerSettings.style.margin='0 0 14px';prayerSection.insertBefore(prayerSettings,prayerSection.firstChild);}
 document.querySelector('.bottom-nav:not(.zad-bottom-nav)')?.remove();
 const meta=[['prayer','مواقيت الصلاة','🕰️'],['quran','استماع القرآن','📖'],['mushaf','المصحف الشريف','۞'],['ruqyah','الرقية الشرعية','🤲'],['radio-egypt','إذاعة القرآن الكريم','📻'],['azkar','الأذكار اليومية','☀️'],['books-library','مكتبة الكتب الإسلامية','📚'],...(!nativeApp?[['kids','ركن الأطفال','🧒']]:[]),['reminders','تنبيهات الصلاة والأذان','🕌'],['hadith-dua','السنة والدعاء','🌿'],['daily-wird','وردي اليومي','📿'],['friday-wird','ورد الجمعة','🌙'],['qalbi-itmaann','قلبي اطمأن','💚'],['library','نفحات إيمانية','✨'],['khutbahs','خطب الجمعة','🎙️'],['nasheed','الإنشاد والابتهالات','🎵']];
 const root=document.createElement('div');root.id='zadAppPages';
