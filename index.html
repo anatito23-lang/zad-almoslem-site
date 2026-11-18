@@ -1126,7 +1126,7 @@ function loadMushafPage(number){
   if(request!==mushafRequestNumber)return;
   $('mushafStatus').textContent='صفحة '+page+' من 604 — تم تحميلها.';
   [page+1,page-1].filter(p=>p>=1&&p<=604).forEach(p=>{
-   const warm=new Image();warm.src='https://raw.githubusercontent.com/Miftah-Fentaw/Quran_webp/main/png/'+p+'.png';
+   const warm=new Image();warm.src='https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran-Images@main/png/'+p+'.png';
   });
 
  };
@@ -1135,9 +1135,9 @@ function loadMushafPage(number){
   $('mushafStatus').textContent='تعذر تحميل الصفحة الآن. تحقق من اتصال الإنترنت ثم حاول مرة أخرى أو انتقل لصفحة أخرى.';
  };
  const pageSources=[
-  'https://raw.githubusercontent.com/Miftah-Fentaw/Quran_webp/main/png/'+page+'.png',
+  'https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran-Images@main/png/'+page+'.png',
   'https://raw.githubusercontent.com/Miftah-Fentaw/Quran-Images/main/png/'+page+'.png',
-  'https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran-Images@main/png/'+page+'.png'
+  'https://raw.githubusercontent.com/GovarJabbar/Quran-PNG/master/'+String(page).padStart(3,'0')+'.png'
  ];
  image.dataset.sourceIndex='0';
  image.onerror=()=>{
@@ -1204,7 +1204,7 @@ async function loadMushafIndex(){
 }
 
 const MUSHAF_OFFLINE_CACHE='zad-mushaf-offline-pages-v1';
-const MUSHAF_CDN='https://raw.githubusercontent.com/Miftah-Fentaw/Quran_webp/main/png/';
+const MUSHAF_CDN='https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran-Images@main/png/';
 function mushafPngUrl(page){return MUSHAF_CDN+page+'.png';}
 async function updateMushafOfflineStatus(){
  const label=$('mushafOfflineStatus');if(!label||!('caches'in window))return;
@@ -1838,6 +1838,6 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261118o"></script>
+<script src="./app-pages.js?v=20261118p"></script>
 </body>
 </html>
