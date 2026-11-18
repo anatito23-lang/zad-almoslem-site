@@ -50,6 +50,20 @@
    const supportedVoices=['basit','husary','mustafa','rifaat','banna','naqshbandi','tobar'];
    const savedVoice=supportedVoices.includes(storedVoice)?storedVoice:'basit';
    if(voice)voice.value=savedVoice;
+   const volumeControl=$('adhanVolume'), volumeValue=$('adhanVolumeValue');
+   const storedVolume=localStorage.getItem('zad_adhan_volume');
+   const savedVolume=Math.max(0,Math.min(100,storedVolume===null?100:parseInt(storedVolume,10)||0));
+   if(volumeControl)volumeControl.value=String(savedVolume);
+   if(volumeValue)volumeValue.textContent=savedVolume+'%';
+   function applyAdhanVolume(){
+     const level=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0)):savedVolume;
+     if(volumeValue)volumeValue.textContent=level+'%';
+     localStorage.setItem('zad_adhan_volume',String(level));
+     if(preview)preview.volume=level/100;
+     if(window.ZadAndroid)window.ZadAndroid.setAdhanVolume(level);
+   }
+   if(volumeControl)volumeControl.addEventListener('input',applyAdhanVolume);
+   applyAdhanVolume();
    if(storedVoice!==savedVoice)localStorage.setItem('zad_adhan_voice',savedVoice);
    const adhanOn=localStorage.getItem('zad_adhan_enabled');
    if($('adhanEnabled'))$('adhanEnabled').checked=adhanOn===null?true:adhanOn==='true';
@@ -79,7 +93,8 @@
        else $('adhanSettingsStatus').textContent='حمّل صوت الأذان أولًا ليعمل من داخل التطبيق دون إنترنت.';
        return;
      }
-     preview.src=adhanSources[voice.value]||adhanSources.sabah;
+     preview.src=adhanSources[voice.value]||adhanSources.basit;
+     preview.volume=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0))/100:savedVolume/100;
      preview.play().catch(()=>{$('adhanSettingsStatus').textContent='اضغط مرة أخرى للسماح بتشغيل الصوت.';});
    });
    if(voice)voice.addEventListener('change',()=>{preview.pause();preview.currentTime=0;updateAdhanDownloadState();});
@@ -98,6 +113,7 @@
    const saveAdhan=$('saveAdhanSettings');
    if(saveAdhan)saveAdhan.addEventListener('click',()=>{
      const enabled=$('adhanEnabled').checked, selected=voice.value;
+     applyAdhanVolume();
      localStorage.setItem('zad_adhan_enabled',String(enabled));
      localStorage.setItem('zad_adhan_voice',selected);
      if(window.ZadAndroid){window.ZadAndroid.setAdhanEnabled(enabled);window.ZadAndroid.setAdhanVoice(selected);}
