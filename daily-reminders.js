@@ -20,8 +20,11 @@
    // Adhan voice and per-prayer controls.
    const voice=$('adhanVoice'), preview=$('adhanPreview'), previewBtn=$('previewAdhan');
    const adhanSources={basit:'https://archive.org/download/hay-hat.com_939/46.mp3',mustafa:'https://archive.org/download/hay-hat.com_939/50.mp3',husary:'https://archive.org/download/hay-hat.com_774/51.mp3',rifaat:'https://archive.org/download/hay-hat.com_774/57.mp3'};
-   const savedVoice=localStorage.getItem('zad_adhan_voice')||'sabah';
+   const storedVoice=localStorage.getItem('zad_adhan_voice');
+   const supportedVoices=['basit','husary','mustafa','rifaat','banna','naqshbandi','tobar'];
+   const savedVoice=supportedVoices.includes(storedVoice)?storedVoice:'basit';
    if(voice)voice.value=savedVoice;
+   if(storedVoice!==savedVoice)localStorage.setItem('zad_adhan_voice',savedVoice);
    const adhanOn=localStorage.getItem('zad_adhan_enabled');
    if($('adhanEnabled'))$('adhanEnabled').checked=adhanOn===null?true:adhanOn==='true';
    document.querySelectorAll('.prayer-alert').forEach(el=>{const v=localStorage.getItem('zad_prayer_alert_'+el.dataset.prayer);el.checked=v===null?true:v==='true';});
