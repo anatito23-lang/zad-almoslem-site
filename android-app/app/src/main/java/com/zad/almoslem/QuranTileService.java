@@ -19,10 +19,11 @@ public class QuranTileService extends TileService {
         android.content.SharedPreferences p=getSharedPreferences("zad_audio",MODE_PRIVATE);
         boolean playing=p.getBoolean("radio_playing",false)&&"quran".equals(p.getString("active_kind",""));
         Intent i=new Intent(this,RadioPlaybackService.class);
-        if(playing) i.setAction(RadioPlaybackService.ACTION_STOP);
+        if(playing) { p.edit().putBoolean("radio_playing",false).putString("active_kind","").apply(); i.setAction(RadioPlaybackService.ACTION_STOP); }
         else {
             String url=p.getString("last_quran_url","");
             if(url.isEmpty()) { startActivityAndCollapse(new Intent(this,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); return; }
+            p.edit().putBoolean("radio_playing",true).putString("active_kind","quran").apply();
             i.setAction(RadioPlaybackService.ACTION_PLAY); i.putExtra("url",url); i.putExtra("label",p.getString("last_quran_title","تلاوة القرآن الكريم")); i.putExtra("kind","quran");
         }
         if(Build.VERSION.SDK_INT>=26) startForegroundService(i); else startService(i);
