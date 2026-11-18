@@ -1,9 +1,11 @@
 (function(){
 'use strict';
 const $=id=>document.getElementById(id), main=document.querySelector('main.wrap'), header=document.querySelector('header.hero');
+const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp());
+if(nativeApp){document.getElementById('kids')?.remove();document.querySelectorAll('a[href="#kids"]').forEach(link=>link.remove());}
 if(!main||!header||$('zadAppPages'))return;
 document.querySelector('.bottom-nav:not(.zad-bottom-nav)')?.remove();
-const meta=[['prayer','مواقيت الصلاة','🕰️'],['quran','استماع القرآن','📖'],['mushaf','المصحف الشريف','۞'],['ruqyah','الرقية الشرعية','🤲'],['radio-egypt','إذاعة القرآن الكريم','📻'],['azkar','الأذكار اليومية','☀️'],['books-library','مكتبة الكتب الإسلامية','📚'],['kids','ركن الأطفال','🧒'],['daily-reminder-settings','إعدادات التذكير','🔔'],['reminders','تنبيهات الصلاة والأذان','🕌'],['hadith-dua','السنة والدعاء','🌿'],['daily-wird','وردي اليومي','📿'],['friday-wird','ورد الجمعة','🌙'],['qalbi-itmaann','قلبي اطمأن','💚'],['library','نفحات إيمانية','✨'],['khutbahs','خطب الجمعة','🎙️'],['nasheed','الإنشاد والابتهالات','🎵']];
+const meta=[['prayer','مواقيت الصلاة','🕰️'],['quran','استماع القرآن','📖'],['mushaf','المصحف الشريف','۞'],['ruqyah','الرقية الشرعية','🤲'],['radio-egypt','إذاعة القرآن الكريم','📻'],['azkar','الأذكار اليومية','☀️'],['books-library','مكتبة الكتب الإسلامية','📚'],...(!nativeApp?[['kids','ركن الأطفال','🧒']]:[]),['daily-reminder-settings','إعدادات التذكير','🔔'],['reminders','تنبيهات الصلاة والأذان','🕌'],['hadith-dua','السنة والدعاء','🌿'],['daily-wird','وردي اليومي','📿'],['friday-wird','ورد الجمعة','🌙'],['qalbi-itmaann','قلبي اطمأن','💚'],['library','نفحات إيمانية','✨'],['khutbahs','خطب الجمعة','🎙️'],['nasheed','الإنشاد والابتهالات','🎵']];
 const root=document.createElement('div');root.id='zadAppPages';
 const home=document.createElement('div');home.className='zad-page is-active';home.id='zad-page-home';home.dataset.page='home';
 const pages=document.createElement('div');pages.className='zad-pages-content';
