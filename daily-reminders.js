@@ -60,7 +60,7 @@
      if(volumeValue)volumeValue.textContent=level+'%';
      localStorage.setItem('zad_adhan_volume',String(level));
      if(preview)preview.volume=level/100;
-     if(window.ZadAndroid)window.ZadAndroid.setAdhanVolume(level);
+     if(window.ZadAndroid&&typeof window.ZadAndroid.setAdhanVolume==='function')window.ZadAndroid.setAdhanVolume(level);
    }
    if(volumeControl)volumeControl.addEventListener('input',applyAdhanVolume);
    applyAdhanVolume();
