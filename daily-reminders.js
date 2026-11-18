@@ -162,12 +162,6 @@
    });
    if(voice)voice.addEventListener('change',()=>{preview.pause();preview.currentTime=0;updateAdhanDownloadState();});
    updateAdhanDownloadState();
-       }catch(e){if(importStatus)importStatus.textContent='تعذر حفظ التسجيل على الجهاز.';}
-     };
-     reader.onerror=()=>{if(importStatus)importStatus.textContent='تعذر قراءة الملف.';};
-     reader.readAsDataURL(file);
-   });
-   updateAdhanDownloadState();
    document.querySelectorAll('.prayer-silent').forEach(el=>{
      el.checked=localStorage.getItem('zad_prayer_silent_'+el.dataset.prayer)==='true';
    });
