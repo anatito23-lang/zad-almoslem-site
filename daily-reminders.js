@@ -19,7 +19,7 @@
 
    // Adhan voice and per-prayer controls.
    const voice=$('adhanVoice'), preview=$('adhanPreview'), previewBtn=$('previewAdhan');
-   const adhanSources={sabah:'https://upload.wikimedia.org/wikipedia/commons/e/e7/Adhan.ogg',beautiful:'https://upload.wikimedia.org/wikipedia/commons/b/b0/Beautiful_adhan.ogg'};
+   const adhanSources={basit:'https://archive.org/download/hay-hat.com_939/46.mp3',mustafa:'https://archive.org/download/hay-hat.com_939/50.mp3',husary:'https://archive.org/download/hay-hat.com_774/51.mp3',rifaat:'https://archive.org/download/hay-hat.com_774/57.mp3'};
    const savedVoice=localStorage.getItem('zad_adhan_voice')||'sabah';
    if(voice)voice.value=savedVoice;
    const adhanOn=localStorage.getItem('zad_adhan_enabled');
