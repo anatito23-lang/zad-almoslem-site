@@ -207,6 +207,38 @@ document.addEventListener('click',function(event){
   status.textContent='تعذر بدء التحميل: '+(error.message||'حاول مرة أخرى.');
  }
 },true);
+
+// Dynamic settings controls are created after daily-reminders.js initializes.
+// Handle preview here with delegation so the preview button always works.
+const zadAdhanPreviewSources={
+ basit:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Abdulbasit_Abdusamad_1_-_Egypt_(%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%A8%D8%A7%D8%B3%D8%B7_%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%B5%D9%85%D8%AF_-_%D9%85%D8%B5%D8%B1).mp3',
+ mustafa:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mustafa_Ismail_-_Egypt_(%D9%85%D8%B5%D8%B7%D9%81%D9%89_%D8%A5%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84_-_%D9%85%D8%B5%D8%B1).mp3',
+ husary:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mahmoud_Khalil_Al_Hussary_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%AE%D9%84%D9%8A%D9%84_%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%8A_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',
+ banna:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mahmoud_Ali_Al_Banna_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%B9%D9%84%D9%8A_%D8%A7%D9%84%D8%A8%D9%86%D8%A7_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',
+ naqshbandi:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Sheikh_Al_Naqshbandi_(%D8%A7%D9%84%D8%B4%D9%8A%D8%AE_%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%89).mp3',
+ haram:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(%D8%B9%D9%84%D9%8A_%D8%A8%D9%86_%D8%A3%D8%حْمَد_%D9%85%D9%84%D8%A7_-_%D8%A7%D9%84%D8%AD%D8%B1%D9%85_%D8%A7%D9%84%D9%85%D9%83%D9%8A).mp3'
+};
+document.addEventListener('click',function(event){
+ const button=event.target&&event.target.closest?event.target.closest('#previewAdhan'):null;
+ if(!button)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ const voice=$('adhanVoice'),audio=$('adhanPreview'),status=$('adhanSettingsStatus');
+ if(!voice||!audio||!status)return;
+ const selected=voice.value;
+ if(window.ZadAndroid&&typeof window.ZadAndroid.isAdhanDownloaded==='function'&&window.ZadAndroid.isAdhanDownloaded(selected)){
+  audio.pause();audio.removeAttribute('src');audio.load();
+  if(typeof window.ZadAndroid.previewAdhan==='function')window.ZadAndroid.previewAdhan(selected);
+  status.textContent='يتم تشغيل معاينة الأذان من الملف المحفوظ على الجهاز.';
+  return;
+ }
+ const source=zadAdhanPreviewSources[selected];
+ if(!source){status.textContent='مصدر معاينة هذا التسجيل غير متاح.';return;}
+ audio.pause();audio.src=source;
+ const volume=$('adhanVolume');audio.volume=volume?Math.max(0,Math.min(100,Number(volume.value)||0))/100:1;
+ audio.load();status.textContent='جارٍ تشغيل معاينة الأذان عبر الإنترنت...';
+ const play=audio.play();
+ if(play&&typeof play.then==='function')play.then(()=>{status.textContent='يعمل الأذان الآن. للاستماع دون إنترنت نزّل الصوت أولًا.';}).catch(()=>{status.textContent='تعذر تشغيل المعاينة. تحقق من الإنترنت وحاول مرة أخرى.';});
+},true);
 window.onAdhanDownloadComplete=function(which,ok,reason){
  const voice=$('adhanVoice'),status=$('adhanSettingsStatus'),button=$('downloadAdhan'),bar=$('zadAdhanProgress');
  if(!voice||which!==voice.value)return;
@@ -235,5 +267,14 @@ document.querySelectorAll('[data-zad-theme]').forEach(b=>b.addEventListener('cli
 $('zadFontFamily')?.addEventListener('change',e=>{localStorage.setItem('zad_font_family',e.target.value);applySettings();});
 $('zadFontSize')?.addEventListener('input',e=>{localStorage.setItem('zad_font_size',e.target.value);applySettings();});
 applySettings();
+css.textContent+='
+#zadAudioSettingsSlot>.adhan-settings{padding:10px!important;margin:6px 0!important;border-radius:12px!important}
+#zadAudioSettingsSlot>.adhan-settings .card{padding:10px!important;margin:6px 0!important}
+#zadAudioSettingsSlot>.adhan-settings h3{font-size:15px!important;margin:0 0 4px!important}
+#zadAudioSettingsSlot>.adhan-settings p{margin:3px 0 7px!important;font-size:12px!important;line-height:1.45!important}
+#zadAudioSettingsSlot>.adhan-settings label{margin:5px 0 3px!important;font-size:12px!important}
+#zadAudioSettingsSlot>.adhan-settings button,#zadAudioSettingsSlot>.adhan-settings select{padding:7px 9px!important;font-size:12px!important}
+#zadAdhanProgress{height:6px!important;margin:4px 0 7px!important}
+';
 document.head.append(css);
 })();
