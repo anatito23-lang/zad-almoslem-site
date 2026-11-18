@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-almoslem-shell-v47";
+const CACHE_NAME = "zad-almoslem-shell-v48";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./daily-reminders.js?v=20261118adhanbuttonfix2", "./app-pages.js?v=20261118sync3"];
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
