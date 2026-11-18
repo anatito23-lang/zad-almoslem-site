@@ -53,11 +53,13 @@ public class ReminderReceiver extends BroadcastReceiver {
     private static void activateSilentMode(Context context) {
         if (Build.VERSION.SDK_INT < 23) return;
         NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (nm == null || !nm.isNotificationPolicyAccessGranted()) return;
+        android.media.AudioManager audio=(android.media.AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+        if (nm == null || audio == null || !nm.isNotificationPolicyAccessGranted()) return;
         android.content.SharedPreferences prefs=context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE);
-        if (nm.getCurrentInterruptionFilter() != NotificationManager.INTERRUPTION_FILTER_ALL) return;
-        prefs.edit().putInt("silent_previous_filter",NotificationManager.INTERRUPTION_FILTER_ALL).putBoolean("silent_restore_pending",true).apply();
-        nm.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
+        int current=audio.getRingerMode();
+        if (current != android.media.AudioManager.RINGER_MODE_NORMAL) return;
+        prefs.edit().putInt("silent_previous_ringer",current).putBoolean("silent_restore_pending",true).apply();
+        audio.setRingerMode(android.media.AudioManager.RINGER_MODE_SILENT);
         AlarmManager am=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Intent restore=new Intent(context,ReminderReceiver.class);
         restore.putExtra("action","restore_silent");
@@ -70,12 +72,13 @@ public class ReminderReceiver extends BroadcastReceiver {
         if (Build.VERSION.SDK_INT < 23) return;
         android.content.SharedPreferences prefs=context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE);
         if (!prefs.getBoolean("silent_restore_pending",false)) return;
+        android.media.AudioManager audio=(android.media.AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
         NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (nm != null && nm.isNotificationPolicyAccessGranted()
-                && nm.getCurrentInterruptionFilter()==NotificationManager.INTERRUPTION_FILTER_NONE) {
-            nm.setInterruptionFilter(prefs.getInt("silent_previous_filter",NotificationManager.INTERRUPTION_FILTER_ALL));
+        if (audio != null && nm != null && nm.isNotificationPolicyAccessGranted()
+                && audio.getRingerMode()==android.media.AudioManager.RINGER_MODE_SILENT) {
+            audio.setRingerMode(prefs.getInt("silent_previous_ringer",android.media.AudioManager.RINGER_MODE_NORMAL));
         }
-        prefs.edit().putBoolean("silent_restore_pending",false).remove("silent_previous_filter").apply();
+        prefs.edit().putBoolean("silent_restore_pending",false).remove("silent_previous_ringer").apply();
     }
 
     @Override public void onReceive(Context context,Intent intent) {
