@@ -28,11 +28,21 @@ public class ReminderReceiver extends BroadcastReceiver {
         context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE).edit().putBoolean(key+"_enabled",false).apply();
         cancel(context,key);
     }
+    private static void scheduleApproachAlert(Context context,String name,long prayerAt) {
+        String alertKey="approach_"+name;
+        long alertAt=prayerAt-15L*60L*1000L;
+        if(alertAt>System.currentTimeMillis()) {
+            schedule(context,alertKey,alertAt,"اقتربت صلاة "+name+"، بقي على الصلاة ربع ساعة.",false);
+        } else {
+            cancel(context,alertKey);
+        }
+    }
     public static void schedulePrayer(Context context,String name,long at) {
         if(at<=System.currentTimeMillis()) return;
         String key="prayer_"+name;
         context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE).edit().putLong(key,at).apply();
         schedule(context,key,at,"حان الآن وقت صلاة "+name,false);
+        scheduleApproachAlert(context,name,at);
     }
     private static void schedule(Context context,String key,long at,String title,boolean daily) {
         AlarmManager am=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
@@ -117,6 +127,7 @@ public class ReminderReceiver extends BroadcastReceiver {
             long next = nextPrayer.getTimeInMillis();
             prefs.edit().putLong(key,next).apply();
             schedule(context,key,next,title,false);
+            scheduleApproachAlert(context,prayerName,next);
         }
         NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
         String channelId=prayer?((adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode))?PRAYER_TONE_CHANNEL_ID:PRAYER_CHANNEL_ID):CHANNEL_ID;
