@@ -49,7 +49,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void schedulePrayer(String name,long timestamp) {
             ReminderReceiver.schedulePrayer(MainActivity.this,name,timestamp);
         }
-        @JavascriptInterface public void setAdhanEnabled(boolean enabled) {
+        @JavascriptInterface public void setAdhanVoice(String voice) {\n            String safe = "beautiful".equals(voice) ? "beautiful" : "sabah";\n            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_voice", safe).apply();\n        }\n        @JavascriptInterface public void setPrayerAdhanEnabled(String prayer, boolean enabled) {\n            String key = "prayer_enabled_" + prayer;\n            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean(key, enabled).apply();\n        }\n        @JavascriptInterface public void setAdhanEnabled(boolean enabled) {
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_enabled", enabled).apply();
         }
         @JavascriptInterface public void requestNotificationPermission() {
