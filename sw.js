@@ -1,4 +1,4 @@
-const CACHE_NAME = "zad-almoslem-shell-v19";
+const CACHE_NAME = "zad-almoslem-shell-v20";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./daily-reminders.js", "./app-pages.js"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
@@ -8,7 +8,27 @@ self.addEventListener("activate", event => {
 });
 self.addEventListener("fetch", event => {
   const request = event.request;
-  if (request.method !== "GET" || new URL(request.url).origin !== self.location.origin) return;
+  if (request.method !== "GET") return;
+  const url = new URL(request.url);
+  const isMushafPage = url.origin === "https://cdn.jsdelivr.net" &&
+    url.pathname.startsWith("/gh/Miftah-Fentaw/Quran-Images@main/png/") &&
+    url.pathname.endsWith(".png");
+  if (isMushafPage) {
+    event.respondWith((async () => {
+      const cache = await caches.open("zad-mushaf-offline-pages-v1");
+      const saved = await cache.match(request);
+      if (saved) return saved;
+      try {
+        const response = await fetch(request);
+        if (response && (response.ok || response.type === "opaque")) await cache.put(request, response.clone());
+        return response;
+      } catch (error) {
+        return new Response("صفحة المصحف غير محفوظة على هذا الجهاز. اتصل بالإنترنت لتنزيلها.", {status:503,headers:{"Content-Type":"text/plain; charset=utf-8"}});
+      }
+    })());
+    return;
+  }
+  if (url.origin !== self.location.origin) return;
   event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {
     if (response && response.ok) {
       const copy = response.clone();
