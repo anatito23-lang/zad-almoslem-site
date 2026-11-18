@@ -3,6 +3,7 @@ package com.zad.almoslem;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import java.util.Calendar;
 
 public class BootReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context context,Intent intent) {
@@ -14,7 +15,12 @@ public class BootReceiver extends BroadcastReceiver {
         for(String name:new String[]{"الفجر","الظهر","العصر","المغرب","العشاء"}) {
             long at=p.getLong("prayer_"+name,0L);
             long now=System.currentTimeMillis();
-            while(at>0L && at<=now) at+=24L*60L*60L*1000L;
+            if (at > 0L) {
+                Calendar next = Calendar.getInstance();
+                next.setTimeInMillis(at);
+                while (next.getTimeInMillis() <= now) next.add(Calendar.DAY_OF_YEAR, 1);
+                at = next.getTimeInMillis();
+            }
             if(at>now) ReminderReceiver.schedulePrayer(context,name,at);
         }
     }
