@@ -123,6 +123,13 @@
    $('qiyamReminderTime').addEventListener('input',()=>{$('qiyamReminderTime').dataset.userEdited='1'});
    // Reapply stored daily schedules whenever the app is opened.
    ['morning','evening','qiyam'].forEach(k=>{const stored=localStorage.getItem(keys[k]);if(k==='morning'||k==='evening'||stored)schedule(k,read(k));});
+   if(window.ZadAndroid&&!window.ZadAndroid.isReminderAudioDownloaded()){
+     window.onReminderAudioDownload=function(ok){
+       const status=$('dailyReminderStatus');
+       if(status)status.textContent=ok?'أصوات الأذكار ودعاء ما بعد الأذان محفوظة للعمل دون إنترنت.':'تعذر تنزيل بعض الملفات الصوتية؛ ستحاول النسخة تنزيلها مرة أخرى عند فتح التطبيق.';
+     };
+     window.ZadAndroid.downloadReminderAudio();
+   }
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
