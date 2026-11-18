@@ -74,16 +74,17 @@ if(nativeApp){
   const cairo='https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8';
   const backup='https://qurango.net/radio/tarateel';
   const setStatus=t=>{if(status)status.textContent=t;};
-  const playSource=async(url,label)=>{
-   radio.pause();radio.src=url;radio.load();setStatus('جارٍ الاتصال بـ'+label+'...');
-   try{await radio.play();}catch(e){setStatus('اضغط زر التشغيل داخل مشغل الإذاعة لبدء الاستماع.');}
+  const stop=document.createElement('button'); stop.type='button'; stop.className='btn light'; stop.textContent='إيقاف الإذاعة'; stop.style.marginTop='8px'; radio.insertAdjacentElement('afterend',stop);
+  radio.hidden=true;
+  const playSource=(url,label,which)=>{
+   setStatus('جارٍ تشغيل '+label+' في الخلفية...');
+   try { window.ZadAndroid.playRadio(which,label); setStatus(label+' تعمل في الخلفية. يمكنك الخروج من التطبيق.'); }
+   catch(e) { setStatus('تعذر بدء تشغيل الإذاعة.'); }
   };
-  fallback?.addEventListener('click',()=>playSource(backup,'البث البديل لتلاوات القرآن'));
-  primary?.addEventListener('click',()=>playSource(cairo,'إذاعة القرآن الكريم من القاهرة'));
-  radio.addEventListener('playing',()=>setStatus('تم الاتصال بالبث. استمتع بالاستماع.'));
-  radio.addEventListener('waiting',()=>setStatus('جارٍ تحميل البث...'));
-  radio.addEventListener('stalled',()=>setStatus('البث متوقف مؤقتًا. جرّب البث البديل.'));
-  radio.addEventListener('error',()=>setStatus('تعذر تشغيل هذا البث. جرّب زر البث البديل.'));
+  fallback?.addEventListener('click',()=>playSource(backup,'البث البديل لتلاوات القرآن','backup'));
+  primary?.addEventListener('click',()=>playSource(cairo,'إذاعة القرآن الكريم من القاهرة','cairo'));
+  stop.addEventListener('click',()=>{try{window.ZadAndroid.stopRadio();setStatus('تم طلب إيقاف الإذاعة.');}catch(e){setStatus('تعذر إيقاف الإذاعة.');}});
+
  }
 }
 document.head.append(css);
