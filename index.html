@@ -1076,6 +1076,22 @@ function loadMushafPage(number){
  mushafCurrentPage=page;
  $('mushafPageNumber').value=String(page);
  $('mushafMeta').textContent='الصفحة '+page+' من 604';
+ $('mushafPageTitle').textContent='مصحف المدينة النبوية';
+ $('mushafMeta').textContent='الصفحة '+page+' من 604';
+ fetch('https://api.alquran.cloud/v1/page/'+page+'/quran-uthmani')
+  .then(response=>{if(!response.ok)throw new Error('page metadata');return response.json();})
+  .then(result=>{
+   if(request!==mushafRequestNumber||result.code!==200||!result.data||!Array.isArray(result.data.ayahs)||!result.data.ayahs.length)return;
+   const first=result.data.ayahs[0];
+   const surahName=first.surah&&first.surah.name?first.surah.name:'';
+   const juz=first.juz||'';
+   $('mushafPageTitle').textContent=surahName||'مصحف المدينة النبوية';
+   $('mushafMeta').textContent='الجزء '+(juz||'—')+' • الصفحة '+page+' من 604';
+   const select=$('mushafSurahSelect');
+   if(select&&first.surah&&first.surah.number)select.value=String(first.surah.number);
+  })
+  .catch(()=>{if(request===mushafRequestNumber)$('mushafMeta').textContent='الصفحة '+page+' من 604';});
+
  $('mushafPageImage').alt='صفحة '+page+' من المصحف الشريف';
  $('mushafStatus').textContent='جارٍ تحميل الصفحة '+page+'...';
  $('mushafPrev').disabled=page===1;
