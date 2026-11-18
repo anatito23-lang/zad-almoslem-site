@@ -80,49 +80,71 @@ public class MainActivity extends Activity {
                 File dir = new File(getFilesDir(), "adhan");
                 File temp = new File(dir, safe + ".download");
                 File target = new File(dir, safe + ".ogg");
+                String error = "تعذر الاتصال بمصدر الصوت";
                 try {
                     if (!dir.exists() && !dir.mkdirs()) throw new Exception("تعذر إنشاء مجلد الصوت");
-                    String source = "beautiful".equals(safe)
-                            ? "https://upload.wikimedia.org/wikipedia/commons/b/b0/Beautiful_adhan.ogg"
-                            : "https://upload.wikimedia.org/wikipedia/commons/e/e7/Adhan.ogg";
-                    connection = (HttpURLConnection) new URL(source).openConnection();
-                    connection.setConnectTimeout(20000);
-                    connection.setReadTimeout(30000);
-                    connection.setInstanceFollowRedirects(true);
-                    connection.setRequestProperty("User-Agent", "ZadAlmoslemAndroid/1.0");
-                    int status = connection.getResponseCode();
-                    if (status != HttpURLConnection.HTTP_OK) throw new Exception("HTTP " + status);
-                    String type = connection.getContentType();
-                    if (type == null || !(type.contains("audio") || type.contains("ogg") || type.contains("octet-stream"))) {
-                        throw new Exception("نوع الملف غير صحيح");
-                    }
-                    int length = connection.getContentLength();
-                    if (length > 8 * 1024 * 1024) throw new Exception("حجم الملف أكبر من المسموح");
-                    try (InputStream in = connection.getInputStream();
-                         FileOutputStream out = new FileOutputStream(temp)) {
-                        byte[] buffer = new byte[8192];
-                        int count;
-                        long total = 0;
-                        while ((count = in.read(buffer)) != -1) {
-                            total += count;
-                            if (total > 8L * 1024L * 1024L) throw new Exception("حجم الملف أكبر من المسموح");
-                            out.write(buffer, 0, count);
+                    String fileName = "beautiful".equals(safe) ? "Beautiful_adhan.ogg" : "Adhan.ogg";
+                    String[] sources = new String[] {
+                            "https://commons.wikimedia.org/wiki/Special:Redirect/file/" + fileName,
+                            "https://upload.wikimedia.org/wikipedia/commons/" +
+                                    ("beautiful".equals(safe) ? "b/b0/Beautiful_adhan.ogg" : "e/e7/Adhan.ogg")
+                    };
+                    Exception lastError = null;
+                    for (String source : sources) {
+                        try {
+                            if (connection != null) connection.disconnect();
+                            if (temp.exists()) temp.delete();
+                            connection = (HttpURLConnection) new URL(source).openConnection();
+                            connection.setConnectTimeout(25000);
+                            connection.setReadTimeout(45000);
+                            connection.setInstanceFollowRedirects(true);
+                            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android) ZadAlmoslem/1.1");
+                            connection.setRequestProperty("Accept", "audio/ogg, application/ogg, application/octet-stream, */*");
+                            int status = connection.getResponseCode();
+                            if (status != HttpURLConnection.HTTP_OK) throw new Exception("استجابة المصدر: " + status);
+                            String type = connection.getContentType();
+                            if (type == null || !(type.toLowerCase().contains("audio") || type.toLowerCase().contains("ogg") || type.toLowerCase().contains("octet-stream"))) {
+                                throw new Exception("المصدر لم يُرجع ملفًا صوتيًا (" + type + ")");
+                            }
+                            int length = connection.getContentLength();
+                            if (length > 8 * 1024 * 1024) throw new Exception("حجم الملف أكبر من المسموح");
+                            try (InputStream in = connection.getInputStream();
+                                 FileOutputStream out = new FileOutputStream(temp)) {
+                                byte[] buffer = new byte[8192];
+                                int count;
+                                long total = 0;
+                                while ((count = in.read(buffer)) != -1) {
+                                    total += count;
+                                    if (total > 8L * 1024L * 1024L) throw new Exception("حجم الملف أكبر من المسموح");
+                                    out.write(buffer, 0, count);
+                                }
+                                out.getFD().sync();
+                                if (total < 10000) throw new Exception("ملف الصوت غير مكتمل");
+                            }
+                            lastError = null;
+                            break;
+                        } catch (Exception attemptError) {
+                            lastError = attemptError;
+                        } finally {
+                            if (connection != null) connection.disconnect();
+                            connection = null;
                         }
-                        out.getFD().sync();
-                        if (total < 10000) throw new Exception("ملف الصوت غير مكتمل");
                     }
+                    if (lastError != null) throw lastError;
                     if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال الملف القديم");
                     if (!temp.renameTo(target)) throw new Exception("تعذر حفظ ملف الصوت");
                     ok = true;
                 } catch (Exception e) {
+                    error = e.getMessage() == null ? "فشل تنزيل الملف" : e.getMessage();
                     if (temp.exists()) temp.delete();
                 } finally {
                     if (connection != null) connection.disconnect();
                 }
                 final boolean result = ok;
+                final String reason = error;
                 runOnUiThread(() -> {
                     if (webView != null) webView.evaluateJavascript(
-                            "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "'," + result + ")", null);
+                            "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "'," + result + "," + org.json.JSONObject.quote(reason) + ")", null);
                 });
             }).start();
         }
