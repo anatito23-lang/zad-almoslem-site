@@ -55,6 +55,17 @@
    });
    if(voice)voice.addEventListener('change',()=>{preview.pause();preview.currentTime=0;updateAdhanDownloadState();});
    updateAdhanDownloadState();
+   document.querySelectorAll('.prayer-silent').forEach(el=>{
+     el.checked=localStorage.getItem('zad_prayer_silent_'+el.dataset.prayer)==='true';
+   });
+   const silentStatus=$('silentSettingsStatus');
+   const permissionBtn=$('grantSilentPermission');
+   if(permissionBtn)permissionBtn.addEventListener('click',()=>{
+     if(!window.ZadAndroid){if(silentStatus)silentStatus.textContent='خاصية الصامت التلقائي متاحة داخل تطبيق أندرويد فقط.';return;}
+     window.ZadAndroid.requestSilentPermission();
+     if(silentStatus)silentStatus.textContent=window.ZadAndroid.hasSilentPermission()?'الإذن متاح على هذا الجهاز.':'افتح إعدادات أندرويد واسمح لتطبيق زاد المسلم بالتحكم في وضع عدم الإزعاج.';
+   });
+   if(window.ZadAndroid&&silentStatus) silentStatus.textContent=window.ZadAndroid.hasSilentPermission()?'الإذن متاح. اختر الصلوات ثم احفظ.':'لم يُمنح إذن التحكم في وضع عدم الإزعاج بعد.';
    const saveAdhan=$('saveAdhanSettings');
    if(saveAdhan)saveAdhan.addEventListener('click',()=>{
      const enabled=$('adhanEnabled').checked, selected=voice.value;
@@ -65,7 +76,12 @@
        localStorage.setItem('zad_prayer_alert_'+el.dataset.prayer,String(el.checked));
        if(window.ZadAndroid)window.ZadAndroid.setPrayerAdhanEnabled(el.dataset.prayer,el.checked);
      });
-     $('adhanSettingsStatus').textContent='تم حفظ صوت المؤذن وإعدادات الصلوات على هذا الجهاز.';
+     document.querySelectorAll('.prayer-silent').forEach(el=>{
+       localStorage.setItem('zad_prayer_silent_'+el.dataset.prayer,String(el.checked));
+       if(window.ZadAndroid)window.ZadAndroid.setPrayerSilentEnabled(el.dataset.prayer,el.checked);
+     });
+     $('adhanSettingsStatus').textContent='تم حفظ إعدادات الأذان والصامت على هذا الجهاز.';
+     if(silentStatus&&window.ZadAndroid) silentStatus.textContent=window.ZadAndroid.hasSilentPermission()?'تم حفظ الصلوات المختارة. سيعمل الصامت 15 دقيقة بعد دخول وقت الصلاة.':'تم حفظ الاختيارات، لكن يجب منح إذن التحكم في وضع عدم الإزعاج أولًا.';
    });
    if(window.ZadAndroid){
      window.ZadAndroid.setAdhanEnabled(!($('adhanEnabled'))||$('adhanEnabled').checked);
