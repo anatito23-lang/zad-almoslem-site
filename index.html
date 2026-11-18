@@ -924,12 +924,17 @@ const fmtTime=t=>{if(!t)return"--:--";let v=t.split(" ")[0];let [h,m]=v.split(":
 function gregArabic(){return new Intl.DateTimeFormat('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).format(new Date())}
 $('gregDate').textContent=gregArabic();
 async function loadPrayer(){
- const city=$('city').value;$('prayerStatus').textContent='جارٍ التحديث...';
+ const savedCity=localStorage.getItem('zad_selected_city');if(savedCity&&[...$('city').options].some(o=>o.value===savedCity))$('city').value=savedCity;const city=$('city').value;$('prayerStatus').textContent='جارٍ التحديث...';
  try{
   const r=await fetch(`https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(city)}&country=Egypt&method=5`);
   const j=await r.json();if(j.code!==200)throw new Error('تعذر جلب المواقيت');
   const t=j.data.timings;
   window.zadPrayerTimings=t;
+  if(window.ZadAndroid){
+   const now=new Date(),prayers=[['الفجر','Fajr'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']];
+   prayers.forEach(([name,key])=>{const parts=t[key].split(' ')[0].split(':').map(Number);const at=new Date(now.getFullYear(),now.getMonth(),now.getDate(),parts[0],parts[1]).getTime();if(at>Date.now())window.ZadAndroid.schedulePrayer(name,at);});
+  }
+  if($('qiyamReminderTime')&&!$('qiyamReminderTime').dataset.userEdited){const parts=t.Fajr.split(' ')[0].split(':').map(Number);const q=new Date(new Date().getFullYear(),new Date().getMonth(),new Date().getDate(),parts[0],parts[1]-30);$('qiyamReminderTime').value=String(q.getHours()).padStart(2,'0')+':'+String(q.getMinutes()).padStart(2,'0');}
   window.zadPrayerDate=j.data.date.gregorian.date;
   countdownDayKey=localDayKey(new Date());
   tomorrowPrayerCache={key:'',timings:null};
