@@ -47,7 +47,7 @@
    const voice=$('adhanVoice'), preview=$('adhanPreview'), previewBtn=$('previewAdhan');
    const adhanSources={basit:'https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/041--.mp3',mustafa:'https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/068-.mp3',husary:'https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/044--.mp3',rifaat:'https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/042--.mp3',banna:'https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/043--.mp3',naqshbandi:'https://cdn1.esm3.com//music/2603/esm3.com.198098.mp3'};
    const storedVoice=localStorage.getItem('zad_adhan_voice');
-   const supportedVoices=['basit','husary','mustafa','rifaat','banna','naqshbandi','tobar'];
+   const supportedVoices=['basit','husary','mustafa','rifaat','banna','naqshbandi','tobar','haram'];
    const savedVoice=supportedVoices.includes(storedVoice)?storedVoice:'basit';
    if(voice)voice.value=savedVoice;
    const volumeControl=$('adhanVolume'), volumeValue=$('adhanVolumeValue');
@@ -65,6 +65,11 @@
    if(volumeControl)volumeControl.addEventListener('input',applyAdhanVolume);
    applyAdhanVolume();
    if(storedVoice!==savedVoice)localStorage.setItem('zad_adhan_voice',savedVoice);
+   const modeControl=$('adhanMode'), approachControl=$('approachAlertEnabled'), approachMinutes=$('approachAlertMinutes');
+   const savedMode=localStorage.getItem('zad_adhan_mode')||'adhan';
+   if(modeControl)modeControl.value=['adhan','tone','vibrate','off'].includes(savedMode)?savedMode:'adhan';
+   if(approachControl)approachControl.checked=localStorage.getItem('zad_approach_enabled')!=='false';
+   if(approachMinutes)approachMinutes.value=String(Math.max(1,Math.min(60,parseInt(localStorage.getItem('zad_approach_minutes')||'15',10)||15)));
    const adhanOn=localStorage.getItem('zad_adhan_enabled');
    if($('adhanEnabled'))$('adhanEnabled').checked=adhanOn===null?true:adhanOn==='true';
    document.querySelectorAll('.prayer-alert').forEach(el=>{const v=localStorage.getItem('zad_prayer_alert_'+el.dataset.prayer);el.checked=v===null?true:v==='true';});
@@ -83,6 +88,7 @@
    };
    if(downloadBtn)downloadBtn.addEventListener('click',()=>{
      if(!window.ZadAndroid){$('adhanSettingsStatus').textContent='تنزيل صوت الأذان للعمل دون إنترنت متاح داخل تطبيق أندرويد فقط.';return;}
+     if(['tobar','haram'].includes(voice.value)){ $('adhanSettingsStatus').textContent='هذا التسجيل يحتاج إضافته من ملف صوتي عبر خانة «إضافة تسجيل المؤذن من جهازك».'; return; }
      downloadBtn.disabled=true;
      $('adhanSettingsStatus').textContent='جارٍ تنزيل صوت الأذان...';
      window.ZadAndroid.downloadAdhan(voice.value);
@@ -98,6 +104,25 @@
      preview.play().catch(()=>{$('adhanSettingsStatus').textContent='اضغط مرة أخرى للسماح بتشغيل الصوت.';});
    });
    if(voice)voice.addEventListener('change',()=>{preview.pause();preview.currentTime=0;updateAdhanDownloadState();});
+   const importFile=$('adhanImportFile'), importStatus=$('adhanImportStatus');
+   if(importFile)importFile.addEventListener('change',()=>{
+     const file=importFile.files&&importFile.files[0]; if(!file)return;
+     if(!file.type.startsWith('audio/')&&!/\.(mp3|ogg|m4a|wav)$/i.test(file.name)){if(importStatus)importStatus.textContent='اختَر ملفًا صوتيًا صالحًا.';return;}
+     if(file.size>20*1024*1024){if(importStatus)importStatus.textContent='حجم التسجيل أكبر من 20 ميجابايت.';return;}
+     if(!window.ZadAndroid||typeof window.ZadAndroid.saveAdhanAudio!=='function'){if(importStatus)importStatus.textContent='إضافة التسجيلات المحفوظة متاحة داخل تطبيق أندرويد.';return;}
+     if(importStatus)importStatus.textContent='جارٍ حفظ التسجيل داخل التطبيق...';
+     const reader=new FileReader();
+     reader.onload=()=>{
+       try{
+         const encoded=String(reader.result||'').split(',')[1]||'';
+         const ok=window.ZadAndroid.saveAdhanAudio(voice.value,encoded);
+         if(importStatus)importStatus.textContent=ok?'تم حفظ تسجيل '+voice.options[voice.selectedIndex].text+' على الجهاز ويعمل دون إنترنت.':'تعذر حفظ الملف؛ تأكد أنه تسجيل صوتي صالح وأقل من 20 ميجابايت.';
+         updateAdhanDownloadState();
+       }catch(e){if(importStatus)importStatus.textContent='تعذر حفظ التسجيل على الجهاز.';}
+     };
+     reader.onerror=()=>{if(importStatus)importStatus.textContent='تعذر قراءة الملف.';};
+     reader.readAsDataURL(file);
+   });
    updateAdhanDownloadState();
    document.querySelectorAll('.prayer-silent').forEach(el=>{
      el.checked=localStorage.getItem('zad_prayer_silent_'+el.dataset.prayer)==='true';
@@ -114,6 +139,17 @@
    if(saveAdhan)saveAdhan.addEventListener('click',()=>{
      const enabled=$('adhanEnabled').checked, selected=voice.value;
      applyAdhanVolume();
+     const selectedMode=modeControl?modeControl.value:'adhan';
+     const approachOn=approachControl?approachControl.checked:true;
+     const approachMins=approachMinutes?Math.max(1,Math.min(60,parseInt(approachMinutes.value,10)||15)):15;
+     localStorage.setItem('zad_adhan_mode',selectedMode);
+     localStorage.setItem('zad_approach_enabled',String(approachOn));
+     localStorage.setItem('zad_approach_minutes',String(approachMins));
+     if(window.ZadAndroid){
+       window.ZadAndroid.setAdhanMode(selectedMode);
+       window.ZadAndroid.setApproachAlertEnabled(approachOn);
+       window.ZadAndroid.setApproachAlertMinutes(approachMins);
+     }
      localStorage.setItem('zad_adhan_enabled',String(enabled));
      localStorage.setItem('zad_adhan_voice',selected);
      if(window.ZadAndroid){window.ZadAndroid.setAdhanEnabled(enabled);window.ZadAndroid.setAdhanVoice(selected);}
@@ -131,6 +167,9 @@
    if(window.ZadAndroid){
      window.ZadAndroid.setAdhanEnabled(!($('adhanEnabled'))||$('adhanEnabled').checked);
      window.ZadAndroid.setAdhanVoice(savedVoice);
+     window.ZadAndroid.setAdhanMode(modeControl?modeControl.value:'adhan');
+     window.ZadAndroid.setApproachAlertEnabled(approachControl?approachControl.checked:true);
+     window.ZadAndroid.setApproachAlertMinutes(approachMinutes?Math.max(1,Math.min(60,parseInt(approachMinutes.value,10)||15)):15);
      document.querySelectorAll('.prayer-alert').forEach(el=>window.ZadAndroid.setPrayerAdhanEnabled(el.dataset.prayer,el.checked));
    }
    // Daily prayer completion tracker, resets automatically on a new date.
