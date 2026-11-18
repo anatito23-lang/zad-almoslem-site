@@ -50,7 +50,7 @@ public class AdhanPlaybackService extends Service {
         } else {
             startForeground(NOTIFICATION_ID, notification);
         }
-        String voice = intent == null ? "sabah" : intent.getStringExtra("voice");
+        String voice = intent == null ? "basit" : intent.getStringExtra("voice");
         playAdhan(voice);
         return START_NOT_STICKY;
     }
@@ -74,7 +74,7 @@ public class AdhanPlaybackService extends Service {
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build());
-            String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)) ? voice : "sabah";
+            String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)) ? voice : "basit";
             File audioDir = new File(getFilesDir(), "adhan");
             File audioFile = new File(audioDir, safeVoice + ".mp3");
             if (!audioFile.isFile() || audioFile.length() < 10000) audioFile = new File(audioDir, safeVoice + ".ogg");
