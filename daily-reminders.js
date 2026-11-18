@@ -19,7 +19,7 @@
 
    // Adhan voice and per-prayer controls.
    const voice=$('adhanVoice'), preview=$('adhanPreview'), previewBtn=$('previewAdhan');
-   const adhanSources={sabah:'https://upload.wikimedia.org/wikipedia/commons/2/27/Call_to_prayer_by_Sabah_Fakhry.mp3',beautiful:'https://upload.wikimedia.org/wikipedia/commons/b/b0/Beautiful_adhan.ogg'};
+   const adhanSources={sabah:'https://upload.wikimedia.org/wikipedia/commons/e/e7/Adhan.ogg',beautiful:'https://upload.wikimedia.org/wikipedia/commons/b/b0/Beautiful_adhan.ogg'};
    const savedVoice=localStorage.getItem('zad_adhan_voice')||'sabah';
    if(voice)voice.value=savedVoice;
    const adhanOn=localStorage.getItem('zad_adhan_enabled');
