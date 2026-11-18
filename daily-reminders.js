@@ -99,7 +99,8 @@
        else $('adhanSettingsStatus').textContent='حمّل صوت الأذان أولًا ليعمل من داخل التطبيق دون إنترنت.';
        return;
      }
-     preview.src=adhanSources[voice.value]||adhanSources.basit;
+     if(!adhanSources[voice.value]){$('adhanSettingsStatus').textContent='معاينة هذا المؤذن تحتاج ملفه الصوتي. أضف التسجيل من خانة استيراد المؤذن داخل التطبيق.';return;}
+     preview.src=adhanSources[voice.value];
      preview.volume=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0))/100:savedVolume/100;
      preview.play().catch(()=>{$('adhanSettingsStatus').textContent='اضغط مرة أخرى للسماح بتشغيل الصوت.';});
    });
@@ -107,7 +108,7 @@
    const importFile=$('adhanImportFile'), importStatus=$('adhanImportStatus');
    if(importFile)importFile.addEventListener('change',()=>{
      const file=importFile.files&&importFile.files[0]; if(!file)return;
-     if(!file.type.startsWith('audio/')&&!/\.(mp3|ogg|m4a|wav)$/i.test(file.name)){if(importStatus)importStatus.textContent='اختَر ملفًا صوتيًا صالحًا.';return;}
+     if(file.type!=='audio/mpeg'&&!/\.mp3$/i.test(file.name)){if(importStatus)importStatus.textContent='اختَر ملفًا صوتيًا صالحًا.';return;}
      if(file.size>20*1024*1024){if(importStatus)importStatus.textContent='حجم التسجيل أكبر من 20 ميجابايت.';return;}
      if(!window.ZadAndroid||typeof window.ZadAndroid.saveAdhanAudio!=='function'){if(importStatus)importStatus.textContent='إضافة التسجيلات المحفوظة متاحة داخل تطبيق أندرويد.';return;}
      if(importStatus)importStatus.textContent='جارٍ حفظ التسجيل داخل التطبيق...';
