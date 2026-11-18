@@ -12,8 +12,7 @@ self.addEventListener("fetch", event => {
   const url = new URL(request.url);
   const isMushafPage =
     (url.origin === "https://raw.githubusercontent.com" &&
-      (url.pathname.startsWith("/Miftah-Fentaw/Quran_webp/main/png/") ||
-       url.pathname.startsWith("/Miftah-Fentaw/Quran_webp/main/png/")) &&
+      url.pathname.startsWith("/Miftah-Fentaw/Quran_webp/main/png/") &&
       url.pathname.endsWith(".png")) ||
     (url.origin === "https://cdn.jsdelivr.net" &&
       url.pathname.startsWith("/gh/Miftah-Fentaw/Quran_webp@main/png/") &&
