@@ -94,14 +94,15 @@ public class ReminderReceiver extends BroadcastReceiver {
     }
 
     @Override public void onReceive(Context context,Intent intent) {
+        if (intent != null && "restore_silent".equals(intent.getStringExtra("action"))) {
+            restoreSilentMode(context);
+            return;
+        }
+        if (intent == null) return;
         String key=intent.getStringExtra("key"),title=intent.getStringExtra("title");
         if(key==null)return;
         boolean prayer=key.startsWith("prayer_");
         android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
-        if ("restore_silent".equals(intent.getStringExtra("action"))) {
-            restoreSilentMode(context);
-            return;
-        }
         if (!prayer && ("morning".equals(key) || "evening".equals(key) || "qiyam".equals(key))) {
             try { ReminderAudioService.play(context, key); } catch (Exception ignored) {}
         }
