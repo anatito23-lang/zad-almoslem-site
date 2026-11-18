@@ -1061,7 +1061,7 @@ async function fetchPrayerJson(url){
 }
 async function getPrayerData(city,day=new Date()){
  const date=prayerApiDate(day);
- const cityUrl=`https://api.aladhan.com/v1/timingsByCity/${date}?city=${encodeURIComponent(city)}&country=Egypt&method=5`;
+ const cityUrl=`https://api.aladhan.com/v1/timingsByCity/${date}?city=${encodeURIComponent(city)}&country=Egypt&method=5`; // Egyptian General Authority of Survey calculation method
  try{return await fetchPrayerJson(cityUrl);}
  catch(cityError){
   const coords=egyptCityCoordinates[city];if(!coords)throw cityError;
@@ -1092,7 +1092,7 @@ async function loadPrayer(){
   const hijriText=`${h.weekday.ar} ${h.day} ${h.month.ar} ${h.year} هـ`;
   $('hijriDate').textContent=hijriText;
   try{localStorage.setItem(cacheKey,JSON.stringify({timings:t,hijri:hijriText,savedAt:Date.now()}));}catch(e){}
-  $('prayerStatus').textContent=`مواقيت ${cityNames[city]||city}`;
+  $('prayerStatus').textContent=`طريقة حساب الهيئة المصرية العامة للمساحة — ${cityNames[city]||city}`;
  }catch(e){if(window.zadPrayerTimings){$('prayerStatus').textContent='تعذر الاتصال — نعرض آخر مواقيت محفوظة لهذا اليوم';}else{$('prayerStatus').textContent='تعذر تحميل المواقيت. أعد المحاولة بعد التأكد من الاتصال.';$('hijriDate').textContent='تعذر تحميل التاريخ الهجري';}$('nextPrayerMessage').textContent='المواقيت المحفوظة تعمل حتى عودة الاتصال';}
 }
 $('loadPrayer').addEventListener('click',loadPrayer);$('city').addEventListener('change',loadPrayer);loadPrayer();
@@ -1854,7 +1854,7 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
  audio.addEventListener('stalled',function(){status.textContent='البث متوقف مؤقتًا أو الاتصال بطيء. يمكنك تجربة البث البديل.';});
 })();
 </script>
-<script src="./daily-reminders.js?v=20261118prayernow2"></script>
+<script src="./daily-reminders.js?v=20261118adhan3"></script>
 <script>
 if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {})); }
 </script>
