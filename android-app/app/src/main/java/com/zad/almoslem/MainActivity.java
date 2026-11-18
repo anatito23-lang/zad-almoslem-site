@@ -75,6 +75,57 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void cancelDailyReminder(String key) {
             ReminderReceiver.cancelDaily(MainActivity.this,key);
         }
+        @JavascriptInterface public void downloadReminderAudio() {
+            new Thread(() -> {
+                String[][] sources = {
+                    {"morning", "https://archive.org/download/makkah-live.-net-athkar-01/MakkahLive.Net_athkar_03.mp3"},
+                    {"evening", "https://archive.org/download/makkah-live.-net-athkar-01/MakkahLive.Net_athkar_04.mp3"},
+                    {"dua", "https://archive.org/download/Islamic_Tape-258_uP_bY_mUSLEm/sharawy_doaa_24.mp3"}
+                };
+                File dir = new File(getFilesDir(), "reminders");
+                boolean allOk = true;
+                try { if (!dir.exists() && !dir.mkdirs()) throw new Exception("تعذر إنشاء مجلد الصوت"); }
+                catch (Exception e) { allOk = false; }
+                for (String[] item : sources) {
+                    if (!allOk) break;
+                    HttpURLConnection connection = null;
+                    File temp = new File(dir, item[0] + ".download");
+                    File target = new File(dir, item[0] + ".mp3");
+                    try {
+                        connection = (HttpURLConnection) new URL(item[1]).openConnection();
+                        connection.setConnectTimeout(20000);
+                        connection.setReadTimeout(60000);
+                        connection.setInstanceFollowRedirects(true);
+                        connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
+                        int status = connection.getResponseCode();
+                        if (status != HttpURLConnection.HTTP_OK) throw new Exception("HTTP " + status);
+                        String type = connection.getContentType();
+                        if (type == null || !(type.toLowerCase().contains("audio") || type.toLowerCase().contains("mpeg") || type.toLowerCase().contains("octet-stream"))) throw new Exception("المصدر لا يعيد ملفًا صوتيًا");
+                        long total = 0;
+                        try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
+                            byte[] buffer = new byte[8192]; int n;
+                            while ((n = in.read(buffer)) != -1) {
+                                total += n;
+                                if (total > 30L * 1024L * 1024L) throw new Exception("ملف الصوت أكبر من الحد المسموح");
+                                out.write(buffer, 0, n);
+                            }
+                            out.getFD().sync();
+                        }
+                        if (total < 10000) throw new Exception("ملف الصوت غير مكتمل");
+                        if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال الملف القديم");
+                        if (!temp.renameTo(target)) throw new Exception("تعذر حفظ الملف");
+                    } catch (Exception e) {
+                        allOk = false;
+                        if (temp.exists()) temp.delete();
+                    } finally { if (connection != null) connection.disconnect(); }
+                }
+                final boolean result = allOk;
+                runOnUiThread(() -> {
+                    if (webView != null) webView.evaluateJavascript(
+                        "window.onReminderAudioDownload && window.onReminderAudioDownload(" + result + ")", null);
+                });
+            }).start();
+        }
         @JavascriptInterface public void schedulePrayer(String name,long timestamp) {
             ReminderReceiver.schedulePrayer(MainActivity.this,name,timestamp);
         }
