@@ -19,12 +19,15 @@ public class AdhanPlaybackService extends Service {
     private static final String CHANNEL_ID = "zad_adhan_playback";
     private static final int NOTIFICATION_ID = 7310;
     private MediaPlayer player;
+    private boolean playDuaAfterCompletion;
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && ACTION_STOP.equals(intent.getAction())) {
             stopPlayback();
             return START_NOT_STICKY;
         }
+        playDuaAfterCompletion = intent != null && intent.getBooleanExtra("play_dua_after", false);
+        ReminderAudioService.stop(this);
         String prayer = intent == null ? "الصلاة" : intent.getStringExtra("prayer");
         createChannel();
         Intent open = new Intent(this, MainActivity.class);
@@ -85,7 +88,12 @@ public class AdhanPlaybackService extends Service {
             }
             player.setDataSource(audioFile.getAbsolutePath());
             player.setOnPreparedListener(MediaPlayer::start);
-            player.setOnCompletionListener(mp -> stopPlayback());
+            player.setOnCompletionListener(mp -> {
+                boolean playDua = playDuaAfterCompletion;
+                playDuaAfterCompletion = false;
+                stopPlayback();
+                if (playDua) ReminderAudioService.play(this, "dua");
+            });
             player.setOnErrorListener((mp, what, extra) -> {
                 stopPlayback();
                 return true;
