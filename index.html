@@ -1386,9 +1386,16 @@ $('showSurah').addEventListener('click',()=>{
  const server=moshaf.server.endsWith('/')?moshaf.server:moshaf.server+'/';
  const url=server+String(id).padStart(3,'0')+'.mp3';
  $('shuaishaTracks').classList.add('hidden');
- $('audio').src=url;$('audio').classList.remove('hidden');$('audio').load();
- $('quranStatus').textContent=`تلاوة سورة ${surahs.find(s=>s.number===id)?.name||''} بصوت ${reciter.name}.`;
- $('audio').play().catch(()=>{$('quranStatus').textContent+=' اضغط زر التشغيل في مشغل الصوت.';});
+ const trackTitle=`سورة ${surahs.find(s=>s.number===id)?.name||''} — ${reciter.name}`;
+ $('quranStatus').textContent=`تلاوة ${trackTitle}.`;
+ if(window.ZadAndroid && typeof window.ZadAndroid.playQuranAudio==='function'){
+  $('audio').pause();$('audio').removeAttribute('src');$('audio').classList.add('hidden');
+  window.ZadAndroid.playQuranAudio(url,trackTitle);
+  $('quranStatus').textContent+=' يستمر التشغيل في الخلفية، ويمكنك الخروج من التطبيق.';
+ } else {
+  $('audio').src=url;$('audio').classList.remove('hidden');$('audio').load();
+  $('audio').play().catch(()=>{$('quranStatus').textContent+=' اضغط زر التشغيل في مشغل الصوت.';});
+ }
 });
 loadSurahs();loadOldEgyptianReciters();
 const azkar={
