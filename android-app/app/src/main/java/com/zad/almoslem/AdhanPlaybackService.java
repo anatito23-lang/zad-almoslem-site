@@ -49,7 +49,7 @@ public class AdhanPlaybackService extends Service {
         } else {
             startForeground(NOTIFICATION_ID, notification);
         }
-        playAdhan();
+        String voice = intent == null ? "sabah" : intent.getStringExtra("voice");\n        playAdhan(voice);
         return START_NOT_STICKY;
     }
 
@@ -63,7 +63,7 @@ public class AdhanPlaybackService extends Service {
         }
     }
 
-    private void playAdhan() {
+    private void playAdhan(String voice) {
         stopPlayerOnly();
         try {
             player = new MediaPlayer();
@@ -72,7 +72,7 @@ public class AdhanPlaybackService extends Service {
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build());
-            player.setDataSource("https://upload.wikimedia.org/wikipedia/commons/b/b0/Beautiful_adhan.ogg");
+            String source = "beautiful".equals(voice)\n                    ? "https://upload.wikimedia.org/wikipedia/commons/b/b0/Beautiful_adhan.ogg"\n                    : "https://upload.wikimedia.org/wikipedia/commons/2/27/Call_to_prayer_by_Sabah_Fakhry.mp3";\n            player.setDataSource(source);
             player.setOnPreparedListener(MediaPlayer::start);
             player.setOnCompletionListener(mp -> stopPlayback());
             player.setOnErrorListener((mp, what, extra) -> {
