@@ -1090,10 +1090,12 @@ function loadMushafPage(number){
   if(request!==mushafRequestNumber)return;
   $('mushafStatus').textContent='تعذر تحميل الصفحة الآن. تحقق من اتصال الإنترنت ثم حاول مرة أخرى أو انتقل لصفحة أخرى.';
  };
+ const paddedPage=String(page).padStart(3,'0');
  const pageSources=[
+  'https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran-Images@main/webp/'+paddedPage+'.webp',
+  'https://raw.githubusercontent.com/Miftah-Fentaw/Quran-Images/main/webp/'+paddedPage+'.webp',
   'https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran-Images@main/png/'+page+'.png',
-  'https://raw.githubusercontent.com/Miftah-Fentaw/Quran-Images/main/png/'+page+'.png',
-  'https://ummah.su/img/mushaf/'+page+'.jpg'
+  'https://raw.githubusercontent.com/Miftah-Fentaw/Quran-Images/main/png/'+page+'.png'
  ];
  image.dataset.sourceIndex='0';
  image.onerror=()=>{
@@ -1767,6 +1769,6 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261118k"></script>
+<script src="./app-pages.js?v=20261118l"></script>
 </body>
 </html>
