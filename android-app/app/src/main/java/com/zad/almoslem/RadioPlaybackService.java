@@ -50,6 +50,7 @@ public class RadioPlaybackService extends Service {
             if(Build.VERSION.SDK_INT>=29) startForeground(NOTIFICATION,n2,android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
             else startForeground(NOTIFICATION,n2);
         }
+        getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",true).putString("active_kind",kind==null?"radio":kind).apply();
         play(url);
         return START_NOT_STICKY;
     }
@@ -76,7 +77,7 @@ public class RadioPlaybackService extends Service {
     private void releasePlayer() {
         if(player!=null) { try { player.reset(); } catch(Exception ignored){} try { player.release(); } catch(Exception ignored){} player=null; }
     }
-    private void stopRadio() { releasePlayer(); stopForeground(true); stopSelf(); }
+    private void stopRadio() { getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putString("active_kind","").apply(); releasePlayer(); stopForeground(true); stopSelf(); }
     @Override public void onDestroy(){releasePlayer();super.onDestroy();}
     @Override public IBinder onBind(Intent intent){return null;}
 }
