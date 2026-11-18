@@ -47,6 +47,15 @@ public class ReminderReceiver extends BroadcastReceiver {
         schedule(context,key,at,"حان الآن وقت صلاة "+name,false);
         scheduleApproachAlert(context,name,at);
     }
+    public static void rescheduleApproachAlerts(Context context) {
+        android.content.SharedPreferences prefs=context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE);
+        long now=System.currentTimeMillis();
+        for(String name:new String[]{"الفجر","الظهر","العصر","المغرب","العشاء"}) {
+            long at=prefs.getLong("prayer_"+name,0L);
+            if(at>now) scheduleApproachAlert(context,name,at);
+            else cancel(context,"approach_"+name);
+        }
+    }
     private static void schedule(Context context,String key,long at,String title,boolean daily) {
         AlarmManager am=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Intent i=new Intent(context,ReminderReceiver.class);
