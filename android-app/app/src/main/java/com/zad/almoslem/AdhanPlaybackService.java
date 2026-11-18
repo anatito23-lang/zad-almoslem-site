@@ -74,7 +74,7 @@ public class AdhanPlaybackService extends Service {
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build());
-            String safeVoice = ("mustafa".equals(voice)||"fajr".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"beautiful".equals(voice)) ? voice : "sabah";
+            String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)) ? voice : "sabah";
             File audioDir = new File(getFilesDir(), "adhan");
             File audioFile = new File(audioDir, safeVoice + ".mp3");
             if (!audioFile.isFile() || audioFile.length() < 10000) audioFile = new File(audioDir, safeVoice + ".ogg");
