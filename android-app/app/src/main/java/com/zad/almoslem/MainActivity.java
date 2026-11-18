@@ -187,6 +187,9 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void setAdhanEnabled(boolean enabled) {
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_enabled", enabled).apply();
         }
+        @JavascriptInterface public void setDuaAfterAdhanEnabled(boolean enabled) {
+            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("dua_after_adhan_enabled", enabled).apply();
+        }
         @JavascriptInterface public void setAdhanMode(String mode) {
             String safe = ("tone".equals(mode) || "silent".equals(mode)) ? mode : "adhan";
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_mode", safe).apply();
