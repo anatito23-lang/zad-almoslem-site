@@ -55,6 +55,11 @@ public class ReminderAudioService extends Service {
                 .setContentText("يتم تشغيل " + title)
                 .setOngoing(true);
         startForeground(NOTIFICATION_ID, b.build());
+        boolean adhanActive = getSharedPreferences("zad_reminders", MODE_PRIVATE).getBoolean("adhan_active", false);
+        if (adhanActive && !"dua".equals(kind)) { finishPlayback(); return START_NOT_STICKY; }
+        Intent stopRadio = new Intent(this, RadioPlaybackService.class);
+        stopRadio.setAction(RadioPlaybackService.ACTION_STOP);
+        try { startService(stopRadio); } catch (Exception ignored) {}
         stopCurrentPlayers();
         if ("qiyam".equals(kind)) {
             speak("حان وقت قيام الليل، لا تنسَ نصيبك من صلاة الليل");
