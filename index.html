@@ -1049,8 +1049,10 @@ function savePrayerSettings(){const s=prayerSettings();localStorage.setItem('zad
 function restorePrayerSettings(){const s={city:localStorage.getItem('zad_selected_city'),country:localStorage.getItem('zad_prayer_country'),method:localStorage.getItem('zad_prayer_method'),school:localStorage.getItem('zad_prayer_school')};if(s.city)$('city').value=s.city;if(s.country)$('prayerCountry').value=s.country;if(s.method)$('prayerMethod').value=s.method;if(s.school)$('prayerSchool').value=s.school;try{const loc=JSON.parse(localStorage.getItem('zad_prayer_coordinates')||'null');if(loc&&Number.isFinite(loc.latitude)&&Number.isFinite(loc.longitude))window.zadPrayerLocation=loc;}catch(e){}}
 
 const fmtTime=t=>{if(!t)return"--:--";let v=t.split(" ")[0];let [h,m]=v.split(":");return `${h}:${m}`};
-function gregArabic(){return new Intl.DateTimeFormat('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).format(new Date())}
+function gregArabic(){return 'الميلادي: '+new Intl.DateTimeFormat('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).format(new Date())}
+function hijriArabicLocal(){try{return 'الهجري: '+new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).format(new Date())+' هـ';}catch(e){return 'التاريخ الهجري غير متاح على هذا الجهاز';}}
 $('gregDate').textContent=gregArabic();
+$('hijriDate').textContent=hijriArabicLocal();
 const egyptCityCoordinates={
  Cairo:[30.0444,31.2357],Zagazig:[30.5877,31.5020],Alexandria:[31.2001,29.9187],Giza:[30.0131,31.2089],
  Mansoura:[31.0409,31.3785],Tanta:[30.7865,31.0004],Ismailia:[30.5965,32.2715],Suez:[29.9668,32.5498],
@@ -1084,7 +1086,7 @@ async function getPrayerData(city,day=new Date()){
 async function loadPrayer(){
  savePrayerSettings();const settings=prayerSettings(),city=settings.city;
  const cacheToday=new Date();const cacheDayKey=cacheToday.getFullYear()+'-'+String(cacheToday.getMonth()+1).padStart(2,'0')+'-'+String(cacheToday.getDate()).padStart(2,'0');const locationKey=window.zadPrayerLocation?window.zadPrayerLocation.latitude+','+window.zadPrayerLocation.longitude:settings.city+','+settings.country;const cacheKey='zad_prayer_cache_'+encodeURIComponent(locationKey)+'_'+settings.method+'_'+settings.school+'_'+cacheDayKey;
- try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&cached.timings){window.zadPrayerTimings=cached.timings;$('prayerGrid').innerHTML=[['الفجر','Fajr'],['الشروق','Sunrise'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']].map(([n,k])=>`<div class="prayer"><div class="pname">${n}</div><div class="ptime">${fmtTime(cached.timings[k])}</div></div>`).join('');if(cached.hijri)$('hijriDate').textContent=cached.hijri;$('prayerStatus').textContent='مواقيت محفوظة لهذا اليوم — جارٍ التحقق من التحديث';}}catch(e){}
+ try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&cached.timings){window.zadPrayerTimings=cached.timings;$('prayerGrid').innerHTML=[['الفجر','Fajr'],['الشروق','Sunrise'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']].map(([n,k])=>`<div class="prayer"><div class="pname">${n}</div><div class="ptime">${fmtTime(cached.timings[k])}</div></div>`).join('');if(cached.hijri)$('hijriDate').textContent=cached.hijri;else $('hijriDate').textContent=hijriArabicLocal();$('prayerStatus').textContent='مواقيت محفوظة لهذا اليوم — جارٍ التحقق من التحديث';}}catch(e){}
  $('prayerStatus').textContent=window.zadPrayerTimings?'مواقيت محفوظة — جارٍ التحديث...':'جارٍ تحديث المواقيت...';
  try{
   const j=await getPrayerData(city);
@@ -1101,11 +1103,11 @@ async function loadPrayer(){
   const names=[['الفجر','Fajr'],['الشروق','Sunrise'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']];
   $('prayerGrid').innerHTML=names.map(([n,k])=>`<div class="prayer"><div class="pname">${n}</div><div class="ptime">${fmtTime(t[k])}</div></div>`).join('');
   const h=j.data.date.hijri;
-  const hijriText=`${h.weekday.ar} ${h.day} ${h.month.ar} ${h.year} هـ`;
+  const hijriText=`الهجري: ${h.weekday.ar} ${h.day} ${h.month.ar} ${h.year} هـ`;
   $('hijriDate').textContent=hijriText;
   try{localStorage.setItem(cacheKey,JSON.stringify({timings:t,hijri:hijriText,savedAt:Date.now()}));}catch(e){}
   $('prayerStatus').textContent=`المواقيت حسب ${settings.country} — ${window.zadPrayerLocation?'موقعك الحالي':(cityNames[city]||city)} — ${$('prayerMethod').selectedOptions[0].textContent}`;
- }catch(e){if(window.zadPrayerTimings){$('prayerStatus').textContent='تعذر الاتصال — نعرض آخر مواقيت محفوظة لهذا اليوم';}else{$('prayerStatus').textContent='تعذر تحميل المواقيت. أعد المحاولة بعد التأكد من الاتصال.';$('hijriDate').textContent='تعذر تحميل التاريخ الهجري';}$('nextPrayerMessage').textContent='المواقيت المحفوظة تعمل حتى عودة الاتصال';}
+ }catch(e){if(window.zadPrayerTimings){$('prayerStatus').textContent='تعذر الاتصال — نعرض آخر مواقيت محفوظة لهذا اليوم';}else{$('prayerStatus').textContent='تعذر تحميل المواقيت. أعد المحاولة بعد التأكد من الاتصال.';$('hijriDate').textContent=hijriArabicLocal();}$('nextPrayerMessage').textContent='المواقيت المحفوظة تعمل حتى عودة الاتصال';}
 }
 restorePrayerSettings();
 $('loadPrayer').addEventListener('click',loadPrayer);
