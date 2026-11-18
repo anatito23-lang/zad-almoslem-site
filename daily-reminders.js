@@ -1,7 +1,7 @@
 (function(){
  const $=id=>document.getElementById(id);
- const keys={morning:'zad_morning_reminder',qiyam:'zad_qiyam_reminder'};
- const defaults={morning:{enabled:true,time:'07:00',title:'حان وقت أذكار الصباح'},qiyam:{enabled:true,time:'04:00',title:'حان وقت قيام الليل'}};
+ const keys={morning:'zad_morning_reminder',evening:'zad_evening_reminder',qiyam:'zad_qiyam_reminder'};
+ const defaults={morning:{enabled:true,time:'07:00',title:'حان وقت أذكار الصباح'},evening:{enabled:true,time:'17:00',title:'حان وقت أذكار المساء'},qiyam:{enabled:true,time:'04:00',title:'حان وقت قيام الليل، لا تنسَ نصيبك من صلاة الليل'}};
  function read(k){try{return JSON.parse(localStorage.getItem(keys[k]))||defaults[k]}catch(e){return defaults[k]}}
  function save(k,v){localStorage.setItem(keys[k],JSON.stringify(v))}
  function schedule(k,v){
@@ -11,7 +11,7 @@
  }
  function init(){
    const city=$('city'); if(city){const saved=localStorage.getItem('zad_selected_city');if(saved&&[...city.options].some(o=>o.value===saved))city.value=saved;city.addEventListener('change',()=>localStorage.setItem('zad_selected_city',city.value));}
-   ['morning','qiyam'].forEach(k=>{const v=read(k);const t=$(k+'ReminderTime'),e=$(k+'ReminderEnabled');if(t)t.value=v.time;if(e)e.checked=!!v.enabled;});
+   ['morning','evening','qiyam'].forEach(k=>{const v=read(k);const t=$(k+'ReminderTime'),e=$(k+'ReminderEnabled');if(t)t.value=v.time;if(e)e.checked=!!v.enabled;});
    const adhanToggle=$('adhanEnabled');
    const adhanSaved=localStorage.getItem('zad_adhan_enabled');
    if(adhanToggle) adhanToggle.checked=adhanSaved===null?true:adhanSaved==='true';
@@ -100,8 +100,8 @@
 
    const saveBtn=$('saveDailyReminders');
    if(saveBtn)saveBtn.addEventListener('click',async()=>{
-     const vals={morning:{enabled:$('morningReminderEnabled').checked,time:$('morningReminderTime').value,title:defaults.morning.title},qiyam:{enabled:$('qiyamReminderEnabled').checked,time:$('qiyamReminderTime').value,title:defaults.qiyam.title}};
-     if(!vals.morning.time||!vals.qiyam.time){$('dailyReminderStatus').textContent='اختر وقتًا صحيحًا لكل تنبيه.';return;}
+     const vals={morning:{enabled:$('morningReminderEnabled').checked,time:$('morningReminderTime').value,title:defaults.morning.title},evening:{enabled:$('eveningReminderEnabled').checked,time:$('eveningReminderTime').value,title:defaults.evening.title},qiyam:{enabled:$('qiyamReminderEnabled').checked,time:$('qiyamReminderTime').value,title:defaults.qiyam.title}};
+     if(!vals.morning.time||!vals.evening.time||!vals.qiyam.time){$('dailyReminderStatus').textContent='اختر وقتًا صحيحًا لكل تنبيه.';return;}
      Object.keys(vals).forEach(k=>{save(k,vals[k]);schedule(k,vals[k]);});
      const adhanControl=$('adhanEnabled');
      if(adhanControl){
@@ -115,7 +115,7 @@
    });
    $('qiyamReminderTime').addEventListener('input',()=>{$('qiyamReminderTime').dataset.userEdited='1'});
    // Reapply stored daily schedules whenever the app is opened.
-   ['morning','qiyam'].forEach(k=>{const stored=localStorage.getItem(keys[k]);if(k==='morning'||stored)schedule(k,read(k));});
+   ['morning','evening','qiyam'].forEach(k=>{const stored=localStorage.getItem(keys[k]);if(k==='morning'||k==='evening'||stored)schedule(k,read(k));});
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
