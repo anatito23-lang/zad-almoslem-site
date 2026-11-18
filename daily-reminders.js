@@ -19,7 +19,7 @@
 
    // Adhan voice and per-prayer controls.
    const voice=$('adhanVoice'), preview=$('adhanPreview'), previewBtn=$('previewAdhan');
-   const adhanSources={basit:'https://archive.org/download/hay-hat.com_939/46.mp3',mustafa:'https://archive.org/download/hay-hat.com_939/50.mp3',husary:'https://archive.org/download/hay-hat.com_774/51.mp3',rifaat:'https://archive.org/download/hay-hat.com_774/57.mp3'};
+   const adhanSources={basit:'https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/041--.mp3',mustafa:'https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/068-.mp3',husary:'https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/044--.mp3',rifaat:'https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/042--.mp3',banna:'https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/043--.mp3',naqshbandi:'https://cdn1.esm3.com//music/2603/esm3.com.198098.mp3'};
    const storedVoice=localStorage.getItem('zad_adhan_voice');
    const supportedVoices=['basit','husary','mustafa','rifaat','banna','naqshbandi','tobar'];
    const savedVoice=supportedVoices.includes(storedVoice)?storedVoice:'basit';
