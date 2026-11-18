@@ -32,9 +32,9 @@
      downloadBtn.textContent=ready?'تم التحميل ✓ — إعادة التحميل':'تحميل للعمل دون إنترنت';
      if(ready)$('adhanSettingsStatus').textContent='التسجيل محفوظ على هذا الجهاز ويعمل دون إنترنت.';
    }
-   window.onAdhanDownloadComplete=function(which,ok){
+   window.onAdhanDownloadComplete=function(which,ok,reason){
      if(!voice||which!==voice.value)return;
-     $('adhanSettingsStatus').textContent=ok?'اكتمل التحميل. أصبح الأذان محفوظًا على الجهاز ويعمل دون إنترنت.':'تعذر التحميل. تحقق من اتصال الإنترنت ثم حاول مرة أخرى.';
+     $('adhanSettingsStatus').textContent=ok?'اكتمل التحميل. أصبح الأذان محفوظًا على الجهاز ويعمل دون إنترنت.':'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
      if(downloadBtn)downloadBtn.disabled=false;
      updateAdhanDownloadState();
    };
