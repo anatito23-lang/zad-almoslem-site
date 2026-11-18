@@ -27,6 +27,7 @@ public class AdhanPlaybackService extends Service {
             return START_NOT_STICKY;
         }
         playDuaAfterCompletion = intent != null && intent.getBooleanExtra("play_dua_after", false);
+        getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_active", true).apply();
         ReminderAudioService.stop(this);
         String prayer = intent == null ? "الصلاة" : intent.getStringExtra("prayer");
         createChannel();
@@ -124,6 +125,7 @@ public class AdhanPlaybackService extends Service {
     }
 
     private void stopPlayback() {
+        getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_active", false).apply();
         stopPlayerOnly();
         stopForeground(true);
         stopSelf();
