@@ -63,6 +63,22 @@ public class MainActivity extends Activity {
         webView.loadUrl("https://anatito23-lang.github.io/zad-almoslem-site/?appbuild=20261118p&native=1");
         requestNotificationPermission();
     }
+    @Override protected void onResume() {
+        super.onResume();
+        if (Build.VERSION.SDK_INT >= 31) {
+            android.app.AlarmManager alarms = (android.app.AlarmManager)getSystemService(ALARM_SERVICE);
+            if (alarms != null && alarms.canScheduleExactAlarms()) {
+                android.content.SharedPreferences prefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
+                for (String key : new String[]{"morning", "evening", "qiyam"}) {
+                    if (prefs.getBoolean(key + "_enabled", false)) {
+                        ReminderReceiver.scheduleDaily(this, key,
+                            prefs.getInt(key + "_hour", 7), prefs.getInt(key + "_minute", 0),
+                            prefs.getString(key + "_title", "تذكير من زاد المسلم"));
+                    }
+                }
+            }
+        }
+    }
     private void requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST);
@@ -164,6 +180,21 @@ public class MainActivity extends Activity {
             if (Build.VERSION.SDK_INT >= 23 && !hasSilentPermission()) {
                 try { startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)); }
                 catch (Exception ignored) {}
+            }
+        }
+        @JavascriptInterface public boolean canScheduleExactAlarms() {
+            if (Build.VERSION.SDK_INT < 31) return true;
+            android.app.AlarmManager alarms = (android.app.AlarmManager)getSystemService(ALARM_SERVICE);
+            return alarms != null && alarms.canScheduleExactAlarms();
+        }
+        @JavascriptInterface public void requestExactAlarmPermission() {
+            if (Build.VERSION.SDK_INT >= 31 && !canScheduleExactAlarms()) {
+                try {
+                    Intent settings = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                        Uri.parse("package:" + getPackageName()));
+                    settings.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(settings);
+                } catch (Exception ignored) {}
             }
         }
         @JavascriptInterface public void requestNotificationPermission() {
