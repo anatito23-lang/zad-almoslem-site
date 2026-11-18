@@ -266,12 +266,12 @@ public class MainActivity extends Activity {
             final String safe = safeVoice(voice);
             final String source;
             switch (safe) {
-                case "basit": source = "https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/041--.mp3"; break;
-                case "mustafa": source = "https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/068-.mp3"; break;
-                case "husary": source = "https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/044--.mp3"; break;
-                case "rifaat": source = "https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/042--.mp3"; break;
-                case "banna": source = "https://archive.org/download/90---azan---90---azan--many----sound----mp3---alazan/043--.mp3"; break;
-                case "naqshbandi": source = "https://cdn1.esm3.com//music/2603/esm3.com.198098.mp3"; break;
+                case "basit": source = "https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Abdulbasit_Abdusamad_1_-_Egypt_(%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%A8%D8%A7%D8%B3%D8%B7_%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%B5%D9%85%D8%AF_-_%D9%85%D8%B5%D8%B1).mp3"; break;
+                case "mustafa": source = "https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mustafa_Ismail_-_Egypt_(%D9%85%D8%B5%D8%B7%D9%81%D9%89_%D8%A5%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84_-_%D9%85%D8%B5%D8%B1).mp3"; break;
+                case "husary": source = "https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mahmoud_Khalil_Al_Hussary_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%AE%D9%84%D9%8A%D9%84_%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%8A_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3"; break;
+                case "banna": source = "https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mahmoud_Ali_Al_Banna_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%B9%D9%84%D9%8A_%D8%A7%D9%84%D8%A8%D9%86%D8%A7_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3"; break;
+                case "naqshbandi": source = "https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Sheikh_Al_Naqshbandi_(%D8%A7%D9%84%D8%B4%D9%8A%D8%AE_%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%89).mp3"; break;
+                case "haram": source = "https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(%D8%B9%D9%84%D9%8A_%D8%A8%D9%86_%D8%A3%D8%AD%D9%85%D8%AF_%D9%85%D9%84%D8%A7_-_%D8%A7%D9%84%D8%AD%D8%B1%D9%85_%D8%A7%D9%84%D9%85%D9%83%D9%8A).mp3"; break;
                 default:
                     runOnUiThread(() -> {
                         if (webView != null) webView.evaluateJavascript(
