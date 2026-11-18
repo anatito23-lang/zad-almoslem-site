@@ -116,6 +116,9 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 }
 
 
+/* إخفاء اختصارات المصحف والسبحة العائمة بناءً على طلب المستخدم */
+.tasbeeh-float,.mushaf-floating-button{display:none!important}
+
 /* سبحة عائمة متاحة من أي مكان في الموقع */
 .tasbeeh-float{position:fixed;right:18px;bottom:18px;z-index:1200;direction:rtl}
 .tasbeeh-fab{--fab-progress:0%;position:relative;isolation:isolate;width:78px;height:78px;min-width:78px;padding:6px;border:0;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:conic-gradient(#d8b76d var(--fab-progress),#ffffff65 0);color:#fff;font:inherit;font-weight:800;box-shadow:0 8px 24px #082d2740;cursor:pointer}
