@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0c3b32">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="زاد المسلم">
 <script data-goatcounter="https://zadalmuslim2026.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 <title>قلبي اطمأن وزاد المسلم | موقع إسلامي شامل</title>
 <style>
@@ -1648,5 +1653,8 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
 <div id="google_translate_element" aria-hidden="true"></div>
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
 <script src="./khutbahs.js?v=20261118b"></script>
+<script>
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {})); }
+</script>
 </body>
 </html>
