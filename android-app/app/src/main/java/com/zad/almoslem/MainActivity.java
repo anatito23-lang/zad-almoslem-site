@@ -206,6 +206,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void playRadio(String stream, String label) {
             String url = "backup".equals(stream) ? "https://qurango.net/radio/tarateel" :
                 "https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8";
+            getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putString("radio_stream", stream == null ? "main" : stream).putString("radio_label", label == null ? "إذاعة القرآن الكريم" : label).apply();
             Intent radio = new Intent(MainActivity.this, RadioPlaybackService.class);
             radio.setAction(RadioPlaybackService.ACTION_PLAY);
             radio.putExtra("url", url);
@@ -218,6 +219,7 @@ public class MainActivity extends Activity {
                 String host = uri.getHost();
                 if (!"https".equalsIgnoreCase(uri.getScheme()) || host == null ||
                     !(host.toLowerCase().endsWith("mp3quran.net") || host.toLowerCase().endsWith("mp3quran.com"))) return;
+                getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putString("last_quran_url", uri.toString()).putString("last_quran_title", trackTitle == null ? "تلاوة القرآن الكريم" : trackTitle).apply();
                 Intent audio = new Intent(MainActivity.this, RadioPlaybackService.class);
                 audio.setAction(RadioPlaybackService.ACTION_PLAY);
                 audio.putExtra("url", uri.toString());
