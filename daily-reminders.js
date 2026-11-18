@@ -74,6 +74,23 @@
    if($('adhanEnabled'))$('adhanEnabled').checked=adhanOn===null?true:adhanOn==='true';
    document.querySelectorAll('.prayer-alert').forEach(el=>{const v=localStorage.getItem('zad_prayer_alert_'+el.dataset.prayer);el.checked=v===null?true:v==='true';});
    const downloadBtn=$('downloadAdhan');
+   const adhanStatus=$('adhanSettingsStatus');
+   let adhanProgress=null;
+   function showAdhanProgress(){
+     if(!adhanStatus)return;
+     if(!document.getElementById('zadAdhanProgressStyle')){
+       const style=document.createElement('style');style.id='zadAdhanProgressStyle';
+       style.textContent='@keyframes zadAdhanLoading{0%{transform:translateX(115%)}100%{transform:translateX(-115%)}}#zadAdhanProgress{height:9px;width:100%;margin:10px 0 4px;border-radius:20px;overflow:hidden;background:#e6eee8;direction:ltr}#zadAdhanProgress>span{display:block;width:38%;height:100%;border-radius:20px;background:linear-gradient(90deg,#0c8067,#d6b76f,#0c8067);animation:zadAdhanLoading 1.15s ease-in-out infinite}';
+       document.head.appendChild(style);
+     }
+     if(!adhanProgress){
+       adhanProgress=document.createElement('div');adhanProgress.id='zadAdhanProgress';adhanProgress.setAttribute('role','progressbar');adhanProgress.setAttribute('aria-label','جاري تحميل صوت الأذان');
+       adhanProgress.innerHTML='<span></span>';
+     }
+     adhanStatus.insertAdjacentElement('afterend',adhanProgress);
+     adhanProgress.style.display='block';
+   }
+   function hideAdhanProgress(){if(adhanProgress)adhanProgress.style.display='none';}
    function updateAdhanDownloadState(){
      if(!window.ZadAndroid||!voice||!downloadBtn)return;
      const ready=window.ZadAndroid.isAdhanDownloaded(voice.value);
@@ -82,7 +99,8 @@
    }
    window.onAdhanDownloadComplete=function(which,ok,reason){
      if(!voice||which!==voice.value)return;
-     $('adhanSettingsStatus').textContent=ok?'اكتمل التحميل. أصبح الأذان محفوظًا على الجهاز ويعمل دون إنترنت.':'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
+     hideAdhanProgress();
+     adhanStatus.textContent=ok?'تم التحميل بنجاح! الأذان محفوظ على الجهاز ويعمل دون إنترنت.':'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
      if(downloadBtn)downloadBtn.disabled=false;
      updateAdhanDownloadState();
    };
@@ -90,8 +108,9 @@
      if(!window.ZadAndroid){$('adhanSettingsStatus').textContent='تنزيل صوت الأذان للعمل دون إنترنت متاح داخل تطبيق أندرويد فقط.';return;}
      if(!adhanSources[voice.value]){$('adhanSettingsStatus').textContent='هذا التسجيل غير متاح للتنزيل حاليًا.';return;}
      downloadBtn.disabled=true;
-     $('adhanSettingsStatus').textContent='جارٍ تنزيل صوت الأذان...';
-     window.ZadAndroid.downloadAdhan(voice.value);
+     adhanStatus.textContent='جارٍ تحميل صوت الأذان، من فضلك انتظر...';
+     showAdhanProgress();
+     try{window.ZadAndroid.downloadAdhan(voice.value);}catch(error){hideAdhanProgress();downloadBtn.disabled=false;adhanStatus.textContent='تعذر بدء التحميل. حاول مرة أخرى.';}
    });
    if(previewBtn)previewBtn.addEventListener('click',()=>{
      if(window.ZadAndroid){
