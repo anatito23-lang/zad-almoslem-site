@@ -28,9 +28,27 @@ public class RadioPlaybackService extends Service {
         if(Build.VERSION.SDK_INT>=29) startForeground(NOTIFICATION,n,android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
         else startForeground(NOTIFICATION,n);
         String url=intent==null?null:intent.getStringExtra("url");
-        if(!("https://qurango.net/radio/tarateel".equals(url) ||
-             "https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8".equals(url))) {
-            stopRadio(); return START_NOT_STICKY;
+        String kind=intent==null?"radio":intent.getStringExtra("kind");
+        boolean allowedRadio="https://qurango.net/radio/tarateel".equals(url) ||
+             "https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8".equals(url);
+        boolean allowedQuran=false;
+        try {
+            android.net.Uri parsed=android.net.Uri.parse(url);
+            String host=parsed.getHost();
+            allowedQuran="quran".equals(kind) && "https".equalsIgnoreCase(parsed.getScheme()) && host!=null &&
+                (host.toLowerCase().endsWith("mp3quran.net") || host.toLowerCase().endsWith("mp3quran.com"));
+        } catch(Exception ignored) {}
+        if(!allowedRadio && !allowedQuran) { stopRadio(); return START_NOT_STICKY; }
+        String label=intent==null?null:intent.getStringExtra("label");
+        if(label!=null) {
+            Notification.Builder updated=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
+            updated.setSmallIcon(android.R.drawable.ic_media_play)
+              .setContentTitle("quran".equals(kind)?"استماع القرآن الكريم":"إذاعة القرآن الكريم")
+              .setContentText(label+" — يعمل في الخلفية").setContentIntent(content).setOngoing(true)
+              .addAction(android.R.drawable.ic_media_pause,"إيقاف الصوت",stopAction);
+            Notification n2=updated.build();
+            if(Build.VERSION.SDK_INT>=29) startForeground(NOTIFICATION,n2,android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+            else startForeground(NOTIFICATION,n2);
         }
         play(url);
         return START_NOT_STICKY;
