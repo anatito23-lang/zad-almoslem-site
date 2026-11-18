@@ -24,7 +24,7 @@ public class ReminderReceiver extends BroadcastReceiver {
     }
     public static void cancelDaily(Context context,String key) {
         context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE).edit().putBoolean(key+"_enabled",false).apply();
-        cancel(context,"daily_"+key);
+        cancel(context,key);
     }
     public static void schedulePrayer(Context context,String name,long at) {
         if(at<=System.currentTimeMillis()) return;
