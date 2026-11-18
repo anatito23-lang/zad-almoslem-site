@@ -318,9 +318,15 @@ footer{background:#071522;color:#c9d6e2}
 <main class="wrap">
   <div class="date-strip">
     <div><strong id="gregDate">اليوم</strong><br><span id="hijriDate">جارٍ تحميل التاريخ الهجري...</span></div>
-    <div><span>المدينة:</span> <select id="city">
-      <option value="Cairo">القاهرة</option><option value="Zagazig">الزقازيق</option><option value="Alexandria">الإسكندرية</option><option value="Giza">الجيزة</option><option value="Mansoura">المنصورة</option><option value="Tanta">طنطا</option><option value="Ismailia">الإسماعيلية</option><option value="Suez">السويس</option><option value="Port Said">بورسعيد</option><option value="Asyut">أسيوط</option><option value="Luxor">الأقصر</option><option value="Aswan">أسوان</option>
-    </select> <button class="btn green" id="loadPrayer">تحديث</button></div>
+    <div class="prayer-location-settings" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:8px;width:100%;margin-top:10px">
+      <label class="small">الدولة<input id="prayerCountry" type="text" value="Egypt" placeholder="مثال: Egypt أو United States" style="display:block;width:100%;margin-top:4px"></label>
+      <label class="small">المدينة<input id="city" type="text" value="Cairo" placeholder="مثال: Cairo أو London" style="display:block;width:100%;margin-top:4px"></label>
+      <label class="small">طريقة حساب المواقيت<select id="prayerMethod" style="display:block;width:100%;margin-top:4px">
+        <option value="auto">تلقائي حسب الموقع</option><option value="5" selected>الهيئة المصرية للمساحة</option><option value="3">رابطة العالم الإسلامي</option><option value="2">أمريكا الشمالية (ISNA)</option><option value="4">أم القرى - مكة</option><option value="1">جامعة العلوم الإسلامية - كراتشي</option><option value="8">الخليج</option><option value="9">الكويت</option><option value="10">قطر</option><option value="11">سنغافورة</option><option value="12">فرنسا</option><option value="13">تركيا</option><option value="14">روسيا</option><option value="15">لجنة رؤية الهلال</option><option value="17">ماليزيا</option><option value="18">تونس</option><option value="19">الجزائر</option><option value="20">إندونيسيا</option><option value="21">المغرب</option><option value="23">الأردن</option>
+      </select></label>
+      <label class="small">حساب صلاة العصر<select id="prayerSchool" style="display:block;width:100%;margin-top:4px"><option value="0">شافعي / الطريقة المعتادة</option><option value="1">حنفي</option></select></label>
+      <div class="row" style="align-self:end"><button class="btn green" id="loadPrayer" type="button">تحديث المواقيت</button><button class="btn light" id="useMyLocation" type="button">موقعي الحالي</button></div>
+    </div>
   </div>
 
   <section class="section" id="prayer">
@@ -1037,6 +1043,11 @@ footer{background:#071522;color:#c9d6e2}
 <script>
 const $=id=>document.getElementById(id);
 const cityNames={Cairo:"القاهرة",Zagazig:"الزقازيق",Alexandria:"الإسكندرية",Giza:"الجيزة",Mansoura:"المنصورة",Tanta:"طنطا",Ismailia:"الإسماعيلية",Suez:"السويس","Port Said":"بورسعيد",Asyut:"أسيوط",Luxor:"الأقصر",Aswan:"أسوان"};
+window.zadPrayerLocation=null;
+function prayerSettings(){return {city:$('city').value.trim(),country:$('prayerCountry').value.trim(),method:$('prayerMethod').value,school:$('prayerSchool').value};}
+function savePrayerSettings(){const s=prayerSettings();localStorage.setItem('zad_selected_city',s.city);localStorage.setItem('zad_prayer_country',s.country);localStorage.setItem('zad_prayer_method',s.method);localStorage.setItem('zad_prayer_school',s.school);}
+function restorePrayerSettings(){const s={city:localStorage.getItem('zad_selected_city'),country:localStorage.getItem('zad_prayer_country'),method:localStorage.getItem('zad_prayer_method'),school:localStorage.getItem('zad_prayer_school')};if(s.city)$('city').value=s.city;if(s.country)$('prayerCountry').value=s.country;if(s.method)$('prayerMethod').value=s.method;if(s.school)$('prayerSchool').value=s.school;try{const loc=JSON.parse(localStorage.getItem('zad_prayer_coordinates')||'null');if(loc&&Number.isFinite(loc.latitude)&&Number.isFinite(loc.longitude))window.zadPrayerLocation=loc;}catch(e){}}
+
 const fmtTime=t=>{if(!t)return"--:--";let v=t.split(" ")[0];let [h,m]=v.split(":");return `${h}:${m}`};
 function gregArabic(){return new Intl.DateTimeFormat('ar-EG',{weekday:'long',year:'numeric',month:'long',day:'numeric'}).format(new Date())}
 $('gregDate').textContent=gregArabic();
@@ -1060,18 +1071,19 @@ async function fetchPrayerJson(url){
  return data;
 }
 async function getPrayerData(city,day=new Date()){
- const date=prayerApiDate(day);
- const cityUrl=`https://api.aladhan.com/v1/timingsByCity/${date}?city=${encodeURIComponent(city)}&country=Egypt&method=5`; // Egyptian General Authority of Survey calculation method
- try{return await fetchPrayerJson(cityUrl);}
- catch(cityError){
-  const coords=egyptCityCoordinates[city];if(!coords)throw cityError;
-  const coordinateUrl=`https://api.aladhan.com/v1/timings/${date}?latitude=${coords[0]}&longitude=${coords[1]}&method=5`;
-  return await fetchPrayerJson(coordinateUrl);
+ const date=prayerApiDate(day),s=prayerSettings(),params=new URLSearchParams({school:s.school});
+ if(s.method!=='auto')params.set('method',s.method);
+ if(window.zadPrayerLocation&&Number.isFinite(window.zadPrayerLocation.latitude)&&Number.isFinite(window.zadPrayerLocation.longitude)){
+  params.set('latitude',String(window.zadPrayerLocation.latitude));params.set('longitude',String(window.zadPrayerLocation.longitude));
+  return await fetchPrayerJson(`https://api.aladhan.com/v1/timings/${date}?${params.toString()}`);
  }
+ if(!s.city||!s.country)throw new Error('أدخل الدولة والمدينة');
+ params.set('city',s.city);params.set('country',s.country);
+ return await fetchPrayerJson(`https://api.aladhan.com/v1/timingsByCity/${date}?${params.toString()}`);
 }
 async function loadPrayer(){
- const savedCity=localStorage.getItem('zad_selected_city');if(savedCity&&[...$('city').options].some(o=>o.value===savedCity))$('city').value=savedCity;const city=$('city').value;
- const cacheToday=new Date();const cacheDayKey=cacheToday.getFullYear()+'-'+String(cacheToday.getMonth()+1).padStart(2,'0')+'-'+String(cacheToday.getDate()).padStart(2,'0');const cacheKey='zad_prayer_cache_'+city+'_'+cacheDayKey;
+ savePrayerSettings();const settings=prayerSettings(),city=settings.city;
+ const cacheToday=new Date();const cacheDayKey=cacheToday.getFullYear()+'-'+String(cacheToday.getMonth()+1).padStart(2,'0')+'-'+String(cacheToday.getDate()).padStart(2,'0');const locationKey=window.zadPrayerLocation?window.zadPrayerLocation.latitude+','+window.zadPrayerLocation.longitude:settings.city+','+settings.country;const cacheKey='zad_prayer_cache_'+encodeURIComponent(locationKey)+'_'+settings.method+'_'+settings.school+'_'+cacheDayKey;
  try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&cached.timings){window.zadPrayerTimings=cached.timings;$('prayerGrid').innerHTML=[['الفجر','Fajr'],['الشروق','Sunrise'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']].map(([n,k])=>`<div class="prayer"><div class="pname">${n}</div><div class="ptime">${fmtTime(cached.timings[k])}</div></div>`).join('');if(cached.hijri)$('hijriDate').textContent=cached.hijri;$('prayerStatus').textContent='مواقيت محفوظة لهذا اليوم — جارٍ التحقق من التحديث';}}catch(e){}
  $('prayerStatus').textContent=window.zadPrayerTimings?'مواقيت محفوظة — جارٍ التحديث...':'جارٍ تحديث المواقيت...';
  try{
@@ -1092,10 +1104,15 @@ async function loadPrayer(){
   const hijriText=`${h.weekday.ar} ${h.day} ${h.month.ar} ${h.year} هـ`;
   $('hijriDate').textContent=hijriText;
   try{localStorage.setItem(cacheKey,JSON.stringify({timings:t,hijri:hijriText,savedAt:Date.now()}));}catch(e){}
-  $('prayerStatus').textContent=`طريقة حساب الهيئة المصرية العامة للمساحة — ${cityNames[city]||city}`;
+  $('prayerStatus').textContent=`المواقيت حسب ${settings.country} — ${window.zadPrayerLocation?'موقعك الحالي':(cityNames[city]||city)} — ${$('prayerMethod').selectedOptions[0].textContent}`;
  }catch(e){if(window.zadPrayerTimings){$('prayerStatus').textContent='تعذر الاتصال — نعرض آخر مواقيت محفوظة لهذا اليوم';}else{$('prayerStatus').textContent='تعذر تحميل المواقيت. أعد المحاولة بعد التأكد من الاتصال.';$('hijriDate').textContent='تعذر تحميل التاريخ الهجري';}$('nextPrayerMessage').textContent='المواقيت المحفوظة تعمل حتى عودة الاتصال';}
 }
-$('loadPrayer').addEventListener('click',loadPrayer);$('city').addEventListener('change',loadPrayer);loadPrayer();
+restorePrayerSettings();
+$('loadPrayer').addEventListener('click',()=>{window.zadPrayerLocation=null;localStorage.removeItem('zad_prayer_coordinates');loadPrayer();});
+['city','prayerCountry','prayerMethod','prayerSchool'].forEach(id=>$(id).addEventListener('change',()=>{window.zadPrayerLocation=null;localStorage.removeItem('zad_prayer_coordinates');loadPrayer();}));
+$('prayerCountry').addEventListener('change',()=>{if($('prayerCountry').value.trim().toLowerCase()!=='egypt'&&$('prayerMethod').value==='5')$('prayerMethod').value='auto';});
+$('useMyLocation').addEventListener('click',()=>{if(!navigator.geolocation){$('prayerStatus').textContent='تحديد الموقع غير مدعوم على هذا الجهاز';return;}$('prayerStatus').textContent='جارٍ تحديد موقعك...';navigator.geolocation.getCurrentPosition(pos=>{window.zadPrayerLocation={latitude:pos.coords.latitude,longitude:pos.coords.longitude};localStorage.setItem('zad_prayer_coordinates',JSON.stringify(window.zadPrayerLocation));loadPrayer();},()=>{$('prayerStatus').textContent='لم نتمكن من تحديد الموقع. أدخل الدولة والمدينة يدويًا.';},{enableHighAccuracy:true,timeout:12000,maximumAge:300000});});
+loadPrayer();
 let countdownDayKey='';
 let tomorrowPrayerCache={key:'',timings:null};
 let tomorrowPrayerRequest=null;
@@ -1104,7 +1121,7 @@ const localDayKey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+
 const apiDate=d=>String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+d.getFullYear();
 function prayerDateTime(day,raw){const parts=(raw||'').split(' ')[0].split(':');if(parts.length<2)return null;const h=Number(parts[0]),m=Number(parts[1]);if(!Number.isFinite(h)||!Number.isFinite(m))return null;return new Date(day.getFullYear(),day.getMonth(),day.getDate(),h,m,0,0);}
 let tomorrowPrayerFailedUntil=0;
-async function getTomorrowPrayerTimings(day,city){const key=localDayKey(day)+'_'+city;if(tomorrowPrayerCache.key===key&&tomorrowPrayerCache.timings)return tomorrowPrayerCache.timings;if(Date.now()<tomorrowPrayerFailedUntil)throw new Error('retry delayed');if(tomorrowPrayerRequest)return tomorrowPrayerRequest;tomorrowPrayerRequest=(async()=>{try{const data=await getPrayerData(city,day);tomorrowPrayerCache={key,timings:data.data.timings};tomorrowPrayerFailedUntil=0;return data.data.timings;}catch(error){tomorrowPrayerFailedUntil=Date.now()+60000;throw error;}finally{tomorrowPrayerRequest=null;}})();return tomorrowPrayerRequest;}
+async function getTomorrowPrayerTimings(day,city){const s=prayerSettings(),loc=window.zadPrayerLocation?window.zadPrayerLocation.latitude+','+window.zadPrayerLocation.longitude:s.city+','+s.country;const key=localDayKey(day)+'_'+loc+'_'+s.method+'_'+s.school;if(tomorrowPrayerCache.key===key&&tomorrowPrayerCache.timings)return tomorrowPrayerCache.timings;if(Date.now()<tomorrowPrayerFailedUntil)throw new Error('retry delayed');if(tomorrowPrayerRequest)return tomorrowPrayerRequest;tomorrowPrayerRequest=(async()=>{try{const data=await getPrayerData(city,day);tomorrowPrayerCache={key,timings:data.data.timings};tomorrowPrayerFailedUntil=0;return data.data.timings;}catch(error){tomorrowPrayerFailedUntil=Date.now()+60000;throw error;}finally{tomorrowPrayerRequest=null;}})();return tomorrowPrayerRequest;}
 function showCountdown(prayer,target,now){const remaining=Math.max(0,target.getTime()-now.getTime());const total=Math.floor(remaining/1000);const hours=Math.floor(total/3600);const minutes=Math.floor((total%3600)/60);const seconds=total%60;$('nextPrayerName').textContent=prayer;$('nextPrayerAt').textContent='موعد الأذان: '+fmtTime(String(target.getHours()).padStart(2,'0')+':'+String(target.getMinutes()).padStart(2,'0'));$('nextPrayerRemaining').textContent=String(hours).padStart(2,'0')+':'+String(minutes).padStart(2,'0')+':'+String(seconds).padStart(2,'0');$('nextPrayerMessage').textContent='ساعة : دقيقة : ثانية';}
 async function updatePrayerCountdown(){if(!window.zadPrayerTimings)return;const now=new Date();const todayKey=localDayKey(now);if(countdownDayKey&&countdownDayKey!==todayKey){countdownDayKey=todayKey;tomorrowPrayerCache={key:'',timings:null};loadPrayer();}const city=$('city').value;const timings=window.zadPrayerTimings;let next=null;for(const item of countdownPrayerNames){const target=prayerDateTime(now,timings[item[1]]);if(target&&target>now){next={name:item[0],target:target};break;}}if(!next){const tomorrow=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);try{const nextTimings=await getTomorrowPrayerTimings(tomorrow,city);const target=prayerDateTime(tomorrow,nextTimings.Fajr);if(target)next={name:'الفجر',target:target};}catch(e){$('nextPrayerName').textContent='تعذر حساب الصلاة القادمة';$('nextPrayerAt').textContent='تحقق من اتصال الإنترنت';$('nextPrayerRemaining').textContent='--:--:--';return;}}if(next)showCountdown(next.name,next.target,now);}
 countdownDayKey=localDayKey(new Date());
