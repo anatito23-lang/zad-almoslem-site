@@ -1,42 +1,5 @@
 (function(){
  const $=id=>document.getElementById(id);
- // مستقل عن تهيئة بقية الصفحة: يضمن استجابة زر تنزيل الأذان حتى لو تعطل جزء آخر.
- document.addEventListener('click',function(event){
-   const button=event.target.closest('#downloadAdhan');
-   if(!button)return;
-   event.preventDefault();
-   event.stopImmediatePropagation();
-   const voice=document.getElementById('adhanVoice');
-   const status=document.getElementById('adhanSettingsStatus');
-   if(!voice||!status)return;
-   if(!window.ZadAndroid||typeof window.ZadAndroid.downloadAdhan!=='function'){
-     status.textContent='التطبيق لم يجهّز خدمة تنزيل الصوت. أغلق التطبيق وافتحه مجددًا، وإذا استمرت المشكلة فالتطبيق يحتاج تحديثًا.';
-     return;
-   }
-   button.disabled=true;
-   status.textContent='جارٍ تحميل صوت الأذان، من فضلك انتظر...';
-   let bar=document.getElementById('zadAdhanProgress');
-   if(!bar){
-     const style=document.createElement('style');
-     style.textContent='@keyframes zadAdhanLoading{0%{transform:translateX(115%)}100%{transform:translateX(-115%)}}#zadAdhanProgress{height:9px;width:100%;margin:10px 0 4px;border-radius:20px;overflow:hidden;background:#e6eee8;direction:ltr}#zadAdhanProgress span{display:block;width:38%;height:100%;border-radius:20px;background:#0c8067;animation:zadAdhanLoading 1.15s ease-in-out infinite}';
-     document.head.appendChild(style);
-     bar=document.createElement('div');bar.id='zadAdhanProgress';bar.setAttribute('role','progressbar');bar.innerHTML='<span></span>';
-   }
-   status.insertAdjacentElement('afterend',bar);
-   bar.style.display='block';
-   try{window.ZadAndroid.downloadAdhan(voice.value);}
-   catch(error){bar.style.display='none';button.disabled=false;status.textContent='تعذر بدء التحميل: '+(error.message||'حاول مرة أخرى.');}
- },true);
- window.onAdhanDownloadComplete=function(which,ok,reason){
-   const voice=document.getElementById('adhanVoice');
-   if(!voice||which!==voice.value)return;
-   const status=document.getElementById('adhanSettingsStatus');
-   const button=document.getElementById('downloadAdhan');
-   const bar=document.getElementById('zadAdhanProgress');
-   if(bar)bar.style.display='none';
-   if(status)status.textContent=ok?'تم التحميل بنجاح! الأذان محفوظ على الجهاز ويعمل دون إنترنت.':'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
-   if(button)button.disabled=false;
- };
  const keys={morning:'zad_morning_reminder',evening:'zad_evening_reminder',qiyam:'zad_qiyam_reminder'};
  const defaults={morning:{enabled:true,time:'07:00',title:'حان وقت أذكار الصباح'},evening:{enabled:true,time:'17:00',title:'حان وقت أذكار المساء'},qiyam:{enabled:true,time:'04:00',title:'حان وقت قيام الليل، لا تنسَ نصيبك من صلاة الليل'}};
  function read(k){try{return JSON.parse(localStorage.getItem(keys[k]))||defaults[k]}catch(e){return defaults[k]}}
