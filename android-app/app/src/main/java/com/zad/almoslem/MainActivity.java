@@ -23,10 +23,10 @@ public class MainActivity extends Activity {
     private static final int NOTIFICATION_PERMISSION_REQUEST = 2401;
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setStatusBarColor(0xFF0C3B32);
-        getWindow().setNavigationBarColor(0xFF0C3B32);
+        getWindow().setStatusBarColor(0xFF071522);
+        getWindow().setNavigationBarColor(0xFF071522);
         webView = new WebView(this);
-        webView.setBackgroundColor(0xFF0C3B32);
+        webView.setBackgroundColor(0xFF071522);
         WebSettings s = webView.getSettings();
         s.setJavaScriptEnabled(true);
         s.setDomStorageEnabled(true);
@@ -36,8 +36,8 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(false);
         s.setGeolocationEnabled(true);
         webView.addJavascriptInterface(new ReminderBridge(), "ZadAndroid");
-        webView.clearCache(true);
-        webView.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
+        // Keep WebView and service-worker caches so downloaded Quran pages remain available offline.
+        s.setCacheMode(WebSettings.LOAD_DEFAULT);
         webView.setWebViewClient(new WebViewClient());
         webView.setWebChromeClient(new WebChromeClient() {
             @Override public void onGeolocationPermissionsShowPrompt(String origin, android.webkit.GeolocationPermissions.Callback callback) {
@@ -45,7 +45,7 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
-        webView.loadUrl("https://anatito23-lang.github.io/zad-almoslem-site/?appbuild=20261118d");
+        webView.loadUrl("https://anatito23-lang.github.io/zad-almoslem-site/?appbuild=20261118p&native=1");
         requestNotificationPermission();
     }
     private void requestNotificationPermission() {
