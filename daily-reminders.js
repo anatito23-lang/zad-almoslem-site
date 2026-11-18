@@ -9,6 +9,24 @@
    if(v.enabled){const p=v.time.split(':').map(Number);window.ZadAndroid.scheduleDailyReminder(k,p[0],p[1],defaults[k].title)}
    else window.ZadAndroid.cancelDailyReminder(k);
  }
+ let reminderAudioDownloadPending=false;
+ function ensureReminderAudioDownloaded(){
+   if(!window.ZadAndroid||reminderAudioDownloadPending)return;
+   if(window.ZadAndroid.isReminderAudioDownloaded()){
+     const status=$('dailyReminderStatus');
+     if(status)status.textContent='ملفات أذكار الصباح والمساء ودعاء الشعراوي محفوظة على الجهاز وتعمل دون إنترنت.';
+     return;
+   }
+   reminderAudioDownloadPending=true;
+   window.onReminderAudioDownload=function(ok,details){
+     reminderAudioDownloadPending=false;
+     const status=$('dailyReminderStatus');
+     if(status)status.textContent=ok
+       ?'تم التأكد من حفظ ملفات الأذكار ودعاء الشعراوي للعمل دون إنترنت.'
+       :'تعذر تنزيل بعض الملفات. '+(details||'افحص اتصال الإنترنت ثم اضغط حفظ الإعدادات لإعادة المحاولة.');
+   };
+   window.ZadAndroid.downloadReminderAudio();
+ }
  function init(){
    const city=$('city'); if(city){const saved=localStorage.getItem('zad_selected_city');if(saved&&[...city.options].some(o=>o.value===saved))city.value=saved;city.addEventListener('change',()=>localStorage.setItem('zad_selected_city',city.value));}
    ['morning','evening','qiyam'].forEach(k=>{const v=read(k);const t=$(k+'ReminderTime'),e=$(k+'ReminderEnabled');if(t)t.value=v.time;if(e)e.checked=!!v.enabled;});
@@ -103,12 +121,10 @@
      const vals={morning:{enabled:$('morningReminderEnabled').checked,time:$('morningReminderTime').value,title:defaults.morning.title},evening:{enabled:$('eveningReminderEnabled').checked,time:$('eveningReminderTime').value,title:defaults.evening.title},qiyam:{enabled:$('qiyamReminderEnabled').checked,time:$('qiyamReminderTime').value,title:defaults.qiyam.title}};
      if(!vals.morning.time||!vals.evening.time||!vals.qiyam.time){$('dailyReminderStatus').textContent='اختر وقتًا صحيحًا لكل تنبيه.';return;}
      Object.keys(vals).forEach(k=>{save(k,vals[k]);schedule(k,vals[k]);});
-     if(window.ZadAndroid&&Object.values(vals).some(v=>v.enabled)){
-       window.onReminderAudioDownload=function(ok){
-         $('dailyReminderStatus').textContent=ok?'تم تنزيل أصوات الأذكار ودعاء ما بعد الأذان وحفظها للعمل دون إنترنت.':'تمت جدولة التنبيهات، لكن تعذر تنزيل بعض الملفات الصوتية؛ ستعمل التنبيهات النصية حتى إعادة المحاولة.';
-       };
-       window.ZadAndroid.downloadReminderAudio();
-       $('dailyReminderStatus').textContent='تمت جدولة التنبيهات. جارٍ تنزيل ملفات الصوت للعمل دون إنترنت...';
+     const anyReminderEnabled=Object.values(vals).some(v=>v.enabled);
+     if(window.ZadAndroid&&anyReminderEnabled){
+       $('dailyReminderStatus').textContent='تم حفظ مواعيد التذكير. جارٍ التأكد من ملفات الصوت...';
+       ensureReminderAudioDownloaded();
      }
      const adhanControl=$('adhanEnabled');
      if(adhanControl){
@@ -118,18 +134,14 @@
      }
      if(window.ZadAndroid){window.ZadAndroid.requestExactAlarmPermission();window.ZadAndroid.requestNotificationPermission();}
      else if('Notification' in window && Notification.permission==='default'){try{await Notification.requestPermission()}catch(e){}}
-     $('dailyReminderStatus').textContent=window.ZadAndroid?'تم حفظ الإعدادات وجدولة التنبيهات على التطبيق.':'تم حفظ الإعدادات على هذا الجهاز. للتنبيه والتطبيق مغلق يلزم استخدام نسخة أندرويد التي تدعم التنبيهات.';
+     if(!window.ZadAndroid)$('dailyReminderStatus').textContent='تم حفظ الإعدادات على هذا الجهاز. للتنبيه والتطبيق مغلق يلزم استخدام نسخة أندرويد.';
+     else if(!anyReminderEnabled)$('dailyReminderStatus').textContent='تم حفظ الإعدادات وإيقاف كل التذكيرات اليومية.';
+     else if(!reminderAudioDownloadPending&&window.ZadAndroid.isReminderAudioDownloaded())$('dailyReminderStatus').textContent='تم حفظ الإعدادات، وملفات الصوت موجودة على الجهاز.';
    });
    $('qiyamReminderTime').addEventListener('input',()=>{$('qiyamReminderTime').dataset.userEdited='1'});
    // Reapply stored daily schedules whenever the app is opened.
    ['morning','evening','qiyam'].forEach(k=>{const stored=localStorage.getItem(keys[k]);if(k==='morning'||k==='evening'||stored)schedule(k,read(k));});
-   if(window.ZadAndroid&&!window.ZadAndroid.isReminderAudioDownloaded()){
-     window.onReminderAudioDownload=function(ok){
-       const status=$('dailyReminderStatus');
-       if(status)status.textContent=ok?'أصوات الأذكار ودعاء ما بعد الأذان محفوظة للعمل دون إنترنت.':'تعذر تنزيل بعض الملفات الصوتية؛ ستحاول النسخة تنزيلها مرة أخرى عند فتح التطبيق.';
-     };
-     window.ZadAndroid.downloadReminderAudio();
-   }
+   if(window.ZadAndroid)ensureReminderAudioDownloaded();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
