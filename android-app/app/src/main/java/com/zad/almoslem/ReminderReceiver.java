@@ -154,9 +154,11 @@ public class ReminderReceiver extends BroadcastReceiver {
                 ch=new NotificationChannel(PRAYER_CHANNEL_ID,"إشعارات الصلاة الصامتة",NotificationManager.IMPORTANCE_HIGH);
                 ch.setDescription("إشعار دخول وقت الصلاة بدون صوت");
                 ch.setSound(null,null);
+                ch.enableVibration(true);
                 nm.createNotificationChannel(ch);
                 NotificationChannel toneCh=new NotificationChannel(PRAYER_TONE_CHANNEL_ID,"تنبيه صوتي للصلاة",NotificationManager.IMPORTANCE_HIGH);
                 toneCh.setDescription("نغمة قصيرة عند دخول وقت الصلاة");
+                toneCh.enableVibration(true);
                 nm.createNotificationChannel(toneCh);
             } else {
                 ch=new NotificationChannel(CHANNEL_ID,"تنبيهات زاد المسلم",NotificationManager.IMPORTANCE_HIGH);
@@ -171,7 +173,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         if(prayer && adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode)) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
         else if(prayer && adhanEnabled && thisPrayerEnabled && "off".equals(adhanMode)) { /* no alert */ }
         else b.setDefaults(Notification.DEFAULT_VIBRATE);
-        if(!prayer || !"off".equals(adhanMode)) nm.notify(key.hashCode(),b.build());
+        if(!prayer || (adhanEnabled && thisPrayerEnabled && !"off".equals(adhanMode))) nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
             String k=key.replace("daily_","");
             if(prefs.getBoolean(k+"_enabled",false)) scheduleDaily(context,k,prefs.getInt(k+"_hour",7),prefs.getInt(k+"_minute",0),prefs.getString(k+"_title","تذكير من زاد المسلم"));
