@@ -89,6 +89,12 @@ public class MainActivity extends Activity {
         Button mushafButton = new Button(this); mushafButton.setText("📖  المصحف الشريف");
         mushafButton.setOnClickListener(v -> startActivity(new Intent(this, QuranTextActivity.class)));
         root.addView(mushafButton, matchWrap());
+        Button booksButton = new Button(this); booksButton.setText("📚  مكتبة الكتب الإسلامية");
+        booksButton.setOnClickListener(v -> startActivity(new Intent(this, BookLibraryActivity.class)));
+        root.addView(booksButton, matchWrap());
+        Button calendarButton = new Button(this); calendarButton.setText("🗓️  التقويم الهجري والميلادي");
+        calendarButton.setOnClickListener(v -> startActivity(new Intent(this, CalendarActivity.class)));
+        root.addView(calendarButton, matchWrap());
         TextView intro = text("إعدادات الأذان",20,Color.rgb(20,55,43),true);
         intro.setPadding(0,dp(20),0,dp(8)); root.addView(intro);
         Switch master = new Switch(this);
