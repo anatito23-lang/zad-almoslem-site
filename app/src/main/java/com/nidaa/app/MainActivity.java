@@ -12,6 +12,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import com.batoulapps.adhan.CalculationMethod;
 import com.batoulapps.adhan.Coordinates;
+import com.batoulapps.adhan.DateComponents;
 import com.batoulapps.adhan.Prayer;
 import com.batoulapps.adhan.PrayerTimes;
 import java.text.SimpleDateFormat;
@@ -91,7 +92,7 @@ public class MainActivity extends Activity {
     }
     private PrayerTimes prayerTimes() {
         Coordinates c = new Coordinates(30.0444,31.2357);
-        return new PrayerTimes(c,new Date(),CalculationMethod.EGYPTIAN.getParameters());
+        return new PrayerTimes(c,DateComponents.from(new Date()),CalculationMethod.EGYPTIAN.getParameters());
     }
     private String nextPrayerName() {
         PrayerTimes p=prayerTimes(); Date now=new Date();
