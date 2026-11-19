@@ -32,6 +32,19 @@ public class ReminderReceiver extends BroadcastReceiver {
         String key="prayer_"+name;
         context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE).edit().putLong(key,at).apply();
         schedule(context,key,at,"حان الآن وقت صلاة "+name,false);
+        schedulePrayerExtras(context,name,at);
+    }
+    private static void schedulePrayerExtras(Context context,String name,long at) {
+        try {
+            android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
+            org.json.JSONObject settings=new org.json.JSONObject(prefs.getString("adhan_settings","{}"));
+            long lead=Math.max(0,Math.min(120,settings.optInt("lead",15)));
+            long iqama=Math.max(0,Math.min(180,settings.optInt("iqama",20)));
+            if(lead>0 && at-lead*60000L>System.currentTimeMillis())
+                schedule(context,"pre_prayer_"+name,at-lead*60000L,"اقترب موعد صلاة "+name,false);
+            if(iqama>0)
+                schedule(context,"iqama_prayer_"+name,at+iqama*60000L,"حان وقت الإقامة لصلاة "+name,false);
+        } catch(Exception ignored) {}
     }
     private static void schedule(Context context,String key,long at,String title,boolean daily) {
         AlarmManager am=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
@@ -54,9 +67,23 @@ public class ReminderReceiver extends BroadcastReceiver {
         String key=intent.getStringExtra("key"),title=intent.getStringExtra("title");
         if(key==null)return;
         boolean prayer=key.startsWith("prayer_");
+        boolean prePrayer=key.startsWith("pre_prayer_");
+        boolean iqama=key.startsWith("iqama_prayer_");
         android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
-        if (!prayer && ("morning".equals(key) || "evening".equals(key) || "qiyam".equals(key))) {
+        if (!prayer && !prePrayer && !iqama && ("morning".equals(key) || "evening".equals(key) || "qiyam".equals(key))) {
             try { ReminderAudioService.play(context, key); } catch (Exception ignored) {}
+        }
+        if(prayer) {
+            String prayerName=key.substring("prayer_".length());
+            try {
+                org.json.JSONObject settings=new org.json.JSONObject(prefs.getString("adhan_settings","{}"));
+                org.json.JSONObject items=settings.optJSONObject("items");
+                String itemKey=prayerName.equals("الفجر")?"fajr":prayerName.equals("الظهر")?"dhuhr":prayerName.equals("العصر")?"asr":prayerName.equals("المغرب")?"maghrib":"isha";
+                org.json.JSONObject item=items==null?null:items.optJSONObject(itemKey);
+                if(settings.optBoolean("enabled",false) && item!=null && item.optBoolean("enabled",true) && "full".equals(item.optString("style","full"))) {
+                    AdhanPlaybackService.play(context,prayerName,item.optString("voice","عبد الباسط عبد الصمد"),item.optInt("volume",80));
+                }
+            } catch(Exception ignored) {}
         }
         if(prayer) {
             // Advance by one local calendar day, not a fixed 24-hour duration.
@@ -68,6 +95,7 @@ public class ReminderReceiver extends BroadcastReceiver {
             long next = nextPrayer.getTimeInMillis();
             prefs.edit().putLong(key,next).apply();
             schedule(context,key,next,title,false);
+            schedulePrayerExtras(context,prayerName,next);
         }
         NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
         String channelId=prayer?PRAYER_CHANNEL_ID:CHANNEL_ID;
