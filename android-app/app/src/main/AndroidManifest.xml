@@ -14,6 +14,7 @@
         <activity android:name=".QuranTextActivity" android:exported="false" />
         <activity android:name=".BookLibraryActivity" android:exported="false" />
         <activity android:name=".CalendarActivity" android:exported="false" />
+        <activity android:name=".AudioLibraryActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="true" android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
