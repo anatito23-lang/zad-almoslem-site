@@ -83,7 +83,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 box.addView(label);box.addView(sp);card(box);
             }
             card(txt("تنبيه مهم: أسماء المؤذنين هنا لا تعني أن التسجيلات الصوتية مرفقة بعد. سنضيف ملفات الأذان المرخصة أو التي توفرها أنت، ثم نفعّل التشغيل دون إنترنت.",13,muted,false));
-            Switch reminder=new Switch(this);reminder.setText("تفعيل تذكيرات الصلاة");reminder.setTextColor(white);reminder.setChecked(prefs.getBoolean("reminders",false));reminder.setPadding(8,12,8,12);reminder.setOnCheckedChangeListener((b,on)->prefs.edit().putBoolean("reminders",on).apply());card(reminder);
+            Switch reminder=new Switch(this);reminder.setText("تفعيل تنبيهات الصلاة");reminder.setTextColor(white);reminder.setChecked(prefs.getBoolean("reminders",false));reminder.setPadding(8,12,8,12);reminder.setOnCheckedChangeListener((b,on)->{prefs.edit().putBoolean("reminders",on).apply();if(on){if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED){requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},71);}else{PrayerAlarmScheduler.schedule(this,cityIndex());Toast.makeText(this,"تم تفعيل تنبيهات الصلاة",Toast.LENGTH_SHORT).show();}}else{PrayerAlarmScheduler.cancel(this);Toast.makeText(this,"تم إيقاف تنبيهات الصلاة",Toast.LENGTH_SHORT).show();}});card(reminder);
             Switch silent=new Switch(this);silent.setText("طلب تفعيل الصامت قبل الصلاة");silent.setTextColor(white);silent.setChecked(prefs.getBoolean("silent",false));silent.setPadding(8,12,8,12);silent.setOnCheckedChangeListener((b,on)->prefs.edit().putBoolean("silent",on).apply());card(silent);
             card(txt("خيارات التذكير تُحفظ الآن؛ جدولة التنبيهات وتشغيل الصوت في الخلفية هي المرحلة البرمجية التالية.",13,muted,false));
         }else if(tab.equals("القبلة")){
@@ -133,5 +133,6 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
     }
 
+    @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){super.onRequestPermissionsResult(requestCode,permissions,grantResults);if(requestCode==71){if(grantResults.length>0&&grantResults[0]==android.content.pm.PackageManager.PERMISSION_GRANTED){PrayerAlarmScheduler.schedule(this,cityIndex());Toast.makeText(this,"تم تفعيل تنبيهات الصلاة",Toast.LENGTH_SHORT).show();}else{prefs.edit().putBoolean("reminders",false).apply();Toast.makeText(this,"اسمح بالإشعارات لتفعيل التنبيهات",Toast.LENGTH_LONG).show();render();}}}
     private double qibla(double lat,double lon){double la=Math.toRadians(lat),lo=Math.toRadians(lon),ka=Math.toRadians(21.4225),ko=Math.toRadians(39.8262);double y=Math.sin(ko-lo);double x=Math.cos(la)*Math.tan(ka)-Math.sin(la)*Math.cos(ko-lo);return (Math.toDegrees(Math.atan2(y,x))+360)%360;}
 }
