@@ -16,6 +16,7 @@ import android.content.ContentValues;
 import android.provider.MediaStore;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import android.util.Base64;
 import android.net.Uri;
