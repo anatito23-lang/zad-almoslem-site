@@ -17,6 +17,7 @@ public class RadioPlaybackService extends Service {
     private static final String CHANNEL="zad_radio_playback";
     private static final int NOTIFICATION=7410;
     private ExoPlayer player;
+    private boolean fallbackAttempted = false;
 
     @Override public int onStartCommand(Intent intent,int flags,int startId) {
         if(intent!=null && ACTION_STOP.equals(intent.getAction())) { stopRadio(); return START_NOT_STICKY; }
@@ -33,6 +34,7 @@ public class RadioPlaybackService extends Service {
         if(Build.VERSION.SDK_INT>=29) startForeground(NOTIFICATION,n,android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
         else startForeground(NOTIFICATION,n);
         String url=intent==null?null:intent.getStringExtra("url");
+        fallbackAttempted = false;
         String kind=intent==null?"radio":intent.getStringExtra("kind");
         boolean allowedRadio="https://qurango.net/radio/tarateel".equals(url) ||
              "https://stream.radiojar.com/8s5u5tpdtwzuv".equals(url);
@@ -88,9 +90,12 @@ public class RadioPlaybackService extends Service {
                     .build(), true);
             player.addListener(new Player.Listener() {
                 @Override public void onPlaybackStateChanged(int state) {
-                    if (state == Player.STATE_READY) {
+                    if (state == Player.STATE_BUFFERING) {
+                        updateRadioNotification("إذاعة القرآن الكريم", "جارٍ الاتصال بالبث...");
+                    } else if (state == Player.STATE_READY) {
                         getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
                                 .putBoolean("radio_ready", true).remove("radio_last_error").apply();
+                        updateRadioNotification("إذاعة القرآن الكريم", "البث يعمل الآن");
                     }
                 }
                 @Override public void onPlayerError(PlaybackException error) {
@@ -100,8 +105,14 @@ public class RadioPlaybackService extends Service {
                             .putBoolean("radio_ready", false).putBoolean("radio_playing", false)
                             .putString("radio_last_error", detail).apply();
                     android.util.Log.e("ZadAlmoslem", "Radio stream playback failed: " + url, error);
-                    showRadioFailure(detail);
-                    try { if (player != null) player.stop(); } catch (Exception ignored) {}
+                    if (!fallbackAttempted && "https://qurango.net/radio/tarateel".equals(url)) {
+                        fallbackAttempted = true;
+                        updateRadioNotification("إذاعة القرآن الكريم", "المصدر الأول تعذر؛ نجرب بث القاهرة الآن...");
+                        play("https://stream.radiojar.com/8s5u5tpdtwzuv", null);
+                    } else {
+                        showRadioFailure(detail);
+                        try { if (player != null) player.stop(); } catch (Exception ignored) {}
+                    }
                 }
             });
             Uri source = localFile != null ? Uri.fromFile(localFile) : Uri.parse(url);
@@ -115,6 +126,25 @@ public class RadioPlaybackService extends Service {
             stopRadio();
         }
     }
+    private void updateRadioNotification(String title, String message) {
+        try {
+            Intent open = new Intent(this, MainActivity.class);
+            PendingIntent content = PendingIntent.getActivity(this, 7411, open,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            Notification.Builder b = Build.VERSION.SDK_INT >= 26
+                    ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
+            b.setSmallIcon(android.R.drawable.ic_media_play)
+                    .setContentTitle(title).setContentText(message)
+                    .setContentIntent(content).setOngoing(true);
+            Notification n = b.build();
+            if (Build.VERSION.SDK_INT >= 29)
+                startForeground(NOTIFICATION, n, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+            else startForeground(NOTIFICATION, n);
+        } catch (Exception e) {
+            android.util.Log.e("ZadAlmoslem", "Could not update radio notification", e);
+        }
+    }
+
     private void showRadioFailure(String detail) {
         try {
             Intent open = new Intent(this, MainActivity.class);
