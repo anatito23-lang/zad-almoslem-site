@@ -27,8 +27,7 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix '.new'
-            versionNameSuffix '-new'
+            versionNameSuffix '-debug'
         }
         release {
             signingConfig signingConfigs.release
