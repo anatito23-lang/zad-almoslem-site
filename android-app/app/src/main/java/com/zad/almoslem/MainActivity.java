@@ -558,10 +558,16 @@ public class MainActivity extends Activity {
             startService(radio);
         }
         @JavascriptInterface public void previewAdhan(String voice) {
+            previewAdhan(voice, "الظهر");
+        }
+        @JavascriptInterface public void previewAdhan(String voice, String prayer) {
             if (!isAdhanDownloaded(voice)) return;
+            String[] prayers = {"الفجر","الظهر","العصر","المغرب","العشاء"};
+            boolean validPrayer = false;
+            for (String item : prayers) if (item.equals(prayer)) validPrayer = true;
             Intent audio = new Intent(MainActivity.this, AdhanPlaybackService.class);
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
-            audio.putExtra("prayer", "تجربة الأذان");
+            audio.putExtra("prayer", validPrayer ? prayer : "الظهر");
             audio.putExtra("voice", safeVoice(voice));
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(audio); else startService(audio);
         }
