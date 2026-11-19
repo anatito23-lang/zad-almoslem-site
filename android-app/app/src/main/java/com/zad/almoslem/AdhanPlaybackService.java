@@ -82,7 +82,7 @@ public class AdhanPlaybackService extends Service {
             int savedVolume = getSharedPreferences("zad_reminders", MODE_PRIVATE).getInt("adhan_volume", 100);
             float adhanVolume = Math.max(0, Math.min(100, savedVolume)) / 100f;
             player.setVolume(adhanVolume, adhanVolume);
-            String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"haram".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)||"doha".equals(voice)) ? voice : "doha";
+            String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"haram".equals(voice)||"doha".equals(voice)) ? voice : "doha";
             File audioDir = new File(getFilesDir(), "adhan");
             if ("doha".equals(safeVoice)) {
                 String prayerKey = "dhuhr";
