@@ -91,6 +91,7 @@ public class MainActivity extends Activity {
         addStandaloneTools(root);
 
         for (int i=0;i<PRAYERS.length;i++) addPrayerCard(root,i);
+        addPrayerTimesUpdater(root);
 
         TextView downloadTitle = text("حفظ التسجيلات على الهاتف",18,Color.rgb(20,55,43),true);
         downloadTitle.setPadding(0,dp(20),0,dp(8)); root.addView(downloadTitle);
@@ -161,6 +162,56 @@ public class MainActivity extends Activity {
         dhikr.addView(text("قال رسول الله ﷺ: «من قال سبحان الله وبحمده في يوم مائة مرة، حُطَّت خطاياه وإن كانت مثل زبد البحر».",15,Color.rgb(55,75,65),false));
         dhikr.addView(text("رواه البخاري ومسلم.",12,Color.rgb(120,120,120),false));
         addCard(root,dhikr);
+    }
+
+    private void addPrayerTimesUpdater(LinearLayout root) {
+        TextView title=text("مواقيت الصلاة حسب مدينتك",18,Color.rgb(20,55,43),true);
+        title.setPadding(0,dp(18),0,dp(8));root.addView(title);
+        LinearLayout card=column();card.setBackground(shape(Color.WHITE,16));card.setPadding(dp(14),dp(12),dp(14),dp(12));
+        TextView hint=text("اختر المدينة لتحديث المواقيت وحفظ تنبيهات الصلوات على الهاتف. آخر مواقيت محفوظة تظل متاحة دون إنترنت.",13,Color.DKGRAY,false);
+        card.addView(hint);
+        String[] cities={"القاهرة","الجيزة","الزقازيق","الإسكندرية","المنصورة","طنطا","بنها","الإسماعيلية","بورسعيد","السويس","أسيوط","الأقصر","أسوان"};
+        String[] english={"Cairo","Giza","Zagazig","Alexandria","Mansoura","Tanta","Banha","Ismailia","Port Said","Suez","Asyut","Luxor","Aswan"};
+        Spinner city=new Spinner(this);
+        city.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,cities));
+        city.setSelection(Math.max(0,Arrays.asList(english).indexOf(prefs.getString("native_prayer_city","Cairo"))));
+        card.addView(city,matchWrap());
+        Button update=new Button(this);update.setText("تحديث مواقيت الصلاة");card.addView(update,matchWrap());
+        TextView result=text("لم يتم تحديث المواقيت بعد.",12,Color.rgb(80,100,90),false);card.addView(result);
+        update.setOnClickListener(v->{
+            int selected=city.getSelectedItemPosition();String cityEn=english[selected],cityAr=cities[selected];
+            prefs.edit().putString("native_prayer_city",cityEn).apply();
+            update.setEnabled(false);result.setText("جارٍ جلب المواقيت...");
+            new Thread(()->{
+                HttpURLConnection connection=null;
+                try{
+                    String url="https://api.aladhan.com/v1/timingsByCity?city="+java.net.URLEncoder.encode(cityEn,"UTF-8")+"&country=Egypt&method=5";
+                    connection=(HttpURLConnection)new URL(url).openConnection();connection.setConnectTimeout(15000);connection.setReadTimeout(20000);
+                    connection.setRequestMethod("GET");
+                    if(connection.getResponseCode()!=200)throw new Exception("تعذر الاتصال بخدمة المواقيت");
+                    ByteArrayOutputStream output=new ByteArrayOutputStream();
+                    try(InputStream in=connection.getInputStream()){byte[] buffer=new byte[4096];int n;while((n=in.read(buffer))!=-1)output.write(buffer,0,n);}
+                    org.json.JSONObject rootJson=new org.json.JSONObject(output.toString("UTF-8"));
+                    org.json.JSONObject timings=rootJson.getJSONObject("data").getJSONObject("timings");
+                    String[] apiKeys={"Fajr","Dhuhr","Asr","Maghrib","Isha"};
+                    long now=System.currentTimeMillis();
+                    for(int i=0;i<PRAYERS.length;i++){
+                        String raw=timings.getString(apiKeys[i]).split(" ")[0];
+                        String[] hm=raw.split(":");int hour=Integer.parseInt(hm[0]),minute=Integer.parseInt(hm[1]);
+                        prefs.edit().putInt("native_time_hour_"+PRAYERS[i],hour).putInt("native_time_minute_"+PRAYERS[i],minute).apply();
+                        Calendar next=Calendar.getInstance();next.set(Calendar.HOUR_OF_DAY,hour);next.set(Calendar.MINUTE,minute);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);
+                        if(next.getTimeInMillis()<=now)next.add(Calendar.DAY_OF_YEAR,1);
+                        if(prefs.getBoolean("prayer_enabled_"+PRAYERS[i],true))ReminderReceiver.schedulePrayer(this,PRAYERS[i],next.getTimeInMillis());
+                        final String label=String.format(Locale.getDefault(),"%02d:%02d",hour,minute);
+                        final String prayer=PRAYERS[i];
+                        runOnUiThread(()->{TextView tv=timeLabels.get(prayer);if(tv!=null)tv.setText(label);});
+                    }
+                    runOnUiThread(()->result.setText("تم تحديث مواقيت "+cityAr+" وحفظ التنبيهات بنجاح."));
+                }catch(Exception e){runOnUiThread(()->result.setText("تعذر تحديث المواقيت: "+(e.getMessage()==null?"تحقق من الإنترنت":e.getMessage())));}
+                finally{if(connection!=null)connection.disconnect();runOnUiThread(()->update.setEnabled(true));}
+            }).start();
+        });
+        addCard(root,card);
     }
 
     private LinearLayout.LayoutParams matchWrap() {
