@@ -3,6 +3,7 @@
 const $=id=>document.getElementById(id);
 const prayers=[['الفجر','fajr'],['الظهر','dhuhr'],['العصر','asr'],['المغرب','maghrib'],['العشاء','isha']];
 const voices=['عبد الباسط عبد الصمد','محمود خليل الحصري','مصطفى إسماعيل','محمود البنا','محمد صديق المنشاوي','محمد رفعت','النقشبندي','نصر الدين طوبار','أذان الحرم المكي','تسجيل أذان الفجر المرفق'];
+const builtInAudio={'عبد الباسط عبد الصمد':'1a014366658c','أذان الحرم المكي':'54944191e2e2'};
 const defaults={enabled:true,lead:15,iqama:20,silent:15,silentEnabled:false,dua:true,items:{}};
 prayers.forEach(([name,key])=>defaults.items[key]={enabled:true,voice:key==='fajr'?'عبد الباسط عبد الصمد':'عبد الباسط عبد الصمد',style:key==='fajr'?'full':'full',volume:80});
 function read(){try{return Object.assign({},defaults,JSON.parse(localStorage.getItem('zad_adhan_settings')||'{}'))}catch(e){return JSON.parse(JSON.stringify(defaults))}}
@@ -19,7 +20,7 @@ function render(){
   return '<div class="adhan-prayer-row" data-prayer="'+key+'"><div class="adhan-prayer-name">'+name+'</div>'+
    '<select class="adhan-voice" aria-label="مؤذن '+name+'">'+voices.map(x=>'<option '+(x===v.voice?'selected':'')+'>'+x+'</option>').join('')+'</select>'+
    '<select class="adhan-style" aria-label="نوع أذان '+name+'"><option value="full" '+(v.style==='full'?'selected':'')+'>الأذان كاملًا</option><option value="takbir" disabled>تكبيرتان فقط (يتطلب تسجيلًا مستقلًا)</option><option value="vibrate" '+(v.style==='vibrate'?'selected':'')+'>اهتزاز فقط</option><option value="off" '+(v.style==='off'?'selected':'')+'>بدون أذان</option></select>'+
-   '<div class="adhan-prayer-options"><label><input class="adhan-enabled" type="checkbox" '+(v.enabled?'checked':'')+'> تفعيل الصلاة</label><label>مستوى الصوت <input class="adhan-volume" type="range" min="0" max="100" value="'+Number(v.volume||80)+'"></label><button class="btn light adhan-import" type="button">إضافة ملف الصوت</button><button class="btn light adhan-test" type="button">تجربة الصوت</button></div></div>';
+   '<div class="adhan-prayer-options"><label><input class="adhan-enabled" type="checkbox" '+(v.enabled?'checked':'')+'> تفعيل الصلاة</label><label>مستوى الصوت <input class="adhan-volume" type="range" min="0" max="100" value="'+Number(v.volume||80)+'"></label>'+(builtInAudio[v.voice]?'<button class="btn light adhan-download" type="button">تنزيل التسجيل داخل التطبيق</button>':'<button class="btn light adhan-import" type="button">إضافة ملف الصوت</button>')+'<button class="btn light adhan-test" type="button">تجربة الصوت</button></div></div>';
  }).join('');
 }
 function collect(){
@@ -37,6 +38,14 @@ function collect(){
 $('adhanPrayerSettings').addEventListener('click',e=>{
  const row=e.target.closest('.adhan-prayer-row');if(!row)return;
  const voice=row.querySelector('.adhan-voice').value;
+ if(e.target.closest('.adhan-download')) {
+  const id=builtInAudio[voice];
+  if(window.ZadAndroid&&window.ZadAndroid.downloadAdhanAudio){
+   $('adhanSettingsStatus').textContent='جاري تنزيل تسجيل '+voice+' وحفظه داخل التطبيق ليعمل دون إنترنت...';
+   window.ZadAndroid.downloadAdhanAudio(voice,id);
+  } else $('adhanSettingsStatus').textContent='تنزيل التسجيلات المدمجة متاح داخل تطبيق أندرويد فقط.';
+  return;
+ }
  if(e.target.closest('.adhan-import')){
   if(window.ZadAndroid&&window.ZadAndroid.importAdhanAudio){window.ZadAndroid.importAdhanAudio(voice);$('adhanSettingsStatus').textContent='اختر ملف الأذان لهذا المؤذن من ملفات الهاتف.';}
   else $('adhanSettingsStatus').textContent='إضافة ملفات الصوت متاحة داخل تطبيق أندرويد فقط.';
@@ -50,6 +59,9 @@ $('adhanPrayerSettings').addEventListener('click',e=>{
   } else $('adhanSettingsStatus').textContent='اختبار الصوت متاح داخل تطبيق أندرويد بعد إضافة التسجيل.';
  }
 });
+window.onAdhanAudioDownloaded=function(voice,ok){
+ $('adhanSettingsStatus').textContent=ok?'تم تنزيل تسجيل '+voice+' وحفظه داخل التطبيق. يمكنك الآن تجربة الصوت دون إنترنت.':'تعذر تنزيل التسجيل. تحقق من اتصال الإنترنت وحاول مرة أخرى.';
+};
 window.onAdhanAudioImported=function(voice,ok){
  $('adhanSettingsStatus').textContent=ok?'تم حفظ ملف صوت '+voice+' على الجهاز ويمكن تجربته دون إنترنت.':'لم يتم حفظ الملف. تأكد أنه ملف صوتي صالح ثم حاول مرة أخرى.';
 };
