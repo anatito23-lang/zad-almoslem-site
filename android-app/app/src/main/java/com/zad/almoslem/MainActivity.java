@@ -404,7 +404,7 @@ public class MainActivity extends Activity {
                 final String message = reason;
                 runOnUiThread(() -> {
                     if (webView != null) webView.evaluateJavascript(
-                        "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('doha'," + result + "," + org.json.JSONObject.quote(message) + ") + ")", null);
+                        "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('doha'," + result + "," + org.json.JSONObject.quote(message) + ")", null);
                 });
             }).start();
         }
@@ -500,7 +500,7 @@ public class MainActivity extends Activity {
                 final String reason = error;
                 runOnUiThread(() -> {
                     if (webView != null) webView.evaluateJavascript(
-                        "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "'," + result + "," + org.json.JSONObject.quote(reason) + ") + ")", null);
+                        "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "'," + result + "," + org.json.JSONObject.quote(reason) + ")", null);
                 });
             }).start();
         }
