@@ -18,7 +18,7 @@ function render(){
   const v=state.items[key]||defaults.items[key];
   return '<div class="adhan-prayer-row" data-prayer="'+key+'"><div class="adhan-prayer-name">'+name+'</div>'+
    '<select class="adhan-voice" aria-label="مؤذن '+name+'">'+voices.map(x=>'<option '+(x===v.voice?'selected':'')+'>'+x+'</option>').join('')+'</select>'+
-   '<select class="adhan-style" aria-label="نوع أذان '+name+'"><option value="full" '+(v.style==='full'?'selected':'')+'>الأذان كاملًا</option><option value="takbir" '+(v.style==='takbir'?'selected':'')+'>تكبيرتان فقط</option><option value="vibrate" '+(v.style==='vibrate'?'selected':'')+'>اهتزاز فقط</option><option value="off" '+(v.style==='off'?'selected':'')+'>بدون أذان</option></select>'+
+   '<select class="adhan-style" aria-label="نوع أذان '+name+'"><option value="full" '+(v.style==='full'?'selected':'')+'>الأذان كاملًا</option><option value="takbir" disabled>تكبيرتان فقط (يتطلب تسجيلًا مستقلًا)</option><option value="vibrate" '+(v.style==='vibrate'?'selected':'')+'>اهتزاز فقط</option><option value="off" '+(v.style==='off'?'selected':'')+'>بدون أذان</option></select>'+
    '<div class="adhan-prayer-options"><label><input class="adhan-enabled" type="checkbox" '+(v.enabled?'checked':'')+'> تفعيل الصلاة</label><label>مستوى الصوت <input class="adhan-volume" type="range" min="0" max="100" value="'+Number(v.volume||80)+'"></label><button class="btn light adhan-import" type="button">إضافة ملف الصوت</button><button class="btn light adhan-test" type="button">تجربة الصوت</button></div></div>';
  }).join('');
 }
