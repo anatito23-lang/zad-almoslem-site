@@ -11,7 +11,7 @@ on:
     paths:
       - 'android-app/**'
       - '.github/workflows/build-apk.yml'
-    branches: [main, feat/per-prayer-adhan-voices, native-android-app]
+    branches: [main, feat/per-prayer-adhan-voices, native-android-app, update-v3-prayer-mushaf-tabs]
 
 jobs:
   build:
