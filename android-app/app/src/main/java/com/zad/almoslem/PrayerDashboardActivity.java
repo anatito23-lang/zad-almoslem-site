@@ -26,6 +26,7 @@ public class PrayerDashboardActivity extends Activity {
     private static final String[] DEFAULT_CITIES={"Cairo","Riyadh","Dubai","Kuwait City","Doha","Amman","Beirut","Jerusalem","Rabat","Algiers","Tunis","Istanbul","Islamabad","New Delhi","Jakarta","Kuala Lumpur","London","New York","Toronto","Berlin","Paris","Manama","Muscat","Baghdad","Damascus","Sanaa","Tripoli","Khartoum","Dhaka","Singapore","Tokyo","Sydney","Johannesburg","Lagos","Moscow","Madrid","Rome","Amsterdam","Stockholm","Oslo"};
     private android.content.SharedPreferences prefs;
     private Spinner countrySpinner;
+    private Button updateButton;
     private EditText cityInput;
     private String selectedCountryCode;
     private TextView result,nextCountdown,trackerCount,adhanNow;
@@ -40,6 +41,9 @@ public class PrayerDashboardActivity extends Activity {
         super.onCreate(b);prefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);
         getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);
         build();handler.post(ticker);
+        String today=new SimpleDateFormat("yyyyMMdd",Locale.US).format(new Date());
+        boolean missing=false;for(String prayer:PRAYERS)if(prefs.getInt("native_time_hour_"+prayer,-1)<0)missing=true;
+        if(missing||!today.equals(prefs.getString("native_times_date","")))updateButton.post(()->fetchTimes(updateButton));
     }
     private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
     private GradientDrawable bg(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
@@ -59,8 +63,8 @@ public class PrayerDashboardActivity extends Activity {
         String savedCountry=prefs.getString("native_country","Egypt");int countryIndex=Arrays.asList(COUNTRY_CODES).indexOf(savedCountry);if(countryIndex<0)countryIndex=0;countrySpinner.setSelection(countryIndex);selectedCountryCode=COUNTRY_CODES[countryIndex];root.addView(countrySpinner,full());
         cityInput=new EditText(this);cityInput.setSingleLine(true);cityInput.setHint("اكتب اسم المدينة بالإنجليزية مثل Cairo أو Zagazig");cityInput.setText(prefs.getString("native_prayer_city",DEFAULT_CITIES[countryIndex]));cityInput.setTextDirection(View.TEXT_DIRECTION_LTR);root.addView(cityInput,full());
         countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){}public void onItemSelected(AdapterView<?> p,View v,int pos,long id){if(!COUNTRY_CODES[pos].equals(selectedCountryCode)){cityInput.setText(DEFAULT_CITIES[pos]);selectedCountryCode=COUNTRY_CODES[pos];}}});
-        Button update=new Button(this);update.setText("تحديث مواقيت الصلاة");root.addView(update,full());
-        result=label("اختر الدولة والمدينة ثم حدّث المواقيت.",12,Color.DKGRAY,false);root.addView(result,full());update.setOnClickListener(v->fetchTimes(update));
+        updateButton=new Button(this);updateButton.setText("تحديث مواقيت الصلاة");root.addView(updateButton,full());
+        result=label("اختر الدولة والمدينة ثم حدّث المواقيت.",12,Color.DKGRAY,false);root.addView(result,full());updateButton.setOnClickListener(v->fetchTimes(updateButton));
 
         TextView prayersTitle=label("الصلوات الخمس",19,green,true);prayersTitle.setPadding(0,dp(18),0,dp(8));root.addView(prayersTitle);
         String[] icons={"🌅","☀️","🌤️","🌇","🌙"};
@@ -114,6 +118,7 @@ public class PrayerDashboardActivity extends Activity {
             ByteArrayOutputStream out=new ByteArrayOutputStream();try(InputStream in=c.getInputStream()){byte[] b=new byte[4096];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}
             JSONObject data=new JSONObject(out.toString("UTF-8")).getJSONObject("data");JSONObject timings=data.getJSONObject("timings");String[] api={"Fajr","Dhuhr","Asr","Maghrib","Isha"};
             for(int i=0;i<5;i++){String raw=timings.getString(api[i]).split(" ")[0];String[] hm=raw.split(":");int h=Integer.parseInt(hm[0]),m=Integer.parseInt(hm[1]);prefs.edit().putInt("native_time_hour_"+PRAYERS[i],h).putInt("native_time_minute_"+PRAYERS[i],m).apply();Calendar next=Calendar.getInstance();next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,m);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);if(prefs.getBoolean("prayer_enabled_"+PRAYERS[i],true))ReminderReceiver.schedulePrayer(this,PRAYERS[i],next.getTimeInMillis());}
+            prefs.edit().putString("native_times_date",new SimpleDateFormat("yyyyMMdd",Locale.US).format(new Date())).apply();
             runOnUiThread(()->{result.setText(pos==0?"تم تحديث المواقيت بطريقة هيئة المساحة المصرية (طريقة الحساب 5).":"تم تحديث مواقيت "+COUNTRIES[pos]+" — "+city+" بطريقة الحساب المعتمدة لهذه الدولة.");refreshCountdowns();});
         }catch(Exception e){runOnUiThread(()->result.setText("تعذر تحديث المواقيت: "+(e.getMessage()==null?"تحقق من اسم المدينة والإنترنت":e.getMessage())));}
         finally{if(c!=null)c.disconnect();runOnUiThread(()->button.setEnabled(true));}}).start();
