@@ -28,6 +28,8 @@ public class MainActivity extends Activity {
     private WebView webView;
     private ValueCallback<Uri[]> fileChooserCallback;
     private static final int AUDIO_FILE_REQUEST = 2402;
+    private static final int ADHAN_AUDIO_FILE_REQUEST = 2403;
+    private String pendingAdhanVoice = null;
     private static final int NOTIFICATION_PERMISSION_REQUEST = 2401;
     @Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -179,6 +181,14 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void schedulePrayer(String name,long timestamp) {
             ReminderReceiver.schedulePrayer(MainActivity.this,name,timestamp);
         }
+        @JavascriptInterface public void saveAdhanSettings(String json) {
+            try { getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_settings", json).apply(); } catch (Exception ignored) {}
+        }
+        @JavascriptInterface public void playAdhanTest(String voice,int volume) { AdhanPlaybackService.play(MainActivity.this, "test", voice, volume); }
+        @JavascriptInterface public void importAdhanAudio(String voice) {
+            pendingAdhanVoice = voice == null ? "" : voice;
+            runOnUiThread(() -> { Intent pick=new Intent(Intent.ACTION_OPEN_DOCUMENT); pick.addCategory(Intent.CATEGORY_OPENABLE); pick.setType("audio/*"); try { startActivityForResult(pick, ADHAN_AUDIO_FILE_REQUEST); } catch(Exception e) { pendingAdhanVoice=null; } });
+        }
         @JavascriptInterface public boolean canScheduleExactAlarms() {
             if (Build.VERSION.SDK_INT < 31) return true;
             android.app.AlarmManager alarms = (android.app.AlarmManager)getSystemService(ALARM_SERVICE);
@@ -200,6 +210,17 @@ public class MainActivity extends Activity {
     }
     @Override protected void onActivityResult(int requestCode,int resultCode,Intent data) {
         super.onActivityResult(requestCode,resultCode,data);
+        if(requestCode==ADHAN_AUDIO_FILE_REQUEST) {
+            String voice=pendingAdhanVoice; pendingAdhanVoice=null; boolean ok=false;
+            if(resultCode==RESULT_OK && data!=null && data.getData()!=null && voice!=null) try {
+                Uri uri=data.getData(); try { getContentResolver().takePersistableUriPermission(uri,Intent.FLAG_GRANT_READ_URI_PERMISSION); } catch(Exception ignored) {}
+                File dir=new File(getFilesDir(),"adhan"); if(!dir.exists())dir.mkdirs();
+                String safe=voice.replaceAll("[^\\\\p{L}\\\\p{N}]+","_"); File out=new File(dir,safe+".mp3");
+                try(InputStream in=getContentResolver().openInputStream(uri);FileOutputStream stream=new FileOutputStream(out)){byte[] buffer=new byte[8192];int n;while((n=in.read(buffer))!=-1)stream.write(buffer,0,n);stream.getFD().sync();}
+                ok=out.length()>10000;
+            } catch(Exception ignored) {}
+            if(webView!=null && voice!=null) webView.evaluateJavascript("window.onAdhanAudioImported && window.onAdhanAudioImported("+org.json.JSONObject.quote(voice)+","+ok+")",null);
+        }
         if(requestCode==AUDIO_FILE_REQUEST && fileChooserCallback!=null){
             Uri[] result=null;
             if(resultCode==RESULT_OK && data!=null && data.getData()!=null) result=new Uri[]{data.getData()};
