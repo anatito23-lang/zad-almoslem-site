@@ -16,6 +16,10 @@ import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.exoplayer.ExoPlayer;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class AdhanPlaybackService extends Service {
     public static final String ACTION_PLAY = "com.zad.almoslem.PLAY_ADHAN";
@@ -127,9 +131,11 @@ public class AdhanPlaybackService extends Service {
             File audioFile = isPlayableAudioFile(mp3File) ? mp3File
                     : (isPlayableAudioFile(oggFile) ? oggFile : null);
             if (audioFile == null) {
-                getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_playback_started", false).putString("adhan_last_playback_error", "ملف الصوت غير موجود أو غير صالح: " + safeVoice).apply();
-                showMissingAudioNotification();
-                stopPlayback();
+                getSharedPreferences("zad_reminders", MODE_PRIVATE).edit()
+                        .putBoolean("adhan_playback_started", false)
+                        .putString("adhan_last_playback_error", "جاري تنزيل التسجيل الناقص: " + safeVoice).apply();
+                stopPlayerOnly();
+                downloadMissingAudio(safeVoice, voice, prayer, audioDir);
                 return;
             }
             player.addListener(new Player.Listener() {
@@ -159,6 +165,84 @@ public class AdhanPlaybackService extends Service {
             showPlaybackErrorNotification("تعذر تشغيل الأذان: " + (e.getMessage() == null ? "خطأ في ملف الصوت" : e.getMessage()));
             stopPlayback();
         }
+    }
+
+    private void downloadMissingAudio(String safeVoice, String originalVoice, String prayer, File audioDir) {
+        new Thread(() -> {
+            HttpURLConnection connection = null;
+            File target = new File(audioDir, safeVoice + ".mp3");
+            File temp = new File(audioDir, safeVoice + ".mp3.part");
+            try {
+                if (!audioDir.exists() && !audioDir.mkdirs()) throw new Exception("تعذر إنشاء مجلد التسجيلات");
+                String address = adhanDownloadUrl(safeVoice);
+                if (address == null) throw new Exception("لا يوجد رابط تنزيل لهذا المؤذن");
+                connection = (HttpURLConnection) new URL(address).openConnection();
+                connection.setConnectTimeout(20000);
+                connection.setReadTimeout(90000);
+                connection.setInstanceFollowRedirects(true);
+                connection.setRequestProperty("User-Agent", "ZadAlmoslem Android Native");
+                int code = connection.getResponseCode();
+                if (code != HttpURLConnection.HTTP_OK) throw new Exception("مصدر التسجيل أعاد " + code);
+                long received = 0;
+                try (InputStream input = connection.getInputStream();
+                     FileOutputStream output = new FileOutputStream(temp)) {
+                    byte[] buffer = new byte[8192];
+                    int count;
+                    while ((count = input.read(buffer)) != -1) {
+                        received += count;
+                        if (received > 25L * 1024 * 1024) throw new Exception("حجم التسجيل أكبر من المسموح");
+                        output.write(buffer, 0, count);
+                    }
+                    output.getFD().sync();
+                }
+                if (!isPlayableAudioFile(temp)) throw new Exception("التسجيل الذي وصل من المصدر غير صالح أو غير مكتمل");
+                if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال التسجيل القديم");
+                if (!temp.renameTo(target)) throw new Exception("تعذر حفظ التسجيل داخل التطبيق");
+                new android.os.Handler(getMainLooper()).post(() -> {
+                    getSharedPreferences("zad_reminders", MODE_PRIVATE).edit()
+                            .remove("adhan_last_playback_error").putString("adhan_last_playback_error", "تم تنزيل التسجيل، جارٍ تشغيله").apply();
+                    playAdhan(originalVoice, prayer);
+                });
+            } catch (Exception error) {
+                String detail = error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage();
+                getSharedPreferences("zad_reminders", MODE_PRIVATE).edit()
+                        .putBoolean("adhan_playback_started", false)
+                        .putString("adhan_last_playback_error", "فشل تنزيل " + safeVoice + ": " + detail).apply();
+                new android.os.Handler(getMainLooper()).post(() -> {
+                    showPlaybackErrorNotification("تعذر تنزيل صوت الأذان: " + detail);
+                    stopPlayback();
+                });
+            } finally {
+                if (connection != null) connection.disconnect();
+                if (temp.exists()) temp.delete();
+            }
+        }, "adhan-audio-download").start();
+    }
+
+    private String adhanDownloadUrl(String voice) throws Exception {
+        if (voice != null && voice.startsWith("doha_")) {
+            String prayerKey = voice.substring("doha_".length());
+            String number;
+            if ("fajr".equals(prayerKey)) number = "01";
+            else if ("dhuhr".equals(prayerKey)) number = "02";
+            else if ("asr".equals(prayerKey)) number = "03";
+            else if ("maghrib".equals(prayerKey)) number = "04";
+            else if ("isha".equals(prayerKey)) number = "05";
+            else return null;
+            String title = "fajr".equals(prayerKey) ? "Fajr" : ("dhuhr".equals(prayerKey) ? "Dhuhr" : ("asr".equals(prayerKey) ? "Asr" : ("maghrib".equals(prayerKey) ? "Maghrib" : "Isha")));
+            return "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_" + number + "_" + title + "_Adhan.mp3";
+        }
+        String file;
+        switch (voice) {
+            case "basit": file = "Abdulbasit_Abdusamad_1_-_Egypt_(عبد_الباسط_عبد_الصمد_-_مصر).mp3"; break;
+            case "mustafa": file = "Mustafa_Ismail_-_Egypt_(مصطفى_إسماعيل_-_مصر).mp3"; break;
+            case "husary": file = "Mahmoud_Khalil_Al_Hussary_-_Cairo_(محمود_خليل_الحصري_-_القاهرة).mp3"; break;
+            case "banna": file = "Mahmoud_Ali_Al_Banna_-_Cairo_(محمود_علي_البنا_-_القاهرة).mp3"; break;
+            case "haram": file = "Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(علي_بن_أحمد_ملا_-_الحرم_المكي).mp3"; break;
+            default: return null;
+        }
+        String encoded = java.net.URLEncoder.encode(file, "UTF-8").replace("+", "%20").replace("%28", "(").replace("%29", ")");
+        return "https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/" + encoded;
     }
 
     private void showPlaybackErrorNotification(String message) {
