@@ -52,7 +52,7 @@ public class AdhanPlaybackService extends Service {
         startForeground(NOTIFICATION_ID, b.build());
         stopPlayer();
         try {
-            String safe = (voice == null ? "" : voice).replaceAll("[^\\p{L}\\p{N}]+", "_");
+            String safe = Integer.toHexString((voice == null ? "" : voice).hashCode());
             File file = new File(new File(getFilesDir(), "adhan"), safe + ".mp3");
             if (!file.isFile() || file.length() < 10000) { if(silentDuration>0) ReminderReceiver.startSilentMode(this,silentDuration); stopForeground(true); stopSelf(); return START_NOT_STICKY; }
             player = new MediaPlayer();
