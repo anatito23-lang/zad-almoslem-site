@@ -559,15 +559,26 @@ public class MainActivity extends Activity {
             previewPrayerAdhan(voice, "الظهر");
         }
         @JavascriptInterface public void previewPrayerAdhan(String voice, String prayer) {
-            if (!isAdhanDownloaded(voice)) return;
+            String safe = safeVoice(voice);
+            if (!isAdhanDownloaded(safe)) {
+                if (webView != null) webView.evaluateJavascript(
+                    "window.onAdhanPreviewError && window.onAdhanPreviewError('ملف المؤذن غير محفوظ أو غير صالح. أعد تنزيل الصوت ثم حاول المعاينة.')", null);
+                return;
+            }
             String[] prayers = {"الفجر","الظهر","العصر","المغرب","العشاء"};
             boolean validPrayer = false;
             for (String item : prayers) if (item.equals(prayer)) validPrayer = true;
             Intent audio = new Intent(MainActivity.this, AdhanPlaybackService.class);
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
             audio.putExtra("prayer", validPrayer ? prayer : "الظهر");
-            audio.putExtra("voice", safeVoice(voice));
-            if (Build.VERSION.SDK_INT >= 26) startForegroundService(audio); else startService(audio);
+            audio.putExtra("voice", safe);
+            try {
+                if (Build.VERSION.SDK_INT >= 26) startForegroundService(audio); else startService(audio);
+            } catch (Exception error) {
+                if (webView != null) webView.evaluateJavascript(
+                    "window.onAdhanPreviewError && window.onAdhanPreviewError(" +
+                    org.json.JSONObject.quote("تعذر تشغيل خدمة الأذان: " + (error.getMessage() == null ? "خطأ غير معروف" : error.getMessage())) + ")", null);
+            }
         }
 
     }
