@@ -184,9 +184,9 @@ public class MainActivity extends Activity {
         Button cairoRadioButton=new Button(this);cairoRadioButton.setText("إذاعة القرآن الكريم من القاهرة");
         radioCard.addView(cairoRadioButton,matchWrap());
         cairoRadioButton.setOnClickListener(v->{
-            String stream="https://stream.radiojar.com/8s5u5tpdtwzuv";
+            String stream="https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8";
             Intent intent=new Intent(this,RadioPlaybackService.class);intent.setAction(RadioPlaybackService.ACTION_PLAY);
-            intent.putExtra("url",stream);intent.putExtra("kind","radio");intent.putExtra("label","إذاعة القرآن الكريم من القاهرة");
+            intent.putExtra("url",stream);intent.putExtra("kind","radio");intent.putExtra("label","إذاعة القرآن الكريم من القاهرة");intent.putExtra("station","egypt");
             try{if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);}
             catch(Exception e){status.setText("تعذر تشغيل إذاعة القاهرة: "+e.getMessage());}
         });
@@ -208,9 +208,9 @@ public class MainActivity extends Activity {
             Intent intent=new Intent(this,RadioPlaybackService.class);
             if(playing){intent.setAction(RadioPlaybackService.ACTION_STOP);audio.edit().putBoolean("radio_playing",false).putString("active_kind","").apply();}
             else{
-                String stream="https://qurango.net/radio/tarateel";
+                String stream="https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8";
                 intent.setAction(RadioPlaybackService.ACTION_PLAY);
-                intent.putExtra("url",stream);intent.putExtra("kind","radio");intent.putExtra("label","إذاعة القرآن الكريم");
+                intent.putExtra("url",stream);intent.putExtra("kind","radio");intent.putExtra("label","إذاعة القرآن الكريم من القاهرة");intent.putExtra("station","egypt");
                 audio.edit().putString("last_quran_url",stream).putString("last_quran_title","إذاعة القرآن الكريم").putBoolean("radio_playing",true).putString("active_kind","radio").apply();
             }
             try{if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);radioButton.postDelayed(refreshRadio,500);}
@@ -469,8 +469,7 @@ public class MainActivity extends Activity {
         top.addView(name,new LinearLayout.LayoutParams(0,dp(44),1));
         TextView time=text(savedTimeLabel(prayer),14,Color.rgb(80,100,90),false);
         timeLabels.put(prayer,time); top.addView(time);
-        Button setTime=new Button(this); setTime.setText("تحديد الوقت"); setTime.setTextSize(11);
-        top.addView(setTime); setTime.setOnClickListener(v->choosePrayerTime(prayer,time));
+        // أوقات الصلاة تُحدّث آليًا من طريقة الحساب المختارة، ولا يوجد تعديل يدوي للوقت.
         card.addView(top);
         TextView voiceLabel=text("صوت المؤذن",13,Color.DKGRAY,true); voiceLabel.setPadding(0,dp(8),0,0); card.addView(voiceLabel);
         Spinner spinner=new Spinner(this);
