@@ -92,21 +92,26 @@
    function ensurePrayerProgress(){
      if(!prayerVoiceStatus)return null;
      if(!prayerProgressBar){
-       prayerProgressBar=document.createElement('div');prayerProgressBar.id='zadPrayerDownloadProgress';
-       prayerProgressBar.style.cssText='display:none;margin:10px 0 14px;padding:10px 12px;border:1px solid #d5e2da;border-radius:12px;background:#f7faf8;direction:rtl';
-       prayerProgressText=document.createElement('div');prayerProgressText.style.cssText='font-size:13px;margin-bottom:8px;color:#244b3d';
-       prayerProgressText.textContent='جاهز لتنزيل التسجيلات';
-       const track=document.createElement('div');track.style.cssText='height:12px;width:100%;border-radius:20px;overflow:hidden;background:#e5eee8;direction:ltr';
-       prayerProgressFill=document.createElement('span');prayerProgressFill.style.cssText='display:block;width:0;height:100%;border-radius:20px;background:#13866b;transition:width .15s ease';
-       track.appendChild(prayerProgressFill);prayerProgressBar.append(prayerProgressText,track);
-       prayerVoiceStatus.insertAdjacentElement('afterend',prayerProgressBar);
+       prayerProgressBar=document.getElementById('zadPrayerDownloadProgress');
+       prayerProgressText=document.getElementById('zadPrayerDownloadProgressText');
+       prayerProgressFill=document.getElementById('zadPrayerDownloadProgressFill');
+       if(!prayerProgressBar){
+         prayerProgressBar=document.createElement('div');prayerProgressBar.id='zadPrayerDownloadProgress';
+         prayerProgressBar.style.cssText='display:block;margin:10px 0 14px;padding:10px 12px;border:1px solid #d5e2da;border-radius:12px;background:#f7faf8;direction:rtl';
+         prayerProgressText=document.createElement('div');prayerProgressText.id='zadPrayerDownloadProgressText';prayerProgressText.style.cssText='font-size:13px;margin-bottom:8px;color:#244b3d';
+         prayerProgressText.textContent='جاهز لتنزيل التسجيلات — 0%';
+         const track=document.createElement('div');track.style.cssText='height:12px;width:100%;border-radius:20px;overflow:hidden;background:#e5eee8;direction:ltr';
+         prayerProgressFill=document.createElement('span');prayerProgressFill.id='zadPrayerDownloadProgressFill';prayerProgressFill.style.cssText='display:block;width:0;height:100%;border-radius:20px;background:#13866b;transition:width .15s ease';
+         track.appendChild(prayerProgressFill);prayerProgressBar.append(prayerProgressText,track);
+         prayerVoiceStatus.insertAdjacentElement('afterend',prayerProgressBar);
+       }
      }
      return prayerProgressBar;
    }
    function updatePrayerProgress(percent,label){
      if(!ensurePrayerProgress())return;
      prayerProgressBar.style.display='block';
-     if(prayerProgressText&&label)prayerProgressText.textContent=label;
+     if(prayerProgressText&&label)prayerProgressText.textContent=label+(percent===null||percent===undefined?'':' — '+Math.round(Math.max(0,Math.min(100,percent)))+'%');
      const value=percent===null||percent===undefined?0:Math.max(0,Math.min(100,percent));
      prayerProgressFill.style.animation='none';
      prayerProgressFill.style.transform='none';
@@ -118,7 +123,7 @@
    }
    function finishPrayerProgress(label){
      updatePrayerProgress(100,label||'اكتمل حفظ التسجيلات داخل الموقع.');
-     setTimeout(()=>{if(prayerProgressBar)prayerProgressBar.style.display='none';},5000);
+     if(prayerProgressBar)prayerProgressBar.style.display='block';
    }
    window.onPrayerAudioDownloadProgress=function(index,total,percent,received,bytesTotal){
      const overall=percent===null||percent===undefined?null:Math.round(((index-1)+(percent/100))/total*100);
