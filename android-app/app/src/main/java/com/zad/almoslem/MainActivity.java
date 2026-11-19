@@ -65,7 +65,7 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
-        webView.loadUrl("file:///android_asset/site/index.html?appbuild=20261119adhan-native4&native=1");
+        webView.loadUrl("file:///android_asset/site/index.html?appbuild=20261119adhan-native5&native=1");
         requestNotificationPermission();
     }
     @Override protected void onResume() {
@@ -201,7 +201,12 @@ public class MainActivity extends Activity {
                 }
             } catch (Exception ignored) {}
         }
-        @JavascriptInterface public void playAdhanTest(String voice,int volume) { AdhanPlaybackService.play(MainActivity.this, "test", voice, volume); }
+        @JavascriptInterface public boolean hasAdhanAudio(String voice) { return AdhanPlaybackService.hasAudio(MainActivity.this,voice); }
+        @JavascriptInterface public boolean playAdhanTest(String voice,int volume) {
+            if(!AdhanPlaybackService.hasAudio(MainActivity.this,voice)) return false;
+            AdhanPlaybackService.play(MainActivity.this, "test", voice, volume);
+            return true;
+        }
         @JavascriptInterface public void importAdhanAudio(String voice) {
             pendingAdhanVoice = voice == null ? "" : voice;
             runOnUiThread(() -> { Intent pick=new Intent(Intent.ACTION_OPEN_DOCUMENT); pick.addCategory(Intent.CATEGORY_OPENABLE); pick.setType("audio/*"); try { startActivityForResult(pick, ADHAN_AUDIO_FILE_REQUEST); } catch(Exception e) { pendingAdhanVoice=null; } });
