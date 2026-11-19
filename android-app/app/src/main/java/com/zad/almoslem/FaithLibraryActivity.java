@@ -16,7 +16,8 @@ public class FaithLibraryActivity extends Activity {
   {"من كان يؤمن بالله واليوم الآخر فليقل خيرًا أو ليصمت","متفق عليه"},
   {"من لا يرحم لا يُرحم","متفق عليه"},
   {"المسلم من سلم المسلمون من لسانه ويده","متفق عليه"},
-  {"من سلك طريقًا يلتمس فيه علمًا سهل الله له به طريقًا إلى الجنة","رواه مسلم"}
+  {"من سلك طريقًا يلتمس فيه علمًا سهل الله له به طريقًا إلى الجنة","رواه مسلم"},
+  {"انظروا إلى من أسفل منكم، ولا تنظروا إلى من هو فوقكم؛ فهو أجدر ألا تزدروا نعمة الله عليكم","رواه مسلم (2963)"}
  };
  private final String[][] duas={
   {"رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ","سورة البقرة: 201"},
@@ -38,6 +39,9 @@ public class FaithLibraryActivity extends Activity {
   TextView title=label("السنة النبوية والأدعية والمكتبة الإيمانية",22,Color.WHITE,true);title.setGravity(Gravity.CENTER);
   TextView sub=label("أحاديث صحيحة وأدعية قرآنية ووقفات نافعة",13,Color.rgb(222,239,229),false);sub.setGravity(Gravity.CENTER);
   LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(13),dp(18),dp(13),dp(18));hero.setBackground(bg(green,18));hero.addView(title);hero.addView(sub);root.addView(hero);
+  LinearLayout ayah=card(root,"۞ آية اليوم");
+  ayah.addView(label("﴿أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ﴾",21,green,true));
+  ayah.addView(label("سورة الرعد: 28",12,Color.GRAY,false));
   LinearLayout hadith=card(root,"ﷺ حديث نبوي");
   hadithText=label("",19,green,true);hadithText.setGravity(Gravity.CENTER);hadithText.setPadding(0,dp(12),0,dp(8));hadith.addView(hadithText);
   hadithSource=label("",12,Color.GRAY,false);hadithSource.setGravity(Gravity.CENTER);hadith.addView(hadithSource);
@@ -60,7 +64,7 @@ public class FaithLibraryActivity extends Activity {
   LinearLayout topics=card(root,"من المكتبة الإيمانية");
   topics.addView(label("﴿أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ﴾ — الرعد: 28",18,green,true));
   topics.addView(label("القناعة لا تعني أن تتوقف عن السعي، بل أن تسعى من غير حسد، وتطلب الرزق من غير سخط، وتفرح بما أعطاك الله وأنت تعمل لتحسين حالك بالحلال.",14,Color.rgb(50,65,55),false));
-  topics.addView(label("المحافظة على الصلاة: اجعل الصلاة أول ما تهتم به في يومك.\n\nبر الوالدين وصلة الرحم: من أعظم أبواب البر الإحسان إلى الوالدين والسؤال عن الأقارب.\n\nالتوبة والاستغفار: باب التوبة مفتوح، فلا يقنط عبد من رحمة الله.\n\nالرفق بالأبناء: الطفل يحتاج إلى من يسمعه ويحتويه قبل أن يوجهه.",14,Color.rgb(50,65,55),false));
+  topics.addView(label("المحافظة على الصلاة: اجعل الصلاة أول ما تهتم به في يومك، وحافظ عليها في وقتها.\\n\\nبر الوالدين وصلة الرحم: من أعظم أبواب البر الإحسان إلى الوالدين والسؤال عن الأقارب وجبر الخواطر.\\n\\nالتوبة والاستغفار: باب التوبة مفتوح، فلا يقنط عبد من رحمة الله، وليتبع السيئة حسنة تمحها.\\n\\nالرفق بالأبناء: الطفل يحتاج إلى من يسمعه ويحتويه قبل أن يوجهه؛ فالكلمة الطيبة والقدوة الحسنة تبني قلبًا آمنًا.\\n\\nضبط الغضب قبل الكلام: إذا احتد النقاش، توقف لحظة واستعذ بالله ولا تتعجل الرد. اترك لنفسك وقتًا تهدأ فيه، ثم ارجع إلى الحوار بصوت هادئ؛ فالهدف حل المشكلة لا كسب الجولة.\\n\\nشكر النعمة بالفعل: سمّ النعمة واعترف بأنها من الله، واحفظها من الحرام، واستعملها في الخير؛ فشكر الصحة يكون بالطاعة، وشكر المال بالإنفاق الحلال ومساعدة المحتاج.",14,Color.rgb(50,65,55),false));
  }
  private void renderHadith(){hadithText.setText("«"+hadiths[hadithIndex][0]+"»");hadithSource.setText(hadiths[hadithIndex][1]);}
  private void renderDua(){duaText.setText("﴿"+duas[duaIndex][0]+"﴾");duaSource.setText(duas[duaIndex][1]);}
