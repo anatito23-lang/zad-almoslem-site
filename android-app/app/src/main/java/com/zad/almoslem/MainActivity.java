@@ -558,9 +558,9 @@ public class MainActivity extends Activity {
             startService(radio);
         }
         @JavascriptInterface public void previewAdhan(String voice) {
-            previewAdhan(voice, "الظهر");
+            previewPrayerAdhan(voice, "الظهر");
         }
-        @JavascriptInterface public void previewAdhan(String voice, String prayer) {
+        @JavascriptInterface public void previewPrayerAdhan(String voice, String prayer) {
             if (!isAdhanDownloaded(voice)) return;
             String[] prayers = {"الفجر","الظهر","العصر","المغرب","العشاء"};
             boolean validPrayer = false;
