@@ -4,6 +4,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -17,7 +24,7 @@ import com.batoulapps.adhan.PrayerTimes;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements SensorEventListener {
     private final int bg=Color.rgb(10,22,37), panel=Color.rgb(20,38,56), gold=Color.rgb(218,181,111), white=Color.rgb(244,241,232), muted=Color.rgb(164,177,188);
     private LinearLayout root,content;
     private SharedPreferences prefs;
@@ -28,7 +35,12 @@ public class MainActivity extends Activity {
     private final double[][] coords={{31.2001,29.9187},{30.0444,31.2357},{30.5877,31.5020},{30.2285,31.4810},{30.5965,32.2715},{31.0409,31.3785},{30.7865,31.0004},{27.1809,31.1837}};
     private final String[] muadhins={"بدون اختيار","عبد الباسط عبد الصمد","محمود خليل الحصري","مصطفى إسماعيل","محمود علي البنا","محمد صديق المنشاوي","محمد رفعت","النقشبندي","نصر الدين طوبار","أذان الحرم المكي"};
     private TextView status;
-    @Override public void onCreate(Bundle b){super.onCreate(b);prefs=getSharedPreferences("nidaa",MODE_PRIVATE);getWindow().setStatusBarColor(bg);getWindow().setNavigationBarColor(bg);getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);render();}
+    private SensorManager sensorManager;
+    private Sensor rotationSensor;
+    private CompassView compassView;
+    private float azimuth=0;
+    private boolean compassAvailable=false;
+    @Override public void onCreate(Bundle b){super.onCreate(b);prefs=getSharedPreferences("nidaa",MODE_PRIVATE);sensorManager=(SensorManager)getSystemService(SENSOR_SERVICE);rotationSensor=sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);compassAvailable=rotationSensor!=null;getWindow().setStatusBarColor(bg);getWindow().setNavigationBarColor(bg);getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);render();}
     private GradientDrawable shape(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(r);d.setStroke(1,Color.rgb(42,62,80));return d;}
     private TextView txt(String s,int z,int c,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(z);t.setTextColor(c);t.setGravity(Gravity.CENTER);t.setPadding(10,10,10,10);if(bold)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
     private LinearLayout vertical(){LinearLayout l=new LinearLayout(this);l.setOrientation(1);return l;}
@@ -77,8 +89,11 @@ public class MainActivity extends Activity {
         }else if(tab.equals("القبلة")){
             card(txt("اتجاه القبلة",24,gold,true));
             double[] c=coords[cityIndex()];double bearing=qibla(c[0],c[1]);
-            card(txt(String.format(Locale.US,"اتجاه القبلة من %s\n%.1f° من الشمال",cities[cityIndex()],bearing),22,white,true));
-            card(txt("هذه زاوية الاتجاه الجغرافي المحسوبة من موقع المدينة المختارة إلى الكعبة. عرض البوصلة الحية يحتاج معايرة مستشعر الهاتف وسيضاف في التحديث التالي.",14,muted,false));
+            card(txt(String.format(Locale.US,"اتجاه القبلة من %s\\n%.1f° من الشمال",cities[cityIndex()],bearing),20,white,true));
+            compassView=new CompassView();
+            LinearLayout compassBox=vertical();compassBox.setGravity(Gravity.CENTER);compassBox.addView(compassView,new LinearLayout.LayoutParams(280,280));card(compassBox);
+            status=txt(compassAvailable?"حرّك الهاتف بشكل أفقي لمعايرة البوصلة":"هذا الهاتف لا يوفر مستشعر اتجاه مناسبًا",13,muted,false);card(status);
+            card(txt("اتجه بحيث يشير السهم الذهبي إلى أعلى الشاشة؛ عندها يكون الهاتف باتجاه القبلة.",14,white,false));
             TextView change=txt("تغيير المدينة",15,gold,true);change.setOnClickListener(v->chooseCity());card(change);
         }else{
             card(txt("الإعدادات",24,gold,true));
@@ -90,5 +105,33 @@ public class MainActivity extends Activity {
     }
     private void settingRow(String title,String value,Runnable action){LinearLayout r=new LinearLayout(this);r.setGravity(Gravity.CENTER_VERTICAL);TextView t=txt(title+"\n"+value,15,white,true);t.setGravity(Gravity.RIGHT);r.addView(t,new LinearLayout.LayoutParams(0,-2,1));TextView b=txt("تغيير",14,gold,true);b.setOnClickListener(v->action.run());r.addView(b);card(r);}
     private void chooseCity(){new AlertDialog.Builder(this).setTitle("اختر مدينتك").setSingleChoiceItems(cities,cityIndex(),(d,w)->{prefs.edit().putInt("city",w).apply();d.dismiss();render();}).setNegativeButton("إلغاء",null).show();}
+
+    @Override protected void onResume(){super.onResume();if(rotationSensor!=null)sensorManager.registerListener(this,rotationSensor,SensorManager.SENSOR_DELAY_UI);}
+    @Override protected void onPause(){super.onPause();if(sensorManager!=null)sensorManager.unregisterListener(this);}
+    @Override public void onSensorChanged(SensorEvent event){
+        if(event.sensor.getType()!=Sensor.TYPE_ROTATION_VECTOR)return;
+        float[] matrix=new float[9];float[] orientation=new float[3];
+        SensorManager.getRotationMatrixFromVector(matrix,event.values);SensorManager.getOrientation(matrix,orientation);
+        float degrees=(float)Math.toDegrees(orientation[0]);azimuth=(azimuth*0.82f)+(degrees*0.18f);
+        if(compassView!=null){compassView.invalidate();if(status!=null)status.setText("اتجاه الهاتف: "+Math.round((azimuth+360)%360)+"° · حرّك الهاتف ببطء للمعايرة");}
+    }
+    @Override public void onAccuracyChanged(Sensor sensor,int accuracy){if(status!=null&&accuracy==SensorManager.SENSOR_STATUS_UNRELIABLE)status.setText("دقة البوصلة منخفضة؛ أبعد الهاتف عن المعادن وأعد المعايرة.");}
+    private class CompassView extends View{
+        private final Paint paint=new Paint(3);
+        CompassView(){super(MainActivity.this);setLayerType(View.LAYER_TYPE_SOFTWARE,null);}
+        @Override protected void onDraw(Canvas canvas){
+            super.onDraw(canvas);float cx=getWidth()/2f,cy=getHeight()/2f,r=Math.min(cx,cy)-18;
+            paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(4);paint.setColor(gold);canvas.drawCircle(cx,cy,r,paint);
+            paint.setStrokeWidth(2);paint.setColor(muted);
+            for(int i=0;i<36;i++){canvas.save();canvas.rotate(i*10,cx,cy);canvas.drawLine(cx,cy-r+5,cx,cy-r+(i%3==0?22:12),paint);canvas.restore();}
+            paint.setStyle(Paint.Style.FILL);paint.setColor(white);paint.setTextSize(22);paint.setTextAlign(Paint.Align.CENTER);canvas.drawText("ش",cx,cy-r+45,paint);
+            double[] loc=coords[cityIndex()];float relative=(float)qibla(loc[0],loc[1])-azimuth;
+            canvas.save();canvas.rotate(relative,cx,cy);
+            Path arrow=new Path();arrow.moveTo(cx,cy-r+55);arrow.lineTo(cx-17,cy+18);arrow.lineTo(cx,cy+5);arrow.lineTo(cx+17,cy+18);arrow.close();
+            paint.setColor(gold);canvas.drawPath(arrow,paint);paint.setColor(white);canvas.drawCircle(cx,cy,8,paint);canvas.restore();
+            paint.setColor(muted);paint.setTextSize(17);canvas.drawText("اتجاه القبلة",cx,cy+r-5,paint);
+        }
+    }
+
     private double qibla(double lat,double lon){double la=Math.toRadians(lat),lo=Math.toRadians(lon),ka=Math.toRadians(21.4225),ko=Math.toRadians(39.8262);double y=Math.sin(ko-lo);double x=Math.cos(la)*Math.tan(ka)-Math.sin(la)*Math.cos(ko-lo);return (Math.toDegrees(Math.atan2(y,x))+360)%360;}
 }
