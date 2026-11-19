@@ -43,6 +43,9 @@ public class MainActivity extends Activity {
         requestNotificationPermission();
         buildScreen();
         refreshStorageStatus();
+        if (!hasAllSelectedAdhanFiles()) {
+            downloadButton.postDelayed(() -> downloadSelectedVoices(), 1200);
+        }
     }
 
     private int dp(float value) { return (int)(value * getResources().getDisplayMetrics().density + 0.5f); }
@@ -507,6 +510,18 @@ public class MainActivity extends Activity {
         try {
             if(Build.VERSION.SDK_INT>=26) startForegroundService(intent); else startService(intent);
         } catch(Exception e) { status.setText("تعذر بدء التشغيل: "+e.getMessage()); }
+    }
+
+    private boolean hasAllSelectedAdhanFiles() {
+        File dir = new File(getFilesDir(), "adhan");
+        for (int i = 0; i < PRAYERS.length; i++) {
+            String voice = prefs.getString("adhan_voice_" + PRAYERS[i], "doha");
+            String fileVoice = "doha".equals(voice) ? "doha_" + KEYS[i] : voice;
+            File mp3 = new File(dir, fileVoice + ".mp3");
+            File ogg = new File(dir, fileVoice + ".ogg");
+            if (!isAudioFileValid(mp3) && !isAudioFileValid(ogg)) return false;
+        }
+        return true;
     }
 
     private void downloadSelectedVoices() {
