@@ -93,13 +93,12 @@ public class PrayerDashboardActivity extends Activity {
         for(int i=0;i<5;i++){String p=PRAYERS[i];timeViews[i].setText(savedTime(p));times[i]=nextTime(p);if(times[i]>0&&times[i]<soon){soon=times[i];next=i;}}
         for(int i=0;i<5;i++){if(times[i]>0){long diff=Math.max(0,times[i]-now)/1000;remainingViews[i].setText("المتبقي: "+format(diff)+(i==next?"  • الصلاة القادمة":""));}else remainingViews[i].setText("حدّث المواقيت لعرض الوقت المتبقي");}
         int active=-1;
-        Calendar current=Calendar.getInstance();
         for(int i=0;i<5;i++){
             int h=prefs.getInt("native_time_hour_"+PRAYERS[i],-1);
             if(h>=0){Calendar prayer=Calendar.getInstance();prayer.set(Calendar.HOUR_OF_DAY,h);prayer.set(Calendar.MINUTE,prefs.getInt("native_time_minute_"+PRAYERS[i],0));prayer.set(Calendar.SECOND,0);prayer.set(Calendar.MILLISECOND,0);long elapsed=now-prayer.getTimeInMillis();if(elapsed>=0&&elapsed<15*60*1000L)active=i;}
         }
-        if(active>=0)adhanNow.setText("🕌 حان الآن وقت صلاة "+PRAYERS[active]+" — تقبّل الله");
-        else if(next>=0)adhanNow.setText("الصلاة القادمة: "+PRAYERS[next]);
+        if(active>=0){adhanNow.setText("🕌 حان الآن وقت صلاة "+PRAYERS[active]+" — تقبّل الله");prayerHero.setBackgroundResource(R.drawable.azhar_mosque_bg);}
+        else {if(next>=0)adhanNow.setText("الصلاة القادمة: "+PRAYERS[next]);prayerHero.setBackground(bg(green,18));}
         if(next>=0)nextCountdown.setText("متبقي على "+PRAYERS[next]+": "+format(Math.max(0,soon-now)/1000));
         else nextCountdown.setText("حدّث مواقيت الصلاة لبدء العد التنازلي");
     }
@@ -115,7 +114,7 @@ public class PrayerDashboardActivity extends Activity {
             ByteArrayOutputStream out=new ByteArrayOutputStream();try(InputStream in=c.getInputStream()){byte[] b=new byte[4096];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}
             JSONObject data=new JSONObject(out.toString("UTF-8")).getJSONObject("data");JSONObject timings=data.getJSONObject("timings");String[] api={"Fajr","Dhuhr","Asr","Maghrib","Isha"};
             for(int i=0;i<5;i++){String raw=timings.getString(api[i]).split(" ")[0];String[] hm=raw.split(":");int h=Integer.parseInt(hm[0]),m=Integer.parseInt(hm[1]);prefs.edit().putInt("native_time_hour_"+PRAYERS[i],h).putInt("native_time_minute_"+PRAYERS[i],m).apply();Calendar next=Calendar.getInstance();next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,m);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);if(prefs.getBoolean("prayer_enabled_"+PRAYERS[i],true))ReminderReceiver.schedulePrayer(this,PRAYERS[i],next.getTimeInMillis());}
-            runOnUiThread(()->{result.setText("تم تحديث مواقيت "+COUNTRIES[pos]+" — "+city+". مصر تستخدم طريقة هيئة المساحة المصرية (5).");refreshCountdowns();});
+            runOnUiThread(()->{result.setText(pos==0?"تم تحديث المواقيت بطريقة هيئة المساحة المصرية (طريقة الحساب 5).":"تم تحديث مواقيت "+COUNTRIES[pos]+" — "+city+" بطريقة الحساب المعتمدة لهذه الدولة.");refreshCountdowns();});
         }catch(Exception e){runOnUiThread(()->result.setText("تعذر تحديث المواقيت: "+(e.getMessage()==null?"تحقق من اسم المدينة والإنترنت":e.getMessage())));}
         finally{if(c!=null)c.disconnect();runOnUiThread(()->button.setEnabled(true));}}).start();
     }
