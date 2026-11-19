@@ -99,8 +99,7 @@ public class AdhanPlaybackService extends Service {
     private void playAdhan(String voice, String prayer) {
         stopPlayerOnly();
         try {
-            player = new ExoPlayer.Builder(this).build();
-            player.setWakeMode(PowerManager.PARTIAL_WAKE_LOCK);
+            player = new ExoPlayer.Builder(this).setWakeMode(androidx.media3.common.C.WAKE_MODE_LOCAL).build();
             player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
                     .setUsage(androidx.media3.common.C.USAGE_ALARM)
                     .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC)
