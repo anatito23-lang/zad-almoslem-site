@@ -10,6 +10,10 @@ import android.net.Uri;
 import android.os.*;
 import java.io.IOException;
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
+import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 
 public class RadioPlaybackService extends Service {
     public static final String ACTION_PLAY="com.zad.almoslem.PLAY_RADIO";
@@ -17,7 +21,9 @@ public class RadioPlaybackService extends Service {
     private static final String CHANNEL="zad_radio_playback";
     private static final int NOTIFICATION=7410;
     private ExoPlayer player;
-    private boolean fallbackAttempted = false;
+    private final Set<String> attemptedRadioUrls = new HashSet<>();
+    private final Handler playbackHandler = new Handler(Looper.getMainLooper());
+    private Runnable startupTimeout;
 
     @Override public int onStartCommand(Intent intent,int flags,int startId) {
         if(intent!=null && ACTION_STOP.equals(intent.getAction())) { stopRadio(); return START_NOT_STICKY; }
@@ -34,10 +40,12 @@ public class RadioPlaybackService extends Service {
         if(Build.VERSION.SDK_INT>=29) startForeground(NOTIFICATION,n,android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
         else startForeground(NOTIFICATION,n);
         String url=intent==null?null:intent.getStringExtra("url");
-        fallbackAttempted = false;
+        attemptedRadioUrls.clear();
+        if (url != null && (url.equals("https://qurango.net/radio/tarateel") || url.equals("https://stream.radiojar.com/8s5u5tpdtwzuv") || url.equals("https://backup.qurango.net/radio/tarateel"))) attemptedRadioUrls.add(url);
         String kind=intent==null?"radio":intent.getStringExtra("kind");
         boolean allowedRadio="https://qurango.net/radio/tarateel".equals(url) ||
-             "https://stream.radiojar.com/8s5u5tpdtwzuv".equals(url);
+             "https://stream.radiojar.com/8s5u5tpdtwzuv".equals(url) ||
+             "https://backup.qurango.net/radio/tarateel".equals(url);
         boolean allowedQuran=false,allowedLocal=false,allowedAudio=false;
         File localFile=null;
         String localPath=intent==null?null:intent.getStringExtra("local_path");
@@ -83,7 +91,14 @@ public class RadioPlaybackService extends Service {
     private void play(String url,File localFile) {
         releasePlayer();
         try {
-            player = new ExoPlayer.Builder(this).build();
+            DefaultHttpDataSource.Factory httpFactory = new DefaultHttpDataSource.Factory()
+                    .setUserAgent("Mozilla/5.0 (Linux; Android) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36 ZadAlmoslem")
+                    .setAllowCrossProtocolRedirects(true)
+                    .setConnectTimeoutMs(15000)
+                    .setReadTimeoutMs(30000);
+            player = new ExoPlayer.Builder(this)
+                    .setMediaSourceFactory(new DefaultMediaSourceFactory(httpFactory))
+                    .build();
             player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
                     .setUsage(androidx.media3.common.C.USAGE_MEDIA)
                     .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC)
@@ -93,8 +108,10 @@ public class RadioPlaybackService extends Service {
                     if (state == Player.STATE_BUFFERING) {
                         updateRadioNotification("إذاعة القرآن الكريم", "جارٍ الاتصال بالبث...");
                     } else if (state == Player.STATE_READY) {
+                        if (startupTimeout != null) playbackHandler.removeCallbacks(startupTimeout);
                         getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
-                                .putBoolean("radio_ready", true).remove("radio_last_error").apply();
+                                .putBoolean("radio_ready", true).putBoolean("radio_playing", true)
+                                .remove("radio_last_error").apply();
                         updateRadioNotification("إذاعة القرآن الكريم", "البث يعمل الآن");
                     }
                 }
@@ -102,23 +119,43 @@ public class RadioPlaybackService extends Service {
                     String detail = error.getErrorCodeName() + ": " +
                             (error.getMessage() == null ? error.toString() : error.getMessage());
                     getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
-                            .putBoolean("radio_ready", false).putBoolean("radio_playing", false)
-                            .putString("radio_last_error", detail).apply();
+                            .putBoolean("radio_ready", false).putString("radio_last_error", detail).apply();
                     android.util.Log.e("ZadAlmoslem", "Radio stream playback failed: " + url, error);
-                    if (!fallbackAttempted && "https://qurango.net/radio/tarateel".equals(url)) {
-                        fallbackAttempted = true;
-                        updateRadioNotification("إذاعة القرآن الكريم", "المصدر الأول تعذر؛ نجرب بث القاهرة الآن...");
-                        play("https://stream.radiojar.com/8s5u5tpdtwzuv", null);
+                    String fallback = nextRadioFallback();
+                    if (fallback != null) {
+                        updateRadioNotification("إذاعة القرآن الكريم", "تعذر المصدر الحالي؛ نجرب مصدر بث احتياطي...");
+                        play(fallback, null);
                     } else {
+                        getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_playing", false).apply();
                         showRadioFailure(detail);
                         try { if (player != null) player.stop(); } catch (Exception ignored) {}
                     }
                 }
             });
             Uri source = localFile != null ? Uri.fromFile(localFile) : Uri.parse(url);
-            player.setMediaItem(MediaItem.fromUri(source));
+            MediaItem item = localFile != null ? MediaItem.fromUri(source)
+                    : new MediaItem.Builder().setUri(source)
+                    .setMimeType(androidx.media3.common.MimeTypes.AUDIO_MPEG).build();
+            player.setMediaItem(item);
             player.prepare();
             player.play();
+            if ("radio".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""))) {
+                startupTimeout = () -> {
+                    if (player != null && player.getPlaybackState() != Player.STATE_READY) {
+                        String fallback = nextRadioFallback();
+                        if (fallback != null) {
+                            updateRadioNotification("إذاعة القرآن الكريم", "الاتصال تأخر؛ نجرب مصدرًا احتياطيًا...");
+                            play(fallback, null);
+                        } else {
+                            getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
+                                    .putBoolean("radio_ready", false).putBoolean("radio_playing", false)
+                                    .putString("radio_last_error", "انتهت مهلة الاتصال بمصادر البث").apply();
+                            showRadioFailure("انتهت مهلة الاتصال بمصادر البث");
+                        }
+                    }
+                };
+                playbackHandler.postDelayed(startupTimeout, 20000);
+            }
         } catch(Exception e) {
             getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
                     .putBoolean("radio_ready", false)
@@ -126,6 +163,18 @@ public class RadioPlaybackService extends Service {
             stopRadio();
         }
     }
+    private String nextRadioFallback() {
+        String[] candidates = {
+                "https://qurango.net/radio/tarateel",
+                "https://stream.radiojar.com/8s5u5tpdtwzuv",
+                "https://backup.qurango.net/radio/tarateel"
+        };
+        for (String candidate : candidates) {
+            if (attemptedRadioUrls.add(candidate)) return candidate;
+        }
+        return null;
+    }
+
     private void updateRadioNotification(String title, String message) {
         try {
             Intent open = new Intent(this, MainActivity.class);
@@ -170,6 +219,10 @@ public class RadioPlaybackService extends Service {
         }
     }
     private void releasePlayer() {
+        if (startupTimeout != null) {
+            playbackHandler.removeCallbacks(startupTimeout);
+            startupTimeout = null;
+        }
         if (player != null) {
             try { player.stop(); } catch (Exception ignored) {}
             try { player.release(); } catch (Exception ignored) {}
