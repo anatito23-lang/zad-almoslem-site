@@ -115,7 +115,7 @@
        if(playing&&typeof playing.catch==='function')playing.catch(()=>{if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر تشغيل المعاينة من المصدر. تحقق من الاتصال وحاول مرة أخرى.';});
        return;
      }
-     if(typeof window.ZadAndroid.previewAdhan!=='function'){if(prayerVoiceStatus)prayerVoiceStatus.textContent='خدمة تشغيل الأذان غير متاحة داخل التطبيق.';return;}
+     if(typeof window.ZadAndroid.previewPrayerAdhan!=='function'){if(prayerVoiceStatus)prayerVoiceStatus.textContent='نسخة التطبيق الحالية لا تدعم معاينة المؤذن لكل صلاة. يلزم تحديث التطبيق بعد اكتمال الإصلاح.';return;}
      try{
        if(window.ZadAndroid.isAdhanDownloaded(key)){
          window.ZadAndroid.previewPrayerAdhan(key,prayer);
