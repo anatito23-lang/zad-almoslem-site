@@ -291,6 +291,20 @@ public class MainActivity extends Activity {
         private String safeVoice(String voice) {
             return ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"haram".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)||"doha".equals(voice))?voice:"doha";
         }
+        private void reportAdhanProgress(int index, String prayer, long received, long total, String directory) {
+            final int fileIndex = index;
+            final String prayerName = prayer;
+            final long bytesReceived = received;
+            final long bytesTotal = total;
+            final String savedDirectory = directory;
+            runOnUiThread(() -> {
+                if (webView != null) webView.evaluateJavascript(
+                    "window.onAdhanDownloadProgress && window.onAdhanDownloadProgress(" +
+                    fileIndex + "," + org.json.JSONObject.quote(prayerName) + "," +
+                    bytesReceived + "," + bytesTotal + "," +
+                    org.json.JSONObject.quote(savedDirectory) + ")", null);
+            });
+        }
         private void downloadDohaAdhan() {
             new Thread(() -> {
                 String[] prayers = {"fajr","dhuhr","asr","maghrib","isha"};
@@ -318,16 +332,25 @@ public class MainActivity extends Activity {
                             connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
                             int status = connection.getResponseCode();
                             if (status != HttpURLConnection.HTTP_OK) throw new Exception("مصدر تسجيل " + prayers[i] + " أعاد " + status);
+                            long expectedBytes = connection.getContentLength();
                             long total = 0;
+                            reportAdhanProgress(i + 1, prayers[i], 0, expectedBytes, dir.getAbsolutePath());
+                            long lastProgressUpdate = 0;
                             try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
                                 byte[] buffer = new byte[8192]; int count;
                                 while ((count = in.read(buffer)) != -1) {
                                     total += count;
                                     if (total > 15L * 1024L * 1024L) throw new Exception("حجم تسجيل الأذان أكبر من المسموح");
                                     out.write(buffer, 0, count);
+                                    long now = System.currentTimeMillis();
+                                    if (now - lastProgressUpdate >= 250) {
+                                        reportAdhanProgress(i + 1, prayers[i], total, expectedBytes, dir.getAbsolutePath());
+                                        lastProgressUpdate = now;
+                                    }
                                 }
                                 out.getFD().sync();
                             }
+                            reportAdhanProgress(i + 1, prayers[i], total, expectedBytes > 0 ? expectedBytes : total, dir.getAbsolutePath());
                             if (!isValidAdhanFile(temp)) throw new Exception("تسجيل " + prayers[i] + " غير صالح أو غير مكتمل");
                             if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال تسجيل " + prayers[i]);
                             if (!temp.renameTo(target)) throw new Exception("تعذر حفظ تسجيل " + prayers[i]);
@@ -337,7 +360,7 @@ public class MainActivity extends Activity {
                         }
                     }
                     ok = true;
-                    reason = "تم تنزيل تسجيلات الصلوات الخمس وحفظها للعمل دون إنترنت.";
+                    reason = "تم تنزيل تسجيلات الصلوات الخمس وحفظها للعمل دون إنترنت. المسار الداخلي: " + dir.getAbsolutePath();
                 } catch (Exception e) {
                     reason = e.getMessage() == null ? "تعذر تنزيل تسجيلات الأذان" : e.getMessage();
                 } finally {
