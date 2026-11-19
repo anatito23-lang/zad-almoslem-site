@@ -28,7 +28,8 @@ public class RadioActivity extends Activity {
         status=new TextView(this);status.setText("حالة البث تظهر في إشعار التشغيل أعلى الهاتف.");status.setTextColor(Color.rgb(30,70,50));status.setPadding(0,20,0,20);root.addView(status);
         Button back=new Button(this);back.setText("العودة");root.addView(back);back.setOnClickListener(v->finish());
     }
-    private void addStation(LinearLayout root,String buttonText,String url,String label,String station){Button b=new Button(this);b.setText("▶ "+buttonText);root.addView(b,new LinearLayout.LayoutParams(-1,-2));b.setOnClickListener(v->start(url,label,station));}\n    private void refreshStatus(){
+    private void addStation(LinearLayout root,String buttonText,String url,String label,String station){Button b=new Button(this);b.setText("▶ "+buttonText);root.addView(b,new LinearLayout.LayoutParams(-1,-2));b.setOnClickListener(v->start(url,label,station));}
+    private void refreshStatus(){
         if(status==null)return;
         android.content.SharedPreferences p=getSharedPreferences("zad_audio",MODE_PRIVATE);
         boolean ready=p.getBoolean("radio_ready",false),playing=p.getBoolean("radio_playing",false);
