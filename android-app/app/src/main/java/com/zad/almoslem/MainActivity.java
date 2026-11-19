@@ -225,7 +225,7 @@ public class MainActivity extends Activity {
             if(resultCode==RESULT_OK && data!=null && data.getData()!=null && voice!=null) try {
                 Uri uri=data.getData(); try { getContentResolver().takePersistableUriPermission(uri,Intent.FLAG_GRANT_READ_URI_PERMISSION); } catch(Exception ignored) {}
                 File dir=new File(getFilesDir(),"adhan"); if(!dir.exists())dir.mkdirs();
-                String safe=voice.replaceAll("[^\\\\p{L}\\\\p{N}]+","_"); File out=new File(dir,safe+".mp3");
+                String safe=Integer.toHexString(voice.hashCode()); File out=new File(dir,safe+".mp3");
                 try(InputStream in=getContentResolver().openInputStream(uri);FileOutputStream stream=new FileOutputStream(out)){byte[] buffer=new byte[8192];int n;while((n=in.read(buffer))!=-1)stream.write(buffer,0,n);stream.getFD().sync();}
                 ok=out.length()>10000;
             } catch(Exception ignored) {}
