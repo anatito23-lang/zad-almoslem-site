@@ -18,7 +18,7 @@ public class RadioActivity extends Activity {
     private final Runnable statusTicker=new Runnable(){@Override public void run(){refreshStatus();handler.postDelayed(this,1000);}};
     @Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(Color.rgb(8,48,40));getWindow().setNavigationBarColor(Color.rgb(8,48,40));build();handler.post(statusTicker);}
     private void build(){
-        LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(24,30,24,24);root.setBackgroundColor(Color.rgb(244,247,243));AppTabs.add(this,root,"radio");setContentView(root);
+        LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(24,30,24,24);root.setBackgroundColor(Color.rgb(244,247,243));setContentView(AppTabs.wrap(this,root,"radio"));
         TextView title=new TextView(this);title.setText("إذاعة القرآن الكريم");title.setTextSize(25);title.setTextColor(Color.WHITE);title.setTypeface(Typeface.DEFAULT,Typeface.BOLD);title.setGravity(Gravity.CENTER);title.setPadding(12,28,12,28);GradientDrawable bg=new GradientDrawable();bg.setColor(Color.rgb(8,48,40));bg.setCornerRadius(28);title.setBackground(bg);root.addView(title);
         TextView desc=new TextView(this);desc.setText("اختر إذاعة القرآن الكريم من مصر أو السعودية أو فلسطين. يستمر التشغيل في الخلفية.");desc.setTextSize(15);desc.setTextColor(Color.DKGRAY);desc.setPadding(0,22,0,18);root.addView(desc);
         addStation(root,"🇪🇬 إذاعة القرآن الكريم من القاهرة","https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8","إذاعة القرآن الكريم من القاهرة","egypt");
