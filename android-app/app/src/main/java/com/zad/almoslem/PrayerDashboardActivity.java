@@ -51,7 +51,7 @@ public class PrayerDashboardActivity extends Activity {
     private LinearLayout col(){LinearLayout l=new LinearLayout(this);l.setOrientation(LinearLayout.VERTICAL);return l;}
     private LinearLayout.LayoutParams full(){return new LinearLayout.LayoutParams(-1,-2);}
     private void build(){
-        ScrollView scroll=new ScrollView(this);LinearLayout root=col();root.setPadding(dp(14),dp(14),dp(14),dp(28));root.setBackgroundColor(Color.rgb(244,247,243));AppTabs.add(this,root,"prayer");scroll.addView(root);setContentView(scroll);
+        ScrollView scroll=new ScrollView(this);LinearLayout root=col();root.setPadding(dp(14),dp(14),dp(14),dp(28));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);setContentView(AppTabs.wrap(this,scroll,"prayer"));
         LinearLayout hero=col();prayerHero=hero;hero.setGravity(Gravity.CENTER);hero.setPadding(dp(16),dp(24),dp(16),dp(24));hero.setBackground(bg(green,18));
         TextView title=label("مواقيت الصلاة",25,Color.WHITE,true);title.setGravity(Gravity.CENTER);
         adhanNow=label("الصلاة نورٌ وطمأنينة",15,Color.WHITE,true);adhanNow.setGravity(Gravity.CENTER);
