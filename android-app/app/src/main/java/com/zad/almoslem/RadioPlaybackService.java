@@ -21,7 +21,6 @@ public class RadioPlaybackService extends Service {
     private static final String CHANNEL="zad_radio_playback";
     private static final int NOTIFICATION=7410;
     private ExoPlayer player;
-    private final Set<String> attemptedRadioUrls = new HashSet<>();
     private final Handler playbackHandler = new Handler(Looper.getMainLooper());
     private Runnable startupTimeout;
 
@@ -40,8 +39,6 @@ public class RadioPlaybackService extends Service {
         if(Build.VERSION.SDK_INT>=29) startForeground(NOTIFICATION,n,android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
         else startForeground(NOTIFICATION,n);
         String url=intent==null?null:intent.getStringExtra("url");
-        attemptedRadioUrls.clear();
-        if (url != null) attemptedRadioUrls.add(url);
         String kind=intent==null?"radio":intent.getStringExtra("kind");
         boolean allowedRadio="https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8".equals(url) ||
              "https://qurango.net/radio/tarateel".equals(url) ||
@@ -128,20 +125,12 @@ public class RadioPlaybackService extends Service {
                 @Override public void onPlayerError(PlaybackException error) {
                     String detail = error.getErrorCodeName() + ": " +
                             (error.getMessage() == null ? error.toString() : error.getMessage());
-                    boolean radioActive = "radio".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""));
                     getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
-                            .putBoolean("radio_ready", false).putString("radio_last_error", detail).apply();
+                            .putBoolean("radio_ready", false).putBoolean("radio_playing", false)
+                            .putString("radio_last_error", detail).apply();
                     android.util.Log.e("ZadAlmoslem", "Audio playback failed: " + url, error);
-                    String station = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("radio_station", "");
-                    String fallback = null; // لا تبدّل محطة المستخدم إلى إذاعة عامة عند تعذر بث الدولة المختارة.
-                    if (fallback != null) {
-                        updateRadioNotification("إذاعة القرآن الكريم", "تعذر المصدر الحالي؛ نجرب مصدر بث احتياطي...");
-                        play(fallback, null);
-                    } else {
-                        getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_playing", false).apply();
-                        showRadioFailure(detail);
-                        try { if (player != null) player.stop(); } catch (Exception ignored) {}
-                    }
+                    showRadioFailure(detail);
+                    try { if (player != null) player.stop(); } catch (Exception ignored) {}
                 }
             });
             Uri source = localFile != null ? Uri.fromFile(localFile) : Uri.parse(url);
@@ -157,17 +146,10 @@ public class RadioPlaybackService extends Service {
             if ("radio".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""))) {
                 startupTimeout = () -> {
                     if (player != null && player.getPlaybackState() != Player.STATE_READY) {
-                        String station = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("radio_station", "");
-                        String fallback = null; // لا تنتقل إلى محطة أخرى؛ أظهر الخطأ للمستخدم بدل تغيير الإذاعة.
-                        if (fallback != null) {
-                            updateRadioNotification("إذاعة القرآن الكريم", "الاتصال تأخر؛ نجرب مصدرًا احتياطيًا...");
-                            play(fallback, null);
-                        } else {
-                            getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
-                                    .putBoolean("radio_ready", false).putBoolean("radio_playing", false)
-                                    .putString("radio_last_error", "انتهت مهلة الاتصال بمصادر البث").apply();
-                            showRadioFailure("انتهت مهلة الاتصال بمصادر البث");
-                        }
+                        getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
+                                .putBoolean("radio_ready", false).putBoolean("radio_playing", false)
+                                .putString("radio_last_error", "انتهت مهلة الاتصال بالمحطة المختارة").apply();
+                        showRadioFailure("انتهت مهلة الاتصال بالمحطة المختارة");
                     }
                 };
                 playbackHandler.postDelayed(startupTimeout, 20000);
@@ -179,18 +161,6 @@ public class RadioPlaybackService extends Service {
             stopRadio();
         }
     }
-    private String nextRadioFallback() {
-        String[] candidates = {
-                "https://qurango.net/radio/tarateel",
-                "https://stream.radiojar.com/8s5u5tpdtwzuv",
-                "https://qurango.net/radio/mishary_alafasi"
-        };
-        for (String candidate : candidates) {
-            if (attemptedRadioUrls.add(candidate)) return candidate;
-        }
-        return null;
-    }
-
     private void updateRadioNotification(String title, String message) {
         try {
             Intent open = new Intent(this, MainActivity.class);
