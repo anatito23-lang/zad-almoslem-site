@@ -17,12 +17,21 @@ import java.io.FileInputStream;
 public class AdhanPlaybackService extends Service {
     public static final String ACTION_PLAY = "com.zad.almoslem.PLAY_ADHAN";
     public static final String ACTION_STOP = "com.zad.almoslem.STOP_ADHAN";
+    public static final String ACTION_SET_VOLUME = "com.zad.almoslem.SET_ADHAN_VOLUME";
     private static final String CHANNEL_ID = "zad_adhan_playback";
     private static final int NOTIFICATION_ID = 7310;
     private MediaPlayer player;
     private boolean playDuaAfterCompletion;
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && ACTION_SET_VOLUME.equals(intent.getAction())) {
+            int level = Math.max(0, Math.min(100, intent.getIntExtra("volume", 100)));
+            if (player != null) {
+                float value = level / 100f;
+                try { player.setVolume(value, value); } catch (Exception ignored) {}
+            }
+            return START_NOT_STICKY;
+        }
         if (intent != null && ACTION_STOP.equals(intent.getAction())) {
             stopPlayback();
             return START_NOT_STICKY;
