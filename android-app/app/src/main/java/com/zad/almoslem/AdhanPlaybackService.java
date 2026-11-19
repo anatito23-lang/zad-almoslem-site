@@ -91,7 +91,16 @@ public class AdhanPlaybackService extends Service {
                 return;
             }
             player.setDataSource(audioFile.getAbsolutePath());
-            player.setOnPreparedListener(MediaPlayer::start);
+            player.setOnPreparedListener(mp -> {
+                try {
+                    mp.start();
+                    getSharedPreferences("zad_reminders", MODE_PRIVATE).edit()
+                            .putBoolean("adhan_active", true).apply();
+                } catch (Exception startError) {
+                    showPlaybackErrorNotification("تعذر بدء تشغيل ملف الأذان.");
+                    stopPlayback();
+                }
+            });
             player.setOnCompletionListener(mp -> {
                 boolean playDua = playDuaAfterCompletion;
                 playDuaAfterCompletion = false;
@@ -99,13 +108,30 @@ public class AdhanPlaybackService extends Service {
                 if (playDua) ReminderAudioService.play(this, "dua");
             });
             player.setOnErrorListener((mp, what, extra) -> {
+                showPlaybackErrorNotification("ملف الأذان تالف أو تعذر فك ترميزه ("
+                        + what + "/" + extra + "). أعد تنزيل صوت المؤذن من الإعدادات.");
                 stopPlayback();
                 return true;
             });
             player.prepareAsync();
         } catch (Exception e) {
+            showPlaybackErrorNotification("تعذر تجهيز ملف الأذان: "
+                    + (e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage()));
             stopPlayback();
         }
+    }
+
+    private void showPlaybackErrorNotification(String message) {
+        try {
+            NotificationManager nm = getSystemService(NotificationManager.class);
+            Notification.Builder b = Build.VERSION.SDK_INT >= 26
+                    ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this);
+            b.setSmallIcon(android.R.drawable.ic_dialog_alert)
+                    .setContentTitle("تعذر تشغيل الأذان")
+                    .setContentText(message)
+                    .setAutoCancel(true);
+            nm.notify(NOTIFICATION_ID + 2, b.build());
+        } catch (Exception ignored) {}
     }
 
     private void showMissingAudioNotification() {
