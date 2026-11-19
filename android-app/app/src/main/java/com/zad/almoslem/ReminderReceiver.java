@@ -66,6 +66,16 @@ public class ReminderReceiver extends BroadcastReceiver {
         if (intent == null) return;
         String key=intent.getStringExtra("key"),title=intent.getStringExtra("title");
         if(key==null)return;
+        if("silent_restore".equals(key)) {
+            try {
+                if(Build.VERSION.SDK_INT>=23) {
+                    NotificationManager manager=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+                    if(manager!=null && manager.isNotificationPolicyAccessGranted())
+                        manager.setInterruptionFilter(prefs.getInt("adhan_previous_filter",NotificationManager.INTERRUPTION_FILTER_ALL));
+                }
+                prefs.edit().putLong("adhan_silent_until",0L).apply();
+            } catch(Exception ignored) {}
+        }
         boolean prayer=key.startsWith("prayer_");
         boolean prePrayer=key.startsWith("pre_prayer_");
         boolean iqama=key.startsWith("iqama_prayer_");
@@ -82,6 +92,20 @@ public class ReminderReceiver extends BroadcastReceiver {
                 org.json.JSONObject item=items==null?null:items.optJSONObject(itemKey);
                 if(settings.optBoolean("enabled",false) && item!=null && item.optBoolean("enabled",true) && "full".equals(item.optString("style","full"))) {
                     AdhanPlaybackService.play(context,prayerName,item.optString("voice","عبد الباسط عبد الصمد"),item.optInt("volume",80));
+                }
+            } catch(Exception ignored) {}
+            try {
+                org.json.JSONObject settings=new org.json.JSONObject(prefs.getString("adhan_settings","{}"));
+                if(settings.optBoolean("silentEnabled",false) && Build.VERSION.SDK_INT>=23) {
+                    NotificationManager manager=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+                    if(manager!=null && manager.isNotificationPolicyAccessGranted()) {
+                        long until=System.currentTimeMillis()+Math.max(1,Math.min(180,settings.optInt("silent",15)))*60000L;
+                        if(prefs.getLong("adhan_silent_until",0L)<=System.currentTimeMillis())
+                            prefs.edit().putInt("adhan_previous_filter",manager.getCurrentInterruptionFilter()).apply();
+                        prefs.edit().putLong("adhan_silent_until",until).apply();
+                        manager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
+                        schedule(context,"silent_restore",until,"انتهت مدة الوضع الصامت",false);
+                    }
                 }
             } catch(Exception ignored) {}
         }
