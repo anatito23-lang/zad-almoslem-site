@@ -373,6 +373,19 @@ footer{background:#071522;color:#c9d6e2}
         <button class="btn light" id="downloadAdhan" type="button">تنزيل الصوت للعمل دون إنترنت</button>
       </div>
       <audio id="adhanPreview" controls preload="none" style="display:block;width:100%;margin-top:10px;border-radius:12px"></audio>
+      <div class="card" style="margin-top:12px" id="perPrayerAdhanCard">
+        <h3>اختيار مؤذن مستقل لكل صلاة</h3>
+        <p class="small">اختر الصوت الذي تفضله لكل صلاة. الاختيارات تُحفظ على الجهاز، ويمكن تنزيل التسجيلات المختارة للعمل دون إنترنت.</p>
+        <div style="display:grid;gap:10px">
+          <label style="display:grid;gap:5px">الفجر<select class="prayer-adhan-voice" data-prayer="الفجر" id="adhanVoice_fajr" style="width:100%"><option value="doha">الدوحة</option><option value="basit">عبد الباسط عبد الصمد</option><option value="mustafa">مصطفى إسماعيل</option><option value="husary">محمود خليل الحصري</option><option value="banna">محمود علي البنا</option><option value="naqshbandi">محمد صديق المنشاوي؟</option><option value="haram">علي ملا</option><option value="tobar">نصر الدين طوبار</option></select></label>
+          <label style="display:grid;gap:5px">الظهر<select class="prayer-adhan-voice" data-prayer="الظهر" id="adhanVoice_dhuhr" style="width:100%"><option value="doha">الدوحة</option><option value="basit">عبد الباسط عبد الصمد</option><option value="mustafa">مصطفى إسماعيل</option><option value="husary">محمود خليل الحصري</option><option value="banna">محمود علي البنا</option><option value="naqshbandi">محمد صديق المنشاوي؟</option><option value="haram">علي ملا</option><option value="tobar">نصر الدين طوبار</option></select></label>
+          <label style="display:grid;gap:5px">العصر<select class="prayer-adhan-voice" data-prayer="العصر" id="adhanVoice_asr" style="width:100%"><option value="doha">الدوحة</option><option value="basit">عبد الباسط عبد الصمد</option><option value="mustafa">مصطفى إسماعيل</option><option value="husary">محمود خليل الحصري</option><option value="banna">محمود علي البنا</option><option value="naqshbandi">محمد صديق المنشاوي؟</option><option value="haram">علي ملا</option><option value="tobar">نصر الدين طوبار</option></select></label>
+          <label style="display:grid;gap:5px">المغرب<select class="prayer-adhan-voice" data-prayer="المغرب" id="adhanVoice_maghrib" style="width:100%"><option value="doha">الدوحة</option><option value="basit">عبد الباسط عبد الصمد</option><option value="mustafa">مصطفى إسماعيل</option><option value="husary">محمود خليل الحصري</option><option value="banna">محمود علي البنا</option><option value="naqshbandi">محمد صديق المنشاوي؟</option><option value="haram">علي ملا</option><option value="tobar">نصر الدين طوبار</option></select></label>
+          <label style="display:grid;gap:5px">العشاء<select class="prayer-adhan-voice" data-prayer="العشاء" id="adhanVoice_isha" style="width:100%"><option value="doha">الدوحة</option><option value="basit">عبد الباسط عبد الصمد</option><option value="mustafa">مصطفى إسماعيل</option><option value="husary">محمود خليل الحصري</option><option value="banna">محمود علي البنا</option><option value="naqshbandi">محمد صديق المنشاوي؟</option><option value="haram">علي ملا</option><option value="tobar">نصر الدين طوبار</option></select></label>
+        </div>
+        <button class="btn light" id="downloadPrayerAdhans" type="button" style="margin-top:12px;width:100%">تنزيل أصوات الصلوات المختارة</button>
+        <p id="prayerAdhanDownloadStatus" class="small" role="status">اختر الأصوات ثم اضغط تنزيل لحفظها على الجهاز.</p>
+      </div>
       <div class="card" style="margin-top:12px">
         <label for="adhanVolume"><strong>مستوى صوت الأذان</strong> <span id="adhanVolumeValue">100%</span></label>
         <input id="adhanVolume" type="range" min="0" max="100" step="1" value="100" style="width:100%;margin:12px 0" aria-label="مستوى صوت الأذان من صفر إلى مئة">
