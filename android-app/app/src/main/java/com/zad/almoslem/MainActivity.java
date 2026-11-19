@@ -181,6 +181,16 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void schedulePrayer(String name,long timestamp) {
             ReminderReceiver.schedulePrayer(MainActivity.this,name,timestamp);
         }
+        @JavascriptInterface public boolean hasDndAccess() {
+            if (Build.VERSION.SDK_INT < 23) return true;
+            android.app.NotificationManager nm=(android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+            return nm!=null && nm.isNotificationPolicyAccessGranted();
+        }
+        @JavascriptInterface public void requestDndAccess() {
+            if (Build.VERSION.SDK_INT >= 23 && !hasDndAccess()) {
+                try { Intent i=new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS); i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); startActivity(i); } catch(Exception ignored) {}
+            }
+        }
         @JavascriptInterface public void saveAdhanSettings(String json) {
             try { getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_settings", json).apply(); } catch (Exception ignored) {}
         }
