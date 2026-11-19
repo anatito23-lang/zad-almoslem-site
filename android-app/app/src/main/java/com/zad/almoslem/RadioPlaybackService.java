@@ -31,7 +31,7 @@ public class RadioPlaybackService extends Service {
         String url=intent==null?null:intent.getStringExtra("url");
         String kind=intent==null?"radio":intent.getStringExtra("kind");
         boolean allowedRadio="https://qurango.net/radio/tarateel".equals(url) ||
-             "https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8".equals(url);
+             "https://stream.radiojar.com/8s5u5tpdtwzuv".equals(url);
         boolean allowedQuran=false,allowedLocal=false,allowedAudio=false;
         File localFile=null;
         String localPath=intent==null?null:intent.getStringExtra("local_path");
