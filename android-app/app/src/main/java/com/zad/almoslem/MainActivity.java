@@ -83,7 +83,6 @@ public class MainActivity extends Activity {
         hero.setBackground(shape(Color.rgb(8,48,40),20)); hero.setPadding(dp(18),dp(22),dp(18),dp(22));
         hero.addView(heading); hero.addView(sub);
         root.addView(hero, matchWrap());
-        AppTabs.add(this,root,"home");
         Button libraryButton = new Button(this); libraryButton.setText("📚  مكتبة خطب الجمعة");
         libraryButton.setOnClickListener(v -> startActivity(new Intent(this, KhutbahLibraryActivity.class)));
         root.addView(libraryButton, matchWrap());
@@ -167,7 +166,7 @@ public class MainActivity extends Activity {
         TextView audioDiagnostics = text("اضغط هنا بعد تجربة الأذان لمعرفة حالة الملف وسبب أي تعذر في التشغيل.",12,Color.rgb(70,85,75),false);
         root.addView(audioDiagnostics, matchWrap());
         audioCheck.setOnClickListener(v -> audioDiagnostics.setText(buildAudioDiagnostics()));
-        setContentView(scroll);
+        setContentView(AppTabs.wrap(this,scroll,"home"));
     }
 
     private void addStandaloneTools(LinearLayout root) {
