@@ -45,7 +45,7 @@
 
    // Adhan voice and per-prayer controls.
    const voice=$('adhanVoice'), preview=$('adhanPreview'), previewBtn=$('previewAdhan');
-   const adhanSources={basit:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Abdulbasit_Abdusamad_1_-_Egypt_(%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%A8%D8%A7%D8%B3%D8%B7_%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%B5%D9%85%D8%AF_-_%D9%85%D8%B5%D8%B1).mp3',mustafa:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mustafa_Ismail_-_Egypt_(%D9%85%D8%B5%D8%B7%D9%81%D9%89_%D8%A5%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84_-_%D9%85%D8%B5%D8%B1).mp3',husary:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mahmoud_Khalil_Al_Hussary_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%AE%D9%84%D9%8A%D9%84_%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%8A_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',banna:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mahmoud_Ali_Al_Banna_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%B9%D9%84%D9%8A_%D8%A7%D9%84%D8%A8%D9%86%D8%A7_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',naqshbandi:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Sheikh_Al_Naqshbandi_(%D8%A7%D9%84%D8%B4%D9%8A%D8%AE_%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%89).mp3',haram:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(%D8%B9%D9%84%D9%8A_%D8%A8%D9%86_%D8%A3%D8%AD%D9%85%D8%AF_%D9%85%D9%84%D8%A7_-_%D8%A7%D9%84%D8%AD%D8%B1%D9%85_%D8%A7%D9%84%D9%85%D9%83%D9%8A).mp3',tobar:'https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Fajr_Adhan_by_Nasreddine_Toubar_(%D8%A7%D8%B0%D8%A7%D9%86_%D8%A7%D9%84%D9%81%D8%AC%D8%B1_%D8%A8%D8%B5%D9%88%D8%AA_%D9%86%D8%B5%D8%B1_%D8%A7%D9%84%D8%AF%D9%8A%D9%86_%D8%B7%D9%88%D8%A8%D8%A7%D8%B1).mp3'};
+   const adhanSources={basit:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Abdulbasit_Abdusamad_1_-_Egypt_(%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%A8%D8%A7%D8%B3%D8%B7_%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%B5%D9%85%D8%AF_-_%D9%85%D8%B5%D8%B1).mp3',mustafa:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mustafa_Ismail_-_Egypt_(%D9%85%D8%B5%D8%B7%D9%81%D9%89_%D8%A5%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84_-_%D9%85%D8%B5%D8%B1).mp3',husary:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mahmoud_Khalil_Al_Hussary_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%AE%D9%84%D9%8A%D9%84_%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%8A_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',banna:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mahmoud_Ali_Al_Banna_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%B9%D9%84%D9%8A_%D8%A7%D9%84%D8%A8%D9%86%D8%A7_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',naqshbandi:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Sheikh_Al_Naqshbandi_(%D8%A7%D9%84%D8%B4%D9%8A%D8%AE_%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%89).mp3',haram:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(%D8%B9%D9%84%D9%8A_%D8%A8%D9%86_%D8%A3%D8%AD%D9%85%D8%AF_%D9%85%D9%84%D8%A7_-_%D8%A7%D9%84%D8%AD%D8%B1%D9%85_%D8%A7%D9%84%D9%85%D9%83%D9%8A).mp3',tobar:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Fajr_Adhan_by_Nasreddine_Toubar_(%D8%A7%D8%B0%D8%A7%D9%86_%D8%A7%D9%84%D9%81%D8%AC%D8%B1_%D8%A8%D8%B5%D9%88%D8%AA_%D9%86%D8%B5%D8%B1_%D8%A7%D9%84%D8%AF%D9%8A%D9%86_%D8%B7%D9%88%D8%A8%D8%A7%D8%B1).mp3'};
    const storedVoice=localStorage.getItem('zad_adhan_voice');
    const supportedVoices=['basit','husary','mustafa','banna','naqshbandi','haram','tobar'];
    const savedVoice=supportedVoices.includes(storedVoice)?storedVoice:'basit';
@@ -132,13 +132,30 @@
      if(downloadBtn)downloadBtn.disabled=false;
      updateAdhanDownloadState();
    };
-   if(downloadBtn)downloadBtn.addEventListener('click',()=>{
-     if(!window.ZadAndroid){$('adhanSettingsStatus').textContent='تنزيل صوت الأذان للعمل دون إنترنت متاح داخل تطبيق أندرويد فقط.';return;}
-     if(!adhanSources[voice.value]){$('adhanSettingsStatus').textContent='هذا التسجيل غير متاح للتنزيل حاليًا.';return;}
+   if(downloadBtn)downloadBtn.addEventListener('click',async()=>{
+     const selected=voice?voice.value:'basit';
+     if(!adhanSources[selected]){$('adhanSettingsStatus').textContent='هذا التسجيل غير متاح للتنزيل حاليًا.';return;}
      downloadBtn.disabled=true;
      adhanStatus.textContent='جارٍ تحميل صوت الأذان، من فضلك انتظر...';
      showAdhanProgress();
-     try{window.ZadAndroid.downloadAdhan(voice.value);}catch(error){hideAdhanProgress();downloadBtn.disabled=false;adhanStatus.textContent='تعذر بدء التحميل. حاول مرة أخرى.';}
+     if(window.ZadAndroid&&typeof window.ZadAndroid.downloadAdhan==='function'){
+       try{window.ZadAndroid.downloadAdhan(selected);return;}
+       catch(error){hideAdhanProgress();downloadBtn.disabled=false;adhanStatus.textContent='تعذر بدء التحميل داخل التطبيق. حاول مرة أخرى.';return;}
+     }
+     const filename=(adhanVoiceNames[selected]||'adhan').replace(/[^\\p{L}\\p{N}_-]+/gu,'_')+'.mp3';
+     const urls=[adhanSources[selected],adhanSources[selected].replace('https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/','https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/')];
+     try{
+       let response=null;
+       for(const url of urls){try{const candidate=await fetch(url,{mode:'cors',cache:'no-store'});if(candidate.ok){response=candidate;break;}}catch(e){}}
+       if(!response)throw new Error('download failed');
+       const blob=await response.blob();
+       if(!blob.size)throw new Error('empty audio');
+       const objectUrl=URL.createObjectURL(blob);
+       const link=document.createElement('a');link.href=objectUrl;link.download=filename;document.body.appendChild(link);link.click();link.remove();
+       setTimeout(()=>URL.revokeObjectURL(objectUrl),30000);
+       adhanStatus.textContent='تم تنزيل ملف الأذان إلى مجلد التنزيلات. لتشغيله دون إنترنت من الموقع، افتح الملف من جهازك.';
+     }catch(error){adhanStatus.textContent='تعذر تنزيل الصوت من المصدر حاليًا. تحقق من الاتصال وحاول مرة أخرى.';}
+     finally{hideAdhanProgress();downloadBtn.disabled=false;}
    });
    if(previewBtn)previewBtn.addEventListener('click',()=>{
      const selected=voice?voice.value:'basit';
@@ -147,15 +164,24 @@
        catch(e){}
      }
      if(!adhanSources[selected]){$('adhanSettingsStatus').textContent='معاينة هذا التسجيل غير متاحة حاليًا.';return;}
+     if(!preview){$('adhanSettingsStatus').textContent='مشغل الصوت غير موجود في الصفحة. حدّث الصفحة وحاول مرة أخرى.';return;}
      try{
-       preview.pause();
+       preview.pause();preview.removeAttribute('src');preview.load();
+       preview.dataset.fallbackAttempted='0';
        preview.src=adhanSources[selected];
-       preview.load();
        preview.volume=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0))/100:savedVolume/100;
        $('adhanSettingsStatus').textContent='جارٍ تشغيل معاينة الأذان...';
        const playing=preview.play();
-       if(playing&&typeof playing.catch==='function')playing.catch(()=>{$('adhanSettingsStatus').textContent='تعذر تشغيل المعاينة. تحقق من اتصال الإنترنت ثم حاول مرة أخرى.';});
+       if(playing&&typeof playing.catch==='function')playing.catch(()=>{$('adhanSettingsStatus').textContent='تعذر تشغيل المعاينة. تحقق من الاتصال ثم حاول مرة أخرى.';});
      }catch(error){$('adhanSettingsStatus').textContent='تعذر تشغيل المعاينة. حاول مرة أخرى.';}
+   });
+   if(preview)preview.addEventListener('error',()=>{
+     const selected=voice?voice.value:'basit';
+     if(!adhanSources[selected]||preview.dataset.fallbackAttempted==='1'){$('adhanSettingsStatus').textContent='تعذر تحميل ملف الأذان من المصدرين. تحقق من الاتصال وحاول لاحقًا.';return;}
+     preview.dataset.fallbackAttempted='1';
+     preview.src=adhanSources[selected].replace('https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/','https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/');
+     preview.load();
+     preview.play().catch(()=>{$('adhanSettingsStatus').textContent='تعذر تشغيل الأذان. تحقق من الاتصال وحاول لاحقًا.';});
    });
    if(voice)voice.addEventListener('change',()=>{preview.pause();preview.currentTime=0;updateAdhanDownloadState();refreshSavedAdhanPath();});
    updateAdhanDownloadState();
