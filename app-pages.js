@@ -194,7 +194,7 @@ document.addEventListener('click',function(event){
   if(!document.getElementById('zadAdhanProgressStyle')){
    const style=document.createElement('style');
    style.id='zadAdhanProgressStyle';
-   style.textContent='@keyframes zadAdhanLoading{0%{transform:translateX(115%)}100%{transform:translateX(-115%)}}#zadAdhanProgress{height:9px;width:100%;margin:10px 0 4px;border-radius:20px;overflow:hidden;background:#e6eee8;direction:ltr}#zadAdhanProgress span{display:block;width:38%;height:100%;border-radius:20px;background:#0c8067;animation:zadAdhanLoading 1.15s ease-in-out infinite}';
+   style.textContent='@keyframes zadAdhanLoading{0%{transform:translateX(115%)}100%{transform:translateX(-115%)}}#zadAdhanProgress{height:5px;width:100%;margin:3px 0 6px;border-radius:8px;overflow:hidden;background:#e6eee8;direction:ltr;flex:0 0 100%;order:-1}#zadAdhanProgress span{display:block;width:38%;height:100%;border-radius:20px;background:#0c8067;animation:zadAdhanLoading 1.15s ease-in-out infinite}';
    document.head.appendChild(style);
   }
   bar=document.createElement('div');
