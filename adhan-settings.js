@@ -44,8 +44,10 @@ $('adhanPrayerSettings').addEventListener('click',e=>{
  }
  if(e.target.closest('.adhan-test')){
   const volume=Number(row.querySelector('.adhan-volume').value);
-  if(window.ZadAndroid&&window.ZadAndroid.playAdhanTest){window.ZadAndroid.playAdhanTest(voice,volume);$('adhanSettingsStatus').textContent='جاري تجربة الصوت المختار. إذا لم تستورد ملفه فلن يصدر صوت.';}
-  else $('adhanSettingsStatus').textContent='اختبار الصوت متاح داخل تطبيق أندرويد بعد استيراد الملف.';
+  if(window.ZadAndroid&&window.ZadAndroid.playAdhanTest){
+   const ok=window.ZadAndroid.playAdhanTest(voice,volume);
+   $('adhanSettingsStatus').textContent=ok?'بدأ تشغيل تجربة أذان '+voice+'.':'تسجيل هذا المؤذن غير موجود على الجهاز بعد. أضف ملفه أولًا.';
+  } else $('adhanSettingsStatus').textContent='اختبار الصوت متاح داخل تطبيق أندرويد بعد إضافة التسجيل.';
  }
 });
 window.onAdhanAudioImported=function(voice,ok){
@@ -58,7 +60,7 @@ $('saveAdhanSettings').addEventListener('click',()=>{
   if(window.ZadAndroid.canScheduleExactAlarms&&!window.ZadAndroid.canScheduleExactAlarms()&&window.ZadAndroid.requestExactAlarmPermission){
    $('adhanSettingsStatus').textContent='تم حفظ الإعدادات. اسمح للتطبيق بالمنبهات الدقيقة حتى تعمل مواقيت الصلاة في موعدها.';
    window.ZadAndroid.requestExactAlarmPermission();
-  } else $('adhanSettingsStatus').textContent='تم حفظ الإعدادات على الجهاز. استورد ملفًا صوتيًا لكل مؤذن تريد تشغيله.';
+  } else $('adhanSettingsStatus').textContent='تم حفظ الإعدادات. تأكد من وجود تسجيل لكل مؤذن اخترته باستخدام زر تجربة الصوت.';
  } else $('adhanSettingsStatus').textContent='تم حفظ الإعدادات على هذا المتصفح فقط؛ تشغيل الأذان بالخلفية يحتاج تطبيق أندرويد.';
 });
 $('adhanMasterEnabled').addEventListener('change',()=>{state.enabled=$('adhanMasterEnabled').checked;});
