@@ -56,7 +56,7 @@ public class AdhanPlaybackService extends Service {
             startForeground(NOTIFICATION_ID, notification);
         }
         String voice = intent == null ? "basit" : intent.getStringExtra("voice");
-        playAdhan(voice);
+        playAdhan(voice, prayer);
         return START_NOT_STICKY;
     }
 
@@ -70,7 +70,7 @@ public class AdhanPlaybackService extends Service {
         }
     }
 
-    private void playAdhan(String voice) {
+    private void playAdhan(String voice, String prayer) {
         stopPlayerOnly();
         try {
             player = new MediaPlayer();
