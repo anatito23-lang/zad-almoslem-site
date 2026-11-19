@@ -15,7 +15,7 @@ public class DailyReminderSettingsActivity extends Activity {
  private SharedPreferences prefs;
  private final String[] keys={"morning","evening","qiyam"};
  private final String[] names={"أذكار الصباح","أذكار المساء","قيام الليل"};
- private final int[] defaultHours={7,17,22};
+ private final int[] defaultHours={7,17,4};
  private TextView[] timeLabels=new TextView[3];
  @Override public void onCreate(Bundle state){super.onCreate(state);prefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);build();}
  private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
