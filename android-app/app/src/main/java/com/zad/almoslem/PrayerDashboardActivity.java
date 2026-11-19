@@ -26,7 +26,7 @@ public class PrayerDashboardActivity extends Activity {
     private static final String[] DEFAULT_CITIES={"Cairo","Riyadh","Dubai","Kuwait City","Doha","Amman","Beirut","Jerusalem","Rabat","Algiers","Tunis","Istanbul","Islamabad","New Delhi","Jakarta","Kuala Lumpur","London","New York","Toronto","Berlin","Paris","Manama","Muscat","Baghdad","Damascus","Sanaa","Tripoli","Khartoum","Dhaka","Singapore","Tokyo","Sydney","Johannesburg","Lagos","Moscow","Madrid","Rome","Amsterdam","Stockholm","Oslo"};
     private android.content.SharedPreferences prefs;
     private Spinner countrySpinner;
-    private EditText cityInput;
+    private EditText cityInput;\n    private String selectedCountryCode;
     private TextView result,nextCountdown,trackerCount,adhanNow;
     private LinearLayout prayerHero;
     private final TextView[] timeViews=new TextView[5];
@@ -55,9 +55,9 @@ public class PrayerDashboardActivity extends Activity {
 
         TextView locationTitle=label("الدولة والمدينة",18,green,true);locationTitle.setPadding(0,dp(16),0,dp(6));root.addView(locationTitle);
         countrySpinner=new Spinner(this);countrySpinner.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,COUNTRIES));
-        String savedCountry=prefs.getString("native_country","Egypt");int countryIndex=Arrays.asList(COUNTRY_CODES).indexOf(savedCountry);if(countryIndex<0)countryIndex=0;countrySpinner.setSelection(countryIndex);root.addView(countrySpinner,full());
+        String savedCountry=prefs.getString("native_country","Egypt");int countryIndex=Arrays.asList(COUNTRY_CODES).indexOf(savedCountry);if(countryIndex<0)countryIndex=0;countrySpinner.setSelection(countryIndex);selectedCountryCode=COUNTRY_CODES[countryIndex];root.addView(countrySpinner,full());
         cityInput=new EditText(this);cityInput.setSingleLine(true);cityInput.setHint("اكتب اسم المدينة بالإنجليزية مثل Cairo أو Zagazig");cityInput.setText(prefs.getString("native_prayer_city",DEFAULT_CITIES[countryIndex]));cityInput.setTextDirection(View.TEXT_DIRECTION_LTR);root.addView(cityInput,full());
-        countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){}public void onItemSelected(AdapterView<?> p,View v,int pos,long id){if(cityInput!=null&&(cityInput.getText().toString().trim().isEmpty()||Arrays.asList(DEFAULT_CITIES).contains(cityInput.getText().toString().trim())))cityInput.setText(DEFAULT_CITIES[pos]);}});
+        countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){}public void onItemSelected(AdapterView<?> p,View v,int pos,long id){if(!COUNTRY_CODES[pos].equals(selectedCountryCode)){cityInput.setText(DEFAULT_CITIES[pos]);selectedCountryCode=COUNTRY_CODES[pos];}}});
         Button update=new Button(this);update.setText("تحديث مواقيت الصلاة");root.addView(update,full());
         result=label("اختر الدولة والمدينة ثم حدّث المواقيت.",12,Color.DKGRAY,false);root.addView(result,full());update.setOnClickListener(v->fetchTimes(update));
 
