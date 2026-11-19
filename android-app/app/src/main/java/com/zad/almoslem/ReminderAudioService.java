@@ -23,11 +23,14 @@ public class ReminderAudioService extends Service {
     private static final int NOTIFICATION_ID = 7520;
     private MediaPlayer player;
     private TextToSpeech tts;
+    private int silentDuration = 0;
 
-    public static void play(Context context, String kind) {
+    public static void play(Context context, String kind) { play(context, kind, 0); }
+    public static void play(Context context, String kind, int silentMinutes) {
         Intent i = new Intent(context, ReminderAudioService.class);
         i.setAction(ACTION_PLAY);
         i.putExtra("kind", kind);
+        i.putExtra("silent_minutes", silentMinutes);
         if (Build.VERSION.SDK_INT >= 26) context.startForegroundService(i);
         else context.startService(i);
     }
@@ -44,6 +47,7 @@ public class ReminderAudioService extends Service {
             return START_NOT_STICKY;
         }
         String kind = intent == null ? "qiyam" : intent.getStringExtra("kind");
+        silentDuration = intent == null ? 0 : intent.getIntExtra("silent_minutes", 0);
         if (!"morning".equals(kind) && !"evening".equals(kind) && !"dua".equals(kind)) kind = "qiyam";
         createChannel();
         String title = "morning".equals(kind) ? "أذكار الصباح" :
@@ -92,7 +96,7 @@ public class ReminderAudioService extends Service {
             player.setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
-            player.setOnCompletionListener(mp -> finishPlayback());
+            player.setOnCompletionListener(mp -> { if("dua".equals(kind) && silentDuration>0) ReminderReceiver.startSilentMode(this,silentDuration); finishPlayback(); });
             player.setOnErrorListener((mp, what, extra) -> { finishPlayback(); return true; });
             player.setOnPreparedListener(MediaPlayer::start);
             player.setDataSource(file.getAbsolutePath());
