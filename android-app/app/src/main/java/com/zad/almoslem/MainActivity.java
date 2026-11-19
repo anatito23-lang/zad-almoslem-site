@@ -161,7 +161,7 @@ public class MainActivity extends Activity {
         Button cairoRadioButton=new Button(this);cairoRadioButton.setText("إذاعة القرآن الكريم من القاهرة");
         radioCard.addView(cairoRadioButton,matchWrap());
         cairoRadioButton.setOnClickListener(v->{
-            String stream="https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8";
+            String stream="https://stream.radiojar.com/8s5u5tpdtwzuv";
             Intent intent=new Intent(this,RadioPlaybackService.class);intent.setAction(RadioPlaybackService.ACTION_PLAY);
             intent.putExtra("url",stream);intent.putExtra("kind","radio");intent.putExtra("label","إذاعة القرآن الكريم من القاهرة");
             try{if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);}
