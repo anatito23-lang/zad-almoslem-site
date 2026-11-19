@@ -2,7 +2,7 @@
 'use strict';
 const $=id=>document.getElementById(id);
 const prayers=[['الفجر','fajr'],['الظهر','dhuhr'],['العصر','asr'],['المغرب','maghrib'],['العشاء','isha']];
-const voices=['عبد الباسط عبد الصمد','محمود خليل الحصري','مصطفى إسماعيل','محمود البنا','محمد صديق المنشاوي','محمد رفعت','النقشبندي','نصر الدين طوبار','أذان الحرم المكي'];
+const voices=['عبد الباسط عبد الصمد','محمود خليل الحصري','مصطفى إسماعيل','محمود البنا','محمد صديق المنشاوي','محمد رفعت','النقشبندي','نصر الدين طوبار','أذان الحرم المكي','تسجيل أذان الفجر المرفق'];
 const defaults={enabled:true,lead:15,iqama:20,silent:15,silentEnabled:false,dua:true,items:{}};
 prayers.forEach(([name,key])=>defaults.items[key]={enabled:true,voice:key==='fajr'?'عبد الباسط عبد الصمد':'عبد الباسط عبد الصمد',style:key==='fajr'?'full':'full',volume:80});
 function read(){try{return Object.assign({},defaults,JSON.parse(localStorage.getItem('zad_adhan_settings')||'{}'))}catch(e){return JSON.parse(JSON.stringify(defaults))}}
