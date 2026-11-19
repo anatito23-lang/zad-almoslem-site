@@ -57,5 +57,11 @@ $('saveAdhanSettings').addEventListener('click',()=>{
  $('adhanSettingsStatus').textContent='تم حفظ الإعدادات على الجهاز. استورد ملفًا صوتيًا لكل مؤذن تريد تشغيله.';
 });
 $('adhanMasterEnabled').addEventListener('change',()=>{state.enabled=$('adhanMasterEnabled').checked;});
+$('adhanSilentEnabled').addEventListener('change',()=>{
+ if($('adhanSilentEnabled').checked && window.ZadAndroid&&window.ZadAndroid.hasDndAccess&&!window.ZadAndroid.hasDndAccess()){
+  $('adhanSettingsStatus').textContent='اسمح للتطبيق بالوصول إلى وضع عدم الإزعاج من إعدادات أندرويد حتى يتمكن من جعل الهاتف صامتًا وقت الصلاة.';
+  if(window.ZadAndroid.requestDndAccess)window.ZadAndroid.requestDndAccess();
+ }
+});
 render();
 })();
