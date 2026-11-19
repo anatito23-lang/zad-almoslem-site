@@ -194,6 +194,10 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void setAdhanVolume(int volume) {
             int safeVolume = Math.max(0, Math.min(100, volume));
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putInt("adhan_volume", safeVolume).apply();
+            Intent volumeIntent = new Intent(MainActivity.this, AdhanPlaybackService.class);
+            volumeIntent.setAction(AdhanPlaybackService.ACTION_SET_VOLUME);
+            volumeIntent.putExtra("volume", safeVolume);
+            try { startService(volumeIntent); } catch (Exception ignored) {}
         }
         @JavascriptInterface public void setPrayerAdhanEnabled(String prayer, boolean enabled) {
             String key = "prayer_enabled_" + prayer;
