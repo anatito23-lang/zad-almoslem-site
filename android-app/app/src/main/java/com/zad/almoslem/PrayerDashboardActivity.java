@@ -90,7 +90,15 @@ public class PrayerDashboardActivity extends Activity {
         long now=System.currentTimeMillis(),soon=Long.MAX_VALUE;int next=-1;long[] times=new long[5];
         for(int i=0;i<5;i++){String p=PRAYERS[i];timeViews[i].setText(savedTime(p));times[i]=nextTime(p);if(times[i]>0&&times[i]<soon){soon=times[i];next=i;}}
         for(int i=0;i<5;i++){if(times[i]>0){long diff=Math.max(0,times[i]-now)/1000;remainingViews[i].setText("المتبقي: "+format(diff)+(i==next?"  • الصلاة القادمة":""));}else remainingViews[i].setText("حدّث المواقيت لعرض الوقت المتبقي");}
-        if(next>=0){nextCountdown.setText("متبقي على "+PRAYERS[next]+": "+format(Math.max(0,soon-now)/1000));long last=soon-86400000L;if(now>=last&&now<last+15*60*1000L)adhanNow.setText("🕌 حان الآن وقت صلاة "+PRAYERS[next]+" — تقبّل الله");else adhanNow.setText("الصلاة القادمة: "+PRAYERS[next]);}
+        int active=-1;
+        Calendar current=Calendar.getInstance();
+        for(int i=0;i<5;i++){
+            int h=prefs.getInt("native_time_hour_"+PRAYERS[i],-1);
+            if(h>=0){Calendar prayer=Calendar.getInstance();prayer.set(Calendar.HOUR_OF_DAY,h);prayer.set(Calendar.MINUTE,prefs.getInt("native_time_minute_"+PRAYERS[i],0));prayer.set(Calendar.SECOND,0);prayer.set(Calendar.MILLISECOND,0);long elapsed=now-prayer.getTimeInMillis();if(elapsed>=0&&elapsed<15*60*1000L)active=i;}
+        }
+        if(active>=0)adhanNow.setText("🕌 حان الآن وقت صلاة "+PRAYERS[active]+" — تقبّل الله");
+        else if(next>=0)adhanNow.setText("الصلاة القادمة: "+PRAYERS[next]);
+        if(next>=0)nextCountdown.setText("متبقي على "+PRAYERS[next]+": "+format(Math.max(0,soon-now)/1000));
         else nextCountdown.setText("حدّث مواقيت الصلاة لبدء العد التنازلي");
     }
     private String format(long seconds){long h=seconds/3600,m=(seconds%3600)/60,s=seconds%60;return String.format(Locale.getDefault(),"%02d:%02d:%02d",h,m,s);}
