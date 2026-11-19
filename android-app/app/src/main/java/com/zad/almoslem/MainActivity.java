@@ -65,7 +65,7 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
-        webView.loadUrl("file:///android_asset/site/index.html?appbuild=20261119adhan-native5&native=1");
+        webView.loadUrl("file:///android_asset/site/index.html?appbuild=20261119adhan-native6&native=1");
         requestNotificationPermission();
     }
     @Override protected void onResume() {
@@ -206,6 +206,44 @@ public class MainActivity extends Activity {
             if(!AdhanPlaybackService.hasAudio(MainActivity.this,voice)) return false;
             AdhanPlaybackService.play(MainActivity.this, "test", voice, volume);
             return true;
+        }
+        @JavascriptInterface public void downloadAdhanAudio(String voice,String audioId) {
+            final String id;
+            if("عبد الباسط عبد الصمد".equals(voice) && "1a014366658c".equals(audioId)) id=audioId;
+            else if("أذان الحرم المكي".equals(voice) && "54944191e2e2".equals(audioId)) id=audioId;
+            else { runOnUiThread(() -> { if(webView!=null) webView.evaluateJavascript("window.onAdhanAudioDownloaded&&window.onAdhanAudioDownloaded("+org.json.JSONObject.quote(voice)+",false)",null); }); return; }
+            new Thread(() -> {
+                boolean ok=false;
+                HttpURLConnection connection=null;
+                File temp=null;
+                try {
+                    URL url=new URL("https://alfurqan.online/api/v1/athan/"+id);
+                    connection=(HttpURLConnection)url.openConnection();
+                    connection.setConnectTimeout(20000);
+                    connection.setReadTimeout(45000);
+                    connection.setRequestProperty("User-Agent","ZadAlmoslem/2.1");
+                    connection.connect();
+                    if(connection.getResponseCode()==200) {
+                        File dir=new File(getFilesDir(),"adhan");
+                        if(!dir.exists()) dir.mkdirs();
+                        String safe=Integer.toHexString(voice.hashCode());
+                        temp=new File(dir,safe+".download");
+                        try(InputStream in=connection.getInputStream();FileOutputStream out=new FileOutputStream(temp)) {
+                            byte[] buffer=new byte[16384]; int count; long total=0;
+                            while((count=in.read(buffer))!=-1) { total+=count; if(total>25L*1024*1024) throw new java.io.IOException("Audio too large"); out.write(buffer,0,count); }
+                            out.getFD().sync();
+                            if(total>10000) {
+                                File target=new File(dir,safe+".mp3");
+                                if(target.exists()) target.delete();
+                                ok=temp.renameTo(target);
+                            }
+                        }
+                    }
+                } catch(Exception ignored) { if(temp!=null) temp.delete(); }
+                finally { if(connection!=null) connection.disconnect(); }
+                final boolean result=ok;
+                runOnUiThread(() -> { if(webView!=null) webView.evaluateJavascript("window.onAdhanAudioDownloaded&&window.onAdhanAudioDownloaded("+org.json.JSONObject.quote(voice)+","+result+")",null); });
+            }).start();
         }
         @JavascriptInterface public void importAdhanAudio(String voice) {
             pendingAdhanVoice = voice == null ? "" : voice;
