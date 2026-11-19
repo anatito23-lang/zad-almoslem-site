@@ -45,21 +45,11 @@
 
    // Adhan voice and per-prayer controls.
    const voice=$('adhanVoice'), preview=$('adhanPreview'), previewBtn=$('previewAdhan');
-   const adhanSources={basit:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Abdulbasit_Abdusamad_1_-_Egypt_(%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%A8%D8%A7%D8%B3%D8%B7_%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%B5%D9%85%D8%AF_-_%D9%85%D8%B5%D8%B1).mp3',mustafa:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mustafa_Ismail_-_Egypt_(%D9%85%D8%B5%D8%B7%D9%81%D9%89_%D8%A5%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84_-_%D9%85%D8%B5%D8%B1).mp3',husary:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mahmoud_Khalil_Al_Hussary_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%AE%D9%84%D9%8A%D9%84_%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%8A_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',banna:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mahmoud_Ali_Al_Banna_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%B9%D9%84%D9%8A_%D8%A7%D9%84%D8%A8%D9%86%D8%A7_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',naqshbandi:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Sheikh_Al_Naqshbandi_(%D8%A7%D9%84%D8%B4%D9%8A%D8%AE_%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%89).mp3',haram:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(%D8%B9%D9%84%D9%8A_%D8%A8%D9%86_%D8%A3%D8%AD%D9%85%D8%AF_%D9%85%D9%84%D8%A7_-_%D8%A7%D9%84%D8%AD%D8%B1%D9%85_%D8%A7%D9%84%D9%85%D9%83%D9%8A).mp3',tobar:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Fajr_Adhan_by_Nasreddine_Toubar_(%D8%A7%D8%B0%D8%A7%D9%86_%D8%A7%D9%84%D9%81%D8%AC%D8%B1_%D8%A8%D8%B5%D9%88%D8%AA_%D9%86%D8%B5%D8%B1_%D8%A7%D9%84%D8%AF%D9%8A%D9%86_%D8%B7%D9%88%D8%A8%D8%A7%D8%B1).mp3'};
-   function getAdhanUrls(voiceKey){
-     const original=adhanSources[voiceKey];
-     if(!original)return [];
-     return [
-       original,
-       original.replace('https://cdn.jsdelivr.net/','https://fastly.jsdelivr.net/'),
-       original.replace('https://cdn.jsdelivr.net/','https://gcore.jsdelivr.net/'),
-       original.replace('https://cdn.jsdelivr.net/gh/','https://raw.githubusercontent.com/').replace('@main/','/main/'),
-       original.replace('https://cdn.jsdelivr.net/gh/','https://raw.githack.com/').replace('@main/','/main/')
-     ];
-   }
+   const adhanSources={doha:'https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_02_Dhuhr_Adhan.mp3'};
+   function getAdhanUrls(voiceKey){return adhanSources[voiceKey]?[adhanSources[voiceKey]]:[];}
    const storedVoice=localStorage.getItem('zad_adhan_voice');
-   const supportedVoices=['basit','husary','mustafa','banna','naqshbandi','haram','tobar'];
-   const savedVoice=supportedVoices.includes(storedVoice)?storedVoice:'basit';
+   const supportedVoices=['doha'];
+   const savedVoice='doha';
    if(voice)voice.value=savedVoice;
    const volumeControl=$('adhanVolume'), volumeValue=$('adhanVolumeValue');
    const storedVolume=localStorage.getItem('zad_adhan_volume');
@@ -88,7 +78,7 @@
    const adhanStatus=$('adhanSettingsStatus');
    let adhanProgress=null;
    let previewAfterDownload=null;
-   const adhanVoiceNames={basit:'عبد الباسط عبد الصمد',mustafa:'مصطفى إسماعيل',husary:'محمود خليل الحصري',banna:'محمود علي البنا',naqshbandi:'سيد النقشبندي',haram:'أذان الحرم المكي',tobar:'نصر الدين طوبار'};
+   const adhanVoiceNames={doha:'تسجيلات الأذان من الدوحة'};
    let adhanPathBox=$('adhanSavedPath');
    if(!adhanPathBox&&adhanStatus){
      adhanPathBox=document.createElement('div');
@@ -109,7 +99,7 @@
      adhanPathBox.append(heading,voiceLine,pathLine,fileLine);
    }
    function refreshSavedAdhanPath(){
-     const selected=voice?voice.value:'basit';
+     const selected=voice?voice.value:'doha';
      showSavedAdhanPath(selected,localStorage.getItem('zad_adhan_public_path_'+selected));
    }
    function showAdhanProgress(){
@@ -168,7 +158,7 @@
      }
    }
    if(downloadBtn)downloadBtn.addEventListener('click',async()=>{
-     const selected=voice?voice.value:'basit';
+     const selected=voice?voice.value:'doha';
      if(!adhanSources[selected]){$('adhanSettingsStatus').textContent='هذا التسجيل غير متاح للتنزيل حاليًا.';return;}
      downloadBtn.disabled=true;
      adhanStatus.textContent='جارٍ تحميل صوت الأذان، من فضلك انتظر...';
@@ -193,7 +183,7 @@
      finally{hideAdhanProgress();downloadBtn.disabled=false;}
    });
    if(previewBtn)previewBtn.addEventListener('click',()=>{
-     const selected=voice?voice.value:'basit';
+     const selected=voice?voice.value:'doha';
      if(window.ZadAndroid&&typeof window.ZadAndroid.isAdhanDownloaded==='function'){
        if(window.ZadAndroid.isAdhanDownloaded(selected)){
          try{window.ZadAndroid.previewAdhan(selected);$('adhanSettingsStatus').textContent='يتم تشغيل معاينة الأذان من الملف المحفوظ على الجهاز.';return;}
