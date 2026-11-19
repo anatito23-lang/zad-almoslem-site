@@ -70,14 +70,22 @@ public class AdhanPlaybackService extends Service {
                 .setOngoing(true)
                 .addAction(android.R.drawable.ic_media_pause, "إيقاف الأذان", stopAction)
                 .build();
-        if (Build.VERSION.SDK_INT >= 29) {
-            startForeground(NOTIFICATION_ID, notification,
-                    android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
-        } else {
-            startForeground(NOTIFICATION_ID, notification);
+        try {
+            if (Build.VERSION.SDK_INT >= 29) {
+                startForeground(NOTIFICATION_ID, notification,
+                        android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+            } else {
+                startForeground(NOTIFICATION_ID, notification);
+            }
+            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().remove("adhan_last_start_error").apply();
+            String voice = intent == null ? "basit" : intent.getStringExtra("voice");
+            playAdhan(voice, prayer);
+        } catch (Exception error) {
+            String detail = error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage();
+            android.util.Log.e("ZadAlmoslem", "Adhan foreground playback startup failed", error);
+            showPlaybackErrorNotification("تعذر بدء خدمة الأذان: " + detail);
+            stopPlayback();
         }
-        String voice = intent == null ? "basit" : intent.getStringExtra("voice");
-        playAdhan(voice, prayer);
         return START_NOT_STICKY;
     }
 
