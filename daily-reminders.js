@@ -76,6 +76,30 @@
    const downloadBtn=$('downloadAdhan');
    const adhanStatus=$('adhanSettingsStatus');
    let adhanProgress=null;
+   const adhanVoiceNames={basit:'عبد الباسط عبد الصمد',mustafa:'مصطفى إسماعيل',husary:'محمود خليل الحصري',banna:'محمود علي البنا',naqshbandi:'سيد النقشبندي',haram:'أذان الحرم المكي',tobar:'نصر الدين طوبار'};
+   let adhanPathBox=$('adhanSavedPath');
+   if(!adhanPathBox&&adhanStatus){
+     adhanPathBox=document.createElement('div');
+     adhanPathBox.id='adhanSavedPath';
+     adhanPathBox.style.cssText='display:none;margin:10px 0;padding:12px;border:1px solid #cbdccf;border-radius:12px;background:#f2f8f2;color:#174b38;direction:rtl;text-align:right;line-height:1.8;overflow-wrap:anywhere';
+     adhanStatus.insertAdjacentElement('afterend',adhanPathBox);
+   }
+   function showSavedAdhanPath(which,path){
+     if(!adhanPathBox)return;
+     if(!path){adhanPathBox.style.display='none';adhanPathBox.textContent='';return;}
+     const name=adhanVoiceNames[which]||which;
+     adhanPathBox.style.display='block';
+     adhanPathBox.innerHTML='';
+     const heading=document.createElement('strong');heading.textContent='مكان حفظ ملف الأذان';
+     const voiceLine=document.createElement('div');voiceLine.textContent='المؤذن: '+name;
+     const pathLine=document.createElement('div');pathLine.textContent='المسار: '+path;
+     const fileLine=document.createElement('div');fileLine.textContent='الملف: '+path.split('/').pop();
+     adhanPathBox.append(heading,voiceLine,pathLine,fileLine);
+   }
+   function refreshSavedAdhanPath(){
+     const selected=voice?voice.value:'basit';
+     showSavedAdhanPath(selected,localStorage.getItem('zad_adhan_public_path_'+selected));
+   }
    function showAdhanProgress(){
      if(!adhanStatus)return;
      if(!document.getElementById('zadAdhanProgressStyle')){
@@ -100,7 +124,11 @@
    window.onAdhanDownloadComplete=function(which,ok,reason){
      if(!voice||which!==voice.value)return;
      hideAdhanProgress();
-     adhanStatus.textContent=ok?'تم تحميل الأذان وحفظ نسخة في مجلد الهاتف. '+(reason||''):'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
+     adhanStatus.textContent=ok?'تم تحميل الأذان وحفظ نسخة في مجلد الهاتف.':'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
+     if(ok&&reason&&reason.indexOf('التخزين الداخلي/')!==-1){
+       localStorage.setItem('zad_adhan_public_path_'+which,reason.replace(/^.*?تم الحفظ في:\\s*/,''));
+       refreshSavedAdhanPath();
+     }else if(!ok){showSavedAdhanPath(which,localStorage.getItem('zad_adhan_public_path_'+which));}
      if(downloadBtn)downloadBtn.disabled=false;
      updateAdhanDownloadState();
    };
@@ -129,8 +157,9 @@
        if(playing&&typeof playing.catch==='function')playing.catch(()=>{$('adhanSettingsStatus').textContent='تعذر تشغيل المعاينة. تحقق من اتصال الإنترنت ثم حاول مرة أخرى.';});
      }catch(error){$('adhanSettingsStatus').textContent='تعذر تشغيل المعاينة. حاول مرة أخرى.';}
    });
-   if(voice)voice.addEventListener('change',()=>{preview.pause();preview.currentTime=0;updateAdhanDownloadState();});
+   if(voice)voice.addEventListener('change',()=>{preview.pause();preview.currentTime=0;updateAdhanDownloadState();refreshSavedAdhanPath();});
    updateAdhanDownloadState();
+   refreshSavedAdhanPath();
    document.querySelectorAll('.prayer-silent').forEach(el=>{
      el.checked=localStorage.getItem('zad_prayer_silent_'+el.dataset.prayer)==='true';
    });
