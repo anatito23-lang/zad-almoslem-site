@@ -101,12 +101,12 @@ public class AdhanPlaybackService extends Service {
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     .build());
             android.content.SharedPreferences prefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
-            String prayerKey = "dhuhr";
-            if (prayer != null && prayer.contains("الفجر")) prayerKey = "fajr";
-            else if (prayer != null && prayer.contains("العصر")) prayerKey = "asr";
-            else if (prayer != null && prayer.contains("المغرب")) prayerKey = "maghrib";
-            else if (prayer != null && prayer.contains("العشاء")) prayerKey = "isha";
-            int savedVolume = prefs.getInt("adhan_volume_" + prayerKey, prefs.getInt("adhan_volume", 100));
+            String volumePrayerKey = "dhuhr";
+            if (prayer != null && prayer.contains("الفجر")) volumePrayerKey = "fajr";
+            else if (prayer != null && prayer.contains("العصر")) volumePrayerKey = "asr";
+            else if (prayer != null && prayer.contains("المغرب")) volumePrayerKey = "maghrib";
+            else if (prayer != null && prayer.contains("العشاء")) volumePrayerKey = "isha";
+            int savedVolume = prefs.getInt("adhan_volume_" + volumePrayerKey, prefs.getInt("adhan_volume", 100));
             float adhanVolume = Math.max(0, Math.min(100, savedVolume)) / 100f;
             player.setVolume(adhanVolume, adhanVolume);
             String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"haram".equals(voice)||"doha".equals(voice)) ? voice : "doha";
