@@ -95,7 +95,7 @@
        const voiceKey=unique[index++];
        if(window.ZadAndroid.isAdhanDownloaded(voiceKey)){runNext();return;}
        if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل التسجيل '+index+' من '+unique.length+': '+voiceKey;
-       window.onAdhanDownloadComplete=(which,ok,details)=>{
+       window.onPrayerAdhanDownloadComplete=(which,ok,details)=>{
          if(prayerVoiceStatus)prayerVoiceStatus.textContent=(ok?'تم تنزيل ':'تعذر تنزيل ')+which+' — '+(details||'');
          runNext();
        };
@@ -180,6 +180,7 @@
      }
    };
    window.onAdhanDownloadComplete=function(which,ok,reason){
+     if(typeof window.onPrayerAdhanDownloadComplete==='function')window.onPrayerAdhanDownloadComplete(which,ok,reason);
      if(!voice)return;
      if(downloadBtn)downloadBtn.disabled=false;
      if(which!==voice.value){updateAdhanDownloadState();return;}
