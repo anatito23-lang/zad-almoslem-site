@@ -2,7 +2,11 @@ package com.zad.almoslem;
 
 import android.app.*;
 import android.content.*;
-import android.media.*;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.Player;
+import androidx.media3.exoplayer.ExoPlayer;
+import android.net.Uri;
 import android.os.*;
 import java.io.IOException;
 import java.io.File;
@@ -12,7 +16,7 @@ public class RadioPlaybackService extends Service {
     public static final String ACTION_STOP="com.zad.almoslem.STOP_RADIO";
     private static final String CHANNEL="zad_radio_playback";
     private static final int NOTIFICATION=7410;
-    private MediaPlayer player;
+    private ExoPlayer player;
 
     @Override public int onStartCommand(Intent intent,int flags,int startId) {
         if(intent!=null && ACTION_STOP.equals(intent.getAction())) { stopRadio(); return START_NOT_STICKY; }
@@ -77,18 +81,44 @@ public class RadioPlaybackService extends Service {
     private void play(String url,File localFile) {
         releasePlayer();
         try {
-            player=new MediaPlayer();
-            player.setWakeMode(getApplicationContext(),PowerManager.PARTIAL_WAKE_LOCK);
-            player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
-            player.setOnPreparedListener(MediaPlayer::start);
-            player.setOnErrorListener((mp,what,extra)->{stopRadio();return true;});
-            player.setOnCompletionListener(mp->stopRadio());
-            if(localFile!=null)player.setDataSource(localFile.getAbsolutePath());else player.setDataSource(url);
-            player.prepareAsync();
-        } catch(Exception e) { stopRadio(); }
+            player = new ExoPlayer.Builder(this).build();
+            player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
+                    .setUsage(androidx.media3.common.C.USAGE_MEDIA)
+                    .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC)
+                    .build(), true);
+            player.addListener(new Player.Listener() {
+                @Override public void onPlaybackStateChanged(int state) {
+                    if (state == Player.STATE_READY) {
+                        getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
+                                .putBoolean("radio_ready", true).remove("radio_last_error").apply();
+                    }
+                }
+                @Override public void onPlayerError(PlaybackException error) {
+                    String detail = error.getMessage() == null ? error.getErrorCodeName() : error.getMessage();
+                    getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
+                            .putBoolean("radio_ready", false).putBoolean("radio_playing", false)
+                            .putString("radio_last_error", detail).apply();
+                    android.util.Log.e("ZadAlmoslem", "Radio stream playback failed: " + url, error);
+                    stopRadio();
+                }
+            });
+            Uri source = localFile != null ? Uri.fromFile(localFile) : Uri.parse(url);
+            player.setMediaItem(MediaItem.fromUri(source));
+            player.prepare();
+            player.play();
+        } catch(Exception e) {
+            getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
+                    .putBoolean("radio_ready", false)
+                    .putString("radio_last_error", e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage()).apply();
+            stopRadio();
+        }
     }
     private void releasePlayer() {
-        if(player!=null) { try { player.reset(); } catch(Exception ignored){} try { player.release(); } catch(Exception ignored){} player=null; }
+        if (player != null) {
+            try { player.stop(); } catch (Exception ignored) {}
+            try { player.release(); } catch (Exception ignored) {}
+            player = null;
+        }
     }
     private void stopRadio() { getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putString("active_kind","").apply(); releasePlayer(); stopForeground(true); stopSelf(); }
     @Override public void onDestroy(){releasePlayer();super.onDestroy();}
