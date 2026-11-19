@@ -45,7 +45,9 @@ public class RadioPlaybackService extends Service {
         String kind=intent==null?"radio":intent.getStringExtra("kind");
         boolean allowedRadio="https://qurango.net/radio/tarateel".equals(url) ||
              "https://stream.radiojar.com/8s5u5tpdtwzuv".equals(url) ||
-             "https://qurango.net/radio/mishary_alafasi".equals(url) ||\n             "https://live.kwikmotion.com/sbrksaquranradiolive/srpksaquranradio/playlist.m3u8".equals(url) ||\n             "http://www.quran-radio.org:8002/".equals(url);
+             "https://qurango.net/radio/mishary_alafasi".equals(url) ||
+             "https://live.kwikmotion.com/sbrksaquranradiolive/srpksaquranradio/playlist.m3u8".equals(url) ||
+             "http://www.quran-radio.org:8002/".equals(url);
         boolean allowedQuran=false,allowedLocal=false,allowedAudio=false;
         File localFile=null;
         String localPath=intent==null?null:intent.getStringExtra("local_path");
@@ -129,7 +131,8 @@ public class RadioPlaybackService extends Service {
                     getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
                             .putBoolean("radio_ready", false).putString("radio_last_error", detail).apply();
                     android.util.Log.e("ZadAlmoslem", "Audio playback failed: " + url, error);
-                    String station = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("radio_station", "");\n                    String fallback = radioActive && "egypt".equals(station) ? nextRadioFallback() : null;
+                    String station = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("radio_station", "");
+                    String fallback = radioActive && "egypt".equals(station) ? nextRadioFallback() : null;
                     if (fallback != null) {
                         updateRadioNotification("إذاعة القرآن الكريم", "تعذر المصدر الحالي؛ نجرب مصدر بث احتياطي...");
                         play(fallback, null);
