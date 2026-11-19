@@ -229,6 +229,42 @@ window.onAdhanDownloadComplete=function(which,ok,reason){
  if(button)button.disabled=false;
 };
 
+// معالجة زر الاستماع من خلال تفويض النقر بعد نقل عناصر الإعدادات.
+document.addEventListener('click',function(event){
+ const button=event.target&&event.target.closest?event.target.closest('#previewAdhan'):null;
+ if(!button)return;
+ event.preventDefault();
+ event.stopImmediatePropagation();
+ const voice=document.getElementById('adhanVoice');
+ const status=document.getElementById('adhanSettingsStatus');
+ const audio=document.getElementById('adhanPreview');
+ const selected=voice?voice.value:'basit';
+ if(!status||!audio)return;
+ status.textContent='جارٍ تجهيز معاينة الأذان...';
+ try{
+  if(window.ZadAndroid&&typeof window.ZadAndroid.isAdhanDownloaded==='function'&&window.ZadAndroid.isAdhanDownloaded(selected)){
+   window.ZadAndroid.previewAdhan(selected);
+   status.textContent='يتم تشغيل معاينة الأذان من الملف المحفوظ على الجهاز.';
+   return;
+  }
+  const sources={
+   basit:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Abdulbasit_Abdusamad_1_-_Egypt_(%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%A8%D8%A7%D8%B3%D8%B7_%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%B5%D9%85%D8%AF_-_%D9%85%D8%B5%D8%B1).mp3',
+   mustafa:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mustafa_Ismail_-_Egypt_(%D9%85%D8%B5%D8%B7%D9%81%D9%89_%D8%A5%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84_-_%D9%85%D8%B5%D8%B1).mp3',
+   husary:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mahmoud_Khalil_Al_Hussary_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%AE%D9%84%D9%8A%D9%84_%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%8A_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',
+   banna:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mahmoud_Ali_Al_Banna_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%B9%D9%84%D9%8A_%D8%A7%D9%84%D8%A8%D9%86%D8%A7_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',
+   naqshbandi:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Sheikh_Al_Naqshbandi_(%D8%A7%D9%84%D8%B4%D9%8A%D8%AE_%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%89).mp3',
+   haram:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(%D8%B9%D9%84%D9%8A_%D8%A8%D9%86_%D8%A3%D8%AD%D9%85%D8%AF_%D9%85%D9%84%D8%A7_-_%D8%A7%D9%84%D8%AD%D8%B1%D9%85_%D8%A7%D9%84%D9%85%D9%83%D9%8A).mp3',
+   tobar:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Fajr_Adhan_by_Nasreddine_Toubar_(%D8%A7%D8%B0%D8%A7%D9%86_%D8%A7%D9%84%D9%81%D8%AC%D8%B1_%D8%A8%D8%B5%D9%88%D8%AA_%D9%86%D8%B5%D8%B1_%D8%A7%D9%84%D8%AF%D9%8A%D9%86_%D8%B7%D9%88%D8%A8%D8%A7%D8%B1).mp3'
+  };
+  const url=sources[selected];
+  if(!url){status.textContent='اختَر مؤذنًا متاحًا أولًا.';return;}
+  audio.pause();audio.src=url;audio.load();
+  audio.volume=Math.max(0,Math.min(100,Number(document.getElementById('adhanVolume')?.value||100)))/100;
+  const play=audio.play();
+  if(play&&typeof play.then==='function')play.then(()=>{status.textContent='يعمل الآن: معاينة الأذان.';}).catch(()=>{status.textContent='تعذر تشغيل المعاينة من مصدر الصوت. جرّب تنزيل التسجيل أولًا.';});
+ }catch(error){status.textContent='تعذر تشغيل المعاينة: '+(error.message||'حاول مرة أخرى.');}
+},true);
+
 if(reminderSettings)$('zadReminderSettingsSlot').append(reminderSettings);
 const themeNames=['light','dark','blue','sand'];
 function applySettings(){
