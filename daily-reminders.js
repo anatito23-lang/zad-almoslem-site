@@ -113,15 +113,21 @@
      try{window.ZadAndroid.downloadAdhan(voice.value);}catch(error){hideAdhanProgress();downloadBtn.disabled=false;adhanStatus.textContent='تعذر بدء التحميل. حاول مرة أخرى.';}
    });
    if(previewBtn)previewBtn.addEventListener('click',()=>{
-     if(window.ZadAndroid){
-       if(window.ZadAndroid.isAdhanDownloaded(voice.value)){window.ZadAndroid.previewAdhan(voice.value);$('adhanSettingsStatus').textContent='يتم تشغيل معاينة الأذان من الملف المحفوظ على الجهاز.';}
-       else $('adhanSettingsStatus').textContent='حمّل صوت الأذان أولًا ليعمل من داخل التطبيق دون إنترنت.';
-       return;
+     const selected=voice?voice.value:'basit';
+     if(window.ZadAndroid&&typeof window.ZadAndroid.isAdhanDownloaded==='function'&&window.ZadAndroid.isAdhanDownloaded(selected)){
+       try{window.ZadAndroid.previewAdhan(selected);$('adhanSettingsStatus').textContent='يتم تشغيل معاينة الأذان من الملف المحفوظ على الجهاز.';return;}
+       catch(e){}
      }
-     if(!adhanSources[voice.value]){$('adhanSettingsStatus').textContent='معاينة هذا التسجيل غير متاحة حاليًا.';return;}
-     preview.src=adhanSources[voice.value];
-     preview.volume=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0))/100:savedVolume/100;
-     preview.play().catch(()=>{$('adhanSettingsStatus').textContent='اضغط مرة أخرى للسماح بتشغيل الصوت.';});
+     if(!adhanSources[selected]){$('adhanSettingsStatus').textContent='معاينة هذا التسجيل غير متاحة حاليًا.';return;}
+     try{
+       preview.pause();
+       preview.src=adhanSources[selected];
+       preview.load();
+       preview.volume=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0))/100:savedVolume/100;
+       $('adhanSettingsStatus').textContent='جارٍ تشغيل معاينة الأذان...';
+       const playing=preview.play();
+       if(playing&&typeof playing.catch==='function')playing.catch(()=>{$('adhanSettingsStatus').textContent='تعذر تشغيل المعاينة. تحقق من اتصال الإنترنت ثم حاول مرة أخرى.';});
+     }catch(error){$('adhanSettingsStatus').textContent='تعذر تشغيل المعاينة. حاول مرة أخرى.';}
    });
    if(voice)voice.addEventListener('change',()=>{preview.pause();preview.currentTime=0;updateAdhanDownloadState();});
    updateAdhanDownloadState();
