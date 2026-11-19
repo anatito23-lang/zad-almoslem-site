@@ -45,7 +45,7 @@ public class RadioPlaybackService extends Service {
                 android.net.Uri parsed=android.net.Uri.parse(url);
                 String host=parsed.getHost();
                 allowedQuran="quran".equals(kind) && "https".equalsIgnoreCase(parsed.getScheme()) && host!=null &&
-                    (host.toLowerCase().endsWith("mp3quran.net") || host.toLowerCase().endsWith("mp3quran.com"));
+                    (host.equalsIgnoreCase("mp3quran.net") || host.toLowerCase().endsWith(".mp3quran.net") || host.equalsIgnoreCase("mp3quran.com") || host.toLowerCase().endsWith(".mp3quran.com"));
             }
         } catch(Exception ignored) {}
         if(!allowedRadio && !allowedQuran && !allowedLocal) { stopRadio(); return START_NOT_STICKY; }
