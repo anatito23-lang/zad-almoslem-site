@@ -37,6 +37,14 @@ public class QuranTextActivity extends Activity {
         LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(16),dp(18),dp(16),dp(18));hero.setBackground(bg(green,18));hero.addView(title);hero.addView(sub);root.addView(hero);
         TextView choose=label("اختر السورة",15,green,true);choose.setPadding(0,dp(16),0,dp(5));root.addView(choose);
         surahPicker=new Spinner(this);surahPicker.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,names));root.addView(surahPicker);
+        LinearLayout navigation=new LinearLayout(this);navigation.setOrientation(LinearLayout.HORIZONTAL);
+        Button previous=new Button(this);previous.setText("السورة السابقة");
+        Button next=new Button(this);next.setText("السورة التالية");
+        navigation.addView(previous,new LinearLayout.LayoutParams(0,dp(48),1));
+        navigation.addView(next,new LinearLayout.LayoutParams(0,dp(48),1));
+        root.addView(navigation);
+        previous.setOnClickListener(v->{int p=surahPicker.getSelectedItemPosition();if(p>0){surahPicker.setSelection(p-1);loadSelected(false);}});
+        next.setOnClickListener(v->{int p=surahPicker.getSelectedItemPosition();if(p<names.length-1){surahPicker.setSelection(p+1);loadSelected(false);}});
         openButton=new Button(this);openButton.setText("فتح السورة وقراءتها");root.addView(openButton);
         saveButton=new Button(this);saveButton.setText("حفظ السورة للقراءة دون إنترنت");root.addView(saveButton);
         status=label("اختر سورة ثم افتحها. يمكن حفظ السورة لتعمل لاحقًا دون اتصال.",13,Color.DKGRAY,false);status.setPadding(0,dp(10),0,dp(10));root.addView(status);
@@ -62,7 +70,14 @@ public class QuranTextActivity extends Activity {
                 int code=c.getResponseCode();if(code!=200)throw new Exception("تعذر الاتصال بمصدر المصحف ("+code+")");
                 ByteArrayOutputStream out=new ByteArrayOutputStream();try(InputStream in=c.getInputStream()){byte[] b=new byte[8192];int k;while((k=in.read(b))!=-1)out.write(b,0,k);}
                 String json=new String(out.toByteArray(),StandardCharsets.UTF_8);JSONObject root=new JSONObject(json);if(root.optInt("code")!=200)throw new Exception("لم يصل نص السورة بصورة صحيحة");
-                JSONObject data=root.getJSONObject("data");JSONArray ayahs=data.getJSONArray("ayahs");if(ayahs.length()==0)throw new Exception("السورة لا تحتوي على آيات");
+                JSONObject data=root.getJSONObject("data");
+                if(data.optInt("number")!=n)throw new Exception("رقم السورة المستلمة لا يطابق السورة المطلوبة");
+                JSONArray ayahs=data.getJSONArray("ayahs");
+                if(ayahs.length()==0)throw new Exception("السورة لا تحتوي على آيات");
+                for(int i=0;i<ayahs.length();i++){
+                    JSONObject ayah=ayahs.optJSONObject(i);
+                    if(ayah==null||ayah.optString("text","").trim().isEmpty())throw new Exception("بيانات آيات السورة غير مكتملة");
+                }
                 if(save){try(FileOutputStream fos=new FileOutputStream(temp)){fos.write(json.getBytes(StandardCharsets.UTF_8));fos.getFD().sync();}File target=cacheFile(n);if(target.exists())target.delete();if(!temp.renameTo(target))throw new Exception("تعذر حفظ السورة على الهاتف");}
                 runOnUiThread(()->{render(data,n);status.setText(save?"تم حفظ السورة داخل التطبيق، ويمكن قراءتها دون إنترنت.":"تم فتح السورة. اضغط حفظ إذا أردت قراءتها دون إنترنت.");});
             }catch(Exception e){runOnUiThread(()->status.setText("تعذر تحميل السورة: "+(e.getMessage()==null?"تحقق من الإنترنت":e.getMessage())));}
