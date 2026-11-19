@@ -35,7 +35,7 @@ public class FaithLibraryActivity extends Activity {
  private GradientDrawable bg(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));return d;}
  private LinearLayout card(LinearLayout root,String title){LinearLayout box=new LinearLayout(this);box.setOrientation(LinearLayout.VERTICAL);box.setPadding(dp(14),dp(13),dp(14),dp(13));box.setBackground(bg(Color.WHITE,15));LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(12);root.addView(box,lp);box.addView(label(title,18,green,true));return box;}
  private void build(){
-  ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(14),dp(15),dp(14),dp(25));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);setContentView(scroll);
+  ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(14),dp(15),dp(14),dp(25));root.setBackgroundColor(Color.rgb(244,247,243));AppTabs.add(this,root,"library");scroll.addView(root);setContentView(scroll);
   TextView title=label("السنة النبوية والأدعية والمكتبة الإيمانية",22,Color.WHITE,true);title.setGravity(Gravity.CENTER);
   TextView sub=label("أحاديث صحيحة وأدعية قرآنية ووقفات نافعة",13,Color.rgb(222,239,229),false);sub.setGravity(Gravity.CENTER);
   LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(13),dp(18),dp(13),dp(18));hero.setBackground(bg(green,18));hero.addView(title);hero.addView(sub);root.addView(hero);
