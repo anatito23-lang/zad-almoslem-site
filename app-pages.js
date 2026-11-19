@@ -202,7 +202,7 @@ document.addEventListener('click',function(event){
   bar.setAttribute('role','progressbar');
   bar.innerHTML='<span></span>';
  }
- status.insertAdjacentElement('afterend',bar);
+ downloadButton.parentElement.insertBefore(bar,downloadButton);
  bar.style.display='block';
  if(adhanDownloadWatchdog)clearTimeout(adhanDownloadWatchdog);
  adhanDownloadWatchdog=setTimeout(function(){
