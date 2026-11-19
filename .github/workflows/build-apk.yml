@@ -6,7 +6,7 @@ on:
     paths:
       - 'android-app/**'
       - '.github/workflows/build-apk.yml'
-    branches: [main]
+    branches: [main, 'clean-restart/adhan-audit-2026-11-19']
 
 jobs:
   build:
