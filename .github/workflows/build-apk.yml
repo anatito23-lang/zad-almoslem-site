@@ -14,7 +14,7 @@ on:
     branches: [main, feat/per-prayer-adhan-voices, native-android-app, update-v3-prayer-mushaf-tabs]
 
 concurrency:
-  group: zad-android-${{ github.head_ref || github.ref }}
+  group: zad-android-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
