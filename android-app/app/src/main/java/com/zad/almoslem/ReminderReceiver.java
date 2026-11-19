@@ -69,12 +69,12 @@ public class ReminderReceiver extends BroadcastReceiver {
         boolean prayer=key.startsWith("prayer_");
         boolean prePrayer=key.startsWith("pre_prayer_");
         boolean iqama=key.startsWith("iqama_prayer_");
+        String prayerName=prayer?key.substring("prayer_".length()):"";
         android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
         if (!prayer && !prePrayer && !iqama && ("morning".equals(key) || "evening".equals(key) || "qiyam".equals(key))) {
             try { ReminderAudioService.play(context, key); } catch (Exception ignored) {}
         }
         if(prayer) {
-            String prayerName=key.substring("prayer_".length());
             try {
                 org.json.JSONObject settings=new org.json.JSONObject(prefs.getString("adhan_settings","{}"));
                 org.json.JSONObject items=settings.optJSONObject("items");
