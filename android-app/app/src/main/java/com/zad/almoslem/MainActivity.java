@@ -291,29 +291,48 @@ public class MainActivity extends Activity {
                 File target = new File(dir, safe + ".mp3");
                 try {
                     if (!dir.exists() && !dir.mkdirs()) throw new Exception("تعذر إنشاء مجلد الصوت");
-                    connection = (HttpURLConnection) new URL(source).openConnection();
-                    connection.setConnectTimeout(20000);
-                    connection.setReadTimeout(45000);
-                    connection.setInstanceFollowRedirects(true);
-                    connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
-                    int status = connection.getResponseCode();
-                    if (status != HttpURLConnection.HTTP_OK) throw new Exception("استجابة مصدر الصوت: " + status);
-                    String type = connection.getContentType();
-                    if (type == null || !(type.toLowerCase().contains("audio") || type.toLowerCase().contains("mpeg") || type.toLowerCase().contains("octet-stream"))) {
-                        throw new Exception("المصدر لم يُرجع ملف MP3 صالحًا");
-                    }
-                    long total = 0;
-                    try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
-                        byte[] buffer = new byte[8192];
-                        int count;
-                        while ((count = in.read(buffer)) != -1) {
-                            total += count;
-                            if (total > 12L * 1024L * 1024L) throw new Exception("حجم الملف أكبر من المسموح");
-                            out.write(buffer, 0, count);
+                    String[] sourceUrls = new String[] {
+                        source.replace("https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/", "https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/"),
+                        source.replace("https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/", "https://fastly.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/"),
+                        source
+                    };
+                    Exception lastFailure = null;
+                    boolean downloaded = false;
+                    for (String sourceUrl : sourceUrls) {
+                        try {
+                            connection = (HttpURLConnection) new URL(sourceUrl).openConnection();
+                            connection.setConnectTimeout(20000);
+                            connection.setReadTimeout(45000);
+                            connection.setInstanceFollowRedirects(true);
+                            connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
+                            int status = connection.getResponseCode();
+                            if (status != HttpURLConnection.HTTP_OK) throw new Exception("استجابة مصدر الصوت: " + status);
+                            String type = connection.getContentType();
+                            if (type == null || !(type.toLowerCase().contains("audio") || type.toLowerCase().contains("mpeg") || type.toLowerCase().contains("octet-stream"))) {
+                                throw new Exception("المصدر لم يُرجع ملف MP3 صالحًا");
+                            }
+                            long total = 0;
+                            try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
+                                byte[] buffer = new byte[8192];
+                                int count;
+                                while ((count = in.read(buffer)) != -1) {
+                                    total += count;
+                                    if (total > 12L * 1024L * 1024L) throw new Exception("حجم الملف أكبر من المسموح");
+                                    out.write(buffer, 0, count);
+                                }
+                                out.getFD().sync();
+                            }
+                            if (total < 10000) throw new Exception("ملف الصوت غير مكتمل");
+                            downloaded = true;
+                            break;
+                        } catch (Exception attemptError) {
+                            lastFailure = attemptError;
+                            if (temp.exists()) temp.delete();
+                        } finally {
+                            if (connection != null) { connection.disconnect(); connection = null; }
                         }
-                        out.getFD().sync();
                     }
-                    if (total < 10000) throw new Exception("ملف الصوت غير مكتمل");
+                    if (!downloaded) throw (lastFailure == null ? new Exception("تعذر الاتصال بمصادر الصوت") : lastFailure);
                     if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال التسجيل القديم");
                     if (!temp.renameTo(target)) throw new Exception("تعذر حفظ التسجيل على الجهاز");
                     String publicPath = copyAdhanToMusicFolder(target, safe);
