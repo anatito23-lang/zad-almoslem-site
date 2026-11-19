@@ -136,6 +136,10 @@
        window.ZadAndroid.downloadAdhan(key);
      }catch(e){btn.disabled=false;hideAdhanProgress();if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر بدء المعاينة أو التنزيل.';}
    }));
+   window.onAdhanPreviewError=function(message){
+     hideAdhanProgress();
+     if(prayerVoiceStatus)prayerVoiceStatus.textContent=message||'تعذر تشغيل معاينة الأذان.';
+   };
    const downloadPrayerVoices=$('downloadPrayerAdhans');
    if(downloadPrayerVoices)downloadPrayerVoices.addEventListener('click',()=>{
      if(!window.ZadAndroid||typeof window.ZadAndroid.downloadAdhan!=='function'){
