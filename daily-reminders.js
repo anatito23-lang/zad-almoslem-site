@@ -181,7 +181,7 @@
          if(ok){window.ZadAndroid.previewPrayerAdhan(key,prayer);if(prayerVoiceStatus)prayerVoiceStatus.textContent='تم تنزيل التسجيل وتشغيل معاينته.';}
          else if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذرت المعاينة: '+(reason||'فشل التنزيل');
        };
-       previewDone.voiceKey=key;
+       previewDone.voiceKey=key;previewDone.taskIndex=1;previewDone.taskTotal=1;
        window.onPrayerPreviewDownloadComplete=previewDone;
        window.ZadAndroid.downloadAdhan(key);
      }catch(e){btn.disabled=false;hideAdhanProgress();if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر بدء المعاينة أو التنزيل.';}
@@ -206,7 +206,7 @@
            updatePrayerProgress(Math.round(index/unique.length*100),'اكتمل '+index+' من '+unique.length+' تسجيلات');
            runNext();
          };
-         done.voiceKey=voiceKey;window.onPrayerAdhanDownloadComplete=done;
+         done.voiceKey=voiceKey;done.taskIndex=index;done.taskTotal=unique.length;window.onPrayerAdhanDownloadComplete=done;
          try{window.ZadAndroid.downloadAdhan(voiceKey);}catch(e){done(voiceKey,false,e.message||'خطأ');}
        };
        runNext();return;
@@ -223,6 +223,9 @@
      downloadPrayerVoices.disabled=true;
      updatePrayerProgress(0,'بدء حفظ التسجيلات داخل الموقع...');
      const downloadNext=async()=>{
+       if(index===0&&navigator.storage&&typeof navigator.storage.persist==='function'){
+         try{await navigator.storage.persist();}catch(error){}
+       }
        if(index>=tasks.length){
          downloadPrayerVoices.disabled=false;
          const msg=failed?'اكتمل الحفظ مع تعذر '+failed+' ملف/ملفات.':'تم حفظ '+tasks.length+' تسجيلات داخل الموقع على هذا الجهاز، ويمكن تشغيلها دون إنترنت.';
@@ -321,23 +324,26 @@
      if(ready)$('adhanSettingsStatus').textContent='التسجيل محفوظ على هذا الجهاز ويعمل دون إنترنت.';
    }
    window.onAdhanDownloadProgress=function(index,prayer,received,total,directory){
-     if(!voice)return;
      const names={fajr:'الفجر',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'};
      const label=names[prayer]||adhanVoiceNames[prayer]||prayer;
      const mb=(received/1048576).toFixed(2);
-     const totalMb=total>0?(total/1048576).toFixed(2):'؟';
+     const totalMb=total>0?(total/1048576).toFixed(2):'غير محدد';
      const percent=total>0?Math.max(0,Math.min(100,Math.round(received/total*100))):null;
+     const activeTask=window.onPrayerAdhanDownloadComplete||window.onPrayerPreviewDownloadComplete;
+     const taskIndex=activeTask&&activeTask.taskIndex?activeTask.taskIndex:index;
+     const taskTotal=activeTask&&activeTask.taskTotal?activeTask.taskTotal:(names[prayer]?5:1);
+     const overall=percent===null?null:Math.round(((taskIndex-1)+(percent/100))/taskTotal*100);
      if(adhanProgress){
        adhanProgress.style.display='block';
        const fill=adhanProgress.querySelector('span');
        if(fill){fill.style.animation='none';fill.style.transform='none';fill.style.width=(percent===null?38:percent)+'%';}
      }
-     updatePrayerProgress(percent);
-     const progressText='جارٍ تنزيل '+label+(names[prayer]?' ('+index+' من 5)':'')+' — '+mb+' من '+totalMb+' ميجابايت'+(percent===null?'':' — '+percent+'%');
+     const progressText='جارٍ تنزيل '+label+' ('+taskIndex+' من '+taskTotal+') — '+mb+' من '+totalMb+' ميجابايت'+(percent===null?' — المصدر لا يحدد الحجم الكلي':' — '+percent+'%');
+     updatePrayerProgress(overall,progressText);
+     if(overall===null&&prayerProgressFill){prayerProgressFill.style.width='38%';prayerProgressFill.style.animation='zadDownloadIndeterminate 1s ease-in-out infinite alternate';}
      adhanStatus.textContent=progressText;
      if(prayerVoiceStatus)prayerVoiceStatus.textContent=progressText;
-     if(directory){
-       if(!adhanPathBox)return;
+     if(directory&&adhanPathBox){
        adhanPathBox.style.display='block';
        const prayerKeys=['fajr','dhuhr','asr','maghrib','isha'];
        const filename=prayerKeys.includes(prayer)?'doha_'+prayer+'.mp3':prayer+'.mp3';
@@ -346,9 +352,17 @@
    };
    window.onAdhanDownloadComplete=function(which,ok,reason){
      const prayerDownloadCallback=window.onPrayerAdhanDownloadComplete;
-     if(typeof prayerDownloadCallback==='function'&&prayerDownloadCallback.voiceKey===which){window.onPrayerAdhanDownloadComplete=null;prayerDownloadCallback(which,ok,reason);}
+     if(typeof prayerDownloadCallback==='function'&&prayerDownloadCallback.voiceKey===which){
+       window.onPrayerAdhanDownloadComplete=null;
+       prayerDownloadCallback(which,ok,reason);
+       return;
+     }
      const prayerPreviewCallback=window.onPrayerPreviewDownloadComplete;
-     if(typeof prayerPreviewCallback==='function'&&prayerPreviewCallback.voiceKey===which){window.onPrayerPreviewDownloadComplete=null;prayerPreviewCallback(which,ok,reason);}
+     if(typeof prayerPreviewCallback==='function'&&prayerPreviewCallback.voiceKey===which){
+       window.onPrayerPreviewDownloadComplete=null;
+       prayerPreviewCallback(which,ok,reason);
+       return;
+     }
      if(!voice)return;
      if(downloadBtn)downloadBtn.disabled=false;
      hideAdhanProgress();
