@@ -15,7 +15,7 @@ public class RadioActivity extends Activity {
     private TextView status;
     @Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(Color.rgb(8,48,40));getWindow().setNavigationBarColor(Color.rgb(8,48,40));build();}
     private void build(){
-        LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(24,30,24,24);root.setBackgroundColor(Color.rgb(244,247,243));setContentView(root);
+        LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(24,30,24,24);root.setBackgroundColor(Color.rgb(244,247,243));AppTabs.add(this,root,"radio");setContentView(root);
         TextView title=new TextView(this);title.setText("إذاعة القرآن الكريم");title.setTextSize(25);title.setTextColor(Color.WHITE);title.setTypeface(Typeface.DEFAULT,Typeface.BOLD);title.setGravity(Gravity.CENTER);title.setPadding(12,28,12,28);GradientDrawable bg=new GradientDrawable();bg.setColor(Color.rgb(8,48,40));bg.setCornerRadius(28);title.setBackground(bg);root.addView(title);
         TextView desc=new TextView(this);desc.setText("استمع إلى إذاعة القرآن الكريم من القاهرة، مع استمرار التشغيل في الخلفية.");desc.setTextSize(15);desc.setTextColor(Color.DKGRAY);desc.setPadding(0,22,0,18);root.addView(desc);
         Button play=new Button(this);play.setText("▶ تشغيل إذاعة القرآن");root.addView(play,new LinearLayout.LayoutParams(-1,-2));play.setOnClickListener(v->start("https://qurango.net/radio/tarateel","إذاعة القرآن الكريم"));
