@@ -37,7 +37,7 @@ jobs:
           mkdir -p android-app/app/src/main/assets/site
           cp index.html app-pages.js daily-reminders.js khutbahs.js khutbahs.json manifest.webmanifest icon.svg sw.js android-app/app/src/main/assets/site/
           test -s android-app/app/src/main/assets/site/index.html
-          grep -q '20261119adhanfix7' android-app/app/src/main/assets/site/index.html
+          grep -q '20261119clean-no-adhan1' android-app/app/src/main/assets/site/index.html
           ! grep -q 'adhan-settings\|downloadAdhan\|onAdhanDownloadComplete' android-app/app/src/main/assets/site/index.html android-app/app/src/main/assets/site/daily-reminders.js
       - name: Build debug APK
         working-directory: android-app
