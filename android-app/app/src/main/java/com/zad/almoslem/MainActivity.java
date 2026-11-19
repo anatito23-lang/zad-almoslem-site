@@ -65,7 +65,7 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
-        webView.loadUrl("file:///android_asset/site/index.html?appbuild=20261119adhan-native6&native=1");
+        webView.loadUrl("file:///android_asset/site/index.html?appbuild=20261119adhan-native7&native=1");
         requestNotificationPermission();
     }
     @Override protected void onResume() {
@@ -223,7 +223,8 @@ public class MainActivity extends Activity {
                     connection.setReadTimeout(45000);
                     connection.setRequestProperty("User-Agent","ZadAlmoslem/2.1");
                     connection.connect();
-                    if(connection.getResponseCode()==200) {
+                    String contentType=connection.getContentType();
+                    if(connection.getResponseCode()==200 && contentType!=null && (contentType.toLowerCase().contains("audio") || contentType.toLowerCase().contains("octet-stream"))) {
                         File dir=new File(getFilesDir(),"adhan");
                         if(!dir.exists()) dir.mkdirs();
                         String safe=Integer.toHexString(voice.hashCode());
