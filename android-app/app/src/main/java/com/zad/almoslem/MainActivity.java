@@ -429,6 +429,7 @@ public class MainActivity extends Activity {
                             if (status != HttpURLConnection.HTTP_OK) throw new Exception("استجابة مصدر الصوت: " + status);
                             // Do not trust CDN Content-Type; validate the downloaded MP3 signature instead.
                             long total = 0;
+                            long expectedBytes = connection.getContentLength();
                             try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
                                 byte[] buffer = new byte[8192];
                                 int count;
@@ -436,6 +437,7 @@ public class MainActivity extends Activity {
                                     total += count;
                                     if (total > 12L * 1024L * 1024L) throw new Exception("حجم الملف أكبر من المسموح");
                                     out.write(buffer, 0, count);
+                                    reportAdhanProgress(1, safe, total, expectedBytes, dir.getAbsolutePath());
                                 }
                                 out.getFD().sync();
                             }
