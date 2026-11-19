@@ -87,6 +87,24 @@
    const prayerVoiceDefaults={الفجر:'basit',الظهر:'basit',العصر:'mustafa',المغرب:'husary',العشاء:'banna'};
    const prayerVoiceSelects=[...document.querySelectorAll('.prayer-adhan-voice')];
    const prayerVoiceStatus=$('prayerAdhanDownloadStatus');
+   let prayerProgressBar=null;
+   function updatePrayerProgress(percent){
+     if(!prayerVoiceStatus)return;
+     if(!prayerProgressBar){
+       prayerProgressBar=document.createElement('div');prayerProgressBar.id='zadPrayerDownloadProgress';
+       prayerProgressBar.style.cssText='height:12px;width:100%;margin:9px 0 12px;border-radius:20px;overflow:hidden;background:#e5eee8;direction:ltr;border:1px solid #d4e1d7';
+       const fill=document.createElement('span');fill.style.cssText='display:block;width:0;height:100%;border-radius:20px;background:linear-gradient(90deg,#0c8067,#d6b76f);transition:width .15s ease';
+       prayerProgressBar.appendChild(fill);prayerVoiceStatus.insertAdjacentElement('afterend',prayerProgressBar);
+     }
+     prayerProgressBar.style.display='block';
+     const value=percent===null||percent===undefined?0:Math.max(0,Math.min(100,percent));
+     prayerProgressBar.firstElementChild.style.width=value+'%';
+     prayerProgressBar.setAttribute('role','progressbar');prayerProgressBar.setAttribute('aria-valuemin','0');prayerProgressBar.setAttribute('aria-valuemax','100');prayerProgressBar.setAttribute('aria-valuenow',String(value));
+   }
+   function finishPrayerProgress(){if(prayerProgressBar){prayerProgressBar.firstElementChild.style.width='100%';setTimeout(()=>{if(prayerProgressBar)prayerProgressBar.style.display='none';},1800);}}
+   window.onPrayerAudioDownloadProgress=function(index,total,percent,received,bytesTotal){
+     updatePrayerProgress(percent);
+   };
    prayerVoiceSelects.forEach(sel=>{
      const prayer=sel.dataset.prayer;
      const stored=localStorage.getItem('zad_adhan_voice_'+prayer)||prayerVoiceDefaults[prayer]||'basit';
@@ -277,6 +295,7 @@
        const fill=adhanProgress.querySelector('span');
        if(fill){fill.style.animation='none';fill.style.transform='none';fill.style.width=(percent===null?38:percent)+'%';}
      }
+     updatePrayerProgress(percent);
      const progressText='جارٍ تنزيل '+label+(names[prayer]?' ('+index+' من 5)':'')+' — '+mb+' من '+totalMb+' ميجابايت'+(percent===null?'':' — '+percent+'%');
      adhanStatus.textContent=progressText;
      if(prayerVoiceStatus)prayerVoiceStatus.textContent=progressText;
@@ -296,6 +315,7 @@
      if(!voice)return;
      if(downloadBtn)downloadBtn.disabled=false;
      hideAdhanProgress();
+     finishPrayerProgress();
      if(which!==voice.value){return;}
      adhanStatus.textContent=ok?'تم تحميل الأذان وحفظ نسخة في مجلد الهاتف.':'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
      if(ok&&reason&&reason.indexOf('المسار الداخلي: ')!==-1){
