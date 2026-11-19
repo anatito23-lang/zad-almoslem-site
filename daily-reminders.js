@@ -186,7 +186,7 @@
      if(ready)$('adhanSettingsStatus').textContent='التسجيل محفوظ على هذا الجهاز ويعمل دون إنترنت.';
    }
    window.onAdhanDownloadProgress=function(index,prayer,received,total,directory){
-     if(!voice||voice.value!=='doha')return;
+     if(!voice)return;
      const names={fajr:'الفجر',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'};
      const label=names[prayer]||prayer;
      const mb=(received/1048576).toFixed(2);
@@ -198,6 +198,7 @@
        if(fill){fill.style.animation='none';fill.style.transform='none';fill.style.width=(percent===null?38:percent)+'%';}
      }
      adhanStatus.textContent='جارٍ تنزيل '+label+' ('+index+' من 5) — '+mb+' من '+totalMb+' ميجابايت'+(percent===null?'':' — '+percent+'%');
+     if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل '+label+' — '+mb+' من '+totalMb+' ميجابايت'+(percent===null?'':' — '+percent+'%');
      if(directory){
        if(!adhanPathBox)return;
        adhanPathBox.style.display='block';
