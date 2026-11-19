@@ -61,7 +61,7 @@ public class AdhanPlaybackService extends Service {
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
             float gain = Math.max(0, Math.min(100, volume)) / 100f;
             player.setVolume(gain, gain);
-            player.setOnCompletionListener(mp -> { if(silentDuration>0) ReminderReceiver.startSilentMode(this,silentDuration); stopPlayer(); stopForeground(true); stopSelf(); });
+            player.setOnCompletionListener(mp -> { finishAdhan(); });
             player.setOnErrorListener((mp, what, extra) -> { if(silentDuration>0) ReminderReceiver.startSilentMode(this,silentDuration); stopPlayer(); stopForeground(true); stopSelf(); return true; });
             player.setOnPreparedListener(MediaPlayer::start);
             player.setDataSource(file.getAbsolutePath());
@@ -70,6 +70,21 @@ public class AdhanPlaybackService extends Service {
         return START_NOT_STICKY;
     }
 
+    private void finishAdhan() {
+        boolean duaEnabled=false;
+        try {
+            org.json.JSONObject settings=new org.json.JSONObject(getSharedPreferences("zad_reminders",MODE_PRIVATE).getString("adhan_settings","{}"));
+            duaEnabled=settings.optBoolean("dua",false);
+        } catch(Exception ignored) {}
+        File dua=new File(new File(getFilesDir(),"reminders"),"dua.mp3");
+        stopPlayer();
+        stopForeground(true);
+        stopSelf();
+        if(duaEnabled && dua.isFile() && dua.length()>10000)
+            ReminderAudioService.play(getApplicationContext(),"dua",silentDuration);
+        else if(silentDuration>0)
+            ReminderReceiver.startSilentMode(getApplicationContext(),silentDuration);
+    }
     private void createChannel() {
         if (Build.VERSION.SDK_INT >= 26) {
             NotificationManager nm = getSystemService(NotificationManager.class);
