@@ -126,7 +126,7 @@
      hideAdhanProgress();
      adhanStatus.textContent=ok?'تم تحميل الأذان وحفظ نسخة في مجلد الهاتف.':'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
      if(ok&&reason&&reason.indexOf('التخزين الداخلي/')!==-1){
-       localStorage.setItem('zad_adhan_public_path_'+which,reason.replace(/^.*?تم الحفظ في:\\s*/,''));
+       localStorage.setItem('zad_adhan_public_path_'+which,reason.replace(/^.*?تم الحفظ في:\s*/,''));
        refreshSavedAdhanPath();
      }else if(!ok){showSavedAdhanPath(which,localStorage.getItem('zad_adhan_public_path_'+which));}
      if(downloadBtn)downloadBtn.disabled=false;
