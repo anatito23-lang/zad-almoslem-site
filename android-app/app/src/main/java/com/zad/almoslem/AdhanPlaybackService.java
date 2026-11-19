@@ -74,7 +74,7 @@ public class AdhanPlaybackService extends Service {
             } else {
                 startForeground(NOTIFICATION_ID, notification);
             }
-            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().remove("adhan_last_start_error").apply();
+            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().remove("adhan_last_start_error").remove("adhan_last_playback_error").putBoolean("adhan_playback_started", false).apply();
             String voice = intent == null ? "basit" : intent.getStringExtra("voice");
             playAdhan(voice, prayer);
         } catch (Exception error) {
@@ -101,8 +101,8 @@ public class AdhanPlaybackService extends Service {
         try {
             player = new ExoPlayer.Builder(this).setWakeMode(androidx.media3.common.C.WAKE_MODE_LOCAL).build();
             player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
-                    .setUsage(androidx.media3.common.C.USAGE_ALARM)
-                    .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC)
+                    .setUsage(androidx.media3.common.C.USAGE_MEDIA)
+                    .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_SPEECH)
                     .build(), true);
             android.content.SharedPreferences prefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
             String volumePrayerKey = "dhuhr";
@@ -127,12 +127,16 @@ public class AdhanPlaybackService extends Service {
             File audioFile = isPlayableAudioFile(mp3File) ? mp3File
                     : (isPlayableAudioFile(oggFile) ? oggFile : null);
             if (audioFile == null) {
+                getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_playback_started", false).putString("adhan_last_playback_error", "ملف الصوت غير موجود أو غير صالح: " + safeVoice).apply();
                 showMissingAudioNotification();
                 stopPlayback();
                 return;
             }
             player.addListener(new Player.Listener() {
                 @Override public void onPlaybackStateChanged(int state) {
+                    if (state == Player.STATE_READY) {
+                        getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_playback_started", true).remove("adhan_last_playback_error").apply();
+                    }
                     if (state == Player.STATE_ENDED) {
                         boolean playDua = playDuaAfterCompletion;
                         playDuaAfterCompletion = false;
@@ -141,6 +145,7 @@ public class AdhanPlaybackService extends Service {
                     }
                 }
                 @Override public void onPlayerError(PlaybackException error) {
+                    getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_playback_started", false).putString("adhan_last_playback_error", error.getMessage() == null ? "صيغة الملف غير مدعومة" : error.getMessage()).apply();
                     showPlaybackErrorNotification("تعذر تشغيل ملف الأذان: " +
                             (error.getMessage() == null ? "صيغة الملف غير مدعومة" : error.getMessage()));
                     stopPlayback();
@@ -150,6 +155,7 @@ public class AdhanPlaybackService extends Service {
             player.prepare();
             player.play();
         } catch (Exception e) {
+            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_playback_started", false).putString("adhan_last_playback_error", e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage()).apply();
             showPlaybackErrorNotification("تعذر تشغيل الأذان: " + (e.getMessage() == null ? "خطأ في ملف الصوت" : e.getMessage()));
             stopPlayback();
         }
