@@ -2031,11 +2031,21 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
    }
    const url=key==='doha'?(sources.doha[prayer]||''):sources[key];
    if(!url){say('مصدر هذا التسجيل غير متاح.');return;}
-   audio.hidden=false;audio.controls=true;audio.pause();audio.removeAttribute('src');audio.src=url;
-   audio.volume=Math.max(0,Math.min(100,Number(document.getElementById('adhanVolume')?.value??100))/100);
-   audio.load();say('جارٍ تحميل وتشغيل صوت '+select.options[select.selectedIndex].text+' لصلاة '+prayer+'...');
-   const p=audio.play();
-   if(p&&p.catch)p.catch(err=>say('تعذّر التشغيل: '+(err.name==='NotAllowedError'?'اضغط زر التشغيل في مشغل الصوت.':'تحقق من اتصال الإنترنت أو مصدر التسجيل.')));
+   (async()=>{
+    let source=url;
+    try{
+     if('caches' in window){
+      const cache=await caches.open('zad-prayer-audio-v1');
+      const saved=await cache.match(url);
+      if(saved){source=URL.createObjectURL(await saved.blob());if(audio.dataset.objectUrl)URL.revokeObjectURL(audio.dataset.objectUrl);audio.dataset.objectUrl=source;}
+     }
+    }catch(error){}
+    audio.hidden=false;audio.controls=true;audio.pause();audio.removeAttribute('src');audio.src=source;
+    audio.volume=Math.max(0,Math.min(100,Number(document.getElementById('adhanVolume')?.value??100))/100);
+    audio.load();say((source.startsWith('blob:')?'تشغيل التسجيل المحفوظ على هذا الجهاز. ':'جارٍ تحميل التسجيل من الإنترنت. ')+'صوت '+select.options[select.selectedIndex].text+' لصلاة '+prayer+'...');
+    const p=audio.play();
+    if(p&&p.catch)p.catch(err=>say('تعذّر التشغيل: '+(err.name==='NotAllowedError'?'اضغط زر التشغيل في مشغل الصوت.':'تحقق من اتصال الإنترنت أو مصدر التسجيل.')));
+   })();
   },true);
   const audio=document.getElementById('adhanPreview'),status=document.getElementById('prayerAdhanDownloadStatus');
   if(audio)audio.addEventListener('error',()=>{if(status)status.textContent='فشل تحميل ملف الصوت من المصدر. تم إصلاح استجابة زر المعاينة، لكن مصدر التسجيل لم يستجب.';});
