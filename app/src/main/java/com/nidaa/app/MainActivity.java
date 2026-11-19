@@ -14,6 +14,7 @@ import android.hardware.SensorManager;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
@@ -40,6 +41,9 @@ public class MainActivity extends Activity implements SensorEventListener {
     private CompassView compassView;
     private float azimuth=0;
     private boolean compassAvailable=false;
+    private final Handler clockHandler=new Handler();
+    private TextView countdownView;
+    private final Runnable clockTick=new Runnable(){@Override public void run(){updateCountdown();clockHandler.postDelayed(this,1000);}};
     private int tasbeehCount=0;
     private int dhikrIndex=0;
     private final String[] adhkar={"سبحان الله","الحمد لله","الله أكبر","أستغفر الله","لا إله إلا الله","اللهم صل وسلم على نبينا محمد"};
@@ -70,14 +74,50 @@ public class MainActivity extends Activity implements SensorEventListener {
         content.removeAllViews();
         if(tab.equals("الرئيسية")){
             String date=new SimpleDateFormat("EEEE، d MMMM yyyy",new Locale("ar")).format(new Date());
-            TextView top=txt(date+"\n"+cities[cityIndex()]+" · التوقيت المحلي",14,muted,true);card(top);
-            LinearLayout hero=vertical();hero.setGravity(Gravity.CENTER);hero.addView(txt("الصلاة القادمة",15,muted,false));int n=nextIndex();hero.addView(txt(prayerNames[n],31,gold,true));hero.addView(txt(fmt(dates(times())[n]),25,white,true));hero.addView(txt("طريقة الحساب: الهيئة المصرية العامة للمساحة",12,muted,false));card(hero);
-            TextView title=txt("مواقيت الصلاة اليوم",19,white,true);title.setGravity(Gravity.RIGHT);content.addView(title);
+            LinearLayout dateRow=new LinearLayout(this);dateRow.setGravity(Gravity.CENTER_VERTICAL);
+            TextView city=txt(cities[cityIndex()],14,gold,true);city.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);
+            TextView today=txt(date,13,muted,false);today.setGravity(Gravity.LEFT|Gravity.CENTER_VERTICAL);
+            dateRow.addView(city,new LinearLayout.LayoutParams(0,-2,1));dateRow.addView(today);card(dateRow);
+
+            LinearLayout hero=vertical();hero.setGravity(Gravity.CENTER);hero.setPadding(8,18,8,18);
+            hero.addView(txt("الصلاة القادمة",15,muted,false));
+            int n=nextIndex();
+            hero.addView(txt(prayerNames[n],34,gold,true));
+            hero.addView(txt(fmt(dates(times())[n]),25,white,true));
+            countdownView=txt("--:--:--",30,white,true);
+            countdownView.setPadding(8,14,8,14);hero.addView(countdownView);
+            hero.addView(txt("الوقت المتبقي للصلاة",12,muted,false));
+            card(hero);
+
+            LinearLayout header=new LinearLayout(this);header.setGravity(Gravity.CENTER_VERTICAL);
+            TextView title=txt("مواقيت الصلاة",20,white,true);title.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);
+            TextView method=txt("حساب مصر",12,muted,false);
+            header.addView(title,new LinearLayout.LayoutParams(0,-2,1));header.addView(method);content.addView(header);
             PrayerTimes p=times();Date[] ds=dates(p);
-            for(int i=0;i<6;i++){final int ix=i;LinearLayout row=new LinearLayout(this);row.setGravity(Gravity.CENTER_VERTICAL);TextView name=txt(prayerNames[i],16,white,true);name.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);TextView time=txt(fmt(ds[i]),16,gold,true);time.setGravity(Gravity.LEFT|Gravity.CENTER_VERTICAL);row.addView(name,new LinearLayout.LayoutParams(0,-2,1));row.addView(time);card(row);}
-            TextView city=txt("تغيير المدينة",15,gold,true);city.setOnClickListener(v->chooseCity());card(city);
-            card(txt("المواقيت محسوبة داخل التطبيق ولا تحتاج إلى إنترنت.",13,muted,false));
-        }else if(tab.equals("الصلاة")){
+            for(int i=0;i<6;i++){
+                final int ix=i;
+                LinearLayout row=new LinearLayout(this);row.setGravity(Gravity.CENTER_VERTICAL);row.setPadding(8,3,8,3);
+                TextView name=txt(prayerNames[i],16,i==n?gold:white,true);name.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);
+                TextView time=txt(fmt(ds[i]),16,i==n?gold:white,true);time.setGravity(Gravity.LEFT|Gravity.CENTER_VERTICAL);
+                row.addView(name,new LinearLayout.LayoutParams(0,-2,1));row.addView(time);
+                card(row);
+            }
+            LinearLayout quick=vertical();
+            quick.addView(txt("وصول سريع",18,white,true));
+            String[] quickNames={"القرآن الكريم","أذكار الصباح والمساء","المسبحة الإلكترونية","اتجاه القبلة"};
+            String[] destinations={"القرآن","الأذكار","الأذكار","القبلة"};
+            for(int i=0;i<quickNames.length;i+=2){
+                LinearLayout line=new LinearLayout(this);
+                for(int j=i;j<Math.min(i+2,quickNames.length);j++){
+                    final String dest=destinations[j];
+                    TextView q=txt(quickNames[j],14,gold,true);q.setBackground(shape(bg,14));q.setOnClickListener(v->{tab=dest;render();});
+                    LinearLayout.LayoutParams qp=new LinearLayout.LayoutParams(0,76,1);qp.setMargins(4,4,4,4);line.addView(q,qp);
+                }
+                quick.addView(line);
+            }
+            card(quick);
+            TextView cityChange=txt("تغيير المدينة وإعدادات الموقع",14,gold,true);cityChange.setOnClickListener(v->chooseCity());card(cityChange);
+        }        }else if(tab.equals("الصلاة")){
             card(txt("إعدادات المؤذّن",23,gold,true));
             card(txt("اختر الصوت المفضل لكل صلاة",15,white,true));
             for(int i:new int[]{0,2,3,4,5}){
@@ -115,11 +155,18 @@ public class MainActivity extends Activity implements SensorEventListener {
             card(txt("نِداء · الإصدار 1.1\nيعمل حساب المواقيت دون اتصال بالإنترنت.",13,muted,false));
         }
     }
+    private void updateCountdown(){
+        if(countdownView==null||!tab.equals("الرئيسية"))return;
+        int n=nextIndex();long diff=dates(times())[n].getTime()-System.currentTimeMillis();
+        if(diff<0)diff=0;
+        long h=diff/3600000,m=(diff/60000)%60,s=(diff/1000)%60;
+        countdownView.setText(String.format(Locale.US,"%02d:%02d:%02d",h,m,s));
+    }
     private void settingRow(String title,String value,Runnable action){LinearLayout r=new LinearLayout(this);r.setGravity(Gravity.CENTER_VERTICAL);TextView t=txt(title+"\n"+value,15,white,true);t.setGravity(Gravity.RIGHT);r.addView(t,new LinearLayout.LayoutParams(0,-2,1));TextView b=txt("تغيير",14,gold,true);b.setOnClickListener(v->action.run());r.addView(b);card(r);}
     private void chooseCity(){new AlertDialog.Builder(this).setTitle("اختر مدينتك").setSingleChoiceItems(cities,cityIndex(),(d,w)->{prefs.edit().putInt("city",w).apply();if(prefs.getBoolean("reminders",false))PrayerAlarmScheduler.schedule(this,w);d.dismiss();render();}).setNegativeButton("إلغاء",null).show();}
 
-    @Override protected void onResume(){super.onResume();if(rotationSensor!=null)sensorManager.registerListener(this,rotationSensor,SensorManager.SENSOR_DELAY_UI);}
-    @Override protected void onPause(){super.onPause();if(sensorManager!=null)sensorManager.unregisterListener(this);}
+    @Override protected void onResume(){super.onResume();if(rotationSensor!=null)sensorManager.registerListener(this,rotationSensor,SensorManager.SENSOR_DELAY_UI);clockHandler.removeCallbacks(clockTick);clockHandler.post(clockTick);}
+    @Override protected void onPause(){super.onPause();clockHandler.removeCallbacks(clockTick);if(sensorManager!=null)sensorManager.unregisterListener(this);}
     @Override public void onSensorChanged(SensorEvent event){
         if(event.sensor.getType()!=Sensor.TYPE_ROTATION_VECTOR)return;
         float[] matrix=new float[9];float[] orientation=new float[3];
