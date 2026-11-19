@@ -22,7 +22,7 @@ public class PrayerAlarmReceiver extends BroadcastReceiver {
             .setContentText("حيّ على الصلاة")
             .setAutoCancel(true).build();
         nm.notify((int)(System.currentTimeMillis()%Integer.MAX_VALUE),notification);
-        int city=context.getSharedPreferences("nidaa",Context.MODE_PRIVATE).getInt("city",0);
-        PrayerAlarmScheduler.scheduleNext(context,city);
+        int id=intent.getIntExtra("prayer_id",-1);
+        PrayerAlarmScheduler.scheduleNextDay(context,id,name);
     }
 }
