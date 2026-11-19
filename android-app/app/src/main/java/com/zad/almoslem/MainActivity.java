@@ -63,7 +63,7 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
-        webView.loadUrl("https://anatito23-lang.github.io/zad-almoslem-site/?appbuild=20261118settings5&native=1");
+        webView.loadUrl("https://anatito23-lang.github.io/zad-almoslem-site/?appbuild=20261119adhanfix8&native=1");
         requestNotificationPermission();
     }
     @Override protected void onResume() {
