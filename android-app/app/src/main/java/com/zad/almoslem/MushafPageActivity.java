@@ -6,6 +6,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.*;
 import org.json.JSONArray;
@@ -16,7 +18,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class MushafPageActivity extends Activity {
-    private int page=1;private boolean busy=false;private TextView pageTitle,status,content;private Button previous,next,save;private SeekBar pageSeek;
+    private int page=1;private boolean busy=false;private TextView pageTitle,status,content;private Button previous,next,save;private SeekBar pageSeek;private GestureDetector pageGesture;
     private final int green=Color.rgb(8,48,40);
     @Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);page=getIntent().getIntExtra("page",getSharedPreferences("zad_mushaf",MODE_PRIVATE).getInt("last_page",1));build();showPage(page);}
     private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
@@ -26,6 +28,19 @@ public class MushafPageActivity extends Activity {
         ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(14),dp(14),dp(14),dp(24));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);setContentView(AppTabs.wrap(this,scroll,"mushaf"));
         TextView title=label("المصحف الشريف — صفحات",24,Color.WHITE,true);title.setPadding(dp(12),dp(20),dp(12),dp(20));title.setBackground(bg(green,16));root.addView(title);
         pageTitle=label("",16,green,true);pageTitle.setPadding(0,dp(10),0,dp(4));root.addView(pageTitle);
+        TextView swipeHint=label("اسحب الصفحة يمينًا أو يسارًا للتقليب مثل المصحف الورقي",12,Color.DKGRAY,false);swipeHint.setPadding(0,dp(2),0,dp(8));root.addView(swipeHint);
+        pageGesture=new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){
+            @Override public boolean onDown(MotionEvent e){return true;}
+            @Override public boolean onFling(MotionEvent e1,MotionEvent e2,float velocityX,float velocityY){
+                if(e1==null||e2==null)return false;
+                float dx=e2.getX()-e1.getX(),dy=e2.getY()-e1.getY();
+                if(Math.abs(dx)<dp(55)||Math.abs(dx)<Math.abs(dy)*1.25f||Math.abs(velocityX)<dp(180))return false;
+                if(busy)return true;
+                if(dx<0&&page<604)showPage(page+1);
+                else if(dx>0&&page>1)showPage(page-1);
+                return true;
+            }
+        });
         LinearLayout nav=new LinearLayout(this);nav.setOrientation(LinearLayout.HORIZONTAL);
         previous=new Button(this);previous.setText("الصفحة السابقة");next=new Button(this);next.setText("الصفحة التالية");
         nav.addView(previous,new LinearLayout.LayoutParams(0,dp(48),1));nav.addView(next,new LinearLayout.LayoutParams(0,dp(48),1));root.addView(nav);
@@ -34,7 +49,10 @@ public class MushafPageActivity extends Activity {
         save=new Button(this);save.setText("حفظ الصفحة للقراءة دون إنترنت");root.addView(save);save.setOnClickListener(v->load(page,true));
         status=label("جارٍ تجهيز المصحف...",12,Color.DKGRAY,false);root.addView(status);
         LinearLayout pageFrame=new LinearLayout(this);pageFrame.setOrientation(LinearLayout.VERTICAL);pageFrame.setPadding(dp(18),dp(22),dp(18),dp(22));pageFrame.setBackground(bg(Color.rgb(255,253,242),8));
-        content=label("",22,Color.rgb(45,45,38),false);content.setGravity(Gravity.CENTER);content.setLineSpacing(dp(13),1.12f);pageFrame.addView(content,new LinearLayout.LayoutParams(-1,-2));LinearLayout.LayoutParams fp=new LinearLayout.LayoutParams(-1,-2);fp.topMargin=dp(10);root.addView(pageFrame,fp);
+        content=label("",22,Color.rgb(45,45,38),false);content.setGravity(Gravity.CENTER);content.setLineSpacing(dp(13),1.12f);pageFrame.addView(content,new LinearLayout.LayoutParams(-1,-2));
+        pageFrame.setClickable(true);pageFrame.setOnTouchListener((v,event)->pageGesture.onTouchEvent(event));
+        content.setOnTouchListener((v,event)->pageGesture.onTouchEvent(event));
+        LinearLayout.LayoutParams fp=new LinearLayout.LayoutParams(-1,-2);fp.topMargin=dp(10);root.addView(pageFrame,fp);
         Button back=new Button(this);back.setText("العودة للأقسام");root.addView(back);back.setOnClickListener(v->finish());
     }
     private File file(int n){File d=new File(getFilesDir(),"mushaf_pages");if(!d.exists())d.mkdirs();return new File(d,"page_"+n+".json");}
