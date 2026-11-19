@@ -35,7 +35,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         int minutes=Math.max(1,Math.min(60,prefs.getInt("approach_alert_minutes",15)));
         long alertAt=prayerAt-minutes*60L*1000L;
         if(alertAt>System.currentTimeMillis()) {
-            schedule(context,alertKey,alertAt,"اقتربت صلاة "+name+"، بقي على الصلاة ربع ساعة.",false);
+            schedule(context,alertKey,alertAt,"اقتربت صلاة "+name+"، بقي على الصلاة "+minutes+" دقيقة. استعد للصلاة.",false);
         } else {
             cancel(context,alertKey);
         }
@@ -117,6 +117,8 @@ public class ReminderReceiver extends BroadcastReceiver {
         android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
         if (!prayer && ("morning".equals(key) || "evening".equals(key) || "qiyam".equals(key))) {
             try { ReminderAudioService.play(context, key); } catch (Exception ignored) {}
+        } else if (key.startsWith("approach_")) {
+            try { ReminderAudioService.play(context, "approach", title); } catch (Exception ignored) {}
         }
         boolean adhanEnabled=prefs.getBoolean("adhan_enabled",true);
         String adhanMode=prefs.getString("adhan_mode","adhan");
