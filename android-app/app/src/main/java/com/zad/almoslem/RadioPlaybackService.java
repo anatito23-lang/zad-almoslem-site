@@ -31,14 +31,23 @@ public class RadioPlaybackService extends Service {
         String kind=intent==null?"radio":intent.getStringExtra("kind");
         boolean allowedRadio="https://qurango.net/radio/tarateel".equals(url) ||
              "https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8".equals(url);
-        boolean allowedQuran=false;
+        boolean allowedQuran=false,allowedLocal=false;
+        File localFile=null;
+        String localPath=intent==null?null:intent.getStringExtra("local_path");
         try {
-            android.net.Uri parsed=android.net.Uri.parse(url);
-            String host=parsed.getHost();
-            allowedQuran="quran".equals(kind) && "https".equalsIgnoreCase(parsed.getScheme()) && host!=null &&
-                (host.toLowerCase().endsWith("mp3quran.net") || host.toLowerCase().endsWith("mp3quran.com"));
+            if("quran".equals(kind)&&localPath!=null){
+                File quranDir=new File(getFilesDir(),"quran").getCanonicalFile();
+                localFile=new File(localPath).getCanonicalFile();
+                allowedLocal=localFile.isFile()&&localFile.length()>10000&&localFile.getPath().startsWith(quranDir.getPath()+File.separator);
+            }
+            if(!allowedLocal){
+                android.net.Uri parsed=android.net.Uri.parse(url);
+                String host=parsed.getHost();
+                allowedQuran="quran".equals(kind) && "https".equalsIgnoreCase(parsed.getScheme()) && host!=null &&
+                    (host.toLowerCase().endsWith("mp3quran.net") || host.toLowerCase().endsWith("mp3quran.com"));
+            }
         } catch(Exception ignored) {}
-        if(!allowedRadio && !allowedQuran) { stopRadio(); return START_NOT_STICKY; }
+        if(!allowedRadio && !allowedQuran && !allowedLocal) { stopRadio(); return START_NOT_STICKY; }
         String label=intent==null?null:intent.getStringExtra("label");
         if(label!=null) {
             Notification.Builder updated=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
@@ -51,7 +60,7 @@ public class RadioPlaybackService extends Service {
             else startForeground(NOTIFICATION,n2);
         }
         getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",true).putString("active_kind",kind==null?"radio":kind).apply();
-        play(url);
+        play(url,allowedLocal?localFile:null);
         return START_NOT_STICKY;
     }
     private void createChannel() {
@@ -61,7 +70,7 @@ public class RadioPlaybackService extends Service {
             c.setDescription("يظهر أثناء استمرار تشغيل الإذاعة في الخلفية"); nm.createNotificationChannel(c);
         }
     }
-    private void play(String url) {
+    private void play(String url,File localFile) {
         releasePlayer();
         try {
             player=new MediaPlayer();
@@ -70,7 +79,7 @@ public class RadioPlaybackService extends Service {
             player.setOnPreparedListener(MediaPlayer::start);
             player.setOnErrorListener((mp,what,extra)->{stopRadio();return true;});
             player.setOnCompletionListener(mp->stopRadio());
-            player.setDataSource(url);
+            if(localFile!=null)player.setDataSource(localFile.getAbsolutePath());else player.setDataSource(url);
             player.prepareAsync();
         } catch(Exception e) { stopRadio(); }
     }
