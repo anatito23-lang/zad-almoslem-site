@@ -94,12 +94,14 @@ public class RadioPlaybackService extends Service {
                     }
                 }
                 @Override public void onPlayerError(PlaybackException error) {
-                    String detail = error.getMessage() == null ? error.getErrorCodeName() : error.getMessage();
+                    String detail = error.getErrorCodeName() + ": " +
+                            (error.getMessage() == null ? error.toString() : error.getMessage());
                     getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
                             .putBoolean("radio_ready", false).putBoolean("radio_playing", false)
                             .putString("radio_last_error", detail).apply();
                     android.util.Log.e("ZadAlmoslem", "Radio stream playback failed: " + url, error);
-                    stopRadio();
+                    showRadioFailure(detail);
+                    try { if (player != null) player.stop(); } catch (Exception ignored) {}
                 }
             });
             Uri source = localFile != null ? Uri.fromFile(localFile) : Uri.parse(url);
@@ -113,6 +115,30 @@ public class RadioPlaybackService extends Service {
             stopRadio();
         }
     }
+    private void showRadioFailure(String detail) {
+        try {
+            Intent open = new Intent(this, MainActivity.class);
+            PendingIntent content = PendingIntent.getActivity(this, 7411, open,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            Intent stop = new Intent(this, RadioPlaybackService.class);
+            stop.setAction(ACTION_STOP);
+            PendingIntent stopAction = PendingIntent.getService(this, 7412, stop,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+            Notification.Builder b = Build.VERSION.SDK_INT >= 26
+                    ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
+            String message = detail == null ? "تعذر استقبال البث" : detail;
+            if (message.length() > 110) message = message.substring(0, 110);
+            b.setSmallIcon(android.R.drawable.ic_dialog_alert)
+                    .setContentTitle("تعذر تشغيل إذاعة القرآن")
+                    .setContentText(message)
+                    .setStyle(new Notification.BigTextStyle().bigText(message))
+                    .setContentIntent(content).setOngoing(true)
+                    .addAction(android.R.drawable.ic_media_pause, "إغلاق", stopAction);
+            getSystemService(NotificationManager.class).notify(NOTIFICATION, b.build());
+        } catch (Exception e) {
+            android.util.Log.e("ZadAlmoslem", "Could not show radio error notification", e);
+        }
+    }
     private void releasePlayer() {
         if (player != null) {
             try { player.stop(); } catch (Exception ignored) {}
@@ -120,7 +146,7 @@ public class RadioPlaybackService extends Service {
             player = null;
         }
     }
-    private void stopRadio() { getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putString("active_kind","").apply(); releasePlayer(); stopForeground(true); stopSelf(); }
+    private void stopRadio() { getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").apply(); releasePlayer(); stopForeground(true); stopSelf(); }
     @Override public void onDestroy(){releasePlayer();super.onDestroy();}
     @Override public IBinder onBind(Intent intent){return null;}
 }
