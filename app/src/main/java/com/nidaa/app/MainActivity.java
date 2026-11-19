@@ -17,7 +17,6 @@ import com.batoulapps.adhan.PrayerTimes;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.TimeZone;
 
 public class MainActivity extends Activity {
     private final int bg = Color.rgb(10, 22, 37), panel = Color.rgb(20, 38, 56), gold = Color.rgb(218, 181, 111), white = Color.rgb(244, 241, 232), muted = Color.rgb(164, 177, 188);
@@ -71,7 +70,7 @@ public class MainActivity extends Activity {
             TextView heading=text("مواقيت اليوم",19,white,true); heading.setGravity(Gravity.RIGHT); content.addView(heading);
             PrayerTimes pt = prayerTimes();
             String[] names={"الفجر","الشروق","الظهر","العصر","المغرب","العشاء"};
-            Date[] times={pt.fajr,pt.sunrise,pt dhuhr,pt.asr,pt.maghrib,pt.isha};
+            Date[] times={pt.fajr,pt.sunrise,pt.dhuhr,pt.asr,pt.maghrib,pt.isha};
             for(int i=0;i<names.length;i++){
                 LinearLayout row=new LinearLayout(this); row.setGravity(Gravity.CENTER_VERTICAL); row.setPadding(8,4,8,4);
                 TextView n=text(names[i],16,white,true); n.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);
