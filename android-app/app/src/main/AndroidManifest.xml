@@ -11,6 +11,7 @@
     <application android:allowBackup="true" android:label="قلبي اطمأن - زاد المسلم" android:icon="@drawable/ic_launcher_new" android:roundIcon="@drawable/ic_launcher_new" android:usesCleartextTraffic="false" android:theme="@style/AppTheme">
         <activity android:name=".KhutbahLibraryActivity" android:exported="false" />
         <activity android:name=".QiblaActivity" android:exported="false" />
+        <activity android:name=".QuranTextActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="true" android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
