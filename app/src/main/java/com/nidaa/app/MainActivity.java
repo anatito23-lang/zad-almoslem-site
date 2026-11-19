@@ -117,7 +117,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             }
             card(quick);
             TextView cityChange=txt("تغيير المدينة وإعدادات الموقع",14,gold,true);cityChange.setOnClickListener(v->chooseCity());card(cityChange);
-        }        }else if(tab.equals("الصلاة")){
+        }else if(tab.equals("الصلاة")){
             card(txt("إعدادات المؤذّن",23,gold,true));
             card(txt("اختر الصوت المفضل لكل صلاة",15,white,true));
             for(int i:new int[]{0,2,3,4,5}){
