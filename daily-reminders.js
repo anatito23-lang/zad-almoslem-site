@@ -197,8 +197,9 @@
        const fill=adhanProgress.querySelector('span');
        if(fill){fill.style.animation='none';fill.style.transform='none';fill.style.width=(percent===null?38:percent)+'%';}
      }
-     adhanStatus.textContent='جارٍ تنزيل '+label+' ('+index+' من 5) — '+mb+' من '+totalMb+' ميجابايت'+(percent===null?'':' — '+percent+'%');
-     if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل '+label+' — '+mb+' من '+totalMb+' ميجابايت'+(percent===null?'':' — '+percent+'%');
+     const progressText='جارٍ تنزيل '+label+(names[prayer]?' ('+index+' من 5)':'')+' — '+mb+' من '+totalMb+' ميجابايت'+(percent===null?'':' — '+percent+'%');
+     adhanStatus.textContent=progressText;
+     if(prayerVoiceStatus)prayerVoiceStatus.textContent=progressText;
      if(directory){
        if(!adhanPathBox)return;
        adhanPathBox.style.display='block';
