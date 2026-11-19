@@ -34,10 +34,14 @@ public class RadioActivity extends Activity {
         android.content.SharedPreferences p=getSharedPreferences("zad_audio",MODE_PRIVATE);
         boolean ready=p.getBoolean("radio_ready",false),playing=p.getBoolean("radio_playing",false);
         String error=p.getString("radio_last_error","");
-        if(ready)status.setText("● البث يعمل الآن — الصوت مستمر من الإذاعة.");
-        else if(playing)status.setText("جارٍ الاتصال بالبث أو تجربة مصدر احتياطي...");
-        else if(error!=null&&!error.isEmpty())status.setText("تعذر تشغيل الإذاعة: "+error);
-        else status.setText("اضغط تشغيل لبدء إذاعة القرآن الكريم.");
+        String station=p.getString("radio_station","");
+        String stationName="egypt".equals(station)?"إذاعة القرآن الكريم المصرية من القاهرة":
+                "saudi".equals(station)?"إذاعة القرآن الكريم السعودية":
+                "palestine".equals(station)?"إذاعة القرآن الكريم من نابلس – فلسطين":"إذاعة القرآن الكريم";
+        if(ready)status.setText("● البث يعمل الآن — "+stationName);
+        else if(playing)status.setText("جارٍ الاتصال بـ "+stationName+"...");
+        else if(error!=null&&!error.isEmpty())status.setText("تعذر تشغيل "+stationName+": "+error);
+        else status.setText("اختر محطة ثم اضغط تشغيل لبدء البث.");
     }
     @Override protected void onDestroy(){handler.removeCallbacks(statusTicker);super.onDestroy();}
     private void start(String url,String label,String station){Intent i=new Intent(this,RadioPlaybackService.class);i.setAction(RadioPlaybackService.ACTION_PLAY);i.putExtra("url",url);i.putExtra("kind","radio");i.putExtra("label",label);i.putExtra("station",station);try{if(Build.VERSION.SDK_INT>=26)startForegroundService(i);else startService(i);status.setText("تم إرسال طلب تشغيل البث. انتظر إشعار حالة الاتصال.");}catch(Exception e){status.setText("تعذر بدء البث: "+e.getMessage());}}
