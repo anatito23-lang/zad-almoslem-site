@@ -378,7 +378,7 @@ footer{background:#071522;color:#c9d6e2}
         <button class="btn light" id="previewAdhan" type="button">استمع للأذان</button>
         <button class="btn light" id="downloadAdhan" type="button">تنزيل الصوت للعمل دون إنترنت</button>
       </div>
-      <audio id="adhanPreview" preload="none"></audio>
+      <audio id="adhanPreview" controls preload="none" style="display:block;width:100%;margin-top:10px;border-radius:12px"></audio>
       <div class="card" style="margin-top:12px">
         <label for="adhanVolume"><strong>مستوى صوت الأذان</strong> <span id="adhanVolumeValue">100%</span></label>
         <input id="adhanVolume" type="range" min="0" max="100" step="1" value="100" style="width:100%;margin:12px 0" aria-label="مستوى صوت الأذان من صفر إلى مئة">
