@@ -109,6 +109,28 @@
      });
    });
    const prayerVoiceStatus=$('prayerAdhanDownloadStatus');
+   function refreshNativeAdhanStorage(){
+     if(!window.ZadAndroid||!prayerVoiceStatus)return;
+     if(typeof window.ZadAndroid.getAdhanStorageDiagnostics!=='function'){
+       prayerVoiceStatus.textContent='اتصال التطبيق موجود، لكن نسخة أندرويد لا تعرض تشخيص التخزين بعد.';
+       return;
+     }
+     try{
+       const info=JSON.parse(window.ZadAndroid.getAdhanStorageDiagnostics());
+       if(info.diagnosticError){prayerVoiceStatus.textContent='تعذر فحص مساحة الأذان: '+info.diagnosticError;return;}
+       const count=Number(info.audioFileCount)||0;
+       const size=(Number(info.audioBytes)||0);
+       const mb=(size/1048576).toFixed(2);
+       const last=info.lastDownloadError||info.lastPlaybackError||'';
+       prayerVoiceStatus.textContent=count
+         ?'التطبيق متصل. ملفات الأذان المحفوظة داخليًا: '+count+' — الحجم '+mb+' ميجابايت.'
+         :'التطبيق متصل ومجلد التخزين الداخلي جاهز، لكن لا توجد ملفات أذان محفوظة حتى الآن.';
+       if(last)prayerVoiceStatus.textContent+=' آخر خطأ مسجل: '+last;
+     }catch(error){
+       prayerVoiceStatus.textContent='تعذر قراءة مساحة تخزين الأذان داخل التطبيق: '+(error.message||'خطأ غير معروف');
+     }
+   }
+   refreshNativeAdhanStorage();
    const PRAYER_AUDIO_CACHE='zad-prayer-audio-v1';
    let prayerProgressBar=null,prayerProgressFill=null,prayerProgressText=null;
    function ensurePrayerProgress(){
@@ -402,6 +424,7 @@
      }
    };
    window.onAdhanDownloadComplete=function(which,ok,reason){
+     refreshNativeAdhanStorage();
      const prayerDownloadCallback=window.onPrayerAdhanDownloadComplete;
      if(typeof prayerDownloadCallback==='function'&&prayerDownloadCallback.voiceKey===which){
        window.onPrayerAdhanDownloadComplete=null;
