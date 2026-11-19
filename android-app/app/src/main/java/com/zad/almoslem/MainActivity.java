@@ -179,6 +179,14 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void schedulePrayer(String name,long timestamp) {
             ReminderReceiver.schedulePrayer(MainActivity.this,name,timestamp);
         }
+        @JavascriptInterface public void setPrayerAdhanVoice(String prayer, String voice) {
+            String[] prayers = {"الفجر","الظهر","العصر","المغرب","العشاء"};
+            boolean validPrayer = false;
+            for (String item : prayers) if (item.equals(prayer)) validPrayer = true;
+            String safe = safeVoice(voice);
+            if (validPrayer) getSharedPreferences("zad_reminders", MODE_PRIVATE)
+                    .edit().putString("adhan_voice_" + prayer, safe).apply();
+        }
         @JavascriptInterface public void setAdhanVoice(String voice) {
             String safe = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"haram".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)) ? voice : "basit";
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_voice", safe).apply();
@@ -421,6 +429,7 @@ public class MainActivity extends Activity {
                             if (status != HttpURLConnection.HTTP_OK) throw new Exception("استجابة مصدر الصوت: " + status);
                             // Do not trust CDN Content-Type; validate the downloaded MP3 signature instead.
                             long total = 0;
+                            long expectedBytes = connection.getContentLength();
                             try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
                                 byte[] buffer = new byte[8192];
                                 int count;
@@ -428,6 +437,7 @@ public class MainActivity extends Activity {
                                     total += count;
                                     if (total > 12L * 1024L * 1024L) throw new Exception("حجم الملف أكبر من المسموح");
                                     out.write(buffer, 0, count);
+                                    reportAdhanProgress(1, safe, total, expectedBytes, dir.getAbsolutePath());
                                 }
                                 out.getFD().sync();
                             }

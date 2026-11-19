@@ -66,6 +66,68 @@
    if(volumeControl)volumeControl.addEventListener('input',applyAdhanVolume);
    applyAdhanVolume();
    if(storedVoice!==savedVoice)localStorage.setItem('zad_adhan_voice',savedVoice);
+   // Per-prayer adhan voices: stored locally and in Android preferences.
+   const prayerVoiceDefaults={الفجر:'tobar',الظهر:'basit',العصر:'mustafa',المغرب:'husary',العشاء:'banna'};
+   const prayerVoiceSelects=[...document.querySelectorAll('.prayer-adhan-voice')];
+   const prayerVoiceStatus=$('prayerAdhanDownloadStatus');
+   prayerVoiceSelects.forEach(sel=>{
+     const prayer=sel.dataset.prayer;
+     const stored=localStorage.getItem('zad_adhan_voice_'+prayer)||prayerVoiceDefaults[prayer]||'basit';
+     sel.value=[...sel.options].some(o=>o.value===stored)?stored:'basit';
+     if(window.ZadAndroid&&typeof window.ZadAndroid.setPrayerAdhanVoice==='function')window.ZadAndroid.setPrayerAdhanVoice(prayer,sel.value);
+     sel.addEventListener('change',()=>{
+       localStorage.setItem('zad_adhan_voice_'+prayer,sel.value);
+       if(window.ZadAndroid&&typeof window.ZadAndroid.setPrayerAdhanVoice==='function')window.ZadAndroid.setPrayerAdhanVoice(prayer,sel.value);
+       if(prayerVoiceStatus)prayerVoiceStatus.textContent='تم اختيار '+sel.options[sel.selectedIndex].text+' لصلاة '+prayer+'. اضغط حفظ الإعدادات لتأكيد كل الاختيارات.';
+     });
+   });
+   document.querySelectorAll('.prayer-adhan-preview').forEach(btn=>btn.addEventListener('click',()=>{
+     const prayer=btn.dataset.prayer;
+     const sel=prayerVoiceSelects.find(item=>item.dataset.prayer===prayer);
+     if(!sel||!window.ZadAndroid||typeof window.ZadAndroid.previewAdhan!=='function'){
+       if(prayerVoiceStatus)prayerVoiceStatus.textContent='معاينة التسجيلات المختارة متاحة داخل تطبيق أندرويد.';
+       return;
+     }
+     const key=sel.value;
+     try{
+       if(window.ZadAndroid.isAdhanDownloaded(key)){
+         window.ZadAndroid.previewAdhan(key);
+         if(prayerVoiceStatus)prayerVoiceStatus.textContent='يتم تشغيل معاينة '+sel.options[sel.selectedIndex].text+' لصلاة '+prayer+'.';
+         return;
+       }
+       btn.disabled=true;
+       if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل التسجيل لمعاينته...';
+       window.onPrayerPreviewDownloadComplete=(which,ok,reason)=>{
+         btn.disabled=false;
+         if(which!==key)return;
+         if(ok){window.ZadAndroid.previewAdhan(key);if(prayerVoiceStatus)prayerVoiceStatus.textContent='تم تنزيل التسجيل وتشغيل معاينته.';}
+         else if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذرت المعاينة: '+(reason||'فشل التنزيل');
+       };
+       window.ZadAndroid.downloadAdhan(key);
+     }catch(e){btn.disabled=false;if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر بدء المعاينة أو التنزيل.';}
+   }));
+   const downloadPrayerVoices=$('downloadPrayerAdhans');
+   if(downloadPrayerVoices)downloadPrayerVoices.addEventListener('click',()=>{
+     if(!window.ZadAndroid||typeof window.ZadAndroid.downloadAdhan!=='function'){
+       if(prayerVoiceStatus)prayerVoiceStatus.textContent='تنزيل التسجيلات للعمل دون إنترنت متاح من داخل تطبيق أندرويد.';
+       return;
+     }
+     const unique=[...new Set(prayerVoiceSelects.map(sel=>sel.value))];
+     let index=0;
+     downloadPrayerVoices.disabled=true;
+     const runNext=()=>{
+       if(index>=unique.length){downloadPrayerVoices.disabled=false;if(prayerVoiceStatus)prayerVoiceStatus.textContent='انتهى طلب تنزيل '+unique.length+' تسجيلات مختلفة. راجع رسائل الحالة للتأكد من نجاح كل ملف.';return;}
+       const voiceKey=unique[index++];
+       if(window.ZadAndroid.isAdhanDownloaded(voiceKey)){runNext();return;}
+       if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل التسجيل '+index+' من '+unique.length+': '+voiceKey;
+       window.onPrayerAdhanDownloadComplete=(which,ok,details)=>{
+         if(prayerVoiceStatus)prayerVoiceStatus.textContent=(ok?'تم تنزيل ':'تعذر تنزيل ')+which+' — '+(details||'');
+         runNext();
+       };
+       try{window.ZadAndroid.downloadAdhan(voiceKey);}catch(e){if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر بدء تنزيل '+voiceKey;runNext();}
+     };
+     runNext();
+   });
    const modeControl=$('adhanMode'), approachControl=$('approachAlertEnabled'), approachMinutes=$('approachAlertMinutes');
    const savedMode=localStorage.getItem('zad_adhan_mode')||'adhan';
    if(modeControl)modeControl.value=['adhan','tone','vibrate','off'].includes(savedMode)?savedMode:'adhan';
@@ -124,9 +186,9 @@
      if(ready)$('adhanSettingsStatus').textContent='التسجيل محفوظ على هذا الجهاز ويعمل دون إنترنت.';
    }
    window.onAdhanDownloadProgress=function(index,prayer,received,total,directory){
-     if(!voice||voice.value!=='doha')return;
+     if(!voice)return;
      const names={fajr:'الفجر',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'};
-     const label=names[prayer]||prayer;
+     const label=names[prayer]||adhanVoiceNames[prayer]||prayer;
      const mb=(received/1048576).toFixed(2);
      const totalMb=total>0?(total/1048576).toFixed(2):'؟';
      const percent=total>0?Math.max(0,Math.min(100,Math.round(received/total*100))):null;
@@ -135,14 +197,22 @@
        const fill=adhanProgress.querySelector('span');
        if(fill){fill.style.animation='none';fill.style.transform='none';fill.style.width=(percent===null?38:percent)+'%';}
      }
-     adhanStatus.textContent='جارٍ تنزيل '+label+' ('+index+' من 5) — '+mb+' من '+totalMb+' ميجابايت'+(percent===null?'':' — '+percent+'%');
+     const progressText='جارٍ تنزيل '+label+(names[prayer]?' ('+index+' من 5)':'')+' — '+mb+' من '+totalMb+' ميجابايت'+(percent===null?'':' — '+percent+'%');
+     adhanStatus.textContent=progressText;
+     if(prayerVoiceStatus)prayerVoiceStatus.textContent=progressText;
      if(directory){
        if(!adhanPathBox)return;
        adhanPathBox.style.display='block';
-       adhanPathBox.textContent='مسار الحفظ داخل التطبيق: '+directory+'/doha_'+prayer+'.mp3';
+       const prayerKeys=['fajr','dhuhr','asr','maghrib','isha'];
+       const filename=prayerKeys.includes(prayer)?'doha_'+prayer+'.mp3':prayer+'.mp3';
+       adhanPathBox.textContent='مسار الحفظ داخل التطبيق: '+directory+'/'+filename;
      }
    };
    window.onAdhanDownloadComplete=function(which,ok,reason){
+     const prayerDownloadCallback=window.onPrayerAdhanDownloadComplete;window.onPrayerAdhanDownloadComplete=null;
+     if(typeof prayerDownloadCallback==='function')prayerDownloadCallback(which,ok,reason);
+     const prayerPreviewCallback=window.onPrayerPreviewDownloadComplete;window.onPrayerPreviewDownloadComplete=null;
+     if(typeof prayerPreviewCallback==='function')prayerPreviewCallback(which,ok,reason);
      if(!voice)return;
      if(downloadBtn)downloadBtn.disabled=false;
      if(which!==voice.value){updateAdhanDownloadState();return;}
