@@ -139,6 +139,11 @@ public class MainActivity extends Activity {
         progress.setMax(100); progress.setProgress(0); root.addView(progress,matchWrap());
         progressText = text("لم يبدأ التنزيل",12,Color.DKGRAY,false); root.addView(progressText);
         status = text("",13,Color.rgb(30,70,50),false); status.setPadding(0,dp(12),0,0); root.addView(status);
+        Button audioCheck = new Button(this); audioCheck.setText("فحص حالة صوت الأذان");
+        root.addView(audioCheck, matchWrap());
+        TextView audioDiagnostics = text("اضغط هنا بعد تجربة الأذان لمعرفة حالة الملف وسبب أي تعذر في التشغيل.",12,Color.rgb(70,85,75),false);
+        root.addView(audioDiagnostics, matchWrap());
+        audioCheck.setOnClickListener(v -> audioDiagnostics.setText(buildAudioDiagnostics()));
         setContentView(scroll);
     }
 
@@ -587,6 +592,41 @@ public class MainActivity extends Activity {
         if(files!=null)for(File f:files)if(f.isFile()&&(f.getName().endsWith(".mp3")||f.getName().endsWith(".ogg"))){count++;bytes+=f.length();}
         if(status!=null)status.setText("التسجيلات المحفوظة داخل التطبيق: "+count+" ملف — "+android.text.format.Formatter.formatShortFileSize(this,bytes));
     }
+    private String buildAudioDiagnostics() {
+        StringBuilder report = new StringBuilder();
+        android.content.SharedPreferences audioPrefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
+        report.append("نتيجة آخر تجربة: ").append(audioPrefs.getBoolean("adhan_playback_started", false) ? "وصل المشغل إلى حالة الجاهزية" : "لم يؤكد المشغل بدء الصوت").append("\\n");
+        String lastError = audioPrefs.getString("adhan_last_playback_error", "");
+        if (!lastError.isEmpty()) report.append("سبب التعذر: ").append(lastError).append("\\n");
+        String startError = audioPrefs.getString("adhan_last_start_error", "");
+        if (!startError.isEmpty()) report.append("خطأ بدء الخدمة: ").append(startError).append("\\n");
+        File dir = new File(getFilesDir(), "adhan");
+        int valid = 0;
+        for (int i = 0; i < PRAYERS.length; i++) {
+            String prayer = PRAYERS[i];
+            String voice = prefs.getString("adhan_voice_" + prayer, "doha");
+            String fileVoice = voice;
+            if ("doha".equals(voice)) fileVoice = "doha_" + KEYS[i];
+            File mp3 = new File(dir, fileVoice + ".mp3");
+            File ogg = new File(dir, fileVoice + ".ogg");
+            File chosen = isAudioFileValid(mp3) ? mp3 : (isAudioFileValid(ogg) ? ogg : null);
+            if (chosen != null) valid++;
+            report.append(prayer).append(": ").append(chosen == null ? "ملف غير موجود/غير صالح" : "ملف سليم — " + android.text.format.Formatter.formatShortFileSize(this, chosen.length())).append("\\n");
+        }
+        report.append("ملفات الأذان الصالحة للصلاة المختارة: ").append(valid).append(" من 5");
+        return report.toString();
+    }
+
+    private boolean isAudioFileValid(File file) {
+        if (file == null || !file.isFile() || file.length() < 10000) return false;
+        try (FileInputStream in = new FileInputStream(file)) {
+            byte[] h = new byte[4]; int n = in.read(h);
+            return (n >= 3 && h[0] == 'I' && h[1] == 'D' && h[2] == '3')
+                    || (n >= 2 && (h[0] & 255) == 255 && (h[1] & 224) == 224)
+                    || (n >= 4 && h[0] == 'O' && h[1] == 'g' && h[2] == 'g' && h[3] == 'S');
+        } catch (Exception e) { return false; }
+    }
+
     private void requestNotificationPermission() {
         if(Build.VERSION.SDK_INT>=33&&checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},2401);
