@@ -34,6 +34,20 @@ public class ReminderReceiver extends BroadcastReceiver {
         schedule(context,key,at,"حان الآن وقت صلاة "+name,false);
         schedulePrayerExtras(context,name,at);
     }
+    public static void startSilentMode(Context context,int minutes) {
+        if(Build.VERSION.SDK_INT<23 || minutes<=0) return;
+        try {
+            NotificationManager manager=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if(manager==null || !manager.isNotificationPolicyAccessGranted()) return;
+            android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
+            long until=System.currentTimeMillis()+Math.max(1,Math.min(180,minutes))*60000L;
+            if(prefs.getLong("adhan_silent_until",0L)<=System.currentTimeMillis())
+                prefs.edit().putInt("adhan_previous_filter",manager.getCurrentInterruptionFilter()).apply();
+            prefs.edit().putLong("adhan_silent_until",until).apply();
+            manager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
+            schedule(context,"silent_restore",until,"انتهت مدة الوضع الصامت",false);
+        } catch(Exception ignored) {}
+    }
     private static void schedulePrayerExtras(Context context,String name,long at) {
         try {
             android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
@@ -90,23 +104,13 @@ public class ReminderReceiver extends BroadcastReceiver {
                 org.json.JSONObject items=settings.optJSONObject("items");
                 String itemKey=prayerName.equals("الفجر")?"fajr":prayerName.equals("الظهر")?"dhuhr":prayerName.equals("العصر")?"asr":prayerName.equals("المغرب")?"maghrib":"isha";
                 org.json.JSONObject item=items==null?null:items.optJSONObject(itemKey);
-                if(settings.optBoolean("enabled",false) && item!=null && item.optBoolean("enabled",true) && "full".equals(item.optString("style","full"))) {
-                    AdhanPlaybackService.play(context,prayerName,item.optString("voice","عبد الباسط عبد الصمد"),item.optInt("volume",80));
-                }
-            } catch(Exception ignored) {}
-            try {
-                org.json.JSONObject settings=new org.json.JSONObject(prefs.getString("adhan_settings","{}"));
-                if(settings.optBoolean("silentEnabled",false) && Build.VERSION.SDK_INT>=23) {
-                    NotificationManager manager=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-                    if(manager!=null && manager.isNotificationPolicyAccessGranted()) {
-                        long until=System.currentTimeMillis()+Math.max(1,Math.min(180,settings.optInt("silent",15)))*60000L;
-                        if(prefs.getLong("adhan_silent_until",0L)<=System.currentTimeMillis())
-                            prefs.edit().putInt("adhan_previous_filter",manager.getCurrentInterruptionFilter()).apply();
-                        prefs.edit().putLong("adhan_silent_until",until).apply();
-                        manager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_NONE);
-                        schedule(context,"silent_restore",until,"انتهت مدة الوضع الصامت",false);
-                    }
-                }
+                boolean shouldPlay=settings.optBoolean("enabled",false) && item!=null && item.optBoolean("enabled",true) && "full".equals(item.optString("style","full"));
+                String voice=item==null?"":item.optString("voice","عبد الباسط عبد الصمد");
+                int volume=item==null?80:item.optInt("volume",80);
+                int silentDuration=settings.optBoolean("silentEnabled",false)?Math.max(1,Math.min(180,settings.optInt("silent",15))):0;
+                if(shouldPlay && AdhanPlaybackService.hasAudio(context,voice))
+                    AdhanPlaybackService.play(context,prayerName,voice,volume,silentDuration);
+                else if(silentDuration>0) startSilentMode(context,silentDuration);
             } catch(Exception ignored) {}
         }
         if(prayer) {
