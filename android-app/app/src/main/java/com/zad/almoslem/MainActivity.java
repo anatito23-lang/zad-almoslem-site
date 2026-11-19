@@ -65,7 +65,7 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
-        webView.loadUrl("file:///android_asset/site/index.html?appbuild=20261119adhan-native3&native=1");
+        webView.loadUrl("file:///android_asset/site/index.html?appbuild=20261119adhan-native4&native=1");
         requestNotificationPermission();
     }
     @Override protected void onResume() {
