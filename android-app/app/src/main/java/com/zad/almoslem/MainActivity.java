@@ -96,6 +96,40 @@ public class MainActivity extends Activity {
     }
     private class ReminderBridge {
         @JavascriptInterface public boolean isNativeApp() { return true; }
+        @JavascriptInterface public String getAdhanStorageDiagnostics() {
+            try {
+                File dir = new File(getFilesDir(), "adhan");
+                if (!dir.exists()) dir.mkdirs();
+                org.json.JSONObject result = new org.json.JSONObject();
+                result.put("nativeBridge", true);
+                result.put("filesDir", getFilesDir().getAbsolutePath());
+                result.put("adhanDir", dir.getAbsolutePath());
+                result.put("directoryExists", dir.isDirectory());
+                org.json.JSONArray files = new org.json.JSONArray();
+                File[] saved = dir.listFiles();
+                long totalBytes = 0L;
+                if (saved != null) {
+                    for (File file : saved) {
+                        if (file.isFile() && (file.getName().endsWith(".mp3") || file.getName().endsWith(".ogg"))) {
+                            org.json.JSONObject item = new org.json.JSONObject();
+                            item.put("name", file.getName());
+                            item.put("bytes", file.length());
+                            files.put(item);
+                            totalBytes += file.length();
+                        }
+                    }
+                }
+                result.put("audioFiles", files);
+                result.put("audioFileCount", files.length());
+                result.put("audioBytes", totalBytes);
+                android.content.SharedPreferences prefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
+                result.put("lastDownloadError", prefs.getString("adhan_download_last_error", ""));
+                result.put("lastPlaybackError", prefs.getString("adhan_last_start_error", ""));
+                return result.toString();
+            } catch (Exception error) {
+                return "{\\"nativeBridge\\":true,\\"diagnosticError\\":" + org.json.JSONObject.quote(error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage()) + "}";
+            }
+        }
         @JavascriptInterface public void scheduleDailyReminder(String key,int hour,int minute,String title) {
             ReminderReceiver.scheduleDaily(MainActivity.this,key,hour,minute,title);
         }
@@ -395,8 +429,10 @@ public class MainActivity extends Activity {
                     }
                     ok = true;
                     reason = "تم تنزيل تسجيلات الصلوات الخمس وحفظها للعمل دون إنترنت. المسار الداخلي: " + dir.getAbsolutePath();
+                    getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().remove("adhan_download_last_error").apply();
                 } catch (Exception e) {
                     reason = e.getMessage() == null ? "تعذر تنزيل تسجيلات الأذان" : e.getMessage();
+                    getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_download_last_error", reason).apply();
                 } finally {
                     if (connection != null) connection.disconnect();
                 }
@@ -489,9 +525,11 @@ public class MainActivity extends Activity {
                     error = publicPath == null
                             ? "تم تنزيل الصوت وحفظه داخل التطبيق للعمل دون إنترنت."
                             : "تم الحفظ في: " + publicPath;
+                    getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().remove("adhan_download_last_error").apply();
                     ok = true;
                 } catch (Exception e) {
                     error = e.getMessage() == null ? "فشل تنزيل التسجيل" : e.getMessage();
+                    getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_download_last_error", error).apply();
                     if (temp.exists()) temp.delete();
                 } finally {
                     if (connection != null) connection.disconnect();
