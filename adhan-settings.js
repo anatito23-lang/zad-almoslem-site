@@ -53,8 +53,13 @@ window.onAdhanAudioImported=function(voice,ok){
 };
 $('saveAdhanSettings').addEventListener('click',()=>{
  collect();localStorage.setItem('zad_adhan_settings',JSON.stringify(state));
- if(window.ZadAndroid&&window.ZadAndroid.saveAdhanSettings)window.ZadAndroid.saveAdhanSettings(JSON.stringify(state));
- $('adhanSettingsStatus').textContent='تم حفظ الإعدادات على الجهاز. استورد ملفًا صوتيًا لكل مؤذن تريد تشغيله.';
+ if(window.ZadAndroid&&window.ZadAndroid.saveAdhanSettings){
+  window.ZadAndroid.saveAdhanSettings(JSON.stringify(state));
+  if(window.ZadAndroid.canScheduleExactAlarms&&!window.ZadAndroid.canScheduleExactAlarms()&&window.ZadAndroid.requestExactAlarmPermission){
+   $('adhanSettingsStatus').textContent='تم حفظ الإعدادات. اسمح للتطبيق بالمنبهات الدقيقة حتى تعمل مواقيت الصلاة في موعدها.';
+   window.ZadAndroid.requestExactAlarmPermission();
+  } else $('adhanSettingsStatus').textContent='تم حفظ الإعدادات على الجهاز. استورد ملفًا صوتيًا لكل مؤذن تريد تشغيله.';
+ } else $('adhanSettingsStatus').textContent='تم حفظ الإعدادات على هذا المتصفح فقط؛ تشغيل الأذان بالخلفية يحتاج تطبيق أندرويد.';
 });
 $('adhanMasterEnabled').addEventListener('change',()=>{state.enabled=$('adhanMasterEnabled').checked;});
 $('adhanSilentEnabled').addEventListener('change',()=>{
