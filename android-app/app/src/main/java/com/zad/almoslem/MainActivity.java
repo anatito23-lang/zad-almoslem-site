@@ -317,8 +317,9 @@ public class MainActivity extends Activity {
                     if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال التسجيل القديم");
                     if (!temp.renameTo(target)) throw new Exception("تعذر حفظ التسجيل على الجهاز");
                     String publicPath = copyAdhanToMusicFolder(target, safe);
-                    if (publicPath == null) throw new Exception("تم تنزيل الصوت داخل التطبيق لكن تعذر نسخه إلى مجلد Music/Zad Almoslem");
-                    error = "تم الحفظ في: " + publicPath;
+                    error = publicPath == null
+                            ? "تم تنزيل الصوت وحفظه داخل التطبيق للعمل دون إنترنت."
+                            : "تم الحفظ في: " + publicPath;
                     ok = true;
                 } catch (Exception e) {
                     error = e.getMessage() == null ? "فشل تنزيل التسجيل" : e.getMessage();
