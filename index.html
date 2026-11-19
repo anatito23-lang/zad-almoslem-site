@@ -370,7 +370,7 @@ footer{background:#071522;color:#c9d6e2}
         <button id="previewAdhan" type="button">معاينة قديمة</button>
         <button id="downloadAdhan" type="button">تنزيل قديم</button>
       </div>
-      <audio id="adhanPreview" preload="none" hidden></audio>
+      
       <div class="card" style="margin-top:12px" id="perPrayerAdhanCard">
         <h3>اختيار مؤذن مستقل لكل صلاة</h3>
         <p class="small">اختَر الصوت لكل صلاة على حدة. تُحفظ اختياراتك تلقائيًا، ويمكنك معاينة كل صوت أو تنزيل الأصوات المختارة للعمل دون إنترنت.</p>
@@ -383,6 +383,7 @@ footer{background:#071522;color:#c9d6e2}
         </div>
         <button class="btn light" id="downloadPrayerAdhans" type="button" style="margin-top:12px;width:100%">تنزيل أصوات الصلوات المختارة</button>
         <p id="prayerAdhanDownloadStatus" class="small" role="status">اختر الأصوات ثم اضغط تنزيل لحفظها على الجهاز.</p>
+        <audio id="adhanPreview" controls preload="none" hidden style="display:block;width:100%;margin-top:10px;border-radius:12px"></audio>
       </div>
       <div class="card" style="margin-top:12px">
         <label for="adhanVolume"><strong>مستوى صوت الأذان</strong> <span id="adhanVolumeValue">100%</span></label>
