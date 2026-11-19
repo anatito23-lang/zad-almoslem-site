@@ -1986,6 +1986,63 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
 })();
 </script>
 <script src="./daily-reminders.js?v=20261119adhanfix4"></script>
+<script id="zad-prayer-audio-fallback">
+(function(){
+ const sources={
+  doha:{
+   'الفجر':'https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_01_Fajr_Adhan.mp3',
+   'الظهر':'https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_02_Dhuhr_Adhan.mp3',
+   'العصر':'https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_03_Asr_Adhan.mp3',
+   'المغرب':'https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_04_Maghrib_Adhan.mp3',
+   'العشاء':'https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_05_Isha_Adhan.mp3'
+  },
+  basit:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Abdulbasit_Abdusamad_1_-_Egypt_(%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%A8%D8%A7%D8%B3%D8%B7_%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%B5%D9%85%D8%AF_-_%D9%85%D8%B5%D8%B1).mp3',
+  mustafa:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mustafa_Ismail_-_Egypt_(%D9%85%D8%B5%D8%B7%D9%81%D9%89_%D8%A5%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84_-_%D9%85%D8%B5%D8%B1).mp3',
+  husary:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mahmoud_Khalil_Al_Hussary_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%AE%D9%84%D9%8A%D9%84_%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%8A_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',
+  banna:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mahmoud_Ali_Al_Banna_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%B9%D9%84%D9%8A_%D8%A7%D9%84%D8%A8%D9%86%D8%A7_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',
+  haram:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(%D8%B9%D9%84%D9%8A_%D8%A8%D9%86_%D8%A3%D8%AD%D9%85%D8%AF_%D9%85%D9%84%D8%A7_-_%D8%A7%D9%84%D8%AD%D8%B1%D9%85_%D8%A7%D9%84%D9%85%D9%83%D9%8A).mp3'
+ };
+ function bind(){
+  document.addEventListener('click',function(e){
+   const btn=e.target.closest('.prayer-adhan-preview');
+   if(!btn)return;
+   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+   const prayer=btn.dataset.prayer, select=document.querySelector('.prayer-adhan-voice[data-prayer="'+prayer+'"]');
+   const status=document.getElementById('prayerAdhanDownloadStatus'), audio=document.getElementById('adhanPreview');
+   const say=t=>{if(status)status.textContent=t;};
+   if(!select||!audio){say('تعذر العثور على مشغل الصوت أو اختيار المؤذن.');return;}
+   const key=select.value;
+   if(window.ZadAndroid){
+    try{
+     if(typeof window.ZadAndroid.previewPrayerAdhan==='function'&&window.ZadAndroid.isAdhanDownloaded(key)){
+      window.ZadAndroid.previewPrayerAdhan(key,prayer);say('يتم تشغيل معاينة المؤذن المختار.');
+     }else if(typeof window.ZadAndroid.downloadAdhan==='function'){
+      say('جارٍ تنزيل التسجيل المختار ثم تشغيله داخل التطبيق...');
+      window.onPrayerPreviewDownloadComplete=function(which,ok,reason){
+       if(which!==key)return;
+       if(ok&&typeof window.ZadAndroid.previewPrayerAdhan==='function'){window.ZadAndroid.previewPrayerAdhan(key,prayer);say('تم تنزيل التسجيل وتشغيله.');}
+       else say('تعذّر تشغيل التسجيل: '+(reason||'فشل التنزيل'));
+      };
+      window.onPrayerPreviewDownloadComplete.voiceKey=key;
+      window.ZadAndroid.downloadAdhan(key);
+     }else say('تشغيل الصوت غير مدعوم في هذه النسخة.');
+    }catch(err){say('حدث خطأ أثناء تشغيل الصوت: '+(err.message||'غير معروف'));}
+    return;
+   }
+   const url=key==='doha'?(sources.doha[prayer]||''):sources[key];
+   if(!url){say('مصدر هذا التسجيل غير متاح.');return;}
+   audio.hidden=false;audio.controls=true;audio.pause();audio.removeAttribute('src');audio.src=url;
+   audio.volume=Math.max(0,Math.min(100,Number(document.getElementById('adhanVolume')?.value??100))/100);
+   audio.load();say('جارٍ تحميل وتشغيل صوت '+select.options[select.selectedIndex].text+' لصلاة '+prayer+'...');
+   const p=audio.play();
+   if(p&&p.catch)p.catch(err=>say('تعذّر التشغيل: '+(err.name==='NotAllowedError'?'اضغط زر التشغيل في مشغل الصوت.':'تحقق من اتصال الإنترنت أو مصدر التسجيل.')));
+  },true);
+  const audio=document.getElementById('adhanPreview'),status=document.getElementById('prayerAdhanDownloadStatus');
+  if(audio)audio.addEventListener('error',()=>{if(status)status.textContent='فشل تحميل ملف الصوت من المصدر. تم إصلاح استجابة زر المعاينة، لكن مصدر التسجيل لم يستجب.';});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
+})();
+</script>
 <script>
 if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261119adhanunified4", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
 </script>
