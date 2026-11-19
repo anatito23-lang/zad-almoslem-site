@@ -179,7 +179,9 @@
        if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل التسجيل لمعاينته...';
        const previewDone=(which,ok,reason)=>{
          btn.disabled=false;
+         hideAdhanProgress();
          if(which!==key)return;
+         finishPrayerProgress(ok?'اكتمل تنزيل التسجيل وحفظه.':'تعذر اكتمال تنزيل التسجيل.');
          if(ok){window.ZadAndroid.previewPrayerAdhan(key,prayer);if(prayerVoiceStatus)prayerVoiceStatus.textContent='تم تنزيل التسجيل وتشغيل معاينته.';}
          else if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذرت المعاينة: '+(reason||'فشل التنزيل');
        };
@@ -198,7 +200,7 @@
        const unique=[...new Set(prayerVoiceSelects.map(sel=>sel.value))];
        let index=0;downloadPrayerVoices.disabled=true;showAdhanProgress();
        const runNext=()=>{
-         if(index>=unique.length){downloadPrayerVoices.disabled=false;hideAdhanProgress();if(prayerVoiceStatus)prayerVoiceStatus.textContent='انتهى طلب تنزيل '+unique.length+' تسجيلات. راجع حالة كل ملف.';return;}
+         if(index>=unique.length){downloadPrayerVoices.disabled=false;hideAdhanProgress();finishPrayerProgress('اكتمل تنزيل '+unique.length+' تسجيلات وحفظها داخل التطبيق للعمل دون إنترنت.');if(prayerVoiceStatus)prayerVoiceStatus.textContent='اكتمل تنزيل '+unique.length+' تسجيلات وحفظها داخل التطبيق للعمل دون إنترنت.';return;}
          const voiceKey=unique[index++];
          if(window.ZadAndroid.isAdhanDownloaded(voiceKey)){runNext();return;}
          if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ حفظ التسجيل '+index+' من '+unique.length+' داخل التطبيق: '+voiceKey;
