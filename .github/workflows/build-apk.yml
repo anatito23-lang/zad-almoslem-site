@@ -3,7 +3,7 @@ name: Build Zad Almoslem APK
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main]
+    branches: [main, native-android-app]
     paths:
       - 'android-app/**'
       - '.github/workflows/build-apk.yml'
