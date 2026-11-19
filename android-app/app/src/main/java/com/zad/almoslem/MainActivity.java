@@ -95,6 +95,9 @@ public class MainActivity extends Activity {
         Button calendarButton = new Button(this); calendarButton.setText("🗓️  التقويم الهجري والميلادي");
         calendarButton.setOnClickListener(v -> startActivity(new Intent(this, CalendarActivity.class)));
         root.addView(calendarButton, matchWrap());
+        Button audioLibraryButton = new Button(this); audioLibraryButton.setText("🎧  الابتهالات والرقية الشرعية");
+        audioLibraryButton.setOnClickListener(v -> startActivity(new Intent(this, AudioLibraryActivity.class)));
+        root.addView(audioLibraryButton, matchWrap());
         TextView intro = text("إعدادات الأذان",20,Color.rgb(20,55,43),true);
         intro.setPadding(0,dp(20),0,dp(8)); root.addView(intro);
         Switch master = new Switch(this);
