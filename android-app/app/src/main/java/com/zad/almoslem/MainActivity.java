@@ -125,6 +125,25 @@ public class MainActivity extends Activity {
         master.setChecked(prefs.getBoolean("adhan_enabled",true));
         master.setOnCheckedChangeListener((b,checked)->prefs.edit().putBoolean("adhan_enabled",checked).apply());
         addCard(root,master);
+
+        TextView silentInfo = text("يمكنك اختيار الصلوات التي تريد أن يتحول فيها الهاتف إلى الوضع الصامت وقت الأذان، ثم يعود إلى وضعه السابق تلقائيًا بعد 15 دقيقة. يتطلب ذلك منح إذن عدم الإزعاج من إعدادات Android.",13,Color.rgb(70,85,75),false);
+        addCard(root,silentInfo);
+        Button silentPermission = new Button(this);
+        silentPermission.setText("إعداد إذن الوضع الصامت");
+        silentPermission.setOnClickListener(v -> {
+            android.app.NotificationManager nm = (android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+            if (Build.VERSION.SDK_INT >= 23 && nm != null && nm.isNotificationPolicyAccessGranted()) {
+                Toast.makeText(this,"إذن الوضع الصامت مفعّل بالفعل",Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try {
+                startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS));
+            } catch (Exception e) {
+                Toast.makeText(this,"تعذر فتح إعداد الإذن في الهاتف",Toast.LENGTH_LONG).show();
+            }
+        });
+        addCard(root,silentPermission);
+
         addStandaloneTools(root);
         addNativeAzkar(root);
 
@@ -483,6 +502,25 @@ public class MainActivity extends Activity {
         Button test=new Button(this); test.setText("تجربة الأذان"); test.setTextSize(11); actions.addView(test);
         test.setOnClickListener(v->playPrayer(prayer));
         card.addView(actions);
+
+        Switch silent = new Switch(this);
+        silent.setText("اجعل الهاتف صامتًا عند أذان " + prayer);
+        silent.setTextSize(12);
+        silent.setTextColor(Color.rgb(35,65,50));
+        silent.setChecked(prefs.getBoolean("prayer_silent_" + prayer,false));
+        silent.setOnCheckedChangeListener((button,checked) -> {
+            prefs.edit().putBoolean("prayer_silent_" + prayer,checked).apply();
+            if (checked) {
+                android.app.NotificationManager nm = (android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+                if (Build.VERSION.SDK_INT >= 23 && (nm == null || !nm.isNotificationPolicyAccessGranted())) {
+                    Toast.makeText(this,"فعّل إذن عدم الإزعاج من زر إعداد إذن الوضع الصامت أعلى الصفحة",Toast.LENGTH_LONG).show();
+                    try {
+                        startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS));
+                    } catch (Exception ignored) {}
+                }
+            }
+        });
+        card.addView(silent);
     }
 
     private String savedTimeLabel(String prayer) {
