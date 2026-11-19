@@ -104,7 +104,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
     }
     private void settingRow(String title,String value,Runnable action){LinearLayout r=new LinearLayout(this);r.setGravity(Gravity.CENTER_VERTICAL);TextView t=txt(title+"\n"+value,15,white,true);t.setGravity(Gravity.RIGHT);r.addView(t,new LinearLayout.LayoutParams(0,-2,1));TextView b=txt("تغيير",14,gold,true);b.setOnClickListener(v->action.run());r.addView(b);card(r);}
-    private void chooseCity(){new AlertDialog.Builder(this).setTitle("اختر مدينتك").setSingleChoiceItems(cities,cityIndex(),(d,w)->{prefs.edit().putInt("city",w).apply();d.dismiss();render();}).setNegativeButton("إلغاء",null).show();}
+    private void chooseCity(){new AlertDialog.Builder(this).setTitle("اختر مدينتك").setSingleChoiceItems(cities,cityIndex(),(d,w)->{prefs.edit().putInt("city",w).apply();if(prefs.getBoolean("reminders",false))PrayerAlarmScheduler.schedule(this,w);d.dismiss();render();}).setNegativeButton("إلغاء",null).show();}
 
     @Override protected void onResume(){super.onResume();if(rotationSensor!=null)sensorManager.registerListener(this,rotationSensor,SensorManager.SENSOR_DELAY_UI);}
     @Override protected void onPause(){super.onPause();if(sensorManager!=null)sensorManager.unregisterListener(this);}
