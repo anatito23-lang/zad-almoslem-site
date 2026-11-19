@@ -89,6 +89,7 @@ public class MainActivity extends Activity {
         master.setOnCheckedChangeListener((b,checked)->prefs.edit().putBoolean("adhan_enabled",checked).apply());
         addCard(root,master);
         addStandaloneTools(root);
+        addNativeAzkar(root);
 
         for (int i=0;i<PRAYERS.length;i++) addPrayerCard(root,i);
         addPrayerTimesUpdater(root);
@@ -263,6 +264,66 @@ public class MainActivity extends Activity {
             if(includes&&!server.isEmpty()){if(!server.endsWith("/"))server+="/";return server+String.format(Locale.US,"%03d.mp3",surahId);}
         }
         return null;
+    }
+
+    private void addNativeAzkar(LinearLayout root) {
+        TextView title=text("الأذكار اليومية",18,Color.rgb(20,55,43),true);
+        title.setPadding(0,dp(18),0,dp(8));root.addView(title);
+        LinearLayout card=column();card.setBackground(shape(Color.WHITE,16));card.setPadding(dp(14),dp(12),dp(14),dp(12));
+        String[] categories={"أذكار الصباح","أذكار المساء","أذكار بعد الصلاة"};
+        String[][][] items={
+          {
+            {"أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.", "1"},
+            {"اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت وإليك النشور.", "1"},
+            {"رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا.", "3"},
+            {"سبحان الله وبحمده.", "100"},
+            {"أستغفر الله وأتوب إليه.", "100"}
+          },
+          {
+            {"أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.", "1"},
+            {"اللهم بك أمسينا وبك أصبحنا وبك نحيا وبك نموت وإليك المصير.", "1"},
+            {"رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا.", "3"},
+            {"سبحان الله وبحمده.", "100"},
+            {"أستغفر الله وأتوب إليه.", "100"}
+          },
+          {
+            {"أستغفر الله.", "3"},
+            {"اللهم أنت السلام ومنك السلام، تباركت يا ذا الجلال والإكرام.", "1"},
+            {"سبحان الله.", "33"},
+            {"الحمد لله.", "33"},
+            {"الله أكبر.", "33"},
+            {"لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.", "1"}
+          }
+        };
+        Spinner category=new Spinner(this);
+        category.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,categories));
+        card.addView(category,matchWrap());
+        TextView dhikr=text("",19,Color.rgb(35,70,55),true);dhikr.setGravity(Gravity.CENTER);dhikr.setPadding(dp(4),dp(18),dp(4),dp(18));card.addView(dhikr);
+        TextView progressText=text("",14,Color.rgb(100,110,100),false);progressText.setGravity(Gravity.CENTER);card.addView(progressText);
+        Button countButton=new Button(this);countButton.setText("تسبيح");card.addView(countButton,matchWrap());
+        Button resetButton=new Button(this);resetButton.setText("إعادة الذكر الحالي");card.addView(resetButton,matchWrap());
+        final int[] current={0},count={0},active={0};
+        Runnable render=()->{
+            int cat=active[0];current[0]=Math.max(0,Math.min(current[0],items[cat].length-1));
+            int goal=Integer.parseInt(items[cat][current[0]][1]);
+            count[0]=prefs.getInt("native_azkar_"+cat+"_"+current[0],0);
+            dhikr.setText(items[cat][current[0]][0]);
+            progressText.setText("الذكر "+(current[0]+1)+" من "+items[cat].length+" — "+Math.min(count[0],goal)+" / "+goal);
+            countButton.setText(count[0]>=goal?"اكتمل الذكر — التالي":"اضغط للتكرار");
+        };
+        category.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            public void onNothingSelected(AdapterView<?> parent){}
+            public void onItemSelected(AdapterView<?> parent,View view,int position,long id){active[0]=position;current[0]=0;render.run();}
+        });
+        countButton.setOnClickListener(v->{
+            int cat=active[0],goal=Integer.parseInt(items[cat][current[0]][1]);
+            if(count[0]>=goal){current[0]=(current[0]+1)%items[cat].length;render.run();return;}
+            count[0]++;prefs.edit().putInt("native_azkar_"+cat+"_"+current[0],count[0]).apply();
+            if(count[0]>=goal){progressText.setText("أحسنت، اكتمل الذكر. اضغط للانتقال إلى الذكر التالي.");countButton.setText("التالي");}
+            else progressText.setText("الذكر "+(current[0]+1)+" من "+items[cat].length+" — "+count[0]+" / "+goal);
+        });
+        resetButton.setOnClickListener(v->{prefs.edit().putInt("native_azkar_"+active[0]+"_"+current[0],0).apply();count[0]=0;render.run();});
+        addCard(root,card);
     }
 
     private void addPrayerTimesUpdater(LinearLayout root) {
