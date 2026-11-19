@@ -7,12 +7,15 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioAttributes;
-import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.net.Uri;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.Player;
+import androidx.media3.exoplayer.ExoPlayer;
 import java.io.File;
-import java.io.FileInputStream;
 
 public class AdhanPlaybackService extends Service {
     public static final String ACTION_PLAY = "com.zad.almoslem.PLAY_ADHAN";
@@ -21,7 +24,7 @@ public class AdhanPlaybackService extends Service {
     public static final String ACTION_SET_PRAYER_VOLUME = "com.zad.almoslem.SET_PRAYER_ADHAN_VOLUME";
     private static final String CHANNEL_ID = "zad_adhan_playback";
     private static final int NOTIFICATION_ID = 7310;
-    private MediaPlayer player;
+    private ExoPlayer player;
     private boolean playDuaAfterCompletion;
     private String activePrayer;
 
@@ -29,18 +32,12 @@ public class AdhanPlaybackService extends Service {
         if (intent != null && ACTION_SET_PRAYER_VOLUME.equals(intent.getAction())) {
             String prayer = intent.getStringExtra("prayer");
             int level = Math.max(0, Math.min(100, intent.getIntExtra("volume", 100)));
-            if (player != null && prayer != null && prayer.equals(activePrayer)) {
-                float value = level / 100f;
-                try { player.setVolume(value, value); } catch (Exception ignored) {}
-            }
+            if (player != null && prayer != null && prayer.equals(activePrayer)) player.setVolume(level / 100f);
             return START_NOT_STICKY;
         }
         if (intent != null && ACTION_SET_VOLUME.equals(intent.getAction())) {
             int level = Math.max(0, Math.min(100, intent.getIntExtra("volume", 100)));
-            if (player != null) {
-                float value = level / 100f;
-                try { player.setVolume(value, value); } catch (Exception ignored) {}
-            }
+            if (player != null) player.setVolume(level / 100f);
             return START_NOT_STICKY;
         }
         if (intent != null && ACTION_STOP.equals(intent.getAction())) {
@@ -102,12 +99,12 @@ public class AdhanPlaybackService extends Service {
     private void playAdhan(String voice, String prayer) {
         stopPlayerOnly();
         try {
-            player = new MediaPlayer();
-            player.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-            player.setAudioAttributes(new AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build());
+            player = new ExoPlayer.Builder(this).build();
+            player.setWakeMode(PowerManager.PARTIAL_WAKE_LOCK);
+            player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
+                    .setUsage(androidx.media3.common.C.USAGE_ALARM)
+                    .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC)
+                    .build(), true);
             android.content.SharedPreferences prefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
             String volumePrayerKey = "dhuhr";
             if (prayer != null && prayer.contains("الفجر")) volumePrayerKey = "fajr";
@@ -115,8 +112,7 @@ public class AdhanPlaybackService extends Service {
             else if (prayer != null && prayer.contains("المغرب")) volumePrayerKey = "maghrib";
             else if (prayer != null && prayer.contains("العشاء")) volumePrayerKey = "isha";
             int savedVolume = prefs.getInt("adhan_volume_" + volumePrayerKey, prefs.getInt("adhan_volume", 100));
-            float adhanVolume = Math.max(0, Math.min(100, savedVolume)) / 100f;
-            player.setVolume(adhanVolume, adhanVolume);
+            player.setVolume(Math.max(0, Math.min(100, savedVolume)) / 100f);
             String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"haram".equals(voice)||"doha".equals(voice)) ? voice : "doha";
             File audioDir = new File(getFilesDir(), "adhan");
             if ("doha".equals(safeVoice)) {
@@ -132,24 +128,28 @@ public class AdhanPlaybackService extends Service {
             File audioFile = isPlayableAudioFile(mp3File) ? mp3File
                     : (isPlayableAudioFile(oggFile) ? oggFile : null);
             if (audioFile == null) {
-                stopPlayback();
                 showMissingAudioNotification();
+                stopPlayback();
                 return;
             }
-            player.setDataSource(audioFile.getAbsolutePath());
-            player.setOnPreparedListener(MediaPlayer::start);
-            player.setOnCompletionListener(mp -> {
-                boolean playDua = playDuaAfterCompletion;
-                playDuaAfterCompletion = false;
-                stopPlayback();
-                if (playDua) ReminderAudioService.play(this, "dua");
+            player.addListener(new Player.Listener() {
+                @Override public void onPlaybackStateChanged(int state) {
+                    if (state == Player.STATE_ENDED) {
+                        boolean playDua = playDuaAfterCompletion;
+                        playDuaAfterCompletion = false;
+                        stopPlayback();
+                        if (playDua) ReminderAudioService.play(AdhanPlaybackService.this, "dua");
+                    }
+                }
+                @Override public void onPlayerError(PlaybackException error) {
+                    showPlaybackErrorNotification("تعذر تشغيل ملف الأذان: " +
+                            (error.getMessage() == null ? "صيغة الملف غير مدعومة" : error.getMessage()));
+                    stopPlayback();
+                }
             });
-            player.setOnErrorListener((mp, what, extra) -> {
-                showPlaybackErrorNotification("تعذر فك ترميز ملف الأذان أو تشغيله. أعد تنزيل التسجيل المختار.");
-                stopPlayback();
-                return true;
-            });
-            player.prepareAsync();
+            player.setMediaItem(MediaItem.fromUri(Uri.fromFile(audioFile)));
+            player.prepare();
+            player.play();
         } catch (Exception e) {
             showPlaybackErrorNotification("تعذر تشغيل الأذان: " + (e.getMessage() == null ? "خطأ في ملف الصوت" : e.getMessage()));
             stopPlayback();
@@ -171,16 +171,14 @@ public class AdhanPlaybackService extends Service {
 
     private boolean isPlayableAudioFile(File file) {
         if (file == null || !file.isFile() || file.length() < 10000) return false;
-        try (FileInputStream in = new FileInputStream(file)) {
+        try (java.io.FileInputStream in = new java.io.FileInputStream(file)) {
             byte[] header = new byte[4];
             int count = in.read(header);
             boolean id3 = count >= 3 && header[0] == 0x49 && header[1] == 0x44 && header[2] == 0x33;
             boolean mpegFrame = count >= 2 && (header[0] & 0xFF) == 0xFF && (header[1] & 0xE0) == 0xE0;
             boolean ogg = count >= 4 && header[0] == 0x4F && header[1] == 0x67 && header[2] == 0x67 && header[3] == 0x53;
             return id3 || mpegFrame || ogg;
-        } catch (Exception e) {
-            return false;
-        }
+        } catch (Exception e) { return false; }
     }
 
     private void showMissingAudioNotification() {
@@ -196,7 +194,7 @@ public class AdhanPlaybackService extends Service {
 
     private void stopPlayerOnly() {
         if (player != null) {
-            try { if (player.isPlaying()) player.stop(); } catch (Exception ignored) {}
+            try { player.stop(); } catch (Exception ignored) {}
             try { player.release(); } catch (Exception ignored) {}
             player = null;
         }
