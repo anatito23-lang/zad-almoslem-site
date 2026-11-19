@@ -140,6 +140,7 @@ public class MainActivity extends Activity {
             catch(Exception e){status.setText("تعذر تشغيل الإذاعة: "+e.getMessage());}
         });
         addCard(root,radioCard);
+        addNativeQuranPlayer(root);
 
         LinearLayout tasbeeh=column();
         tasbeeh.setBackground(shape(Color.WHITE,16));tasbeeh.setPadding(dp(14),dp(12),dp(14),dp(12));
@@ -162,6 +163,65 @@ public class MainActivity extends Activity {
         dhikr.addView(text("قال رسول الله ﷺ: «من قال سبحان الله وبحمده في يوم مائة مرة، حُطَّت خطاياه وإن كانت مثل زبد البحر».",15,Color.rgb(55,75,65),false));
         dhikr.addView(text("رواه البخاري ومسلم.",12,Color.rgb(120,120,120),false));
         addCard(root,dhikr);
+    }
+
+    private void addNativeQuranPlayer(LinearLayout root) {
+        TextView section=text("استماع القرآن الكريم",18,Color.rgb(20,55,43),true);
+        section.setPadding(0,dp(18),0,dp(8));root.addView(section);
+        LinearLayout card=column();card.setBackground(shape(Color.WHITE,16));card.setPadding(dp(14),dp(12),dp(14),dp(12));
+        card.addView(text("اختر القارئ والسورة، وسيعمل الصوت في مشغل Android بالخلفية دون فتح الموقع.",13,Color.DKGRAY,false));
+        Spinner reciterSpinner=new Spinner(this),surahSpinner=new Spinner(this);
+        reciterSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"جارٍ تحميل القراء..."}));
+        String[] surahs={"الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"};
+        surahSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,surahs));
+        card.addView(text("القارئ",12,Color.DKGRAY,true));card.addView(reciterSpinner,matchWrap());
+        card.addView(text("السورة",12,Color.DKGRAY,true));card.addView(surahSpinner,matchWrap());
+        Button play=new Button(this);play.setText("استمع الآن");card.addView(play,matchWrap());
+        TextView state=text("جارٍ تحميل قائمة القراء من مكتبة التسجيلات.",12,Color.rgb(80,100,90),false);card.addView(state);
+        addCard(root,card);
+        final ArrayList<org.json.JSONObject> reciters=new ArrayList<>();
+        final ArrayList<String> reciterNames=new ArrayList<>();
+        new Thread(()->{
+            HttpURLConnection connection=null;
+            try{
+                connection=(HttpURLConnection)new URL("https://mp3quran.net/api/v3/reciters?language=ar").openConnection();
+                connection.setConnectTimeout(15000);connection.setReadTimeout(20000);
+                if(connection.getResponseCode()!=200)throw new Exception("تعذر تحميل قائمة القراء");
+                ByteArrayOutputStream out=new ByteArrayOutputStream();
+                try(InputStream in=connection.getInputStream()){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}
+                org.json.JSONArray array=new org.json.JSONObject(out.toString("UTF-8")).getJSONArray("reciters");
+                for(int i=0;i<array.length();i++){org.json.JSONObject item=array.getJSONObject(i);if(item.has("moshaf")&&item.getJSONArray("moshaf").length()>0){reciters.add(item);reciterNames.add(item.optString("name","قارئ"));}}
+                runOnUiThread(()->{
+                    if(reciterNames.isEmpty()){state.setText("لا توجد قائمة قراء متاحة حاليًا.");return;}
+                    reciterSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,reciterNames));
+                    state.setText("تم تحميل "+reciterNames.size()+" قارئًا. اختر القارئ والسورة.");
+                });
+            }catch(Exception e){runOnUiThread(()->state.setText("تعذر تحميل القراء. تحقق من الإنترنت ثم أعد فتح التطبيق."));}
+            finally{if(connection!=null)connection.disconnect();}
+        }).start();
+        play.setOnClickListener(v->{
+            int ri=reciterSpinner.getSelectedItemPosition(),si=surahSpinner.getSelectedItemPosition()+1;
+            if(ri<0||ri>=reciters.size()){state.setText("انتظر حتى تكتمل قائمة القراء.");return;}
+            try{
+                org.json.JSONObject reciter=reciters.get(ri);org.json.JSONArray moshafs=reciter.getJSONArray("moshaf");
+                String server=null;
+                for(int i=0;i<moshafs.length();i++){
+                    org.json.JSONObject m=moshafs.getJSONObject(i);
+                    String list=m.optString("surah_list","");
+                    boolean includes=false;for(String id:list.split(",")){try{if(Integer.parseInt(id.trim())==si){includes=true;break;}}catch(Exception ignored){}}
+                    if(includes&&!m.optString("server","").isEmpty()){server=m.getString("server");break;}
+                }
+                if(server==null){state.setText("السورة غير متاحة لهذا القارئ. اختر قارئًا آخر.");return;}
+                if(!server.endsWith("/"))server+="/";
+                String audioUrl=server+String.format(Locale.US,"%03d.mp3",si);
+                String label="سورة "+surahs[si-1]+" — "+reciter.optString("name","القارئ");
+                getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putString("last_quran_url",audioUrl).putString("last_quran_title",label).putBoolean("radio_playing",true).putString("active_kind","quran").apply();
+                Intent intent=new Intent(this,RadioPlaybackService.class);intent.setAction(RadioPlaybackService.ACTION_PLAY);
+                intent.putExtra("url",audioUrl);intent.putExtra("kind","quran");intent.putExtra("label",label);
+                if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);
+                state.setText("يتم تشغيل "+label+" في الخلفية.");
+            }catch(Exception e){state.setText("تعذر بدء التلاوة: "+e.getMessage());}
+        });
     }
 
     private void addPrayerTimesUpdater(LinearLayout root) {
