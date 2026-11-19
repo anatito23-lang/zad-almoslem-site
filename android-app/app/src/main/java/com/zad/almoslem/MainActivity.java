@@ -153,6 +153,21 @@ public class MainActivity extends Activity {
         radioCard.addView(radioTitle); radioCard.addView(radioDesc);
         Button radioButton=new Button(this);
         radioCard.addView(radioButton,matchWrap());
+        Button cairoRadioButton=new Button(this);cairoRadioButton.setText("إذاعة القرآن الكريم من القاهرة");
+        radioCard.addView(cairoRadioButton,matchWrap());
+        cairoRadioButton.setOnClickListener(v->{
+            String stream="https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8";
+            Intent intent=new Intent(this,RadioPlaybackService.class);intent.setAction(RadioPlaybackService.ACTION_PLAY);
+            intent.putExtra("url",stream);intent.putExtra("kind","radio");intent.putExtra("label","إذاعة القرآن الكريم من القاهرة");
+            try{if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);}
+            catch(Exception e){status.setText("تعذر تشغيل إذاعة القاهرة: "+e.getMessage());}
+        });
+        Button stopRadioButton=new Button(this);stopRadioButton.setText("إيقاف الإذاعة");
+        radioCard.addView(stopRadioButton,matchWrap());
+        stopRadioButton.setOnClickListener(v->{
+            Intent stop=new Intent(this,RadioPlaybackService.class);stop.setAction(RadioPlaybackService.ACTION_STOP);
+            try{startService(stop);}catch(Exception e){status.setText("تعذر إيقاف الإذاعة: "+e.getMessage());}
+        });
         Runnable refreshRadio=()->{
             boolean playing=getSharedPreferences("zad_audio",MODE_PRIVATE).getBoolean("radio_playing",false)
                     && "radio".equals(getSharedPreferences("zad_audio",MODE_PRIVATE).getString("active_kind",""));
