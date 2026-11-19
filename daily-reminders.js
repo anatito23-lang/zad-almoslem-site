@@ -100,7 +100,7 @@
    window.onAdhanDownloadComplete=function(which,ok,reason){
      if(!voice||which!==voice.value)return;
      hideAdhanProgress();
-     adhanStatus.textContent=ok?'تم التحميل بنجاح! الأذان محفوظ على الجهاز ويعمل دون إنترنت.':'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
+     adhanStatus.textContent=ok?'تم تحميل الأذان وحفظ نسخة في مجلد الهاتف. '+(reason||''):'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
      if(downloadBtn)downloadBtn.disabled=false;
      updateAdhanDownloadState();
    };
