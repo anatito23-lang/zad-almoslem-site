@@ -133,7 +133,8 @@ public class RadioPlaybackService extends Service {
                 }
             });
             Uri source = localFile != null ? Uri.fromFile(localFile) : Uri.parse(url);
-            MediaItem item = localFile != null ? MediaItem.fromUri(source)
+            boolean radioStream = "radio".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""));
+            MediaItem item = (localFile != null || !radioStream) ? MediaItem.fromUri(source)
                     : new MediaItem.Builder().setUri(source)
                     .setMimeType(androidx.media3.common.MimeTypes.AUDIO_MPEG).build();
             player.setMediaItem(item);
