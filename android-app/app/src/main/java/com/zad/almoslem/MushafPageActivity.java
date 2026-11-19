@@ -23,7 +23,7 @@ public class MushafPageActivity extends Activity {
     private GradientDrawable bg(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));d.setStroke(dp(1),Color.rgb(190,170,120));return d;}
     private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.CENTER);t.setTextDirection(View.TEXT_DIRECTION_RTL);if(bold)t.setTypeface(Typeface.DEFAULT,bold?Typeface.BOLD:Typeface.NORMAL);return t;}
     private void build(){
-        ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(14),dp(14),dp(14),dp(24));root.setBackgroundColor(Color.rgb(244,247,243));AppTabs.add(this,root,"mushaf");scroll.addView(root);setContentView(scroll);
+        ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(14),dp(14),dp(14),dp(24));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);setContentView(AppTabs.wrap(this,scroll,"mushaf"));
         TextView title=label("المصحف الشريف — صفحات",24,Color.WHITE,true);title.setPadding(dp(12),dp(20),dp(12),dp(20));title.setBackground(bg(green,16));root.addView(title);
         pageTitle=label("",16,green,true);pageTitle.setPadding(0,dp(10),0,dp(4));root.addView(pageTitle);
         LinearLayout nav=new LinearLayout(this);nav.setOrientation(LinearLayout.HORIZONTAL);
