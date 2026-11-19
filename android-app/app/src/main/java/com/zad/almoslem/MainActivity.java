@@ -110,6 +110,9 @@ public class MainActivity extends Activity {
         Button dailyWirdButton = new Button(this); dailyWirdButton.setText("☀️  وردي اليومي");
         dailyWirdButton.setOnClickListener(v -> startActivity(new Intent(this, DailyWirdActivity.class)));
         root.addView(dailyWirdButton, matchWrap());
+        Button remindersButton = new Button(this); remindersButton.setText("⏰  إعدادات التنبيهات اليومية");
+        remindersButton.setOnClickListener(v -> startActivity(new Intent(this, DailyReminderSettingsActivity.class)));
+        root.addView(remindersButton, matchWrap());
         TextView intro = text("إعدادات الأذان",20,Color.rgb(20,55,43),true);
         intro.setPadding(0,dp(20),0,dp(8)); root.addView(intro);
         Switch master = new Switch(this);
