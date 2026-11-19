@@ -308,10 +308,7 @@ public class MainActivity extends Activity {
                             connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
                             int status = connection.getResponseCode();
                             if (status != HttpURLConnection.HTTP_OK) throw new Exception("استجابة مصدر الصوت: " + status);
-                            String type = connection.getContentType();
-                            if (type == null || !(type.toLowerCase().contains("audio") || type.toLowerCase().contains("mpeg") || type.toLowerCase().contains("octet-stream"))) {
-                                throw new Exception("المصدر لم يُرجع ملف MP3 صالحًا");
-                            }
+                            // Do not trust CDN Content-Type; validate the downloaded MP3 signature instead.
                             long total = 0;
                             try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
                                 byte[] buffer = new byte[8192];
@@ -324,6 +321,13 @@ public class MainActivity extends Activity {
                                 out.getFD().sync();
                             }
                             if (total < 10000) throw new Exception("ملف الصوت غير مكتمل");
+                            try (FileInputStream check = new FileInputStream(temp)) {
+                                byte[] header = new byte[3];
+                                int headerLength = check.read(header);
+                                boolean id3 = headerLength >= 3 && header[0] == 0x49 && header[1] == 0x44 && header[2] == 0x33;
+                                boolean mpegFrame = headerLength >= 2 && (header[0] & 0xFF) == 0xFF && (header[1] & 0xE0) == 0xE0;
+                                if (!id3 && !mpegFrame) throw new Exception("الملف الذي وصل ليس تسجيل MP3 صالحًا");
+                            }
                             downloaded = true;
                             break;
                         } catch (Exception attemptError) {
