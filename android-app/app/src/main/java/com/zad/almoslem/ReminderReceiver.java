@@ -66,6 +66,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         if (intent == null) return;
         String key=intent.getStringExtra("key"),title=intent.getStringExtra("title");
         if(key==null)return;
+        android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
         if("silent_restore".equals(key)) {
             try {
                 if(Build.VERSION.SDK_INT>=23) {
@@ -80,7 +81,6 @@ public class ReminderReceiver extends BroadcastReceiver {
         boolean prePrayer=key.startsWith("pre_prayer_");
         boolean iqama=key.startsWith("iqama_prayer_");
         String prayerName=prayer?key.substring("prayer_".length()):"";
-        android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
         if (!prayer && !prePrayer && !iqama && ("morning".equals(key) || "evening".equals(key) || "qiyam".equals(key))) {
             try { ReminderAudioService.play(context, key); } catch (Exception ignored) {}
         }
