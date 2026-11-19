@@ -197,6 +197,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void requestNotificationPermission() {
             runOnUiThread(() -> MainActivity.this.requestNotificationPermission());
         }
+    }
     @Override protected void onActivityResult(int requestCode,int resultCode,Intent data) {
         super.onActivityResult(requestCode,resultCode,data);
         if(requestCode==AUDIO_FILE_REQUEST && fileChooserCallback!=null){
