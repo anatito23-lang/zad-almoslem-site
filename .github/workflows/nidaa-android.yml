@@ -15,6 +15,11 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Download and verify Tanzil Uthmani Quran text
+        run: |
+          mkdir -p app/src/main/assets
+          curl -fL --retry 3 'https://raw.githubusercontent.com/iptvchecker/content-tanzil/main/tanzil-uthmani-1.1.txt' -o app/src/main/assets/quran-uthmani.txt
+          echo 'ac0724796cbbda0f4801470fbbd11d0f3c5802067bae0493466d0128b0c667af  app/src/main/assets/quran-uthmani.txt' | sha256sum -c -
       - name: Build debug APK
         run: gradle assembleDebug
       - uses: actions/upload-artifact@v4
