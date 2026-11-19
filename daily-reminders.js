@@ -206,8 +206,10 @@
      }
    };
    window.onAdhanDownloadComplete=function(which,ok,reason){
-     if(typeof window.onPrayerAdhanDownloadComplete==='function')window.onPrayerAdhanDownloadComplete(which,ok,reason);
-     if(typeof window.onPrayerPreviewDownloadComplete==='function')window.onPrayerPreviewDownloadComplete(which,ok,reason);
+     const prayerDownloadCallback=window.onPrayerAdhanDownloadComplete;window.onPrayerAdhanDownloadComplete=null;
+     if(typeof prayerDownloadCallback==='function')prayerDownloadCallback(which,ok,reason);
+     const prayerPreviewCallback=window.onPrayerPreviewDownloadComplete;window.onPrayerPreviewDownloadComplete=null;
+     if(typeof prayerPreviewCallback==='function')prayerPreviewCallback(which,ok,reason);
      if(!voice)return;
      if(downloadBtn)downloadBtn.disabled=false;
      if(which!==voice.value){updateAdhanDownloadState();return;}
