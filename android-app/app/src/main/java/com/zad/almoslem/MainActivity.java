@@ -127,10 +127,7 @@ public class MainActivity extends Activity {
                 result.put("lastPlaybackError", prefs.getString("adhan_last_start_error", ""));
                 return result.toString();
             } catch (Exception error) {
-                org.json.JSONObject failure = new org.json.JSONObject();
-                failure.put("nativeBridge", true);
-                failure.put("diagnosticError", error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage());
-                return failure.toString();
+                return "{\"nativeBridge\":true}";
             }
         }
         @JavascriptInterface public void scheduleDailyReminder(String key,int hour,int minute,String title) {
