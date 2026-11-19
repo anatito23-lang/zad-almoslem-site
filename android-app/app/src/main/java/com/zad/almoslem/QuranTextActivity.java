@@ -25,6 +25,8 @@ public class QuranTextActivity extends Activity {
 
     @Override public void onCreate(Bundle state){
         super.onCreate(state);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);build();
+        int requested=getIntent().getIntExtra("surah_number",0);
+        if(requested>=1&&requested<=names.length){surahPicker.setSelection(requested-1);loadSelected(false);}
     }
     private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
     private GradientDrawable bg(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));return d;}
