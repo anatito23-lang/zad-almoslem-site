@@ -164,7 +164,15 @@ if(nativeApp){
 
  }
 }
-// تبقى إعدادات الأذان داخل صفحة مواقيت الصلاة، بجوار جدول الصلوات.
+// تثبيت إعدادات الأذان داخل صفحة مواقيت الصلاة في موضع واضح ومستقل.
+const prayerSection=$('prayer');
+const adhanSettings=prayerSection?.querySelector('.adhan-settings');
+if(adhanSettings){
+ let audioSlot=$('zadAudioSettingsSlot');
+ if(!audioSlot){audioSlot=document.createElement('div');audioSlot.id='zadAudioSettingsSlot';audioSlot.className='zad-prayer-audio-settings';adhanSettings.parentNode.insertBefore(audioSlot,adhanSettings);}
+ audioSlot.append(adhanSettings);
+}
+// تبقى تنبيهات الأذكار اليومية ضمن إعدادات البرنامج.
 const reminderSettings=$('daily-reminder-settings');
 if(reminderSettings)$('zadReminderSettingsSlot').append(reminderSettings);
 const themeNames=['light','dark','blue','sand'];
