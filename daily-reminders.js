@@ -188,7 +188,7 @@
    window.onAdhanDownloadProgress=function(index,prayer,received,total,directory){
      if(!voice)return;
      const names={fajr:'الفجر',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'};
-     const label=names[prayer]||prayer;
+     const label=names[prayer]||adhanVoiceNames[prayer]||prayer;
      const mb=(received/1048576).toFixed(2);
      const totalMb=total>0?(total/1048576).toFixed(2):'؟';
      const percent=total>0?Math.max(0,Math.min(100,Math.round(received/total*100))):null;
@@ -202,7 +202,9 @@
      if(directory){
        if(!adhanPathBox)return;
        adhanPathBox.style.display='block';
-       adhanPathBox.textContent='مسار الحفظ داخل التطبيق: '+directory+'/doha_'+prayer+'.mp3';
+       const prayerKeys=['fajr','dhuhr','asr','maghrib','isha'];
+       const filename=prayerKeys.includes(prayer)?'doha_'+prayer+'.mp3':prayer+'.mp3';
+       adhanPathBox.textContent='مسار الحفظ داخل التطبيق: '+directory+'/'+filename;
      }
    };
    window.onAdhanDownloadComplete=function(which,ok,reason){
