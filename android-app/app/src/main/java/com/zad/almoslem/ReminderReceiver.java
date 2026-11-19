@@ -140,24 +140,6 @@ public class ReminderReceiver extends BroadcastReceiver {
         if (!prayer && ("morning".equals(key) || "evening".equals(key) || "qiyam".equals(key))) {
             try { ReminderAudioService.play(context, key); } catch (Exception ignored) {}
         }
-        boolean adhanEnabled=prefs.getBoolean("adhan_enabled",true);
-        String adhanMode=prefs.getString("adhan_mode","adhan");
-        String prayerName = prayer ? key.substring("prayer_".length()) : "";
-        boolean thisPrayerEnabled = prayer && prefs.getBoolean("prayer_enabled_" + prayerName, true);
-        if (prayer && prefs.getBoolean("prayer_silent_" + prayerName, false)) activateSilentMode(context);
-        if(prayer && adhanEnabled && thisPrayerEnabled && "adhan".equals(adhanMode)) {
-            Intent audio=new Intent(context,AdhanPlaybackService.class);
-            audio.setAction(AdhanPlaybackService.ACTION_PLAY);
-            audio.putExtra("prayer",prayerName);
-            audio.putExtra("voice",prefs.getString("adhan_voice","basit"));
-            audio.putExtra("play_dua_after",prefs.getBoolean("dua_after_adhan_enabled",true));
-            try {
-                if(Build.VERSION.SDK_INT>=26) context.startForegroundService(audio);
-                else context.startService(audio);
-            } catch(Exception launchError) {
-                showAdhanLaunchFailure(context, prayerName, launchError);
-            }
-        }
         if(prayer) {
             // Advance by one local calendar day, not a fixed 24-hour duration.
             Calendar nextPrayer = Calendar.getInstance();
@@ -171,7 +153,7 @@ public class ReminderReceiver extends BroadcastReceiver {
             scheduleApproachAlert(context,prayerName,next);
         }
         NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        String channelId=prayer?((adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode))?PRAYER_TONE_CHANNEL_ID:PRAYER_CHANNEL_ID):CHANNEL_ID;
+        String channelId=prayer?PRAYER_CHANNEL_ID:CHANNEL_ID;
         if(Build.VERSION.SDK_INT>=26){
             NotificationChannel ch;
             if(prayer){
@@ -194,10 +176,8 @@ public class ReminderReceiver extends BroadcastReceiver {
         PendingIntent content=PendingIntent.getActivity(context,0,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,channelId):new Notification.Builder(context);
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("قلبي اطمأن – زاد المسلم").setContentText(title==null?"تذكير من زاد المسلم":title).setAutoCancel(true).setContentIntent(content);
-        if(prayer && adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode)) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
-        else if(prayer && adhanEnabled && thisPrayerEnabled && "off".equals(adhanMode)) { /* no alert */ }
-        else b.setDefaults(Notification.DEFAULT_VIBRATE);
-        if(!prayer || (adhanEnabled && thisPrayerEnabled && !"off".equals(adhanMode))) nm.notify(key.hashCode(),b.build());
+        b.setDefaults(Notification.DEFAULT_VIBRATE);
+        nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
             String k=key.replace("daily_","");
             if(prefs.getBoolean(k+"_enabled",false)) scheduleDaily(context,k,prefs.getInt(k+"_hour",7),prefs.getInt(k+"_minute",0),prefs.getString(k+"_title","تذكير من زاد المسلم"));
