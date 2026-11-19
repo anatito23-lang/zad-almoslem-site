@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
         s.setLoadsImagesAutomatically(true);
-        s.setAllowFileAccess(false);
+        s.setAllowFileAccess(true);
         s.setGeolocationEnabled(true);
         webView.addJavascriptInterface(new ReminderBridge(), "ZadAndroid");
         // Keep WebView and service-worker caches so downloaded Quran pages remain available offline.
@@ -63,7 +63,7 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
-        webView.loadUrl("https://anatito23-lang.github.io/zad-almoslem-site/?appbuild=20261118settings5&native=1");
+        webView.loadUrl("file:///android_asset/site/index.html?appbuild=20261119localadhan1&native=1");
         requestNotificationPermission();
     }
     @Override protected void onResume() {
