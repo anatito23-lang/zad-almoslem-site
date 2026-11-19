@@ -108,20 +108,28 @@ public class RadioPlaybackService extends Service {
                     if (state == Player.STATE_BUFFERING) {
                         updateRadioNotification("إذاعة القرآن الكريم", "جارٍ الاتصال بالبث...");
                     } else if (state == Player.STATE_READY) {
-                        if (startupTimeout != null) playbackHandler.removeCallbacks(startupTimeout);
-                        getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
-                                .putBoolean("radio_ready", true).putBoolean("radio_playing", true)
-                                .remove("radio_last_error").apply();
-                        updateRadioNotification("إذاعة القرآن الكريم", "البث يعمل الآن");
+                        String active = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", "");
+                        if ("radio".equals(active)) {
+                            if (startupTimeout != null) playbackHandler.removeCallbacks(startupTimeout);
+                            getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
+                                    .putBoolean("radio_ready", true).putBoolean("radio_playing", true)
+                                    .remove("radio_last_error").apply();
+                            updateRadioNotification("إذاعة القرآن الكريم", "البث يعمل الآن");
+                        } else {
+                            String title = "quran".equals(active) ? "استماع القرآن الكريم" :
+                                    ("nasheed".equals(active) ? "الإنشاد والابتهالات" : "الرقية الشرعية");
+                            updateRadioNotification(title, "يعمل الآن");
+                        }
                     }
                 }
                 @Override public void onPlayerError(PlaybackException error) {
                     String detail = error.getErrorCodeName() + ": " +
                             (error.getMessage() == null ? error.toString() : error.getMessage());
+                    boolean radioActive = "radio".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""));
                     getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
                             .putBoolean("radio_ready", false).putString("radio_last_error", detail).apply();
-                    android.util.Log.e("ZadAlmoslem", "Radio stream playback failed: " + url, error);
-                    String fallback = nextRadioFallback();
+                    android.util.Log.e("ZadAlmoslem", "Audio playback failed: " + url, error);
+                    String fallback = radioActive ? nextRadioFallback() : null;
                     if (fallback != null) {
                         updateRadioNotification("إذاعة القرآن الكريم", "تعذر المصدر الحالي؛ نجرب مصدر بث احتياطي...");
                         play(fallback, null);
@@ -209,7 +217,7 @@ public class RadioPlaybackService extends Service {
             String message = detail == null ? "تعذر استقبال البث" : detail;
             if (message.length() > 110) message = message.substring(0, 110);
             b.setSmallIcon(android.R.drawable.ic_dialog_alert)
-                    .setContentTitle("تعذر تشغيل إذاعة القرآن")
+                    .setContentTitle("تعذر تشغيل الصوت")
                     .setContentText(message)
                     .setStyle(new Notification.BigTextStyle().bigText(message))
                     .setContentIntent(content).setOngoing(true)
