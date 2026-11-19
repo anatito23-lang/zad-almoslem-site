@@ -81,6 +81,31 @@
        if(prayerVoiceStatus)prayerVoiceStatus.textContent='تم اختيار '+sel.options[sel.selectedIndex].text+' لصلاة '+prayer+'. اضغط حفظ الإعدادات لتأكيد كل الاختيارات.';
      });
    });
+   document.querySelectorAll('.prayer-adhan-preview').forEach(btn=>btn.addEventListener('click',()=>{
+     const prayer=btn.dataset.prayer;
+     const sel=prayerVoiceSelects.find(item=>item.dataset.prayer===prayer);
+     if(!sel||!window.ZadAndroid||typeof window.ZadAndroid.previewAdhan!=='function'){
+       if(prayerVoiceStatus)prayerVoiceStatus.textContent='معاينة التسجيلات المختارة متاحة داخل تطبيق أندرويد.';
+       return;
+     }
+     const key=sel.value;
+     try{
+       if(window.ZadAndroid.isAdhanDownloaded(key)){
+         window.ZadAndroid.previewAdhan(key);
+         if(prayerVoiceStatus)prayerVoiceStatus.textContent='يتم تشغيل معاينة '+sel.options[sel.selectedIndex].text+' لصلاة '+prayer+'.';
+         return;
+       }
+       btn.disabled=true;
+       if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل التسجيل لمعاينته...';
+       window.onPrayerPreviewDownloadComplete=(which,ok,reason)=>{
+         btn.disabled=false;
+         if(which!==key)return;
+         if(ok){window.ZadAndroid.previewAdhan(key);if(prayerVoiceStatus)prayerVoiceStatus.textContent='تم تنزيل التسجيل وتشغيل معاينته.';}
+         else if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذرت المعاينة: '+(reason||'فشل التنزيل');
+       };
+       window.ZadAndroid.downloadAdhan(key);
+     }catch(e){btn.disabled=false;if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر بدء المعاينة أو التنزيل.';}
+   }));
    const downloadPrayerVoices=$('downloadPrayerAdhans');
    if(downloadPrayerVoices)downloadPrayerVoices.addEventListener('click',()=>{
      if(!window.ZadAndroid||typeof window.ZadAndroid.downloadAdhan!=='function'){
@@ -181,6 +206,7 @@
    };
    window.onAdhanDownloadComplete=function(which,ok,reason){
      if(typeof window.onPrayerAdhanDownloadComplete==='function')window.onPrayerAdhanDownloadComplete(which,ok,reason);
+     if(typeof window.onPrayerPreviewDownloadComplete==='function')window.onPrayerPreviewDownloadComplete(which,ok,reason);
      if(!voice)return;
      if(downloadBtn)downloadBtn.disabled=false;
      if(which!==voice.value){updateAdhanDownloadState();return;}
