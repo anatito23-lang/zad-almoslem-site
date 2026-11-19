@@ -25,9 +25,14 @@ public class ReminderAudioService extends Service {
     private TextToSpeech tts;
 
     public static void play(Context context, String kind) {
+        play(context, kind, null);
+    }
+
+    public static void play(Context context, String kind, String message) {
         Intent i = new Intent(context, ReminderAudioService.class);
         i.setAction(ACTION_PLAY);
         i.putExtra("kind", kind);
+        if (message != null) i.putExtra("message", message);
         if (Build.VERSION.SDK_INT >= 26) context.startForegroundService(i);
         else context.startService(i);
     }
@@ -44,11 +49,14 @@ public class ReminderAudioService extends Service {
             return START_NOT_STICKY;
         }
         String kind = intent == null ? "qiyam" : intent.getStringExtra("kind");
-        if (!"morning".equals(kind) && !"evening".equals(kind) && !"dua".equals(kind)) kind = "qiyam";
+        if (!"morning".equals(kind) && !"evening".equals(kind) && !"dua".equals(kind)
+                && !"approach".equals(kind)) kind = "qiyam";
+        String reminderMessage = intent == null ? null : intent.getStringExtra("message");
         createChannel();
         String title = "morning".equals(kind) ? "أذكار الصباح" :
                 "evening".equals(kind) ? "أذكار المساء" :
-                "dua".equals(kind) ? "دعاء ما بعد الأذان" : "قيام الليل";
+                "dua".equals(kind) ? "دعاء ما بعد الأذان" :
+                "approach".equals(kind) ? "تنبيه اقتراب الصلاة" : "قيام الليل";
         Notification.Builder b = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
@@ -64,6 +72,9 @@ public class ReminderAudioService extends Service {
         stopCurrentPlayers();
         if ("qiyam".equals(kind)) {
             speak("حان وقت قيام الليل، لا تنسَ نصيبك من صلاة الليل");
+        } else if ("approach".equals(kind)) {
+            speak(reminderMessage == null || reminderMessage.trim().isEmpty()
+                    ? "اقترب موعد الصلاة، استعد للقاء الله" : reminderMessage);
         } else {
             playFile(kind);
         }
