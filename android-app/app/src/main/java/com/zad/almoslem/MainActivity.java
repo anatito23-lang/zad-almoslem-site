@@ -242,25 +242,46 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void requestNotificationPermission() {
             runOnUiThread(() -> MainActivity.this.requestNotificationPermission());
         }
+        private boolean isValidAdhanBytes(byte[] header, int length) {
+            boolean id3 = length >= 3 && header[0] == 0x49 && header[1] == 0x44 && header[2] == 0x33;
+            boolean mpegFrame = length >= 2 && (header[0] & 0xFF) == 0xFF && (header[1] & 0xE0) == 0xE0;
+            boolean ogg = length >= 4 && header[0] == 0x4F && header[1] == 0x67 && header[2] == 0x67 && header[3] == 0x53;
+            return id3 || mpegFrame || ogg;
+        }
+        private boolean isValidAdhanFile(File file) {
+            if (file == null || !file.isFile() || file.length() < 10000) return false;
+            try (FileInputStream in = new FileInputStream(file)) {
+                byte[] header = new byte[4];
+                return isValidAdhanBytes(header, in.read(header));
+            } catch (Exception e) {
+                return false;
+            }
+        }
         @JavascriptInterface public boolean isAdhanDownloaded(String voice) {
-            File f=adhanFile(voice);
-            if (f.isFile() && f.length()>10000) return true;
-            File mp3=new File(f.getParentFile(),safeVoice(voice)+".mp3");
-            return mp3.isFile() && mp3.length()>10000;
+            File dir = new File(getFilesDir(), "adhan");
+            String safe = safeVoice(voice);
+            return isValidAdhanFile(new File(dir, safe + ".mp3"))
+                    || isValidAdhanFile(new File(dir, safe + ".ogg"));
         }
         @JavascriptInterface public boolean saveAdhanAudio(String voice,String encoded) {
+            File temp = null;
             try {
                 String safe=safeVoice(voice);
                 byte[] bytes=Base64.decode(encoded,Base64.DEFAULT);
-                if(bytes.length<10000 || bytes.length>20*1024*1024) return false;
+                if(bytes.length<10000 || bytes.length>20*1024*1024
+                        || !isValidAdhanBytes(bytes, bytes.length)) return false;
                 File dir=new File(getFilesDir(),"adhan");
                 if(!dir.exists()&&!dir.mkdirs()) return false;
-                File temp=new File(dir,safe+".import");
+                temp=new File(dir,safe+".import");
                 File target=new File(dir,safe+".mp3");
                 try(FileOutputStream out=new FileOutputStream(temp)){out.write(bytes);out.getFD().sync();}
+                if(!isValidAdhanFile(temp)){temp.delete();return false;}
                 if(target.exists()&&!target.delete()){temp.delete();return false;}
                 return temp.renameTo(target);
-            } catch(Exception e){return false;}
+            } catch(Exception e) {
+                if(temp!=null&&temp.exists()) temp.delete();
+                return false;
+            }
         }
         private String safeVoice(String voice) {
             return ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"haram".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice))?voice:"basit";
