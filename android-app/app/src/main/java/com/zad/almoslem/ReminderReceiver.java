@@ -130,9 +130,14 @@ public class ReminderReceiver extends BroadcastReceiver {
             audio.putExtra("voice",prefs.getString("adhan_voice_" + prayerName,prefs.getString("adhan_voice","basit")));
             audio.putExtra("play_dua_after",prefs.getBoolean("dua_after_adhan_enabled",true));
             try {
+                prefs.edit().remove("adhan_last_start_error").apply();
                 if(Build.VERSION.SDK_INT>=26) context.startForegroundService(audio);
                 else context.startService(audio);
-            } catch(Exception ignored) {}
+            } catch(Exception error) {
+                String detail = error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage();
+                prefs.edit().putString("adhan_last_start_error", detail).apply();
+                android.util.Log.e("ZadAlmoslem", "Unable to start adhan playback service for " + prayerName, error);
+            }
         }
         if(prayer) {
             // Advance by one local calendar day, not a fixed 24-hour duration.
@@ -169,7 +174,10 @@ public class ReminderReceiver extends BroadcastReceiver {
         Intent open=new Intent(context,MainActivity.class);
         PendingIntent content=PendingIntent.getActivity(context,0,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,channelId):new Notification.Builder(context);
-        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("قلبي اطمأن – زاد المسلم").setContentText(title==null?"تذكير من زاد المسلم":title).setAutoCancel(true).setContentIntent(content);
+        String startError = prayer ? prefs.getString("adhan_last_start_error", "") : "";
+        String notificationText = title==null?"تذكير من زاد المسلم":title;
+        if (!startError.isEmpty()) notificationText = "تعذر بدء الأذان: " + startError;
+        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("قلبي اطمأن – زاد المسلم").setContentText(notificationText).setAutoCancel(true).setContentIntent(content);
         if(prayer && adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode)) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
         else if(prayer && adhanEnabled && thisPrayerEnabled && "off".equals(adhanMode)) { /* no alert */ }
         else b.setDefaults(Notification.DEFAULT_VIBRATE);
