@@ -423,7 +423,7 @@ footer{background:#071522;color:#c9d6e2}
       </div>
       <button class="btn green" id="saveAdhanSettings" type="button">حفظ إعدادات الأذان والصامت</button>
       <p id="adhanSettingsStatus" class="small" role="status">اختر صوت الأذان، وحدد الصلوات التي تريد تشغيله فيها. يمكنك أيضًا تحديد الصلوات التي يتحول فيها الهاتف إلى الصامت لمدة 15 دقيقة.</p>
-    </div>
+    
     <div class="small">المواقيت تُجلب عبر الإنترنت من خدمة مواقيت الصلاة، وقد تختلف دقائق قليلة حسب طريقة الحساب والجهة المحلية.</div>
   </section>
 
@@ -850,8 +850,6 @@ footer{background:#071522;color:#c9d6e2}
       <div class="card"><div class="icon">🌆</div><h3>أذكار المساء</h3><p>تذكير يومي في الوقت الذي تختاره.</p><label class="small" for="eveningReminderTime">وقت التذكير</label><input id="eveningReminderTime" type="time" value="17:00" style="width:100%;margin:6px 0 12px"><label><input id="eveningReminderEnabled" type="checkbox" checked> تفعيل تنبيه أذكار المساء</label></div>
       <div class="card"><div class="icon">🌙</div><h3>قيام الليل</h3><p>تذكير قبل أذان الفجر بنصف ساعة، ويمكنك تغيير الموعد.</p><label class="small" for="qiyamReminderTime">وقت التذكير</label><input id="qiyamReminderTime" type="time" value="04:00" style="width:100%;margin:6px 0 12px"><label><input id="qiyamReminderEnabled" type="checkbox" checked> تفعيل تنبيه قيام الليل</label></div>
     </div>
-    <div class="card" style="margin-top:12px"><div class="icon">🤲</div><h3>دعاء الشيخ الشعراوي بعد الأذان</h3><p>تشغيل التسجيل تلقائيًا بعد انتهاء الأذان مباشرة.</p><label><input id="duaAfterAdhanEnabled" type="checkbox" checked> تشغيل دعاء الشعراوي بعد كل أذان</label></div>
-    <div class="card" style="margin-top:12px"><div class="icon">🕌</div><h3>الأذان عند دخول وقت الصلاة</h3><p>يشغّل الأذان بصوته عند الفجر والظهر والعصر والمغرب والعشاء، حتى لو أغلقت التطبيق. يحتاج اتصالًا بالإنترنت وقت التشغيل.</p><p class="small">يمكنك ضبط صوت الأذان لكل صلاة من قسم مواقيت الصلاة.</p></div>
     <div class="row" style="margin-top:12px"><button class="btn green" id="saveDailyReminders">حفظ إعدادات التنبيهات</button><span class="small" id="dailyReminderStatus" role="status">أذكار الصباح 7:00 صباحًا، والمساء 5:00 مساءً، وقيام الليل 4:00 صباحًا.</span></div>
     <div class="notice">تنبيهات التطبيق على أندرويد تحتاج السماح بالإشعارات. وقد يطلب الهاتف السماح بالتنبيهات الدقيقة أو استثناء التطبيق من توفير البطارية لضمان وصولها في موعدها.</div>
   </section>
