@@ -260,6 +260,11 @@ public class MainActivity extends Activity {
         @JavascriptInterface public boolean isAdhanDownloaded(String voice) {
             File dir = new File(getFilesDir(), "adhan");
             String safe = safeVoice(voice);
+            if ("doha".equals(safe)) {
+                String[] prayers = {"fajr","dhuhr","asr","maghrib","isha"};
+                for (String prayer : prayers) if (!isValidAdhanFile(new File(dir, "doha_" + prayer + ".mp3"))) return false;
+                return true;
+            }
             return isValidAdhanFile(new File(dir, safe + ".mp3"))
                     || isValidAdhanFile(new File(dir, safe + ".ogg"));
         }
@@ -284,10 +289,71 @@ public class MainActivity extends Activity {
             }
         }
         private String safeVoice(String voice) {
-            return ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"haram".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice))?voice:"basit";
+            return ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"haram".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)||"doha".equals(voice))?voice:"doha";
+        }
+        private void downloadDohaAdhan() {
+            new Thread(() -> {
+                String[] prayers = {"fajr","dhuhr","asr","maghrib","isha"};
+                String[] urls = {
+                    "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_01_Fajr_Adhan.mp3",
+                    "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_02_Dhuhr_Adhan.mp3",
+                    "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_03_Asr_Adhan.mp3",
+                    "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_04_Maghrib_Adhan.mp3",
+                    "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_05_Isha_Adhan.mp3"
+                };
+                boolean ok = false;
+                String reason = "تعذر تنزيل تسجيلات الأذان";
+                HttpURLConnection connection = null;
+                File dir = new File(getFilesDir(), "adhan");
+                try {
+                    if (!dir.exists() && !dir.mkdirs()) throw new Exception("تعذر إنشاء مجلد الصوت");
+                    for (int i = 0; i < urls.length; i++) {
+                        File temp = new File(dir, "doha_" + prayers[i] + ".download");
+                        File target = new File(dir, "doha_" + prayers[i] + ".mp3");
+                        try {
+                            connection = (HttpURLConnection) new URL(urls[i]).openConnection();
+                            connection.setConnectTimeout(25000);
+                            connection.setReadTimeout(60000);
+                            connection.setInstanceFollowRedirects(true);
+                            connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
+                            int status = connection.getResponseCode();
+                            if (status != HttpURLConnection.HTTP_OK) throw new Exception("مصدر تسجيل " + prayers[i] + " أعاد " + status);
+                            long total = 0;
+                            try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
+                                byte[] buffer = new byte[8192]; int count;
+                                while ((count = in.read(buffer)) != -1) {
+                                    total += count;
+                                    if (total > 15L * 1024L * 1024L) throw new Exception("حجم تسجيل الأذان أكبر من المسموح");
+                                    out.write(buffer, 0, count);
+                                }
+                                out.getFD().sync();
+                            }
+                            if (!isValidAdhanFile(temp)) throw new Exception("تسجيل " + prayers[i] + " غير صالح أو غير مكتمل");
+                            if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال تسجيل " + prayers[i]);
+                            if (!temp.renameTo(target)) throw new Exception("تعذر حفظ تسجيل " + prayers[i]);
+                        } finally {
+                            if (connection != null) { connection.disconnect(); connection = null; }
+                            if (temp.exists()) temp.delete();
+                        }
+                    }
+                    ok = true;
+                    reason = "تم تنزيل تسجيلات الصلوات الخمس وحفظها للعمل دون إنترنت.";
+                } catch (Exception e) {
+                    reason = e.getMessage() == null ? "تعذر تنزيل تسجيلات الأذان" : e.getMessage();
+                } finally {
+                    if (connection != null) connection.disconnect();
+                }
+                final boolean result = ok;
+                final String message = reason;
+                runOnUiThread(() -> {
+                    if (webView != null) webView.evaluateJavascript(
+                        "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('doha'," + result + "," + org.json.JSONObject.quote(message) + ")", null);
+                });
+            }).start();
         }
         @JavascriptInterface public void downloadAdhan(String voice) {
             final String safe = safeVoice(voice);
+            if ("doha".equals(safe)) { downloadDohaAdhan(); return; }
             final String source;
             switch (safe) {
                 case "basit": source = "https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Abdulbasit_Abdusamad_1_-_Egypt_(%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%A8%D8%A7%D8%B3%D8%B7_%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%B5%D9%85%D8%AF_-_%D9%85%D8%B5%D8%B1).mp3"; break;
