@@ -75,7 +75,7 @@ public class QuranTextActivity extends Activity {
     }
     private void render(JSONObject data,int n){
         StringBuilder text=new StringBuilder();JSONArray ayahs=data.optJSONArray("ayahs");if(ayahs!=null)for(int i=0;i<ayahs.length();i++){JSONObject a=ayahs.optJSONObject(i);if(a!=null)text.append(a.optString("text","")).append(" ﴿").append(a.optInt("numberInSurah",i+1)).append("﴾  ");}
-        content.setText("سُورَةُ "+names[n-1]+"\\n\\n"+text.toString());
+        content.setText("سُورَةُ "+names[n-1]+"\n\n"+text.toString());
         content.setTypeface(Typeface.create("serif",Typeface.NORMAL));
     }
 }
