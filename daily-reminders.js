@@ -91,18 +91,20 @@
      const key=sel.value;
      try{
        if(window.ZadAndroid.isAdhanDownloaded(key)){
-         window.ZadAndroid.previewAdhan(key);
+         window.ZadAndroid.previewAdhan(key,prayer);
          if(prayerVoiceStatus)prayerVoiceStatus.textContent='يتم تشغيل معاينة '+sel.options[sel.selectedIndex].text+' لصلاة '+prayer+'.';
          return;
        }
        btn.disabled=true;
        if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل التسجيل لمعاينته...';
-       window.onPrayerPreviewDownloadComplete=(which,ok,reason)=>{
+       const previewDone=(which,ok,reason)=>{
          btn.disabled=false;
          if(which!==key)return;
-         if(ok){window.ZadAndroid.previewAdhan(key);if(prayerVoiceStatus)prayerVoiceStatus.textContent='تم تنزيل التسجيل وتشغيل معاينته.';}
+         if(ok){window.ZadAndroid.previewAdhan(key,prayer);if(prayerVoiceStatus)prayerVoiceStatus.textContent='تم تنزيل التسجيل وتشغيل معاينته.';}
          else if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذرت المعاينة: '+(reason||'فشل التنزيل');
        };
+       previewDone.voiceKey=key;
+       window.onPrayerPreviewDownloadComplete=previewDone;
        window.ZadAndroid.downloadAdhan(key);
      }catch(e){btn.disabled=false;if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر بدء المعاينة أو التنزيل.';}
    }));
@@ -120,11 +122,13 @@
        const voiceKey=unique[index++];
        if(window.ZadAndroid.isAdhanDownloaded(voiceKey)){runNext();return;}
        if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل التسجيل '+index+' من '+unique.length+': '+voiceKey;
-       window.onPrayerAdhanDownloadComplete=(which,ok,details)=>{
+       const downloadDone=(which,ok,details)=>{
          if(prayerVoiceStatus)prayerVoiceStatus.textContent=(ok?'تم تنزيل ':'تعذر تنزيل ')+which+' — '+(details||'');
          runNext();
        };
-       try{window.ZadAndroid.downloadAdhan(voiceKey);}catch(e){if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر بدء تنزيل '+voiceKey;runNext();}
+       downloadDone.voiceKey=voiceKey;
+       window.onPrayerAdhanDownloadComplete=downloadDone;
+       try{window.ZadAndroid.downloadAdhan(voiceKey);}catch(e){window.onPrayerAdhanDownloadComplete=null;if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر بدء تنزيل '+voiceKey;runNext();}
      };
      runNext();
    });
@@ -209,10 +213,10 @@
      }
    };
    window.onAdhanDownloadComplete=function(which,ok,reason){
-     const prayerDownloadCallback=window.onPrayerAdhanDownloadComplete;window.onPrayerAdhanDownloadComplete=null;
-     if(typeof prayerDownloadCallback==='function')prayerDownloadCallback(which,ok,reason);
-     const prayerPreviewCallback=window.onPrayerPreviewDownloadComplete;window.onPrayerPreviewDownloadComplete=null;
-     if(typeof prayerPreviewCallback==='function')prayerPreviewCallback(which,ok,reason);
+     const prayerDownloadCallback=window.onPrayerAdhanDownloadComplete;
+     if(typeof prayerDownloadCallback==='function'&&prayerDownloadCallback.voiceKey===which){window.onPrayerAdhanDownloadComplete=null;prayerDownloadCallback(which,ok,reason);}
+     const prayerPreviewCallback=window.onPrayerPreviewDownloadComplete;
+     if(typeof prayerPreviewCallback==='function'&&prayerPreviewCallback.voiceKey===which){window.onPrayerPreviewDownloadComplete=null;prayerPreviewCallback(which,ok,reason);}
      if(!voice)return;
      if(downloadBtn)downloadBtn.disabled=false;
      if(which!==voice.value){updateAdhanDownloadState();return;}
@@ -351,8 +355,8 @@
        localStorage.setItem('zad_prayer_silent_'+el.dataset.prayer,String(el.checked));
        if(window.ZadAndroid)window.ZadAndroid.setPrayerSilentEnabled(el.dataset.prayer,el.checked);
      });
+     prayerVoiceSelects.forEach(sel=>{const prayer=sel.dataset.prayer;localStorage.setItem('zad_adhan_voice_'+prayer,sel.value);if(window.ZadAndroid&&typeof window.ZadAndroid.setPrayerAdhanVoice==='function')window.ZadAndroid.setPrayerAdhanVoice(prayer,sel.value);});
      $('adhanSettingsStatus').textContent='تم حفظ إعدادات الأذان والصامت على هذا الجهاز.';
-     ensureSelectedAdhanDownloaded();
      if(silentStatus&&window.ZadAndroid) silentStatus.textContent=window.ZadAndroid.hasSilentPermission()?'تم حفظ الصلوات المختارة. سيعمل الصامت 15 دقيقة بعد دخول وقت الصلاة.':'تم حفظ الاختيارات، لكن يجب منح إذن التحكم في وضع عدم الإزعاج أولًا.';
    });
    if(window.ZadAndroid){
@@ -362,7 +366,6 @@
      window.ZadAndroid.setApproachAlertEnabled(approachControl?approachControl.checked:true);
      window.ZadAndroid.setApproachAlertMinutes(approachMinutes?Math.max(1,Math.min(60,parseInt(approachMinutes.value,10)||15)):15);
      document.querySelectorAll('.prayer-alert').forEach(el=>window.ZadAndroid.setPrayerAdhanEnabled(el.dataset.prayer,el.checked));
-     ensureSelectedAdhanDownloaded();
    }
    // Daily prayer completion tracker, resets automatically on a new date.
    const todayKey='zad_prayer_tracker_'+new Date().toISOString().slice(0,10);
