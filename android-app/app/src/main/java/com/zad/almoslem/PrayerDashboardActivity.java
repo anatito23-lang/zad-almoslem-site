@@ -26,7 +26,8 @@ public class PrayerDashboardActivity extends Activity {
     private static final String[] DEFAULT_CITIES={"Cairo","Riyadh","Dubai","Kuwait City","Doha","Amman","Beirut","Jerusalem","Rabat","Algiers","Tunis","Istanbul","Islamabad","New Delhi","Jakarta","Kuala Lumpur","London","New York","Toronto","Berlin","Paris","Manama","Muscat","Baghdad","Damascus","Sanaa","Tripoli","Khartoum","Dhaka","Singapore","Tokyo","Sydney","Johannesburg","Lagos","Moscow","Madrid","Rome","Amsterdam","Stockholm","Oslo"};
     private android.content.SharedPreferences prefs;
     private Spinner countrySpinner;
-    private EditText cityInput;\n    private String selectedCountryCode;
+    private EditText cityInput;
+    private String selectedCountryCode;
     private TextView result,nextCountdown,trackerCount,adhanNow;
     private LinearLayout prayerHero;
     private final TextView[] timeViews=new TextView[5];
