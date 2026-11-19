@@ -98,6 +98,12 @@ public class MainActivity extends Activity {
         Button audioLibraryButton = new Button(this); audioLibraryButton.setText("🎧  الابتهالات والرقية الشرعية");
         audioLibraryButton.setOnClickListener(v -> startActivity(new Intent(this, AudioLibraryActivity.class)));
         root.addView(audioLibraryButton, matchWrap());
+        Button kidsButton = new Button(this); kidsButton.setText("🧒  ركن الأطفال");
+        kidsButton.setOnClickListener(v -> startActivity(new Intent(this, KidsCornerActivity.class)));
+        root.addView(kidsButton, matchWrap());
+        Button fridayButton = new Button(this); fridayButton.setText("🌙  ورد يوم الجمعة");
+        fridayButton.setOnClickListener(v -> startActivity(new Intent(this, FridayWirdActivity.class)));
+        root.addView(fridayButton, matchWrap());
         TextView intro = text("إعدادات الأذان",20,Color.rgb(20,55,43),true);
         intro.setPadding(0,dp(20),0,dp(8)); root.addView(intro);
         Switch master = new Switch(this);
