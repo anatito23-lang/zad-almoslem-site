@@ -65,7 +65,7 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
-        webView.loadUrl("file:///android_asset/site/index.html?appbuild=20261119clean-no-adhan1&native=1");
+        webView.loadUrl("file:///android_asset/site/index.html?appbuild=20261119adhan-native2&native=1");
         requestNotificationPermission();
     }
     @Override protected void onResume() {
@@ -192,7 +192,14 @@ public class MainActivity extends Activity {
             }
         }
         @JavascriptInterface public void saveAdhanSettings(String json) {
-            try { getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_settings", json).apply(); } catch (Exception ignored) {}
+            try {
+                android.content.SharedPreferences prefs=getSharedPreferences("zad_reminders", MODE_PRIVATE);
+                prefs.edit().putString("adhan_settings", json).apply();
+                for(String name:new String[]{"الفجر","الظهر","العصر","المغرب","العشاء"}) {
+                    long at=prefs.getLong("prayer_"+name,0L);
+                    if(at>System.currentTimeMillis()) ReminderReceiver.schedulePrayer(MainActivity.this,name,at);
+                }
+            } catch (Exception ignored) {}
         }
         @JavascriptInterface public void playAdhanTest(String voice,int volume) { AdhanPlaybackService.play(MainActivity.this, "test", voice, volume); }
         @JavascriptInterface public void importAdhanAudio(String voice) {
