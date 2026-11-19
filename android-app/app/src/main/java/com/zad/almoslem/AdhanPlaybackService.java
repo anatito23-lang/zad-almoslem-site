@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import java.io.File;
+import java.io.FileInputStream;
 
 public class AdhanPlaybackService extends Service {
     public static final String ACTION_PLAY = "com.zad.almoslem.PLAY_ADHAN";
@@ -83,9 +84,11 @@ public class AdhanPlaybackService extends Service {
             player.setVolume(adhanVolume, adhanVolume);
             String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"haram".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)) ? voice : "basit";
             File audioDir = new File(getFilesDir(), "adhan");
-            File audioFile = new File(audioDir, safeVoice + ".mp3");
-            if (!audioFile.isFile() || audioFile.length() < 10000) audioFile = new File(audioDir, safeVoice + ".ogg");
-            if (!audioFile.isFile() || audioFile.length() < 10000) {
+            File mp3File = new File(audioDir, safeVoice + ".mp3");
+            File oggFile = new File(audioDir, safeVoice + ".ogg");
+            File audioFile = isPlayableAudioFile(mp3File) ? mp3File
+                    : (isPlayableAudioFile(oggFile) ? oggFile : null);
+            if (audioFile == null) {
                 stopPlayback();
                 showMissingAudioNotification();
                 return;
@@ -105,6 +108,20 @@ public class AdhanPlaybackService extends Service {
             player.prepareAsync();
         } catch (Exception e) {
             stopPlayback();
+        }
+    }
+
+    private boolean isPlayableAudioFile(File file) {
+        if (file == null || !file.isFile() || file.length() < 10000) return false;
+        try (FileInputStream in = new FileInputStream(file)) {
+            byte[] header = new byte[4];
+            int count = in.read(header);
+            boolean id3 = count >= 3 && header[0] == 0x49 && header[1] == 0x44 && header[2] == 0x33;
+            boolean mpegFrame = count >= 2 && (header[0] & 0xFF) == 0xFF && (header[1] & 0xE0) == 0xE0;
+            boolean ogg = count >= 4 && header[0] == 0x4F && header[1] == 0x67 && header[2] == 0x67 && header[3] == 0x53;
+            return id3 || mpegFrame || ogg;
+        } catch (Exception e) {
+            return false;
         }
     }
 
