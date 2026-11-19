@@ -32,6 +32,13 @@ jobs:
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
+      - name: Bundle the exact website revision into the Android app
+        run: |
+          mkdir -p android-app/app/src/main/assets/site
+          cp index.html app-pages.js daily-reminders.js khutbahs.js khutbahs.json manifest.webmanifest icon.svg sw.js android-app/app/src/main/assets/site/
+          test -s android-app/app/src/main/assets/site/index.html
+          grep -q '20261119adhanfix7' android-app/app/src/main/assets/site/index.html
+          grep -q 'onAdhanDownloadComplete' android-app/app/src/main/assets/site/daily-reminders.js
       - name: Build debug APK
         working-directory: android-app
         run: gradle assembleDebug
