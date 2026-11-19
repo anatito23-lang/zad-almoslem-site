@@ -80,6 +80,9 @@ public class MainActivity extends Activity {
         hero.setBackground(shape(Color.rgb(8,48,40),20)); hero.setPadding(dp(18),dp(22),dp(18),dp(22));
         hero.addView(heading); hero.addView(sub);
         root.addView(hero, matchWrap());
+        Button libraryButton = new Button(this); libraryButton.setText("📚  مكتبة خطب الجمعة");
+        libraryButton.setOnClickListener(v -> startActivity(new Intent(this, KhutbahLibraryActivity.class)));
+        root.addView(libraryButton, matchWrap());
         TextView intro = text("إعدادات الأذان",20,Color.rgb(20,55,43),true);
         intro.setPadding(0,dp(20),0,dp(8)); root.addView(intro);
         Switch master = new Switch(this);
