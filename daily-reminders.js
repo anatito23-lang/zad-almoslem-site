@@ -134,9 +134,10 @@
      if(ready)$('adhanSettingsStatus').textContent='التسجيل محفوظ على هذا الجهاز ويعمل دون إنترنت.';
    }
    window.onAdhanDownloadComplete=function(which,ok,reason){
-     if(!voice||which!==voice.value)return;
      hideAdhanProgress();
-     adhanStatus.textContent=ok?'تم تحميل الأذان وحفظ نسخة في مجلد الهاتف.':'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
+     if(downloadBtn)downloadBtn.disabled=false;
+     if(!voice||which!==voice.value){updateAdhanDownloadState();return;}
+     adhanStatus.textContent=ok?(reason&&reason.indexOf('التخزين الداخلي/')!==-1?'تم تنزيل التسجيل وحفظه داخل التطبيق ليعمل دون إنترنت.':'تم تنزيل التسجيل. '+(reason||'')):'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
      if(ok&&reason&&reason.indexOf('التخزين الداخلي/')!==-1){
        localStorage.setItem('zad_adhan_public_path_'+which,reason.replace(/^.*?تم الحفظ في:\s*/,''));
        refreshSavedAdhanPath();
