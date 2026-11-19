@@ -28,7 +28,30 @@ public class DailyReminderSettingsActivity extends Activity {
   TextView title=label("تنبيهاتك اليومية",24,Color.WHITE,true);title.setGravity(Gravity.CENTER);TextView sub=label("اختر مواعيد التذكير التي تناسب يومك",13,Color.rgb(222,239,229),false);sub.setGravity(Gravity.CENTER);
   LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(14),dp(18),dp(14),dp(18));hero.setBackground(bg(green,18));hero.addView(title);hero.addView(sub);root.addView(hero);
   for(int i=0;i<keys.length;i++)addReminder(root,i);
+  addPrayerApproachSettings(root);
   TextView note=label("تحتاج التنبيهات إلى السماح بإشعارات التطبيق. وإذا لم يتوفر إذن المنبهات الدقيقة، يستخدم Android تنبيهًا بديلًا قد يتأخر قليلًا.",12,Color.GRAY,false);note.setPadding(0,dp(10),0,0);root.addView(note);
+ }
+
+ private void addPrayerApproachSettings(LinearLayout root){
+  LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
+  card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
+  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(card,lp);
+  card.addView(label("التذكير باقتراب الصلاة",18,green,true));
+  Switch enabled=new Switch(this);enabled.setText("تنبيه صوتي قبل الصلاة");enabled.setChecked(prefs.getBoolean("approach_alert_enabled",true));card.addView(enabled);
+  TextView value=label("قبل الصلاة بـ "+prefs.getInt("approach_alert_minutes",15)+" دقيقة",14,green,false);card.addView(value);
+  SeekBar minutes=new SeekBar(this);minutes.setMax(59);minutes.setProgress(Math.max(1,Math.min(60,prefs.getInt("approach_alert_minutes",15)))-1);card.addView(minutes);
+  enabled.setOnCheckedChangeListener((button,checked)->{
+   prefs.edit().putBoolean("approach_alert_enabled",checked).apply();
+   ReminderReceiver.rescheduleApproachAlerts(this);
+  });
+  minutes.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+   public void onProgressChanged(SeekBar bar,int progress,boolean fromUser){
+    int m=progress+1;value.setText("قبل الصلاة بـ "+m+" دقيقة");
+    if(fromUser){prefs.edit().putInt("approach_alert_minutes",m).apply();ReminderReceiver.rescheduleApproachAlerts(DailyReminderSettingsActivity.this);}
+   }
+   public void onStartTrackingTouch(SeekBar bar){}
+   public void onStopTrackingTouch(SeekBar bar){}
+  });
  }
  private void addReminder(LinearLayout root,int i){
   String key=keys[i];LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
