@@ -86,6 +86,28 @@
    // Per-prayer adhan voices: stored locally and in Android preferences.
    const prayerVoiceDefaults={الفجر:'basit',الظهر:'basit',العصر:'mustafa',المغرب:'husary',العشاء:'banna'};
    const prayerVoiceSelects=[...document.querySelectorAll('.prayer-adhan-voice')];
+   // Independent volume settings for each prayer, persisted on web and Android.
+   const prayerVolumeControls=[...document.querySelectorAll('.prayer-adhan-volume')];
+   function getPrayerVolume(prayer){
+     const raw=localStorage.getItem('zad_adhan_volume_'+prayer);
+     const parsed=raw===null?100:parseInt(raw,10);
+     return Math.max(0,Math.min(100,Number.isFinite(parsed)?parsed:100));
+   }
+   prayerVolumeControls.forEach((control,index)=>{
+     const prayer=control.dataset.prayer;
+     const valueLabel=document.getElementById('adhanPrayerVolumeValue_'+index);
+     const initial=getPrayerVolume(prayer);
+     control.value=String(initial);
+     if(valueLabel)valueLabel.textContent=initial+'%';
+     if(window.ZadAndroid&&typeof window.ZadAndroid.setPrayerAdhanVolume==='function')window.ZadAndroid.setPrayerAdhanVolume(prayer,initial);
+     control.addEventListener('input',()=>{
+       const level=Math.max(0,Math.min(100,parseInt(control.value,10)||0));
+       localStorage.setItem('zad_adhan_volume_'+prayer,String(level));
+       if(valueLabel)valueLabel.textContent=level+'%';
+       if(preview&&preview.dataset.prayer===prayer)preview.volume=level/100;
+       if(window.ZadAndroid&&typeof window.ZadAndroid.setPrayerAdhanVolume==='function')window.ZadAndroid.setPrayerAdhanVolume(prayer,level);
+     });
+   });
    const prayerVoiceStatus=$('prayerAdhanDownloadStatus');
    const PRAYER_AUDIO_CACHE='zad-prayer-audio-v1';
    let prayerProgressBar=null,prayerProgressFill=null,prayerProgressText=null;
@@ -164,7 +186,7 @@
        getCachedPrayerAudioUrl(urls[0]).then(source=>{
          if(source.startsWith('blob:'))preview.dataset.objectUrl=source;
          preview.src=source;
-         preview.volume=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0))/100:savedVolume/100;
+         preview.volume=getPrayerVolume(prayer)/100;
          preview.load();
          if(prayerVoiceStatus)prayerVoiceStatus.textContent=(source.startsWith('blob:')?'تشغيل التسجيل المحفوظ داخل الموقع.':'تشغيل المعاينة من الإنترنت.')+' — '+sel.options[sel.selectedIndex].text+' لصلاة '+prayer+'.';
          const playing=preview.play();
@@ -459,7 +481,7 @@
        preview.dataset.sourceIndex='0';
        preview.src=getAdhanUrls(selected)[0];
        preview.load();
-       preview.volume=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0))/100:savedVolume/100;
+       preview.volume=getPrayerVolume(prayer)/100;
        $('adhanSettingsStatus').textContent='جارٍ تشغيل معاينة الأذان...';
        const playing=preview.play();
        if(playing&&typeof playing.catch==='function')playing.catch(()=>{$('adhanSettingsStatus').textContent='تعذر تشغيل المعاينة. تحقق من الاتصال ثم حاول مرة أخرى.';});
