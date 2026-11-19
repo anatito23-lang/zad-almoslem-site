@@ -120,7 +120,7 @@
      if(typeof window.ZadAndroid.previewAdhan!=='function'){if(prayerVoiceStatus)prayerVoiceStatus.textContent='خدمة تشغيل الأذان غير متاحة داخل التطبيق.';return;}
      try{
        if(window.ZadAndroid.isAdhanDownloaded(key)){
-         window.ZadAndroid.previewAdhan(key,prayer);
+         window.ZadAndroid.previewPrayerAdhan(key,prayer);
          if(prayerVoiceStatus)prayerVoiceStatus.textContent='يتم تشغيل معاينة '+sel.options[sel.selectedIndex].text+' لصلاة '+prayer+'.';
          return;
        }
@@ -129,7 +129,7 @@
        const previewDone=(which,ok,reason)=>{
          btn.disabled=false;
          if(which!==key)return;
-         if(ok){window.ZadAndroid.previewAdhan(key,prayer);if(prayerVoiceStatus)prayerVoiceStatus.textContent='تم تنزيل التسجيل وتشغيل معاينته.';}
+         if(ok){window.ZadAndroid.previewPrayerAdhan(key,prayer);if(prayerVoiceStatus)prayerVoiceStatus.textContent='تم تنزيل التسجيل وتشغيل معاينته.';}
          else if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذرت المعاينة: '+(reason||'فشل التنزيل');
        };
        previewDone.voiceKey=key;
