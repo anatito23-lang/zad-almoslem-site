@@ -14,7 +14,6 @@ import java.util.Calendar;
 public class ReminderReceiver extends BroadcastReceiver {
     public static final String CHANNEL_ID = "zad_reminders";
     private static final String PRAYER_CHANNEL_ID = "zad_prayer_alerts";
-    private static final String PRAYER_TONE_CHANNEL_ID = "zad_prayer_tone";
 
     public static void scheduleDaily(Context context, String key, int hour, int minute, String title) {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders", Context.MODE_PRIVATE);
@@ -28,33 +27,11 @@ public class ReminderReceiver extends BroadcastReceiver {
         context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE).edit().putBoolean(key+"_enabled",false).apply();
         cancel(context,key);
     }
-    private static void scheduleApproachAlert(Context context,String name,long prayerAt) {
-        String alertKey="approach_"+name;
-        android.content.SharedPreferences prefs=context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE);
-        if(!prefs.getBoolean("approach_alert_enabled",true)){cancel(context,alertKey);return;}
-        int minutes=Math.max(1,Math.min(60,prefs.getInt("approach_alert_minutes",15)));
-        long alertAt=prayerAt-minutes*60L*1000L;
-        if(alertAt>System.currentTimeMillis()) {
-            schedule(context,alertKey,alertAt,"اقتربت صلاة "+name+"، بقي على الصلاة ربع ساعة.",false);
-        } else {
-            cancel(context,alertKey);
-        }
-    }
     public static void schedulePrayer(Context context,String name,long at) {
         if(at<=System.currentTimeMillis()) return;
         String key="prayer_"+name;
         context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE).edit().putLong(key,at).apply();
         schedule(context,key,at,"حان الآن وقت صلاة "+name,false);
-        scheduleApproachAlert(context,name,at);
-    }
-    public static void rescheduleApproachAlerts(Context context) {
-        android.content.SharedPreferences prefs=context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE);
-        long now=System.currentTimeMillis();
-        for(String name:new String[]{"الفجر","الظهر","العصر","المغرب","العشاء"}) {
-            long at=prefs.getLong("prayer_"+name,0L);
-            if(at>now) scheduleApproachAlert(context,name,at);
-            else cancel(context,"approach_"+name);
-        }
     }
     private static void schedule(Context context,String key,long at,String title,boolean daily) {
         AlarmManager am=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
@@ -72,66 +49,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         PendingIntent pi=PendingIntent.getBroadcast(context,key.hashCode(),i,PendingIntent.FLAG_NO_CREATE|PendingIntent.FLAG_IMMUTABLE);
         if(pi!=null){((AlarmManager)context.getSystemService(Context.ALARM_SERVICE)).cancel(pi);pi.cancel();}
     }
-    private static final String SILENT_PREFS = "zad_reminders";
-    private static void activateSilentMode(Context context) {
-        if (Build.VERSION.SDK_INT < 23) return;
-        NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        android.media.AudioManager audio=(android.media.AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
-        if (nm == null || audio == null || !nm.isNotificationPolicyAccessGranted()) return;
-        android.content.SharedPreferences prefs=context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE);
-        int current=audio.getRingerMode();
-        if (current != android.media.AudioManager.RINGER_MODE_NORMAL) return;
-        prefs.edit().putInt("silent_previous_ringer",current).putBoolean("silent_restore_pending",true).apply();
-        audio.setRingerMode(android.media.AudioManager.RINGER_MODE_SILENT);
-        AlarmManager am=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-        Intent restore=new Intent(context,ReminderReceiver.class);
-        restore.putExtra("action","restore_silent");
-        PendingIntent pi=PendingIntent.getBroadcast(context,987654,restore,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-        long at=System.currentTimeMillis()+15L*60L*1000L;
-        if (Build.VERSION.SDK_INT >= 31 && !am.canScheduleExactAlarms()) am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,pi);
-        else if (Build.VERSION.SDK_INT >= 23) am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,at,pi);
-        else am.setExact(AlarmManager.RTC_WAKEUP,at,pi);
-    }
-    private static void restoreSilentMode(Context context) {
-        if (Build.VERSION.SDK_INT < 23) return;
-        android.content.SharedPreferences prefs=context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE);
-        if (!prefs.getBoolean("silent_restore_pending",false)) return;
-        android.media.AudioManager audio=(android.media.AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
-        NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        if (audio != null && nm != null && nm.isNotificationPolicyAccessGranted()
-                && audio.getRingerMode()==android.media.AudioManager.RINGER_MODE_SILENT) {
-            audio.setRingerMode(prefs.getInt("silent_previous_ringer",android.media.AudioManager.RINGER_MODE_NORMAL));
-        }
-        prefs.edit().putBoolean("silent_restore_pending",false).remove("silent_previous_ringer").apply();
-    }
-
-    private static void showAdhanLaunchFailure(Context context, String prayerName, Exception error) {
-        try {
-            NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            if (manager == null) return;
-            String channel = "zad_adhan_launch_errors";
-            if (Build.VERSION.SDK_INT >= 26) {
-                NotificationChannel ch = new NotificationChannel(channel, "أخطاء تشغيل الأذان", NotificationManager.IMPORTANCE_HIGH);
-                ch.setDescription("تنبيه عند تعذر بدء خدمة الأذان");
-                manager.createNotificationChannel(ch);
-            }
-            String detail = error.getMessage();
-            if (detail == null || detail.trim().isEmpty()) detail = error.getClass().getSimpleName();
-            Notification.Builder builder = Build.VERSION.SDK_INT >= 26
-                    ? new Notification.Builder(context, channel) : new Notification.Builder(context);
-            builder.setSmallIcon(android.R.drawable.ic_dialog_alert)
-                    .setContentTitle("تعذر بدء أذان " + prayerName)
-                    .setContentText("لم يتمكن أندرويد من بدء تشغيل الأذان: " + detail)
-                    .setAutoCancel(true);
-            manager.notify(("adhan_launch_" + prayerName).hashCode(), builder.build());
-        } catch (Exception ignored) {}
-    }
-
     @Override public void onReceive(Context context,Intent intent) {
-        if (intent != null && "restore_silent".equals(intent.getStringExtra("action"))) {
-            restoreSilentMode(context);
-            return;
-        }
         if (intent == null) return;
         String key=intent.getStringExtra("key"),title=intent.getStringExtra("title");
         if(key==null)return;
@@ -150,7 +68,6 @@ public class ReminderReceiver extends BroadcastReceiver {
             long next = nextPrayer.getTimeInMillis();
             prefs.edit().putLong(key,next).apply();
             schedule(context,key,next,title,false);
-            scheduleApproachAlert(context,prayerName,next);
         }
         NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
         String channelId=prayer?PRAYER_CHANNEL_ID:CHANNEL_ID;
@@ -162,10 +79,6 @@ public class ReminderReceiver extends BroadcastReceiver {
                 ch.setSound(null,null);
                 ch.enableVibration(true);
                 nm.createNotificationChannel(ch);
-                NotificationChannel toneCh=new NotificationChannel(PRAYER_TONE_CHANNEL_ID,"تنبيه صوتي للصلاة",NotificationManager.IMPORTANCE_HIGH);
-                toneCh.setDescription("نغمة قصيرة عند دخول وقت الصلاة");
-                toneCh.enableVibration(true);
-                nm.createNotificationChannel(toneCh);
             } else {
                 ch=new NotificationChannel(CHANNEL_ID,"تنبيهات زاد المسلم",NotificationManager.IMPORTANCE_HIGH);
                 ch.setDescription("تنبيهات الأذكار وقيام الليل");
