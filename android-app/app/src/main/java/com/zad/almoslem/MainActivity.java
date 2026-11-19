@@ -63,7 +63,7 @@ public class MainActivity extends Activity {
             }
         });
         setContentView(webView);
-        webView.loadUrl("https://anatito23-lang.github.io/zad-almoslem-site/?appbuild=20261119prayer-volume1&native=1");
+        webView.loadUrl("https://anatito23-lang.github.io/zad-almoslem-site/?appbuild=20261119app-audio-fix1&native=1");
         requestNotificationPermission();
     }
     @Override protected void onResume() {
@@ -404,7 +404,7 @@ public class MainActivity extends Activity {
                 final String message = reason;
                 runOnUiThread(() -> {
                     if (webView != null) webView.evaluateJavascript(
-                        "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('doha'," + result + "," + org.json.JSONObject.quote(message) + ");window.onPrayerAdhanDownloadComplete && window.onPrayerAdhanDownloadComplete('doha'," + result + "," + org.json.JSONObject.quote(message) + ");window.onPrayerPreviewDownloadComplete && window.onPrayerPreviewDownloadComplete('doha'," + result + "," + org.json.JSONObject.quote(message) + ")", null);
+                        "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('doha'," + result + "," + org.json.JSONObject.quote(message) + ") + ")", null);
                 });
             }).start();
         }
@@ -421,7 +421,7 @@ public class MainActivity extends Activity {
                 default:
                     runOnUiThread(() -> {
                         if (webView != null) webView.evaluateJavascript(
-                            "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "',false,'ملف هذا المؤذن غير متاح حاليًا؛ اختر صوتًا آخر');window.onPrayerAdhanDownloadComplete && window.onPrayerAdhanDownloadComplete('" + safe + "',false,'ملف هذا المؤذن غير متاح حاليًا؛ اختر صوتًا آخر');window.onPrayerPreviewDownloadComplete && window.onPrayerPreviewDownloadComplete('" + safe + "',false,'ملف هذا المؤذن غير متاح حاليًا؛ اختر صوتًا آخر')", null);
+                            "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "',false,'ملف هذا المؤذن غير متاح حاليًا؛ اختر صوتًا آخر')", null);
                     });
                     return;
             }
@@ -500,7 +500,7 @@ public class MainActivity extends Activity {
                 final String reason = error;
                 runOnUiThread(() -> {
                     if (webView != null) webView.evaluateJavascript(
-                        "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "'," + result + "," + org.json.JSONObject.quote(reason) + ");window.onPrayerAdhanDownloadComplete && window.onPrayerAdhanDownloadComplete('" + safe + "'," + result + "," + org.json.JSONObject.quote(reason) + ");window.onPrayerPreviewDownloadComplete && window.onPrayerPreviewDownloadComplete('" + safe + "'," + result + "," + org.json.JSONObject.quote(reason) + ")", null);
+                        "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "'," + result + "," + org.json.JSONObject.quote(reason) + ") + ")", null);
                 });
             }).start();
         }
