@@ -27,7 +27,8 @@ public class PrayerDashboardActivity extends Activity {
     private android.content.SharedPreferences prefs;
     private Spinner countrySpinner;
     private EditText cityInput;
-    private TextView result,nextCountdown,trackerCount,adhanNow;\n    private LinearLayout prayerHero;
+    private TextView result,nextCountdown,trackerCount,adhanNow;
+    private LinearLayout prayerHero;
     private final TextView[] timeViews=new TextView[5];
     private final TextView[] remainingViews=new TextView[5];
     private final Handler handler=new Handler();
