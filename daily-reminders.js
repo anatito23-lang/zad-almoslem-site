@@ -225,16 +225,29 @@
    if(downloadPrayerVoices)downloadPrayerVoices.addEventListener('click',()=>{
      if(window.ZadAndroid&&typeof window.ZadAndroid.downloadAdhan==='function'){
        const unique=[...new Set(prayerVoiceSelects.map(sel=>sel.value))];
-       let index=0;downloadPrayerVoices.disabled=true;showAdhanProgress();
+       let index=0,failed=[];
+       downloadPrayerVoices.disabled=true;showAdhanProgress();
        const runNext=()=>{
-         if(index>=unique.length){downloadPrayerVoices.disabled=false;hideAdhanProgress();finishPrayerProgress('اكتمل تنزيل '+unique.length+' تسجيلات وحفظها داخل التطبيق للعمل دون إنترنت.');if(prayerVoiceStatus)prayerVoiceStatus.textContent='اكتمل تنزيل '+unique.length+' تسجيلات وحفظها داخل التطبيق للعمل دون إنترنت.';return;}
+         if(index>=unique.length){
+           downloadPrayerVoices.disabled=false;hideAdhanProgress();
+           const savedCount=unique.length-failed.length;
+           const summary=failed.length
+             ?'انتهى التنزيل: تم حفظ '+savedCount+' من '+unique.length+' تسجيلات، وتعذر حفظ '+failed.length+'. أعد المحاولة للتسجيلات المتعذرة.'
+             :'تم التحقق من حفظ جميع التسجيلات ('+unique.length+') داخل التطبيق للعمل دون إنترنت.';
+           finishPrayerProgress(summary);
+           if(prayerVoiceStatus)prayerVoiceStatus.textContent=summary;
+           return;
+         }
          const voiceKey=unique[index++];
          if(window.ZadAndroid.isAdhanDownloaded(voiceKey)){runNext();return;}
          if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ حفظ التسجيل '+index+' من '+unique.length+' داخل التطبيق: '+voiceKey;
          updatePrayerProgress(Math.round((index-1)/unique.length*100),'حفظ التسجيل '+index+' من '+unique.length+' داخل التطبيق');
          const done=(which,ok,details)=>{
-           if(prayerVoiceStatus)prayerVoiceStatus.textContent=(ok?'تم حفظ ':'تعذر حفظ ')+which+' — '+(details||'');
-           updatePrayerProgress(Math.round(index/unique.length*100),'اكتمل '+index+' من '+unique.length+' تسجيلات');
+           let verified=false;
+           try{verified=!!window.ZadAndroid.isAdhanDownloaded(voiceKey);}catch(e){}
+           if(!ok||!verified)failed.push(voiceKey);
+           if(prayerVoiceStatus)prayerVoiceStatus.textContent=(!ok||!verified?'تعذر تأكيد حفظ ':'تم التحقق من حفظ ')+which+' — '+(details||'');
+           updatePrayerProgress(Math.round(index/unique.length*100),'تم فحص '+index+' من '+unique.length+' تسجيلات');
            runNext();
          };
          done.voiceKey=voiceKey;done.taskIndex=index;done.taskTotal=unique.length;window.onPrayerAdhanDownloadComplete=done;
