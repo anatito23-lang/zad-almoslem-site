@@ -86,6 +86,14 @@ public class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
             requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST);
     }
+    private String prayerVolumeKey(String prayer) {
+        if ("الفجر".equals(prayer)) return "fajr";
+        if ("الظهر".equals(prayer)) return "dhuhr";
+        if ("العصر".equals(prayer)) return "asr";
+        if ("المغرب".equals(prayer)) return "maghrib";
+        if ("العشاء".equals(prayer)) return "isha";
+        return "dhuhr";
+    }
     private class ReminderBridge {
         @JavascriptInterface public boolean isNativeApp() { return true; }
         @JavascriptInterface public void scheduleDailyReminder(String key,int hour,int minute,String title) {
@@ -198,6 +206,20 @@ public class MainActivity extends Activity {
             volumeIntent.setAction(AdhanPlaybackService.ACTION_SET_VOLUME);
             volumeIntent.putExtra("volume", safeVolume);
             try { startService(volumeIntent); } catch (Exception ignored) {}
+        }
+        @JavascriptInterface public void setPrayerAdhanVolume(String prayer, int volume) {
+            String[] prayers = {"الفجر","الظهر","العصر","المغرب","العشاء"};
+            boolean valid = false;
+            for (String item : prayers) if (item.equals(prayer)) valid = true;
+            if (!valid) return;
+            int safeVolume = Math.max(0, Math.min(100, volume));
+            String key = prayerVolumeKey(prayer);
+            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putInt("adhan_volume_" + key, safeVolume).apply();
+            Intent intent = new Intent(MainActivity.this, AdhanPlaybackService.class);
+            intent.setAction(AdhanPlaybackService.ACTION_SET_PRAYER_VOLUME);
+            intent.putExtra("prayer", prayer);
+            intent.putExtra("volume", safeVolume);
+            try { startService(intent); } catch (Exception ignored) {}
         }
         @JavascriptInterface public void setPrayerAdhanEnabled(String prayer, boolean enabled) {
             String key = "prayer_enabled_" + prayer;
@@ -564,14 +586,20 @@ public class MainActivity extends Activity {
         }
         @JavascriptInterface public void previewPrayerAdhan(String voice, String prayer) {
             String safe = safeVoice(voice);
-            if (!isAdhanDownloaded(safe)) {
-                if (webView != null) webView.evaluateJavascript(
-                    "window.onAdhanPreviewError && window.onAdhanPreviewError('ملف المؤذن غير محفوظ أو غير صالح. أعد تنزيل الصوت ثم حاول المعاينة.')", null);
-                return;
-            }
             String[] prayers = {"الفجر","الظهر","العصر","المغرب","العشاء"};
             boolean validPrayer = false;
             for (String item : prayers) if (item.equals(prayer)) validPrayer = true;
+            if (!validPrayer) prayer = "الظهر";
+            File adhanDir = new File(getFilesDir(), "adhan");
+            String prayerKey = prayerVolumeKey(prayer);
+            boolean downloaded = "doha".equals(safe)
+                    ? isValidAdhanFile(new File(adhanDir, "doha_" + prayerKey + ".mp3"))
+                    : isValidAdhanFile(new File(adhanDir, safe + ".mp3")) || isValidAdhanFile(new File(adhanDir, safe + ".ogg"));
+            if (!downloaded) {
+                if (webView != null) webView.evaluateJavascript(
+                    "window.onAdhanPreviewError && window.onAdhanPreviewError('ملف أذان هذه الصلاة غير محفوظ على الجهاز. اضغط تنزيل أصوات الصلوات المختارة أولًا.')", null);
+                return;
+            }
             Intent audio = new Intent(MainActivity.this, AdhanPlaybackService.class);
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
             audio.putExtra("prayer", validPrayer ? prayer : "الظهر");
