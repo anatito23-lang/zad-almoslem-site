@@ -40,6 +40,10 @@ public class MainActivity extends Activity implements SensorEventListener {
     private CompassView compassView;
     private float azimuth=0;
     private boolean compassAvailable=false;
+    private int tasbeehCount=0;
+    private int dhikrIndex=0;
+    private final String[] adhkar={"سبحان الله","الحمد لله","الله أكبر","أستغفر الله","لا إله إلا الله","اللهم صل وسلم على نبينا محمد"};
+    private final String[] adhkarDetails={"من قال سبحان الله وبحمده مائة مرة حُطّت خطاياه وإن كانت مثل زبد البحر.","كلمتان خفيفتان على اللسان، ثقيلتان في الميزان، حبيبتان إلى الرحمن.","التكبير من أحب الذكر إلى الله.","استغفر الله وأتوب إليه.","أفضل الذكر لا إله إلا الله.","الصلاة على النبي ﷺ من أجلّ القربات."};
     @Override public void onCreate(Bundle b){super.onCreate(b);prefs=getSharedPreferences("nidaa",MODE_PRIVATE);sensorManager=(SensorManager)getSystemService(SENSOR_SERVICE);rotationSensor=sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);compassAvailable=rotationSensor!=null;getWindow().setStatusBarColor(bg);getWindow().setNavigationBarColor(bg);getWindow().getDecorView().setLayoutDirection(View.LAYOUT_DIRECTION_RTL);render();}
     private GradientDrawable shape(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(r);d.setStroke(1,Color.rgb(42,62,80));return d;}
     private TextView txt(String s,int z,int c,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(z);t.setTextColor(c);t.setGravity(Gravity.CENTER);t.setPadding(10,10,10,10);if(bold)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
@@ -53,7 +57,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         ScrollView sc=new ScrollView(this);content=vertical();content.setPadding(16,8,16,18);sc.addView(content);root.addView(sc,new LinearLayout.LayoutParams(-1,0,1));
         showTab();
         LinearLayout nav=new LinearLayout(this);nav.setPadding(4,8,4,10);nav.setBackgroundColor(panel);
-        String[] tabs={"الرئيسية","الأذان","القبلة","الإعدادات"};
+        String[] tabs={"الرئيسية","الصلاة","القرآن","الأذكار","القبلة","المزيد"};
         for(String s:tabs){TextView b=txt(s,13,s.equals(tab)?gold:white,true);b.setOnClickListener(v->{tab=s;render();});nav.addView(b,new LinearLayout.LayoutParams(0,-2,1));}root.addView(nav);
     }
     private void card(View v){LinearLayout c=vertical();c.setPadding(12,12,12,12);c.setBackground(shape(panel,18));c.addView(v);LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.bottomMargin=12;content.addView(c,p);}
@@ -73,7 +77,7 @@ public class MainActivity extends Activity implements SensorEventListener {
             for(int i=0;i<6;i++){final int ix=i;LinearLayout row=new LinearLayout(this);row.setGravity(Gravity.CENTER_VERTICAL);TextView name=txt(prayerNames[i],16,white,true);name.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);TextView time=txt(fmt(ds[i]),16,gold,true);time.setGravity(Gravity.LEFT|Gravity.CENTER_VERTICAL);row.addView(name,new LinearLayout.LayoutParams(0,-2,1));row.addView(time);card(row);}
             TextView city=txt("تغيير المدينة",15,gold,true);city.setOnClickListener(v->chooseCity());card(city);
             card(txt("المواقيت محسوبة داخل التطبيق ولا تحتاج إلى إنترنت.",13,muted,false));
-        }else if(tab.equals("الأذان")){
+        }else if(tab.equals("الصلاة")){
             card(txt("إعدادات المؤذّن",23,gold,true));
             card(txt("اختر الصوت المفضل لكل صلاة",15,white,true));
             for(int i:new int[]{0,2,3,4,5}){
@@ -86,6 +90,14 @@ public class MainActivity extends Activity implements SensorEventListener {
             Switch reminder=new Switch(this);reminder.setText("تفعيل تنبيهات الصلاة");reminder.setTextColor(white);reminder.setChecked(prefs.getBoolean("reminders",false));reminder.setPadding(8,12,8,12);reminder.setOnCheckedChangeListener((b,on)->{prefs.edit().putBoolean("reminders",on).apply();if(on){if(android.os.Build.VERSION.SDK_INT>=33&&checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED){requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},71);}else{PrayerAlarmScheduler.schedule(this,cityIndex());Toast.makeText(this,"تم تفعيل تنبيهات الصلاة",Toast.LENGTH_SHORT).show();}}else{PrayerAlarmScheduler.cancel(this);Toast.makeText(this,"تم إيقاف تنبيهات الصلاة",Toast.LENGTH_SHORT).show();}});card(reminder);
             Switch silent=new Switch(this);silent.setText("طلب تفعيل الصامت قبل الصلاة");silent.setTextColor(white);silent.setChecked(prefs.getBoolean("silent",false));silent.setPadding(8,12,8,12);silent.setOnCheckedChangeListener((b,on)->prefs.edit().putBoolean("silent",on).apply());card(silent);
             card(txt("خيارات التذكير تُحفظ الآن؛ جدولة التنبيهات وتشغيل الصوت في الخلفية هي المرحلة البرمجية التالية.",13,muted,false));
+        }else if(tab.equals("الأذكار")){
+            card(txt("الأذكار اليومية",24,gold,true));
+            card(txt("أذكار مختارة للتسبيح والاستغفار والصلاة على النبي ﷺ",14,muted,false));
+            for(int i=0;i<adhkar.length;i++){final int ix=i;LinearLayout item=vertical();TextView phrase=txt(adhkar[i],21,white,true);TextView detail=txt(adhkarDetails[i],13,muted,false);Button count= new Button(this);count.setText("اضغط للتسبيح · "+prefs.getInt("dhikr_"+i,0));count.setOnClickListener(v->{int n=prefs.getInt("dhikr_"+ix,0)+1;prefs.edit().putInt("dhikr_"+ix,n).apply();count.setText("اضغط للتسبيح · "+n);});item.addView(phrase);item.addView(detail);item.addView(count);card(item);}
+        }else if(tab.equals("القرآن")){
+            card(txt("القرآن الكريم",24,gold,true));
+            card(txt("المصحف الشريف",21,white,true));
+            card(txt("هذه النسخة لم يُضمّن فيها ملف المصحف بعد. لن نعرض نصًا ناقصًا أو غير موثوق على أنه مصحف كامل. ستُضاف صفحات المصحف بالرسم العثماني مع القراءة دون إنترنت في مرحلة المحتوى.",15,muted,false));
         }else if(tab.equals("القبلة")){
             card(txt("اتجاه القبلة",24,gold,true));
             double[] c=coords[cityIndex()];double bearing=qibla(c[0],c[1]);
