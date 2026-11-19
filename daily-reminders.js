@@ -77,7 +77,7 @@
      const level=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0)):savedVolume;
      if(volumeValue)volumeValue.textContent=level+'%';
      localStorage.setItem('zad_adhan_volume',String(level));
-     if(preview)preview.volume=level/100;
+     document.querySelectorAll('audio').forEach(audio=>{try{audio.volume=level/100;}catch(e){}});
      if(window.ZadAndroid&&typeof window.ZadAndroid.setAdhanVolume==='function')window.ZadAndroid.setAdhanVolume(level);
    }
    if(volumeControl)volumeControl.addEventListener('input',applyAdhanVolume);
@@ -87,24 +87,50 @@
    const prayerVoiceDefaults={الفجر:'basit',الظهر:'basit',العصر:'mustafa',المغرب:'husary',العشاء:'banna'};
    const prayerVoiceSelects=[...document.querySelectorAll('.prayer-adhan-voice')];
    const prayerVoiceStatus=$('prayerAdhanDownloadStatus');
-   let prayerProgressBar=null;
-   function updatePrayerProgress(percent){
-     if(!prayerVoiceStatus)return;
+   const PRAYER_AUDIO_CACHE='zad-prayer-audio-v1';
+   let prayerProgressBar=null,prayerProgressFill=null,prayerProgressText=null;
+   function ensurePrayerProgress(){
+     if(!prayerVoiceStatus)return null;
      if(!prayerProgressBar){
        prayerProgressBar=document.createElement('div');prayerProgressBar.id='zadPrayerDownloadProgress';
-       prayerProgressBar.style.cssText='height:12px;width:100%;margin:9px 0 12px;border-radius:20px;overflow:hidden;background:#e5eee8;direction:ltr;border:1px solid #d4e1d7';
-       const fill=document.createElement('span');fill.style.cssText='display:block;width:0;height:100%;border-radius:20px;background:linear-gradient(90deg,#0c8067,#d6b76f);transition:width .15s ease';
-       prayerProgressBar.appendChild(fill);prayerVoiceStatus.insertAdjacentElement('afterend',prayerProgressBar);
+       prayerProgressBar.style.cssText='display:none;margin:10px 0 14px;padding:10px 12px;border:1px solid #d5e2da;border-radius:12px;background:#f7faf8;direction:rtl';
+       prayerProgressText=document.createElement('div');prayerProgressText.style.cssText='font-size:13px;margin-bottom:8px;color:#244b3d';
+       prayerProgressText.textContent='جاهز لتنزيل التسجيلات';
+       const track=document.createElement('div');track.style.cssText='height:12px;width:100%;border-radius:20px;overflow:hidden;background:#e5eee8;direction:ltr';
+       prayerProgressFill=document.createElement('span');prayerProgressFill.style.cssText='display:block;width:0;height:100%;border-radius:20px;background:#13866b;transition:width .15s ease';
+       track.appendChild(prayerProgressFill);prayerProgressBar.append(prayerProgressText,track);
+       prayerVoiceStatus.insertAdjacentElement('afterend',prayerProgressBar);
      }
-     prayerProgressBar.style.display='block';
-     const value=percent===null||percent===undefined?0:Math.max(0,Math.min(100,percent));
-     prayerProgressBar.firstElementChild.style.width=value+'%';
-     prayerProgressBar.setAttribute('role','progressbar');prayerProgressBar.setAttribute('aria-valuemin','0');prayerProgressBar.setAttribute('aria-valuemax','100');prayerProgressBar.setAttribute('aria-valuenow',String(value));
+     return prayerProgressBar;
    }
-   function finishPrayerProgress(){if(prayerProgressBar){prayerProgressBar.firstElementChild.style.width='100%';setTimeout(()=>{if(prayerProgressBar)prayerProgressBar.style.display='none';},1800);}}
+   function updatePrayerProgress(percent,label){
+     if(!ensurePrayerProgress())return;
+     prayerProgressBar.style.display='block';
+     if(prayerProgressText&&label)prayerProgressText.textContent=label;
+     const value=percent===null||percent===undefined?0:Math.max(0,Math.min(100,percent));
+     prayerProgressFill.style.width=value+'%';
+     prayerProgressBar.setAttribute('role','progressbar');
+     prayerProgressBar.setAttribute('aria-valuemin','0');
+     prayerProgressBar.setAttribute('aria-valuemax','100');
+     prayerProgressBar.setAttribute('aria-valuenow',String(value));
+   }
+   function finishPrayerProgress(label){
+     updatePrayerProgress(100,label||'اكتمل حفظ التسجيلات داخل الموقع.');
+     setTimeout(()=>{if(prayerProgressBar)prayerProgressBar.style.display='none';},5000);
+   }
    window.onPrayerAudioDownloadProgress=function(index,total,percent,received,bytesTotal){
-     updatePrayerProgress(percent);
+     const overall=percent===null||percent===undefined?null:Math.round(((index-1)+(percent/100))/total*100);
+     updatePrayerProgress(overall,'تنزيل الملف '+index+' من '+total+(percent===null||percent===undefined?' — تم استلام '+(received/1048576).toFixed(2)+' ميجابايت':' — '+percent+'%'));
    };
+   async function getCachedPrayerAudioUrl(url){
+     try{
+       const cache=await caches.open(PRAYER_AUDIO_CACHE);
+       const saved=await cache.match(url);
+       if(!saved)return url;
+       const blob=await saved.blob();
+       return URL.createObjectURL(blob);
+     }catch(e){return url;}
+   }
    prayerVoiceSelects.forEach(sel=>{
      const prayer=sel.dataset.prayer;
      const stored=localStorage.getItem('zad_adhan_voice_'+prayer)||prayerVoiceDefaults[prayer]||'basit';
@@ -125,12 +151,18 @@
        const urls=getAdhanUrls(key,prayer);
        if(!preview||!urls.length){if(prayerVoiceStatus)prayerVoiceStatus.textContent='مصدر معاينة هذا الصوت غير متاح حاليًا.';return;}
        preview.hidden=false;preview.controls=true;preview.dataset.prayer=prayer;
-       preview.pause();preview.removeAttribute('src');preview.src=urls[0];
-       preview.volume=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0))/100:savedVolume/100;
-       preview.load();
-       if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تشغيل معاينة '+sel.options[sel.selectedIndex].text+' لصلاة '+prayer+' على الموقع...';
-       const playing=preview.play();
-       if(playing&&typeof playing.catch==='function')playing.catch(()=>{if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر تشغيل المعاينة من المصدر. تحقق من الاتصال وحاول مرة أخرى.';});
+       preview.pause();
+       if(preview.dataset.objectUrl){URL.revokeObjectURL(preview.dataset.objectUrl);delete preview.dataset.objectUrl;}
+       preview.removeAttribute('src');
+       getCachedPrayerAudioUrl(urls[0]).then(source=>{
+         if(source.startsWith('blob:'))preview.dataset.objectUrl=source;
+         preview.src=source;
+         preview.volume=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0))/100:savedVolume/100;
+         preview.load();
+         if(prayerVoiceStatus)prayerVoiceStatus.textContent=(source.startsWith('blob:')?'تشغيل التسجيل المحفوظ داخل الموقع.':'تشغيل المعاينة من الإنترنت.')+' — '+sel.options[sel.selectedIndex].text+' لصلاة '+prayer+'.';
+         const playing=preview.play();
+         if(playing&&typeof playing.catch==='function')playing.catch(()=>{if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر تشغيل المعاينة. تحقق من الاتصال وحاول مرة أخرى.';});
+       });
        return;
      }
      if(typeof window.ZadAndroid.previewPrayerAdhan!=='function'){if(prayerVoiceStatus)prayerVoiceStatus.textContent='نسخة التطبيق الحالية لا تدعم معاينة المؤذن لكل صلاة. يلزم تحديث التطبيق بعد اكتمال الإصلاح.';return;}
@@ -160,71 +192,76 @@
    };
    const downloadPrayerVoices=$('downloadPrayerAdhans');
    if(downloadPrayerVoices)downloadPrayerVoices.addEventListener('click',()=>{
-     if(!window.ZadAndroid||typeof window.ZadAndroid.downloadAdhan!=='function'){
-       const tasks=[],seen=new Set();
-       prayerVoiceSelects.forEach(sel=>{
-         const voiceKey=sel.value,prayer=sel.dataset.prayer;
-         const taskKey=voiceKey==='doha'?'doha:'+prayer:voiceKey;
-         if(!seen.has(taskKey)){seen.add(taskKey);tasks.push({voiceKey,prayer});}
-       });
-       let index=0,failed=0;
-       downloadPrayerVoices.disabled=true;
-       const downloadNext=async()=>{
-         if(index>=tasks.length){
-           downloadPrayerVoices.disabled=false;
-           if(prayerVoiceStatus)prayerVoiceStatus.textContent=failed?'انتهى التنزيل مع تعذر '+failed+' ملف/ملفات. راجع اتصال الإنترنت وحاول مرة أخرى.':'تم إرسال '+tasks.length+' ملف/ملفات إلى تنزيلات المتصفح.';
-           return;
-         }
-         const task=tasks[index++],urls=getAdhanUrls(task.voiceKey,task.prayer);
-         if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل '+index+' من '+tasks.length+': '+task.voiceKey+' ('+task.prayer+')';
-         if(!urls.length){failed++;downloadNext();return;}
-         try{
-           const blob=await new Promise((resolve,reject)=>{
-             const xhr=new XMLHttpRequest();xhr.open('GET',urls[0],true);xhr.responseType='blob';
-             xhr.onprogress=event=>{
-               const percent=event.lengthComputable?Math.max(0,Math.min(100,Math.round(event.loaded/event.total*100))):null;
-               if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل الملف '+index+' من '+tasks.length+' — '+(event.loaded/1048576).toFixed(2)+' ميجابايت'+(event.lengthComputable?' من '+(event.total/1048576).toFixed(2)+' ميجابايت — '+percent+'%':' — جارٍ حساب النسبة');
-               if(typeof window.onPrayerAudioDownloadProgress==='function')window.onPrayerAudioDownloadProgress(index,tasks.length,percent,event.loaded,event.total);
-             };
-             xhr.onload=()=>xhr.status>=200&&xhr.status<300&&xhr.response&&xhr.response.size?resolve(xhr.response):reject(new Error('HTTP '+xhr.status));
-             xhr.onerror=()=>reject(new Error('خطأ شبكة'));xhr.onabort=()=>reject(new Error('تم إيقاف التنزيل'));xhr.send();
-           });
-           const objectUrl=URL.createObjectURL(blob);
-           const link=document.createElement('a');
-           link.href=objectUrl;link.download='adhan_'+task.voiceKey+'_'+task.prayer+'.mp3';
-           document.body.appendChild(link);link.click();link.remove();
-           setTimeout(()=>URL.revokeObjectURL(objectUrl),30000);
-           if(prayerVoiceStatus)prayerVoiceStatus.textContent='اكتمل تنزيل الملف '+index+' من '+tasks.length+' — 100%. تم إرسال الملف إلى تنزيلات المتصفح.';
-         }catch(error){
-           failed++;
-           const fallback=document.createElement('a');
-           fallback.href=urls[0];fallback.target='_blank';fallback.rel='noopener noreferrer';
-           document.body.appendChild(fallback);fallback.click();fallback.remove();
-           if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر التنزيل المباشر ('+(error.message||'خطأ شبكة')+'). فُتح مصدر الملف لمحاولة حفظه يدويًا.';
-         }
-         downloadNext();
+     if(window.ZadAndroid&&typeof window.ZadAndroid.downloadAdhan==='function'){
+       const unique=[...new Set(prayerVoiceSelects.map(sel=>sel.value))];
+       let index=0;downloadPrayerVoices.disabled=true;showAdhanProgress();
+       const runNext=()=>{
+         if(index>=unique.length){downloadPrayerVoices.disabled=false;hideAdhanProgress();if(prayerVoiceStatus)prayerVoiceStatus.textContent='انتهى طلب تنزيل '+unique.length+' تسجيلات. راجع حالة كل ملف.';return;}
+         const voiceKey=unique[index++];
+         if(window.ZadAndroid.isAdhanDownloaded(voiceKey)){runNext();return;}
+         if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ حفظ التسجيل '+index+' من '+unique.length+' داخل التطبيق: '+voiceKey;
+         updatePrayerProgress(Math.round((index-1)/unique.length*100),'حفظ التسجيل '+index+' من '+unique.length+' داخل التطبيق');
+         const done=(which,ok,details)=>{
+           if(prayerVoiceStatus)prayerVoiceStatus.textContent=(ok?'تم حفظ ':'تعذر حفظ ')+which+' — '+(details||'');
+           updatePrayerProgress(Math.round(index/unique.length*100),'اكتمل '+index+' من '+unique.length+' تسجيلات');
+           runNext();
+         };
+         done.voiceKey=voiceKey;window.onPrayerAdhanDownloadComplete=done;
+         try{window.ZadAndroid.downloadAdhan(voiceKey);}catch(e){done(voiceKey,false,e.message||'خطأ');}
        };
-       downloadNext();
-       return;
+       runNext();return;
      }
-     const unique=[...new Set(prayerVoiceSelects.map(sel=>sel.value))];
-     let index=0;
+     const tasks=[],seen=new Set();
+     prayerVoiceSelects.forEach(sel=>{
+       const voiceKey=sel.value,prayer=sel.dataset.prayer;
+       const taskKey=voiceKey==='doha'?'doha:'+prayer:voiceKey;
+       if(!seen.has(taskKey)){seen.add(taskKey);tasks.push({voiceKey,prayer});}
+     });
+     if(!tasks.length){if(prayerVoiceStatus)prayerVoiceStatus.textContent='اختر صوتًا واحدًا على الأقل.';return;}
+     if(!('caches' in window)){if(prayerVoiceStatus)prayerVoiceStatus.textContent='المتصفح لا يدعم التخزين الداخلي للموقع.';return;}
+     let index=0,failed=0,already=0;
      downloadPrayerVoices.disabled=true;
-     showAdhanProgress();
-     const runNext=()=>{
-       if(index>=unique.length){downloadPrayerVoices.disabled=false;hideAdhanProgress();if(prayerVoiceStatus)prayerVoiceStatus.textContent='انتهى طلب تنزيل '+unique.length+' تسجيلات مختلفة. راجع رسائل الحالة للتأكد من نجاح كل ملف.';return;}
-       const voiceKey=unique[index++];
-       if(window.ZadAndroid.isAdhanDownloaded(voiceKey)){runNext();return;}
-       if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل التسجيل '+index+' من '+unique.length+': '+voiceKey;
-       const downloadDone=(which,ok,details)=>{
-         if(prayerVoiceStatus)prayerVoiceStatus.textContent=(ok?'تم تنزيل ':'تعذر تنزيل ')+which+' — '+(details||'');
-         runNext();
-       };
-       downloadDone.voiceKey=voiceKey;
-       window.onPrayerAdhanDownloadComplete=downloadDone;
-       try{window.ZadAndroid.downloadAdhan(voiceKey);}catch(e){window.onPrayerAdhanDownloadComplete=null;hideAdhanProgress();if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر بدء تنزيل '+voiceKey;runNext();}
+     updatePrayerProgress(0,'بدء حفظ التسجيلات داخل الموقع...');
+     const downloadNext=async()=>{
+       if(index>=tasks.length){
+         downloadPrayerVoices.disabled=false;
+         const msg=failed?'اكتمل الحفظ مع تعذر '+failed+' ملف/ملفات.':'تم حفظ '+tasks.length+' تسجيلات داخل الموقع على هذا الجهاز، ويمكن تشغيلها دون إنترنت.';
+         if(prayerVoiceStatus)prayerVoiceStatus.textContent=msg+(already?' ('+already+' محفوظة مسبقًا).':'');
+         finishPrayerProgress(failed?'انتهى الحفظ مع وجود ملفات لم تكتمل.':'اكتمل حفظ التسجيلات داخل الموقع.');
+         return;
+       }
+       const task=tasks[index],urls=getAdhanUrls(task.voiceKey,task.prayer);
+       if(!urls.length){failed++;index++;downloadNext();return;}
+       const url=urls[0];
+       try{
+         const cache=await caches.open(PRAYER_AUDIO_CACHE);
+         const cached=await cache.match(url);
+         if(cached){already++;index++;updatePrayerProgress(Math.round(index/tasks.length*100),'التسجيل '+index+' من '+tasks.length+' محفوظ مسبقًا داخل الموقع.');downloadNext();return;}
+         if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ حفظ التسجيل '+(index+1)+' من '+tasks.length+' داخل الموقع: '+task.prayer;
+         updatePrayerProgress(Math.round(index/tasks.length*100),'جارٍ تنزيل التسجيل '+(index+1)+' من '+tasks.length+' — 0%');
+         const blob=await new Promise((resolve,reject)=>{
+           const xhr=new XMLHttpRequest();xhr.open('GET',url,true);xhr.responseType='blob';
+           xhr.onprogress=event=>{
+             const percent=event.lengthComputable?Math.round(event.loaded/event.total*100):null;
+             const overall=percent===null?null:Math.round((index+percent/100)/tasks.length*100);
+             updatePrayerProgress(overall,'تنزيل التسجيل '+(index+1)+' من '+tasks.length+' — '+(event.loaded/1048576).toFixed(2)+' ميجابايت'+(event.lengthComputable?' — '+percent+'%':' — جارٍ حساب النسبة'));
+           };
+           xhr.onload=()=>xhr.status>=200&&xhr.status<300&&xhr.response&&xhr.response.size?resolve(xhr.response):reject(new Error('استجابة '+xhr.status));
+           xhr.onerror=()=>reject(new Error('المصدر لا يسمح بالتحميل المباشر أو تعذر الاتصال.'));
+           xhr.onabort=()=>reject(new Error('تم إيقاف التنزيل.'));
+           xhr.send();
+         });
+         await cache.put(url,new Response(blob,{headers:{'Content-Type':'audio/mpeg','Cache-Control':'public, max-age=31536000'}}));
+         index++;
+         updatePrayerProgress(Math.round(index/tasks.length*100),'تم حفظ التسجيل '+index+' من '+tasks.length+' داخل الموقع.');
+       }catch(error){
+         failed++;index++;
+         if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر حفظ تسجيل '+task.prayer+' داخل الموقع: '+(error.message||'خطأ تحميل');
+         updatePrayerProgress(Math.round(index/tasks.length*100),'تعذر ملف واحد — جارٍ متابعة بقية التسجيلات.');
+       }
+       downloadNext();
      };
-     runNext();
+     downloadNext();
    });
    const modeControl=$('adhanMode'), approachControl=$('approachAlertEnabled'), approachMinutes=$('approachAlertMinutes');
    const savedMode=localStorage.getItem('zad_adhan_mode')||'adhan';
