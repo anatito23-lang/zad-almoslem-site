@@ -145,16 +145,19 @@ public class RadioPlaybackService extends Service {
             });
             Uri source = localFile != null ? Uri.fromFile(localFile) : Uri.parse(url);
             boolean radioStream = "radio".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""));
-            MediaItem item = (localFile != null || !radioStream) ? MediaItem.fromUri(source)
-                    : new MediaItem.Builder().setUri(source)
-                    .setMimeType(androidx.media3.common.MimeTypes.AUDIO_MPEG).build();
+            boolean hls = url != null && url.toLowerCase().contains(".m3u8");
+            MediaItem item = hls
+                    ? new MediaItem.Builder().setUri(source).setMimeType(androidx.media3.common.MimeTypes.APPLICATION_M3U8).build()
+                    : ((localFile != null || !radioStream) ? MediaItem.fromUri(source)
+                    : new MediaItem.Builder().setUri(source).setMimeType(androidx.media3.common.MimeTypes.AUDIO_MPEG).build());
             player.setMediaItem(item);
             player.prepare();
             player.play();
             if ("radio".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""))) {
                 startupTimeout = () -> {
                     if (player != null && player.getPlaybackState() != Player.STATE_READY) {
-                        String fallback = nextRadioFallback();
+                        String station = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("radio_station", "");
+                        String fallback = "egypt".equals(station) ? nextRadioFallback() : null;
                         if (fallback != null) {
                             updateRadioNotification("إذاعة القرآن الكريم", "الاتصال تأخر؛ نجرب مصدرًا احتياطيًا...");
                             play(fallback, null);
