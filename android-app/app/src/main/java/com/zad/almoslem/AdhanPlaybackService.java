@@ -84,6 +84,14 @@ public class AdhanPlaybackService extends Service {
             player.setVolume(adhanVolume, adhanVolume);
             String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"haram".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)) ? voice : "basit";
             File audioDir = new File(getFilesDir(), "adhan");
+            if ("doha".equals(safeVoice)) {
+                String prayerKey = "dhuhr";
+                if (prayer != null && prayer.contains("الفجر")) prayerKey = "fajr";
+                else if (prayer != null && prayer.contains("العصر")) prayerKey = "asr";
+                else if (prayer != null && prayer.contains("المغرب")) prayerKey = "maghrib";
+                else if (prayer != null && prayer.contains("العشاء")) prayerKey = "isha";
+                safeVoice = "doha_" + prayerKey;
+            }
             File mp3File = new File(audioDir, safeVoice + ".mp3");
             File oggFile = new File(audioDir, safeVoice + ".ogg");
             File audioFile = isPlayableAudioFile(mp3File) ? mp3File
