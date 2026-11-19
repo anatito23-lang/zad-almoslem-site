@@ -105,6 +105,28 @@ public class ReminderReceiver extends BroadcastReceiver {
         prefs.edit().putBoolean("silent_restore_pending",false).remove("silent_previous_ringer").apply();
     }
 
+    private static void showAdhanLaunchFailure(Context context, String prayerName, Exception error) {
+        try {
+            NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (manager == null) return;
+            String channel = "zad_adhan_launch_errors";
+            if (Build.VERSION.SDK_INT >= 26) {
+                NotificationChannel ch = new NotificationChannel(channel, "أخطاء تشغيل الأذان", NotificationManager.IMPORTANCE_HIGH);
+                ch.setDescription("تنبيه عند تعذر بدء خدمة الأذان");
+                manager.createNotificationChannel(ch);
+            }
+            String detail = error.getMessage();
+            if (detail == null || detail.trim().isEmpty()) detail = error.getClass().getSimpleName();
+            Notification.Builder builder = Build.VERSION.SDK_INT >= 26
+                    ? new Notification.Builder(context, channel) : new Notification.Builder(context);
+            builder.setSmallIcon(android.R.drawable.ic_dialog_alert)
+                    .setContentTitle("تعذر بدء أذان " + prayerName)
+                    .setContentText("لم يتمكن أندرويد من بدء تشغيل الأذان: " + detail)
+                    .setAutoCancel(true);
+            manager.notify(("adhan_launch_" + prayerName).hashCode(), builder.build());
+        } catch (Exception ignored) {}
+    }
+
     @Override public void onReceive(Context context,Intent intent) {
         if (intent != null && "restore_silent".equals(intent.getStringExtra("action"))) {
             restoreSilentMode(context);
@@ -132,7 +154,9 @@ public class ReminderReceiver extends BroadcastReceiver {
             try {
                 if(Build.VERSION.SDK_INT>=26) context.startForegroundService(audio);
                 else context.startService(audio);
-            } catch(Exception ignored) {}
+            } catch(Exception launchError) {
+                showAdhanLaunchFailure(context, prayerName, launchError);
+            }
         }
         if(prayer) {
             // Advance by one local calendar day, not a fixed 24-hour duration.
