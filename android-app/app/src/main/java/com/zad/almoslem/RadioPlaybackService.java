@@ -32,7 +32,7 @@ public class RadioPlaybackService extends Service {
         String kind=intent==null?"radio":intent.getStringExtra("kind");
         boolean allowedRadio="https://qurango.net/radio/tarateel".equals(url) ||
              "https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8".equals(url);
-        boolean allowedQuran=false,allowedLocal=false;
+        boolean allowedQuran=false,allowedLocal=false,allowedAudio=false;
         File localFile=null;
         String localPath=intent==null?null:intent.getStringExtra("local_path");
         try {
@@ -46,14 +46,17 @@ public class RadioPlaybackService extends Service {
                 String host=parsed.getHost();
                 allowedQuran="quran".equals(kind) && "https".equalsIgnoreCase(parsed.getScheme()) && host!=null &&
                     (host.equalsIgnoreCase("mp3quran.net") || host.toLowerCase().endsWith(".mp3quran.net") || host.equalsIgnoreCase("mp3quran.com") || host.toLowerCase().endsWith(".mp3quran.com"));
+                allowedAudio=("nasheed".equals(kind)||"ruqyah".equals(kind)) && "https".equalsIgnoreCase(parsed.getScheme()) && host!=null &&
+                    (host.equalsIgnoreCase("archive.org") || host.equalsIgnoreCase("www.archive.org") ||
+                     host.equalsIgnoreCase("nourelquran.com") || host.equalsIgnoreCase("www.nourelquran.com"));
             }
         } catch(Exception ignored) {}
-        if(!allowedRadio && !allowedQuran && !allowedLocal) { stopRadio(); return START_NOT_STICKY; }
+        if(!allowedRadio && !allowedQuran && !allowedLocal && !allowedAudio) { stopRadio(); return START_NOT_STICKY; }
         String label=intent==null?null:intent.getStringExtra("label");
         if(label!=null) {
             Notification.Builder updated=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
             updated.setSmallIcon(android.R.drawable.ic_media_play)
-              .setContentTitle("quran".equals(kind)?"استماع القرآن الكريم":"إذاعة القرآن الكريم")
+              .setContentTitle("quran".equals(kind)?"استماع القرآن الكريم":("nasheed".equals(kind)?"الإنشاد والابتهالات":("ruqyah".equals(kind)?"الرقية الشرعية":"إذاعة القرآن الكريم")))
               .setContentText(label+" — يعمل في الخلفية").setContentIntent(content).setOngoing(true)
               .addAction(android.R.drawable.ic_media_pause,"إيقاف الصوت",stopAction);
             Notification n2=updated.build();
