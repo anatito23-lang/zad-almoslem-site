@@ -16,13 +16,23 @@ public class AdhanPlaybackService extends Service {
     private static final String CHANNEL = "zad_adhan_playback";
     private static final int NOTIFICATION_ID = 7530;
     private MediaPlayer player;
+    private int silentDuration = 0;
 
+    public static boolean hasAudio(Context context, String voice) {
+        String safe = Integer.toHexString((voice == null ? "" : voice).hashCode());
+        File file = new File(new File(context.getFilesDir(), "adhan"), safe + ".mp3");
+        return file.isFile() && file.length() > 10000;
+    }
     public static void play(Context context, String prayer, String voice, int volume) {
+        play(context, prayer, voice, volume, 0);
+    }
+    public static void play(Context context, String prayer, String voice, int volume, int silentMinutes) {
         Intent i = new Intent(context, AdhanPlaybackService.class);
         i.setAction("PLAY");
         i.putExtra("prayer", prayer);
         i.putExtra("voice", voice);
         i.putExtra("volume", volume);
+        i.putExtra("silent_minutes", silentMinutes);
         if (Build.VERSION.SDK_INT >= 26) context.startForegroundService(i);
         else context.startService(i);
     }
@@ -32,6 +42,7 @@ public class AdhanPlaybackService extends Service {
         String prayer = intent == null ? "الصلاة" : intent.getStringExtra("prayer");
         String voice = intent == null ? "" : intent.getStringExtra("voice");
         int volume = intent == null ? 80 : intent.getIntExtra("volume", 80);
+        silentDuration = intent == null ? 0 : intent.getIntExtra("silent_minutes", 0);
         Notification.Builder b = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
@@ -43,19 +54,19 @@ public class AdhanPlaybackService extends Service {
         try {
             String safe = (voice == null ? "" : voice).replaceAll("[^\\p{L}\\p{N}]+", "_");
             File file = new File(new File(getFilesDir(), "adhan"), safe + ".mp3");
-            if (!file.isFile() || file.length() < 10000) { stopSelf(); return START_NOT_STICKY; }
+            if (!file.isFile() || file.length() < 10000) { if(silentDuration>0) ReminderReceiver.startSilentMode(this,silentDuration); stopForeground(true); stopSelf(); return START_NOT_STICKY; }
             player = new MediaPlayer();
             player.setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_MEDIA)
                     .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build());
             float gain = Math.max(0, Math.min(100, volume)) / 100f;
             player.setVolume(gain, gain);
-            player.setOnCompletionListener(mp -> { stopPlayer(); stopForeground(true); stopSelf(); });
-            player.setOnErrorListener((mp, what, extra) -> { stopPlayer(); stopForeground(true); stopSelf(); return true; });
+            player.setOnCompletionListener(mp -> { if(silentDuration>0) ReminderReceiver.startSilentMode(this,silentDuration); stopPlayer(); stopForeground(true); stopSelf(); });
+            player.setOnErrorListener((mp, what, extra) -> { if(silentDuration>0) ReminderReceiver.startSilentMode(this,silentDuration); stopPlayer(); stopForeground(true); stopSelf(); return true; });
+            player.setOnPreparedListener(MediaPlayer::start);
             player.setDataSource(file.getAbsolutePath());
             player.prepareAsync();
-            player.setOnPreparedListener(MediaPlayer::start);
-        } catch (Exception e) { stopPlayer(); stopForeground(true); stopSelf(); }
+        } catch (Exception e) { if(silentDuration>0) ReminderReceiver.startSilentMode(this,silentDuration); stopPlayer(); stopForeground(true); stopSelf(); }
         return START_NOT_STICKY;
     }
 
