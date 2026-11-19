@@ -294,6 +294,7 @@ public class MainActivity extends Activity {
                     String[] sourceUrls = new String[] {
                         source.replace("https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/", "https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/"),
                         source.replace("https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/", "https://fastly.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/"),
+                        source.replace("https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/", "https://raw.githack.com/Kiwifu/adhan-mp3/main/"),
                         source
                     };
                     Exception lastFailure = null;
