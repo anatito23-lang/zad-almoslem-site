@@ -481,7 +481,7 @@
        preview.dataset.sourceIndex='0';
        preview.src=getAdhanUrls(selected)[0];
        preview.load();
-       preview.volume=getPrayerVolume(prayer)/100;
+       preview.volume=getPrayerVolume('الظهر')/100;
        $('adhanSettingsStatus').textContent='جارٍ تشغيل معاينة الأذان...';
        const playing=preview.play();
        if(playing&&typeof playing.catch==='function')playing.catch(()=>{$('adhanSettingsStatus').textContent='تعذر تشغيل المعاينة. تحقق من الاتصال ثم حاول مرة أخرى.';});
