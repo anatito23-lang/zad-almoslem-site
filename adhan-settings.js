@@ -19,7 +19,7 @@ function render(){
   return '<div class="adhan-prayer-row" data-prayer="'+key+'"><div class="adhan-prayer-name">'+name+'</div>'+
    '<select class="adhan-voice" aria-label="مؤذن '+name+'">'+voices.map(x=>'<option '+(x===v.voice?'selected':'')+'>'+x+'</option>').join('')+'</select>'+
    '<select class="adhan-style" aria-label="نوع أذان '+name+'"><option value="full" '+(v.style==='full'?'selected':'')+'>الأذان كاملًا</option><option value="takbir" '+(v.style==='takbir'?'selected':'')+'>تكبيرتان فقط</option><option value="vibrate" '+(v.style==='vibrate'?'selected':'')+'>اهتزاز فقط</option><option value="off" '+(v.style==='off'?'selected':'')+'>بدون أذان</option></select>'+
-   '<div class="adhan-prayer-options"><label><input class="adhan-enabled" type="checkbox" '+(v.enabled?'checked':'')+'> تفعيل الصلاة</label><label>مستوى الصوت <input class="adhan-volume" type="range" min="0" max="100" value="'+Number(v.volume||80)+'"></label><button class="btn light adhan-test" type="button">تجربة الصوت</button></div></div>';
+   '<div class="adhan-prayer-options"><label><input class="adhan-enabled" type="checkbox" '+(v.enabled?'checked':'')+'> تفعيل الصلاة</label><label>مستوى الصوت <input class="adhan-volume" type="range" min="0" max="100" value="'+Number(v.volume||80)+'"></label><button class="btn light adhan-import" type="button">إضافة ملف الصوت</button><button class="btn light adhan-test" type="button">تجربة الصوت</button></div></div>';
  }).join('');
 }
 function collect(){
@@ -35,13 +35,26 @@ function collect(){
  });
 }
 $('adhanPrayerSettings').addEventListener('click',e=>{
- const btn=e.target.closest('.adhan-test');if(!btn)return;
- $('adhanSettingsStatus').textContent='سيعمل اختبار الصوت بعد تثبيت ملفات المؤذنين وربط مشغل الأذان.';
+ const row=e.target.closest('.adhan-prayer-row');if(!row)return;
+ const voice=row.querySelector('.adhan-voice').value;
+ if(e.target.closest('.adhan-import')){
+  if(window.ZadAndroid&&window.ZadAndroid.importAdhanAudio){window.ZadAndroid.importAdhanAudio(voice);$('adhanSettingsStatus').textContent='اختر ملف الأذان لهذا المؤذن من ملفات الهاتف.';}
+  else $('adhanSettingsStatus').textContent='إضافة ملفات الصوت متاحة داخل تطبيق أندرويد فقط.';
+  return;
+ }
+ if(e.target.closest('.adhan-test')){
+  const volume=Number(row.querySelector('.adhan-volume').value);
+  if(window.ZadAndroid&&window.ZadAndroid.playAdhanTest){window.ZadAndroid.playAdhanTest(voice,volume);$('adhanSettingsStatus').textContent='جاري تجربة الصوت المختار. إذا لم تستورد ملفه فلن يصدر صوت.';}
+  else $('adhanSettingsStatus').textContent='اختبار الصوت متاح داخل تطبيق أندرويد بعد استيراد الملف.';
+ }
 });
+window.onAdhanAudioImported=function(voice,ok){
+ $('adhanSettingsStatus').textContent=ok?'تم حفظ ملف صوت '+voice+' على الجهاز ويمكن تجربته دون إنترنت.':'لم يتم حفظ الملف. تأكد أنه ملف صوتي صالح ثم حاول مرة أخرى.';
+};
 $('saveAdhanSettings').addEventListener('click',()=>{
  collect();localStorage.setItem('zad_adhan_settings',JSON.stringify(state));
  if(window.ZadAndroid&&window.ZadAndroid.saveAdhanSettings)window.ZadAndroid.saveAdhanSettings(JSON.stringify(state));
- $('adhanSettingsStatus').textContent='تم حفظ اختيارات المؤذنين والتنبيهات لكل صلاة على هذا الجهاز.';
+ $('adhanSettingsStatus').textContent='تم حفظ الإعدادات على الجهاز. استورد ملفًا صوتيًا لكل مؤذن تريد تشغيله.';
 });
 $('adhanMasterEnabled').addEventListener('change',()=>{state.enabled=$('adhanMasterEnabled').checked;});
 render();
