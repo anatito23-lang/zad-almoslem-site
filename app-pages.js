@@ -98,6 +98,19 @@ css.textContent+=`
 .zad-theme-options button{padding:12px 8px;border:1px solid var(--line,#e5ebe5);border-radius:12px;background:var(--soft,#eaf2ed);color:var(--ink,#18332d);font:inherit}
 .zad-theme-options button.active{outline:2px solid var(--gold,#c9a45c);font-weight:800}
 #zadAudioSettingsSlot>.adhan-settings,#zadReminderSettingsSlot>#daily-reminder-settings{display:block!important;margin:0!important}
+#zadAudioSettingsSlot>.adhan-settings{padding:10px!important;border-radius:12px!important;font-size:13px!important}
+#zadAudioSettingsSlot>.adhan-settings>div{margin-top:7px!important}
+#zadAudioSettingsSlot>.adhan-settings h3{font-size:14px!important;margin:0 0 4px!important}
+#zadAudioSettingsSlot>.adhan-settings p{font-size:11px!important;line-height:1.45!important;margin:3px 0 6px!important}
+#zadAudioSettingsSlot>.adhan-settings .row{gap:6px!important;flex-wrap:wrap!important;margin:6px 0!important}
+#zadAudioSettingsSlot>.adhan-settings select,#zadAudioSettingsSlot>.adhan-settings input:not([type=checkbox]):not([type=range]){min-height:34px!important;padding:5px 8px!important;font-size:12px!important}
+#zadAudioSettingsSlot>.adhan-settings button{min-height:34px!important;padding:6px 9px!important;font-size:12px!important}
+#zadAudioSettingsSlot>.adhan-settings>.card{padding:8px!important;margin:7px 0!important;border-radius:10px!important}
+#zadAudioSettingsSlot>.adhan-settings .prayer-alert-list{gap:5px!important;margin:6px 0!important}
+#zadAudioSettingsSlot>.adhan-settings .prayer-alert-list label{font-size:12px!important;margin:2px 0!important}
+#zadAudioSettingsSlot>.adhan-settings .adhan-master{font-size:12px!important;margin:7px 0!important}
+#zadAdhanProgress{height:5px!important;width:100%!important;margin:3px 0 6px!important;border-radius:8px!important;flex:0 0 100%!important;order:-1!important}
+
 #zadReminderSettingsSlot #daily-reminder-settings .section-head{display:none!important}
 #zadReminderSettingsSlot #daily-reminder-settings .grid{grid-template-columns:1fr!important}
 #zadReminderSettingsSlot #daily-reminder-settings .card{margin:8px 0!important}
