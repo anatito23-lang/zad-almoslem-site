@@ -41,11 +41,11 @@ public class RadioPlaybackService extends Service {
         else startForeground(NOTIFICATION,n);
         String url=intent==null?null:intent.getStringExtra("url");
         attemptedRadioUrls.clear();
-        if (url != null && (url.equals("https://qurango.net/radio/tarateel") || url.equals("https://stream.radiojar.com/8s5u5tpdtwzuv") || url.equals("https://backup.qurango.net/radio/tarateel"))) attemptedRadioUrls.add(url);
+        if (url != null && (url.equals("https://qurango.net/radio/tarateel") || url.equals("https://stream.radiojar.com/8s5u5tpdtwzuv") || url.equals("https://qurango.net/radio/mishary_alafasi"))) attemptedRadioUrls.add(url);
         String kind=intent==null?"radio":intent.getStringExtra("kind");
         boolean allowedRadio="https://qurango.net/radio/tarateel".equals(url) ||
              "https://stream.radiojar.com/8s5u5tpdtwzuv".equals(url) ||
-             "https://backup.qurango.net/radio/tarateel".equals(url);
+             "https://qurango.net/radio/mishary_alafasi".equals(url);
         boolean allowedQuran=false,allowedLocal=false,allowedAudio=false;
         File localFile=null;
         String localPath=intent==null?null:intent.getStringExtra("local_path");
@@ -168,7 +168,7 @@ public class RadioPlaybackService extends Service {
         String[] candidates = {
                 "https://qurango.net/radio/tarateel",
                 "https://stream.radiojar.com/8s5u5tpdtwzuv",
-                "https://backup.qurango.net/radio/tarateel"
+                "https://qurango.net/radio/mishary_alafasi"
         };
         for (String candidate : candidates) {
             if (attemptedRadioUrls.add(candidate)) return candidate;
