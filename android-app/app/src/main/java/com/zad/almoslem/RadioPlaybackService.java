@@ -43,7 +43,8 @@ public class RadioPlaybackService extends Service {
         attemptedRadioUrls.clear();
         if (url != null) attemptedRadioUrls.add(url);
         String kind=intent==null?"radio":intent.getStringExtra("kind");
-        boolean allowedRadio="https://qurango.net/radio/tarateel".equals(url) ||
+        boolean allowedRadio="https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8".equals(url) ||
+             "https://qurango.net/radio/tarateel".equals(url) ||
              "https://stream.radiojar.com/8s5u5tpdtwzuv".equals(url) ||
              "https://qurango.net/radio/mishary_alafasi".equals(url) ||
              "https://live.kwikmotion.com/sbrksaquranradiolive/srpksaquranradio/playlist.m3u8".equals(url) ||
@@ -132,7 +133,7 @@ public class RadioPlaybackService extends Service {
                             .putBoolean("radio_ready", false).putString("radio_last_error", detail).apply();
                     android.util.Log.e("ZadAlmoslem", "Audio playback failed: " + url, error);
                     String station = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("radio_station", "");
-                    String fallback = radioActive && "egypt".equals(station) ? nextRadioFallback() : null;
+                    String fallback = null; // لا تبدّل محطة المستخدم إلى إذاعة عامة عند تعذر بث الدولة المختارة.
                     if (fallback != null) {
                         updateRadioNotification("إذاعة القرآن الكريم", "تعذر المصدر الحالي؛ نجرب مصدر بث احتياطي...");
                         play(fallback, null);
@@ -157,7 +158,7 @@ public class RadioPlaybackService extends Service {
                 startupTimeout = () -> {
                     if (player != null && player.getPlaybackState() != Player.STATE_READY) {
                         String station = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("radio_station", "");
-                        String fallback = "egypt".equals(station) ? nextRadioFallback() : null;
+                        String fallback = null; // لا تنتقل إلى محطة أخرى؛ أظهر الخطأ للمستخدم بدل تغيير الإذاعة.
                         if (fallback != null) {
                             updateRadioNotification("إذاعة القرآن الكريم", "الاتصال تأخر؛ نجرب مصدرًا احتياطيًا...");
                             play(fallback, null);
