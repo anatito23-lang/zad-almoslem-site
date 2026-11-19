@@ -8,8 +8,8 @@ android {
         applicationId 'com.zad.almoslem'
         minSdk 23
         targetSdk 35
-        versionCode 9
-        versionName '2.1-adhan-test'
+        versionCode 10
+        versionName '2.1.1-adhan-test'
     }
 
     signingConfigs {
