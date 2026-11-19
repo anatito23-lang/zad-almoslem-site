@@ -108,6 +108,8 @@
      prayerProgressBar.style.display='block';
      if(prayerProgressText&&label)prayerProgressText.textContent=label;
      const value=percent===null||percent===undefined?0:Math.max(0,Math.min(100,percent));
+     prayerProgressFill.style.animation='none';
+     prayerProgressFill.style.transform='none';
      prayerProgressFill.style.width=value+'%';
      prayerProgressBar.setAttribute('role','progressbar');
      prayerProgressBar.setAttribute('aria-valuemin','0');
@@ -340,7 +342,14 @@
      }
      const progressText='جارٍ تنزيل '+label+' ('+taskIndex+' من '+taskTotal+') — '+mb+' من '+totalMb+' ميجابايت'+(percent===null?' — المصدر لا يحدد الحجم الكلي':' — '+percent+'%');
      updatePrayerProgress(overall,progressText);
-     if(overall===null&&prayerProgressFill){prayerProgressFill.style.width='38%';prayerProgressFill.style.animation='zadDownloadIndeterminate 1s ease-in-out infinite alternate';}
+     if(overall===null&&prayerProgressFill){
+       if(!document.getElementById('zadDownloadProgressStyle')){
+         const style=document.createElement('style');style.id='zadDownloadProgressStyle';
+         style.textContent='@keyframes zadDownloadIndeterminate{from{transform:translateX(130%)}to{transform:translateX(-130%)}}';
+         document.head.appendChild(style);
+       }
+       prayerProgressFill.style.width='38%';prayerProgressFill.style.animation='zadDownloadIndeterminate 1s ease-in-out infinite alternate';
+     }
      adhanStatus.textContent=progressText;
      if(prayerVoiceStatus)prayerVoiceStatus.textContent=progressText;
      if(directory&&adhanPathBox){
