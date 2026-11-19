@@ -20,14 +20,14 @@ import java.util.*;
 public class PrayerDashboardActivity extends Activity {
     private static final String[] PRAYERS={"الفجر","الظهر","العصر","المغرب","العشاء"};
     private static final String[] KEYS={"fajr","dhuhr","asr","maghrib","isha"};
-    private static final String[] COUNTRIES={"مصر","السعودية","الإمارات","الكويت","قطر","الأردن","لبنان","فلسطين","المغرب","الجزائر","تونس","تركيا","باكستان","الهند","إندونيسيا","ماليزيا","المملكة المتحدة","الولايات المتحدة","كندا","ألمانيا","فرنسا"};
-    private static final String[] COUNTRY_CODES={"Egypt","Saudi Arabia","United Arab Emirates","Kuwait","Qatar","Jordan","Lebanon","Palestine","Morocco","Algeria","Tunisia","Turkey","Pakistan","India","Indonesia","Malaysia","United Kingdom","United States","Canada","Germany","France"};
-    private static final String[] METHODS={"5","4","4","9","10","3","3","3","3","3","3","13","1","1","3","3","3","2","2","3","3"};
-    private static final String[] DEFAULT_CITIES={"Cairo","Riyadh","Dubai","Kuwait City","Doha","Amman","Beirut","Jerusalem","Rabat","Algiers","Tunis","Istanbul","Islamabad","New Delhi","Jakarta","Kuala Lumpur","London","New York","Toronto","Berlin","Paris"};
+    private static final String[] COUNTRIES={"مصر","السعودية","الإمارات","الكويت","قطر","الأردن","لبنان","فلسطين","المغرب","الجزائر","تونس","تركيا","باكستان","الهند","إندونيسيا","ماليزيا","المملكة المتحدة","الولايات المتحدة","كندا","ألمانيا","فرنسا","البحرين","عُمان","العراق","سوريا","اليمن","ليبيا","السودان","بنغلاديش","سنغافورة","اليابان","أستراليا","جنوب أفريقيا","نيجيريا","روسيا","إسبانيا","إيطاليا","هولندا","السويد","النرويج"};
+    private static final String[] COUNTRY_CODES={"Egypt","Saudi Arabia","United Arab Emirates","Kuwait","Qatar","Jordan","Lebanon","Palestine","Morocco","Algeria","Tunisia","Turkey","Pakistan","India","Indonesia","Malaysia","United Kingdom","United States","Canada","Germany","France","Bahrain","Oman","Iraq","Syria","Yemen","Libya","Sudan","Bangladesh","Singapore","Japan","Australia","South Africa","Nigeria","Russia","Spain","Italy","Netherlands","Sweden","Norway"};
+    private static final String[] METHODS={"5","4","4","9","10","3","3","3","3","3","3","13","1","1","3","3","3","2","2","3","12","8","8","3","3","3","3","3","1","11","3","3","3","3","14","3","3","3","3","3"};
+    private static final String[] DEFAULT_CITIES={"Cairo","Riyadh","Dubai","Kuwait City","Doha","Amman","Beirut","Jerusalem","Rabat","Algiers","Tunis","Istanbul","Islamabad","New Delhi","Jakarta","Kuala Lumpur","London","New York","Toronto","Berlin","Paris","Manama","Muscat","Baghdad","Damascus","Sanaa","Tripoli","Khartoum","Dhaka","Singapore","Tokyo","Sydney","Johannesburg","Lagos","Moscow","Madrid","Rome","Amsterdam","Stockholm","Oslo"};
     private android.content.SharedPreferences prefs;
     private Spinner countrySpinner;
     private EditText cityInput;
-    private TextView result,nextCountdown,trackerCount,adhanNow;
+    private TextView result,nextCountdown,trackerCount,adhanNow;\n    private LinearLayout prayerHero;
     private final TextView[] timeViews=new TextView[5];
     private final TextView[] remainingViews=new TextView[5];
     private final Handler handler=new Handler();
@@ -46,7 +46,7 @@ public class PrayerDashboardActivity extends Activity {
     private LinearLayout.LayoutParams full(){return new LinearLayout.LayoutParams(-1,-2);}
     private void build(){
         ScrollView scroll=new ScrollView(this);LinearLayout root=col();root.setPadding(dp(14),dp(14),dp(14),dp(28));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);setContentView(scroll);
-        LinearLayout hero=col();hero.setGravity(Gravity.CENTER);hero.setPadding(dp(16),dp(24),dp(16),dp(24));hero.setBackgroundResource(R.drawable.azhar_mosque_bg);
+        LinearLayout hero=col();prayerHero=hero;hero.setGravity(Gravity.CENTER);hero.setPadding(dp(16),dp(24),dp(16),dp(24));hero.setBackground(bg(green,18));
         TextView title=label("مواقيت الصلاة",25,Color.WHITE,true);title.setGravity(Gravity.CENTER);
         adhanNow=label("الصلاة نورٌ وطمأنينة",15,Color.WHITE,true);adhanNow.setGravity(Gravity.CENTER);
         nextCountdown=label("جارٍ حساب الصلاة القادمة...",14,Color.WHITE,false);nextCountdown.setGravity(Gravity.CENTER);
@@ -65,9 +65,9 @@ public class PrayerDashboardActivity extends Activity {
         for(int i=0;i<5;i++){
             LinearLayout card=col();card.setPadding(dp(14),dp(10),dp(14),dp(10));card.setBackground(bg(Color.WHITE,15));
             LinearLayout row=new LinearLayout(this);row.setGravity(Gravity.CENTER_VERTICAL);row.setOrientation(LinearLayout.HORIZONTAL);
-            TextView name=label(icons[i]+"  "+PRAYERS[i],18,green,true);row.addView(name,new LinearLayout.LayoutParams(0,dp(42),1));
-            timeViews[i]=label(savedTime(PRAYERS[i]),18,green,true);row.addView(timeViews[i]);card.addView(row);
-            remainingViews[i]=label("المتبقي: —",12,Color.DKGRAY,false);card.addView(remainingViews[i]);
+            TextView name=label(icons[i]+"  "+PRAYERS[i],18,green,true);name.setGravity(Gravity.CENTER);row.addView(name,new LinearLayout.LayoutParams(-1,dp(42)));card.addView(row);
+            timeViews[i]=label(savedTime(PRAYERS[i]),20,green,true);timeViews[i].setGravity(Gravity.CENTER);card.addView(timeViews[i]);
+            remainingViews[i]=label("المتبقي: —",12,Color.DKGRAY,false);remainingViews[i].setGravity(Gravity.CENTER);card.addView(remainingViews[i]);
             LinearLayout.LayoutParams cp=full();cp.bottomMargin=dp(9);root.addView(card,cp);
         }
         TextView trackerTitle=label("متتبع الصلوات اليومي",19,green,true);trackerTitle.setPadding(0,dp(16),0,dp(5));root.addView(trackerTitle);
