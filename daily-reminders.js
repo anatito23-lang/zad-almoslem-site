@@ -53,7 +53,8 @@
        original,
        original.replace('https://cdn.jsdelivr.net/','https://fastly.jsdelivr.net/'),
        original.replace('https://cdn.jsdelivr.net/','https://gcore.jsdelivr.net/'),
-       original.replace('https://cdn.jsdelivr.net/gh/','https://raw.githubusercontent.com/').replace('@main/','/main/')
+       original.replace('https://cdn.jsdelivr.net/gh/','https://raw.githubusercontent.com/').replace('@main/','/main/'),
+       original.replace('https://cdn.jsdelivr.net/gh/','https://raw.githack.com/').replace('@main/','/main/')
      ];
    }
    const storedVoice=localStorage.getItem('zad_adhan_voice');
@@ -179,6 +180,7 @@
        preview.pause();preview.removeAttribute('src');preview.load();
        preview.dataset.sourceIndex='0';
        preview.src=getAdhanUrls(selected)[0];
+       preview.load();
        preview.volume=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0))/100:savedVolume/100;
        $('adhanSettingsStatus').textContent='جارٍ تشغيل معاينة الأذان...';
        const playing=preview.play();
