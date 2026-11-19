@@ -17,7 +17,13 @@ public class DailyReminderSettingsActivity extends Activity {
  private final String[] names={"أذكار الصباح","أذكار المساء","قيام الليل"};
  private final int[] defaultHours={7,17,4};
  private TextView[] timeLabels=new TextView[3];
- @Override public void onCreate(Bundle state){super.onCreate(state);prefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);build();}
+ @Override public void onCreate(Bundle state){
+  super.onCreate(state);prefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);
+  getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);
+  if(!prefs.contains("morning_enabled"))ReminderReceiver.scheduleDaily(this,"morning",7,0,"حان وقت أذكار الصباح، لا تنس وردك من ذكر الله.");
+  if(!prefs.contains("evening_enabled"))ReminderReceiver.scheduleDaily(this,"evening",17,0,"حان وقت أذكار المساء، لا تنس وردك من ذكر الله.");
+  build();
+ }
  private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
  private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.RIGHT);t.setTextDirection(android.view.View.TEXT_DIRECTION_RTL);if(bold)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
  private GradientDrawable bg(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));return d;}
