@@ -104,6 +104,12 @@ public class MainActivity extends Activity {
         Button fridayButton = new Button(this); fridayButton.setText("🌙  ورد يوم الجمعة");
         fridayButton.setOnClickListener(v -> startActivity(new Intent(this, FridayWirdActivity.class)));
         root.addView(fridayButton, matchWrap());
+        Button faithButton = new Button(this); faithButton.setText("📚  المكتبة الإيمانية والسنة والأدعية");
+        faithButton.setOnClickListener(v -> startActivity(new Intent(this, FaithLibraryActivity.class)));
+        root.addView(faithButton, matchWrap());
+        Button dailyWirdButton = new Button(this); dailyWirdButton.setText("☀️  وردي اليومي");
+        dailyWirdButton.setOnClickListener(v -> startActivity(new Intent(this, DailyWirdActivity.class)));
+        root.addView(dailyWirdButton, matchWrap());
         TextView intro = text("إعدادات الأذان",20,Color.rgb(20,55,43),true);
         intro.setPadding(0,dp(20),0,dp(8)); root.addView(intro);
         Switch master = new Switch(this);
