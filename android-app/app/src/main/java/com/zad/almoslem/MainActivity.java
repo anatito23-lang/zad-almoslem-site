@@ -86,6 +86,9 @@ public class MainActivity extends Activity {
         Button qiblaButton = new Button(this); qiblaButton.setText("🧭  بوصلة القبلة");
         qiblaButton.setOnClickListener(v -> startActivity(new Intent(this, QiblaActivity.class)));
         root.addView(qiblaButton, matchWrap());
+        Button mushafButton = new Button(this); mushafButton.setText("📖  المصحف الشريف");
+        mushafButton.setOnClickListener(v -> startActivity(new Intent(this, QuranTextActivity.class)));
+        root.addView(mushafButton, matchWrap());
         TextView intro = text("إعدادات الأذان",20,Color.rgb(20,55,43),true);
         intro.setPadding(0,dp(20),0,dp(8)); root.addView(intro);
         Switch master = new Switch(this);
