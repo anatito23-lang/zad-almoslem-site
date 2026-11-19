@@ -123,15 +123,34 @@
      downloadBtn.textContent=ready?'الصوت محفوظ ويعمل دون إنترنت ✓':'تنزيل الصوت للعمل دون إنترنت';
      if(ready)$('adhanSettingsStatus').textContent='التسجيل محفوظ على هذا الجهاز ويعمل دون إنترنت.';
    }
+   window.onAdhanDownloadProgress=function(index,prayer,received,total,directory){
+     if(!voice||voice.value!=='doha')return;
+     const names={fajr:'الفجر',dhuhr:'الظهر',asr:'العصر',maghrib:'المغرب',isha:'العشاء'};
+     const label=names[prayer]||prayer;
+     const mb=(received/1048576).toFixed(2);
+     const totalMb=total>0?(total/1048576).toFixed(2):'؟';
+     const percent=total>0?Math.max(0,Math.min(100,Math.round(received/total*100))):null;
+     if(adhanProgress){
+       adhanProgress.style.display='block';
+       const fill=adhanProgress.querySelector('span');
+       if(fill){fill.style.animation='none';fill.style.transform='none';fill.style.width=(percent===null?38:percent)+'%';}
+     }
+     adhanStatus.textContent='جارٍ تنزيل '+label+' ('+index+' من 5) — '+mb+' من '+totalMb+' ميجابايت'+(percent===null?'':' — '+percent+'%');
+     if(directory){
+       if(!adhanPathBox)return;
+       adhanPathBox.style.display='block';
+       adhanPathBox.textContent='مسار الحفظ داخل التطبيق: '+directory+'/doha_'+prayer+'.mp3';
+     }
+   };
    window.onAdhanDownloadComplete=function(which,ok,reason){
      if(!voice)return;
      if(downloadBtn)downloadBtn.disabled=false;
      if(which!==voice.value){updateAdhanDownloadState();return;}
      hideAdhanProgress();
      adhanStatus.textContent=ok?'تم تحميل الأذان وحفظ نسخة في مجلد الهاتف.':'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
-     if(ok&&reason&&reason.indexOf('التخزين الداخلي/')!==-1){
-       localStorage.setItem('zad_adhan_public_path_'+which,reason.replace(/^.*?تم الحفظ في:\s*/,''));
-       refreshSavedAdhanPath();
+     if(ok&&reason&&reason.indexOf('المسار الداخلي: ')!==-1){
+       const internalPath=reason.split('المسار الداخلي: ').pop().trim();
+       if(adhanPathBox){adhanPathBox.style.display='block';adhanPathBox.textContent='اكتمل تنزيل الملفات الخمسة. مجلد الحفظ داخل التطبيق: '+internalPath;}
      }else if(!ok){showSavedAdhanPath(which,localStorage.getItem('zad_adhan_public_path_'+which));}
      if(downloadBtn)downloadBtn.disabled=false;
      updateAdhanDownloadState();
