@@ -123,6 +123,7 @@
          return;
        }
        btn.disabled=true;
+       showAdhanProgress();
        if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل التسجيل لمعاينته...';
        const previewDone=(which,ok,reason)=>{
          btn.disabled=false;
@@ -133,7 +134,7 @@
        previewDone.voiceKey=key;
        window.onPrayerPreviewDownloadComplete=previewDone;
        window.ZadAndroid.downloadAdhan(key);
-     }catch(e){btn.disabled=false;if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر بدء المعاينة أو التنزيل.';}
+     }catch(e){btn.disabled=false;hideAdhanProgress();if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر بدء المعاينة أو التنزيل.';}
    }));
    const downloadPrayerVoices=$('downloadPrayerAdhans');
    if(downloadPrayerVoices)downloadPrayerVoices.addEventListener('click',()=>{
@@ -180,8 +181,9 @@
      const unique=[...new Set(prayerVoiceSelects.map(sel=>sel.value))];
      let index=0;
      downloadPrayerVoices.disabled=true;
+     showAdhanProgress();
      const runNext=()=>{
-       if(index>=unique.length){downloadPrayerVoices.disabled=false;if(prayerVoiceStatus)prayerVoiceStatus.textContent='انتهى طلب تنزيل '+unique.length+' تسجيلات مختلفة. راجع رسائل الحالة للتأكد من نجاح كل ملف.';return;}
+       if(index>=unique.length){downloadPrayerVoices.disabled=false;hideAdhanProgress();if(prayerVoiceStatus)prayerVoiceStatus.textContent='انتهى طلب تنزيل '+unique.length+' تسجيلات مختلفة. راجع رسائل الحالة للتأكد من نجاح كل ملف.';return;}
        const voiceKey=unique[index++];
        if(window.ZadAndroid.isAdhanDownloaded(voiceKey)){runNext();return;}
        if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل التسجيل '+index+' من '+unique.length+': '+voiceKey;
@@ -191,7 +193,7 @@
        };
        downloadDone.voiceKey=voiceKey;
        window.onPrayerAdhanDownloadComplete=downloadDone;
-       try{window.ZadAndroid.downloadAdhan(voiceKey);}catch(e){window.onPrayerAdhanDownloadComplete=null;if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر بدء تنزيل '+voiceKey;runNext();}
+       try{window.ZadAndroid.downloadAdhan(voiceKey);}catch(e){window.onPrayerAdhanDownloadComplete=null;hideAdhanProgress();if(prayerVoiceStatus)prayerVoiceStatus.textContent='تعذر بدء تنزيل '+voiceKey;runNext();}
      };
      runNext();
    });
@@ -282,8 +284,8 @@
      if(typeof prayerPreviewCallback==='function'&&prayerPreviewCallback.voiceKey===which){window.onPrayerPreviewDownloadComplete=null;prayerPreviewCallback(which,ok,reason);}
      if(!voice)return;
      if(downloadBtn)downloadBtn.disabled=false;
-     if(which!==voice.value){updateAdhanDownloadState();return;}
      hideAdhanProgress();
+     if(which!==voice.value){return;}
      adhanStatus.textContent=ok?'تم تحميل الأذان وحفظ نسخة في مجلد الهاتف.':'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
      if(ok&&reason&&reason.indexOf('المسار الداخلي: ')!==-1){
        const internalPath=reason.split('المسار الداخلي: ').pop().trim();
