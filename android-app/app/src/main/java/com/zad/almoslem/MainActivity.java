@@ -88,6 +88,7 @@ public class MainActivity extends Activity {
         master.setChecked(prefs.getBoolean("adhan_enabled",true));
         master.setOnCheckedChangeListener((b,checked)->prefs.edit().putBoolean("adhan_enabled",checked).apply());
         addCard(root,master);
+        addStandaloneTools(root);
 
         for (int i=0;i<PRAYERS.length;i++) addPrayerCard(root,i);
 
@@ -104,6 +105,62 @@ public class MainActivity extends Activity {
         progressText = text("لم يبدأ التنزيل",12,Color.DKGRAY,false); root.addView(progressText);
         status = text("",13,Color.rgb(30,70,50),false); status.setPadding(0,dp(12),0,0); root.addView(status);
         setContentView(scroll);
+    }
+
+    private void addStandaloneTools(LinearLayout root) {
+        TextView toolsTitle=text("خدمات التطبيق المستقلة",19,Color.rgb(20,55,43),true);
+        toolsTitle.setPadding(0,dp(18),0,dp(8)); root.addView(toolsTitle);
+
+        LinearLayout radioCard=column();
+        radioCard.setBackground(shape(Color.WHITE,16)); radioCard.setPadding(dp(14),dp(12),dp(14),dp(12));
+        TextView radioTitle=text("إذاعة القرآن الكريم",17,Color.rgb(20,55,43),true);
+        TextView radioDesc=text("تشغيل البث الصوتي مباشرة من مشغل Android، دون فتح أي صفحة ويب.",13,Color.DKGRAY,false);
+        radioCard.addView(radioTitle); radioCard.addView(radioDesc);
+        Button radioButton=new Button(this);
+        radioCard.addView(radioButton,matchWrap());
+        Runnable refreshRadio=()->{
+            boolean playing=getSharedPreferences("zad_audio",MODE_PRIVATE).getBoolean("radio_playing",false)
+                    && "radio".equals(getSharedPreferences("zad_audio",MODE_PRIVATE).getString("active_kind",""));
+            radioButton.setText(playing?"إيقاف إذاعة القرآن":"تشغيل إذاعة القرآن");
+        };
+        refreshRadio.run();
+        radioButton.setOnClickListener(v->{
+            android.content.SharedPreferences audio=getSharedPreferences("zad_audio",MODE_PRIVATE);
+            boolean playing=audio.getBoolean("radio_playing",false)&&"radio".equals(audio.getString("active_kind",""));
+            Intent intent=new Intent(this,RadioPlaybackService.class);
+            if(playing){intent.setAction(RadioPlaybackService.ACTION_STOP);audio.edit().putBoolean("radio_playing",false).putString("active_kind","").apply();}
+            else{
+                String stream="https://qurango.net/radio/tarateel";
+                intent.setAction(RadioPlaybackService.ACTION_PLAY);
+                intent.putExtra("url",stream);intent.putExtra("kind","radio");intent.putExtra("label","إذاعة القرآن الكريم");
+                audio.edit().putString("last_quran_url",stream).putString("last_quran_title","إذاعة القرآن الكريم").putBoolean("radio_playing",true).putString("active_kind","radio").apply();
+            }
+            try{if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);radioButton.postDelayed(refreshRadio,500);}
+            catch(Exception e){status.setText("تعذر تشغيل الإذاعة: "+e.getMessage());}
+        });
+        addCard(root,radioCard);
+
+        LinearLayout tasbeeh=column();
+        tasbeeh.setBackground(shape(Color.WHITE,16));tasbeeh.setPadding(dp(14),dp(12),dp(14),dp(12));
+        TextView tasTitle=text("السبحة الإلكترونية",17,Color.rgb(20,55,43),true);
+        TextView tasDesc=text("سبحان الله وبحمده — ذكر ثابت في السنة.",13,Color.DKGRAY,false);
+        TextView count=text("0",34,Color.rgb(17,91,68),true);count.setGravity(Gravity.CENTER);
+        int saved=prefs.getInt("native_tasbeeh_count",0);count.setText(String.valueOf(saved));
+        LinearLayout actions=row();
+        Button add=new Button(this);add.setText("تسبيح");add.setTextSize(14);
+        Button reset=new Button(this);reset.setText("تصفير");reset.setTextSize(14);
+        actions.addView(add,new LinearLayout.LayoutParams(0,dp(48),1));actions.addView(reset,new LinearLayout.LayoutParams(0,dp(48),1));
+        add.setOnClickListener(v->{int n=prefs.getInt("native_tasbeeh_count",0)+1;prefs.edit().putInt("native_tasbeeh_count",n).apply();count.setText(String.valueOf(n));});
+        reset.setOnClickListener(v->{prefs.edit().putInt("native_tasbeeh_count",0).apply();count.setText("0");});
+        tasbeeh.addView(tasTitle);tasbeeh.addView(tasDesc);tasbeeh.addView(count);tasbeeh.addView(actions);
+        addCard(root,tasbeeh);
+
+        LinearLayout dhikr=column();
+        dhikr.setBackground(shape(Color.WHITE,16));dhikr.setPadding(dp(14),dp(12),dp(14),dp(12));
+        dhikr.addView(text("ذكر اليوم",17,Color.rgb(20,55,43),true));
+        dhikr.addView(text("قال رسول الله ﷺ: «من قال سبحان الله وبحمده في يوم مائة مرة، حُطَّت خطاياه وإن كانت مثل زبد البحر».",15,Color.rgb(55,75,65),false));
+        dhikr.addView(text("رواه البخاري ومسلم.",12,Color.rgb(120,120,120),false));
+        addCard(root,dhikr);
     }
 
     private LinearLayout.LayoutParams matchWrap() {
@@ -275,9 +332,9 @@ public class MainActivity extends Activity {
     }
     @Override protected void onResume() {
         super.onResume();
-        if(Build.VERSION.SDK_INT>=31){
+        {
             android.app.AlarmManager alarms=(android.app.AlarmManager)getSystemService(ALARM_SERVICE);
-            if(alarms!=null&&alarms.canScheduleExactAlarms()){
+            if(alarms!=null){
                 for(String prayer:PRAYERS){
                     int h=prefs.getInt("native_time_hour_"+prayer,-1);
                     if(h>=0&&prefs.getBoolean("prayer_enabled_"+prayer,true)){
