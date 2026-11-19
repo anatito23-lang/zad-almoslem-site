@@ -161,15 +161,22 @@
          if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل '+index+' من '+tasks.length+': '+task.voiceKey+' ('+task.prayer+')';
          if(!urls.length){failed++;downloadNext();return;}
          try{
-           const response=await fetch(urls[0],{mode:'cors',cache:'no-store'});
-           if(!response.ok)throw new Error('HTTP '+response.status);
-           const blob=await response.blob();
-           if(!blob.size)throw new Error('ملف فارغ');
+           const blob=await new Promise((resolve,reject)=>{
+             const xhr=new XMLHttpRequest();xhr.open('GET',urls[0],true);xhr.responseType='blob';
+             xhr.onprogress=event=>{
+               const percent=event.lengthComputable?Math.max(0,Math.min(100,Math.round(event.loaded/event.total*100))):null;
+               if(prayerVoiceStatus)prayerVoiceStatus.textContent='جارٍ تنزيل الملف '+index+' من '+tasks.length+' — '+(event.loaded/1048576).toFixed(2)+' ميجابايت'+(event.lengthComputable?' من '+(event.total/1048576).toFixed(2)+' ميجابايت — '+percent+'%':' — جارٍ حساب النسبة');
+               if(typeof window.onPrayerAudioDownloadProgress==='function')window.onPrayerAudioDownloadProgress(index,tasks.length,percent,event.loaded,event.total);
+             };
+             xhr.onload=()=>xhr.status>=200&&xhr.status<300&&xhr.response&&xhr.response.size?resolve(xhr.response):reject(new Error('HTTP '+xhr.status));
+             xhr.onerror=()=>reject(new Error('خطأ شبكة'));xhr.onabort=()=>reject(new Error('تم إيقاف التنزيل'));xhr.send();
+           });
            const objectUrl=URL.createObjectURL(blob);
            const link=document.createElement('a');
            link.href=objectUrl;link.download='adhan_'+task.voiceKey+'_'+task.prayer+'.mp3';
            document.body.appendChild(link);link.click();link.remove();
            setTimeout(()=>URL.revokeObjectURL(objectUrl),30000);
+           if(prayerVoiceStatus)prayerVoiceStatus.textContent='اكتمل تنزيل الملف '+index+' من '+tasks.length+' — 100%. تم إرسال الملف إلى تنزيلات المتصفح.';
          }catch(error){
            failed++;
            const fallback=document.createElement('a');
