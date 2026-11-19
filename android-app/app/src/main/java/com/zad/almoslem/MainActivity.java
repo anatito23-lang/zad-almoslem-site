@@ -12,6 +12,8 @@ import android.webkit.WebViewClient;
 import android.view.KeyEvent;
 import android.content.pm.PackageManager;
 import android.content.Intent;
+import android.content.ContentValues;
+import android.provider.MediaStore;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -313,6 +315,9 @@ public class MainActivity extends Activity {
                     if (total < 10000) throw new Exception("ملف الصوت غير مكتمل");
                     if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال التسجيل القديم");
                     if (!temp.renameTo(target)) throw new Exception("تعذر حفظ التسجيل على الجهاز");
+                    String publicPath = copyAdhanToMusicFolder(target, safe);
+                    if (publicPath == null) throw new Exception("تم تنزيل الصوت داخل التطبيق لكن تعذر نسخه إلى مجلد Music/Zad Almoslem");
+                    error = "تم الحفظ في: " + publicPath;
                     ok = true;
                 } catch (Exception e) {
                     error = e.getMessage() == null ? "فشل تنزيل التسجيل" : e.getMessage();
@@ -327,6 +332,49 @@ public class MainActivity extends Activity {
                         "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "'," + result + "," + org.json.JSONObject.quote(reason) + ")", null);
                 });
             }).start();
+        }
+        private String copyAdhanToMusicFolder(File source, String voice) {
+            if (Build.VERSION.SDK_INT < 29) return null;
+            String folder = "Music/Zad Almoslem";
+            String displayName = voice + ".mp3";
+            android.content.ContentResolver resolver = getContentResolver();
+            android.net.Uri collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+            try {
+                String selection = MediaStore.MediaColumns.DISPLAY_NAME + "=? AND " +
+                        MediaStore.MediaColumns.RELATIVE_PATH + "=?";
+                String[] args = new String[]{displayName, folder + "/"};
+                try (android.database.Cursor cursor = resolver.query(collection,
+                        new String[]{MediaStore.MediaColumns._ID}, selection, args, null)) {
+                    if (cursor != null && cursor.moveToFirst()) {
+                        long id = cursor.getLong(0);
+                        resolver.delete(android.content.ContentUris.withAppendedId(collection, id), null, null);
+                    }
+                }
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
+                values.put(MediaStore.MediaColumns.MIME_TYPE, "audio/mpeg");
+                values.put(MediaStore.MediaColumns.RELATIVE_PATH, folder);
+                values.put(MediaStore.MediaColumns.IS_PENDING, 1);
+                android.net.Uri item = resolver.insert(collection, values);
+                if (item == null) return null;
+                try (InputStream in = new java.io.FileInputStream(source);
+                     java.io.OutputStream out = resolver.openOutputStream(item, "w")) {
+                    if (out == null) throw new Exception("تعذر فتح ملف الوجهة");
+                    byte[] buffer = new byte[8192];
+                    int count;
+                    while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
+                    out.flush();
+                } catch (Exception e) {
+                    resolver.delete(item, null, null);
+                    throw e;
+                }
+                ContentValues ready = new ContentValues();
+                ready.put(MediaStore.MediaColumns.IS_PENDING, 0);
+                resolver.update(item, ready, null, null);
+                return "التخزين الداخلي/" + folder + "/" + displayName;
+            } catch (Exception e) {
+                return null;
+            }
         }
         private File adhanFile(String voice) {
             String safe = safeVoice(voice);
