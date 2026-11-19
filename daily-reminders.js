@@ -134,7 +134,9 @@
      if(ready)$('adhanSettingsStatus').textContent='التسجيل محفوظ على هذا الجهاز ويعمل دون إنترنت.';
    }
    window.onAdhanDownloadComplete=function(which,ok,reason){
-     if(!voice||which!==voice.value)return;
+     if(!voice)return;
+     if(downloadBtn)downloadBtn.disabled=false;
+     if(which!==voice.value){updateAdhanDownloadState();return;}
      hideAdhanProgress();
      adhanStatus.textContent=ok?'تم تحميل الأذان وحفظ نسخة في مجلد الهاتف.':'تعذر تحميل التسجيل: '+(reason||'تحقق من الإنترنت وحاول مرة أخرى.');
      if(ok&&reason&&reason.indexOf('التخزين الداخلي/')!==-1){
@@ -151,6 +153,20 @@
        }
      }else if(!ok&&previewAfterDownload===which){previewAfterDownload=null;}
    };
+   function ensureSelectedAdhanDownloaded(){
+     if(!window.ZadAndroid||!voice||!downloadBtn)return;
+     const enabled=$('adhanEnabled');
+     if(enabled&&!enabled.checked)return;
+     if(modeControl&&modeControl.value!=='adhan')return;
+     try{
+       if(!window.ZadAndroid.isAdhanDownloaded(voice.value)&&!downloadBtn.disabled){
+         adhanStatus.textContent='جارٍ تنزيل صوت الأذان المختار تلقائيًا ليعمل عند دخول وقت الصلاة...';
+         downloadBtn.click();
+       }
+     }catch(error){
+       if(adhanStatus)adhanStatus.textContent='تعذر التحقق من ملف الأذان. يمكنك إعادة المحاولة من زر التنزيل.';
+     }
+   }
    if(downloadBtn)downloadBtn.addEventListener('click',async()=>{
      const selected=voice?voice.value:'basit';
      if(!adhanSources[selected]){$('adhanSettingsStatus').textContent='هذا التسجيل غير متاح للتنزيل حاليًا.';return;}
@@ -257,6 +273,7 @@
        if(window.ZadAndroid)window.ZadAndroid.setPrayerSilentEnabled(el.dataset.prayer,el.checked);
      });
      $('adhanSettingsStatus').textContent='تم حفظ إعدادات الأذان والصامت على هذا الجهاز.';
+     ensureSelectedAdhanDownloaded();
      if(silentStatus&&window.ZadAndroid) silentStatus.textContent=window.ZadAndroid.hasSilentPermission()?'تم حفظ الصلوات المختارة. سيعمل الصامت 15 دقيقة بعد دخول وقت الصلاة.':'تم حفظ الاختيارات، لكن يجب منح إذن التحكم في وضع عدم الإزعاج أولًا.';
    });
    if(window.ZadAndroid){
@@ -266,6 +283,7 @@
      window.ZadAndroid.setApproachAlertEnabled(approachControl?approachControl.checked:true);
      window.ZadAndroid.setApproachAlertMinutes(approachMinutes?Math.max(1,Math.min(60,parseInt(approachMinutes.value,10)||15)):15);
      document.querySelectorAll('.prayer-alert').forEach(el=>window.ZadAndroid.setPrayerAdhanEnabled(el.dataset.prayer,el.checked));
+     ensureSelectedAdhanDownloaded();
    }
    // Daily prayer completion tracker, resets automatically on a new date.
    const todayKey='zad_prayer_tracker_'+new Date().toISOString().slice(0,10);
