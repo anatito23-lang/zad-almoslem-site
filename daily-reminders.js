@@ -87,6 +87,7 @@
    const downloadBtn=$('downloadAdhan');
    const adhanStatus=$('adhanSettingsStatus');
    let adhanProgress=null;
+   let previewAfterDownload=null;
    const adhanVoiceNames={basit:'عبد الباسط عبد الصمد',mustafa:'مصطفى إسماعيل',husary:'محمود خليل الحصري',banna:'محمود علي البنا',naqshbandi:'سيد النقشبندي',haram:'أذان الحرم المكي',tobar:'نصر الدين طوبار'};
    let adhanPathBox=$('adhanSavedPath');
    if(!adhanPathBox&&adhanStatus){
@@ -142,6 +143,13 @@
      }else if(!ok){showSavedAdhanPath(which,localStorage.getItem('zad_adhan_public_path_'+which));}
      if(downloadBtn)downloadBtn.disabled=false;
      updateAdhanDownloadState();
+     if(ok&&previewAfterDownload===which){
+       previewAfterDownload=null;
+       if(window.ZadAndroid&&typeof window.ZadAndroid.previewAdhan==='function'){
+         window.ZadAndroid.previewAdhan(which);
+         adhanStatus.textContent='تم حفظ التسجيل، وجارٍ تشغيله من الجهاز.';
+       }
+     }else if(!ok&&previewAfterDownload===which){previewAfterDownload=null;}
    };
    if(downloadBtn)downloadBtn.addEventListener('click',async()=>{
      const selected=voice?voice.value:'basit';
@@ -170,9 +178,17 @@
    });
    if(previewBtn)previewBtn.addEventListener('click',()=>{
      const selected=voice?voice.value:'basit';
-     if(window.ZadAndroid&&typeof window.ZadAndroid.isAdhanDownloaded==='function'&&window.ZadAndroid.isAdhanDownloaded(selected)){
-       try{window.ZadAndroid.previewAdhan(selected);$('adhanSettingsStatus').textContent='يتم تشغيل معاينة الأذان من الملف المحفوظ على الجهاز.';return;}
-       catch(e){}
+     if(window.ZadAndroid&&typeof window.ZadAndroid.isAdhanDownloaded==='function'){
+       if(window.ZadAndroid.isAdhanDownloaded(selected)){
+         try{window.ZadAndroid.previewAdhan(selected);$('adhanSettingsStatus').textContent='يتم تشغيل معاينة الأذان من الملف المحفوظ على الجهاز.';return;}
+         catch(e){$('adhanSettingsStatus').textContent='تعذر تشغيل الملف المحفوظ.';return;}
+       }
+       if(typeof window.ZadAndroid.downloadAdhan==='function'){
+         previewAfterDownload=selected;
+         $('adhanSettingsStatus').textContent='التسجيل غير محفوظ. جارٍ تنزيله ثم تشغيله تلقائيًا...';
+         try{window.ZadAndroid.downloadAdhan(selected);return;}
+         catch(e){previewAfterDownload=null;$('adhanSettingsStatus').textContent='تعذر بدء تنزيل التسجيل.';return;}
+       }
      }
      if(!adhanSources[selected]){$('adhanSettingsStatus').textContent='معاينة هذا التسجيل غير متاحة حاليًا.';return;}
      if(!preview){$('adhanSettingsStatus').textContent='مشغل الصوت غير موجود في الصفحة. حدّث الصفحة وحاول مرة أخرى.';return;}
