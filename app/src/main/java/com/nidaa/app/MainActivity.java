@@ -12,7 +12,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import com.batoulapps.adhan.CalculationMethod;
 import com.batoulapps.adhan.Coordinates;
-import com.batoulapps.adhan.DateComponents;
+import com.batoulapps.adhan.data.DateComponents;
 import com.batoulapps.adhan.Prayer;
 import com.batoulapps.adhan.PrayerTimes;
 import java.text.SimpleDateFormat;
@@ -64,7 +64,7 @@ public class MainActivity extends Activity {
         content.removeAllViews();
         if(tab.equals("الرئيسية")) {
             String date = new SimpleDateFormat("EEEE، d MMMM yyyy", new Locale("ar")).format(new Date());
-            TextView dateView=text(date+"\nمصر · التوقيت المحلي",14,muted,false); card(dateView);
+            TextView dateView=text(date+"\\nمصر · التوقيت المحلي",14,muted,false); card(dateView);
             TextView hero=text("الصلاة القادمة",15,muted,false);
             LinearLayout heroBox=new LinearLayout(this); heroBox.setOrientation(LinearLayout.VERTICAL); heroBox.setGravity(Gravity.CENTER);
             heroBox.addView(hero); heroBox.addView(text(nextPrayerName(),30,gold,true)); heroBox.addView(text(nextPrayerTime(),24,white,true)); heroBox.addView(text("نحسب المواقيت محليًا دون الحاجة للإنترنت",12,muted,false)); card(heroBox);
@@ -80,13 +80,13 @@ public class MainActivity extends Activity {
             }
         } else if(tab.equals("الأذان")) {
             card(text("إعدادات الأذان",23,gold,true));
-            card(text("اختيار مؤذن مستقل لكل صلاة\nتفعيل الأذان عند حلول الوقت\nتنزيل التسجيلات لتعمل دون إنترنت\nاختبار الصوت والتحكم في مستوى الصوت",16,white,false));
+            card(text("اختيار مؤذن مستقل لكل صلاة\\nتفعيل الأذان عند حلول الوقت\\nتنزيل التسجيلات لتعمل دون إنترنت\\nاختبار الصوت والتحكم في مستوى الصوت",16,white,false));
             card(text("سيتم ربط التسجيلات الصوتية والتنبيهات في المرحلة التالية.",13,muted,false));
         } else if(tab.equals("القبلة")) {
             card(text("اتجاه القبلة",23,gold,true)); card(text("سيتم تفعيل البوصلة بعد إضافة إذن المستشعرات والموقع.",15,white,false));
         } else {
             card(text("إعدادات نداء",23,gold,true));
-            card(text("طريقة حساب المواقيت: الهيئة المصرية العامة للمساحة\nالموقع الحالي: مصر (إحداثيات القاهرة مؤقتًا)\nاللغة: العربية",15,white,false));
+            card(text("طريقة حساب المواقيت: الهيئة المصرية العامة للمساحة\\nالموقع الحالي: مصر (إحداثيات القاهرة مؤقتًا)\\nاللغة: العربية",15,white,false));
             card(text("سيضاف اختيار المدينة وتحديد الموقع تلقائيًا في المرحلة التالية.",13,muted,false));
         }
     }
