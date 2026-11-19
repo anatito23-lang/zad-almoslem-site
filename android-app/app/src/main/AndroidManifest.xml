@@ -19,6 +19,7 @@
         <activity android:name=".FridayWirdActivity" android:exported="false" />
         <activity android:name=".FaithLibraryActivity" android:exported="false" />
         <activity android:name=".DailyWirdActivity" android:exported="false" />
+        <activity android:name=".DailyReminderSettingsActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="true" android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
