@@ -101,6 +101,15 @@ public class MushafPageActivity extends Activity {
 
         pageLabel = label("", 15, AppThemeColors.text(this), true);
         toolbar.addView(pageLabel, new LinearLayout.LayoutParams(0, dp(38), 1));
+        Button correction = new Button(this);
+        correction.setText("استماع وتصحيح");
+        correction.setTextSize(11);
+        toolbar.addView(correction, new LinearLayout.LayoutParams(0, dp(38), 1));
+        correction.setOnClickListener(v -> {
+            Intent open = new Intent(this, QuranTextActivity.class);
+            open.putExtra("page_number", page);
+            startActivity(open);
+        });
         root.addView(toolbar);
 
         LinearLayout pageFrame = new LinearLayout(this);
