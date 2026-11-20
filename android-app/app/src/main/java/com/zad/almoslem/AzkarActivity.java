@@ -73,7 +73,8 @@ public class AzkarActivity extends Activity {
             String text=row.optString("text","").trim();
             String source=row.optString("source","").trim();
             int count=row.optInt("count",1);
-            if(category.isEmpty()||text.isEmpty()||source.isEmpty()||count<1)continue;
+            if(category.isEmpty()||text.isEmpty()||count<1)continue;
+            if(source.isEmpty())source="لم يُذكر المصدر في بيانات الذكر";
             boolean exists=false;
             for(Zikr item:items){
                 if(item.category.equals(category)&&item.text.equals(text)&&item.source.equals(source)){
