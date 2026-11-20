@@ -7,14 +7,14 @@ service cloud.firestore {
         && request.auth.uid == '5UkeBQyyGGZcICXULT9LUD0S4lt2';
     }
 
-    function isManagedCollection(collection) {
-      return collection in ['azkar', 'hadiths', 'duas'];
+    match /azkar/{document} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update, delete: if isAdmin();
     }
 
-    match /{collection}/{document} {
-      allow read: if isManagedCollection(collection)
-        && (resource.data.published == true || isAdmin());
-      allow create, update, delete: if isManagedCollection(collection) && isAdmin();
+    match /duas/{document} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update, delete: if isAdmin();
     }
   }
 }
