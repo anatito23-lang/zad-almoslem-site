@@ -169,12 +169,26 @@ public class ReminderReceiver extends BroadcastReceiver {
             prefs.edit().putInt("gentle_message_index",(index+1)%messages.length).apply();
             scheduleGentleReminder(context);
         }
+        boolean exactAlarmAudioAllowed = Build.VERSION.SDK_INT < 31
+                || ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).canScheduleExactAlarms();
         if (!prayer && ("morning".equals(key) || "evening".equals(key) || "qiyam".equals(key))) {
-            if (prefs.getBoolean(key + "_audio_enabled", true)) {
-                try { ReminderAudioService.play(context, key); } catch (Exception ignored) {}
+            if (prefs.getBoolean(key + "_audio_enabled", true) && exactAlarmAudioAllowed) {
+                try { ReminderAudioService.play(context, key); } catch (Exception error) {
+                    android.util.Log.e("ZadAlmoslem", "Unable to start daily reminder audio", error);
+                }
             }
         } else if (key.startsWith("approach_")) {
-            try { ReminderAudioService.play(context, "approach", title); } catch (Exception ignored) {}
+            if (exactAlarmAudioAllowed) {
+                try { ReminderAudioService.play(context, "approach", title); } catch (Exception error) {
+                    android.util.Log.e("ZadAlmoslem", "Unable to start prayer approach audio", error);
+                }
+            }
+        } else if ("gentle_reminder".equals(key)) {
+            if (prefs.getBoolean("gentle_audio_enabled", true) && exactAlarmAudioAllowed) {
+                try { ReminderAudioService.play(context, "gentle", title); } catch (Exception error) {
+                    android.util.Log.e("ZadAlmoslem", "Unable to start gentle reminder audio", error);
+                }
+            }
         }
         boolean adhanEnabled=prefs.getBoolean("adhan_enabled",true);
         String adhanMode=prefs.getString("adhan_mode","adhan");
@@ -191,9 +205,14 @@ public class ReminderReceiver extends BroadcastReceiver {
             audio.putExtra("voice", selectedVoice);
             audio.putExtra("play_dua_after",prefs.getBoolean("dua_after_adhan_enabled",true));
             try {
-                prefs.edit().remove("adhan_last_start_error").apply();
-                if(Build.VERSION.SDK_INT>=26) context.startForegroundService(audio);
-                else context.startService(audio);
+                if (!exactAlarmAudioAllowed) {
+                    prefs.edit().putString("adhan_last_start_error",
+                            "فعّل إذن المنبهات الدقيقة من إعدادات التذكيرات لتشغيل الأذان صوتيًا").apply();
+                } else {
+                    prefs.edit().remove("adhan_last_start_error").apply();
+                    if(Build.VERSION.SDK_INT>=26) context.startForegroundService(audio);
+                    else context.startService(audio);
+                }
             } catch(Exception error) {
                 String detail = error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage();
                 prefs.edit().putString("adhan_last_start_error", detail).apply();
