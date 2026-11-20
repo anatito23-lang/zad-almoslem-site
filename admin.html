@@ -20,7 +20,7 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 </style>
 </head>
 <body>
-<header><div class="wrap" style="margin:0 auto"><h1>لوحة إدارة المحتوى — زاد المسلم</h1><div class="small" style="color:#d5e5dc">إدارة الأذكار والأحاديث والأدعية المنشورة في التطبيق</div></div></header>
+<header><div class="wrap" style="margin:0 auto"><h1>لوحة إدارة المحتوى — زاد المسلم</h1><div class="small" style="color:#d5e5dc">إدارة الأذكار والأدعية المنشورة في التطبيق</div></div></header>
 <main class="wrap">
 <section class="card" id="loginCard">
 <h2>دخول المسؤول</h2>
@@ -36,7 +36,7 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <div class="notice">التغييرات المنشورة تصل إلى التطبيق عند المزامنة بالإنترنت. لا تحتاج إضافة محتوى جديد إلى إصدار APK جديد.</div>
 <label for="collection">نوع المحتوى</label>
 <select id="collection">
-<option value="azkar">الأذكار</option><option value="hadiths">الأحاديث النبوية</option><option value="duas">الأدعية</option>
+<option value="azkar">الأذكار</option><option value="duas">الأدعية</option>
 </select>
 <form id="contentForm">
 <input id="documentId" type="hidden">
@@ -58,7 +58,7 @@ const firebaseConfig={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomai
 const ADMIN_UID="5UkeBQyyGGZcICXULT9LUD0S4lt2";
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const $=id=>document.getElementById(id);
-const names={azkar:"الأذكار",hadiths:"الأحاديث",duas:"الأدعية"};
+const names={azkar:"الأذكار",duas:"الأدعية"};
 let busy=false;
 function message(id,text,error=false){const el=$(id);el.textContent=text;el.classList.remove("hidden","error");if(error)el.classList.add("error");}
 function clearMessage(id){$(id).textContent="";$(id).classList.add("hidden");}
