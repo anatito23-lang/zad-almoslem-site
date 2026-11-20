@@ -20,6 +20,8 @@ public class KhutbahLibraryActivity extends Activity {
     private JSONArray sermons = new JSONArray();
     private LinearLayout root, list;
     private EditText search;
+    private Spinner categorySpinner;
+    private String selectedCategory="الكل";
     private int green = Color.rgb(8,48,40), ink = Color.rgb(30,55,45);
 
     @Override public void onCreate(Bundle state) {
@@ -81,7 +83,9 @@ public class KhutbahLibraryActivity extends Activity {
             JSONObject item=sermons.optJSONObject(i); if(item==null)continue;
             String title=item.optString("title","خطبة بدون عنوان");
             String date=item.optString("date",""); String cat=item.optString("category","خطبة الجمعة");
-            if(!title.toLowerCase().contains(query.toLowerCase()))continue;
+            boolean matchesText=title.toLowerCase().contains(query.toLowerCase())||cat.toLowerCase().contains(query.toLowerCase());
+            if(!matchesText)continue;
+            if(!"الكل".equals(selectedCategory)&&!selectedCategory.equals(cat))continue;
             LinearLayout card=new LinearLayout(this); card.setOrientation(LinearLayout.VERTICAL);
             card.setPadding(dp(14),dp(12),dp(14),dp(12)); card.setBackground(bg(Color.WHITE,15));
             TextView t=label(title,18,ink,true); card.addView(t);

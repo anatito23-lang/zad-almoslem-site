@@ -6,7 +6,10 @@ import android.content.Intent;
 import java.util.Calendar;
 
 public class BootReceiver extends BroadcastReceiver {
+    private android.content.SharedPreferences prefs(Context context){return context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);}
     @Override public void onReceive(Context context,Intent intent) {
+        ReminderReceiver.ensureDefaultDailyReminders(context);
+        if(prefs(context).getBoolean("gentle_enabled",false)) ReminderReceiver.scheduleGentleReminder(context);
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
         for(String key:new String[]{"morning","evening","qiyam"}) {
             if(p.getBoolean(key+"_enabled",false))

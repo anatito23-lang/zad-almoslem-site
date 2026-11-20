@@ -2,6 +2,7 @@ plugins { id 'com.android.application' }
 
 dependencies {
     implementation 'androidx.media3:media3-exoplayer:1.5.1'
+    implementation 'androidx.media3:media3-exoplayer-hls:1.5.1'
 }
 
 android {
@@ -12,8 +13,8 @@ android {
         applicationId 'com.zad.almoslem'
         minSdk 23
         targetSdk 35
-        versionCode 8
-        versionName '2.0-test'
+        versionCode 9
+        versionName '3.0'
     }
 
     signingConfigs {
@@ -27,8 +28,7 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix '.new'
-            versionNameSuffix '-new'
+            versionNameSuffix '-debug'
         }
         release {
             signingConfig signingConfigs.release

@@ -7,6 +7,9 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioAttributes;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -30,6 +33,7 @@ public class AdhanPlaybackService extends Service {
     private static final int NOTIFICATION_ID = 7310;
     private ExoPlayer player;
     private boolean playDuaAfterCompletion;
+    private boolean deferBackgroundAudioResume;
     private String activePrayer;
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
@@ -49,11 +53,42 @@ public class AdhanPlaybackService extends Service {
             return START_NOT_STICKY;
         }
         playDuaAfterCompletion = intent != null && intent.getBooleanExtra("play_dua_after", false);
-        getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_active", true).apply();
-        ReminderAudioService.stop(this);
         String prayer = intent == null ? "الصلاة" : intent.getStringExtra("prayer");
         activePrayer = prayer;
         createChannel();
+        // Promote the service immediately with a lightweight notification. Do not perform
+        // other service starts or bitmap rendering before startForeground().
+        Notification.Builder initialBuilder = Build.VERSION.SDK_INT >= 26
+                ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this);
+        initialBuilder.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+                .setContentTitle("حان الآن وقت الصلاة")
+                .setContentText("يتم تجهيز أذان " + prayer)
+                .setOngoing(true);
+        try {
+            if (Build.VERSION.SDK_INT >= 29) {
+                startForeground(NOTIFICATION_ID, initialBuilder.build(),
+                        android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+            } else {
+                startForeground(NOTIFICATION_ID, initialBuilder.build());
+            }
+        } catch (Exception startupError) {
+            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit()
+                    .putBoolean("adhan_active", false)
+                    .putString("adhan_last_start_error", startupError.getMessage() == null
+                            ? startupError.getClass().getSimpleName() : startupError.getMessage()).apply();
+            android.util.Log.e("ZadAlmoslem", "Could not promote adhan service immediately", startupError);
+            stopSelf(startId);
+            return START_NOT_STICKY;
+        }
+        getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_active", true).apply();
+        ReminderAudioService.stop(this);
+        // Keep the current radio/Quran player alive and pause it until the adhan finishes.
+        Intent pauseAudio = new Intent(this, RadioPlaybackService.class);
+        pauseAudio.setAction(RadioPlaybackService.ACTION_PAUSE_FOR_ADHAN);
+        try { startService(pauseAudio); }
+        catch (Exception error) {
+            android.util.Log.w("ZadAlmoslem", "Could not pause background audio for adhan", error);
+        }
         Intent open = new Intent(this, MainActivity.class);
         PendingIntent content = PendingIntent.getActivity(this, 7311, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
@@ -63,21 +98,25 @@ public class AdhanPlaybackService extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder builder = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this);
-        Notification notification = builder
-                .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+        Bitmap mosqueImage = createAzharMosqueBitmap();
+        builder.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle("حان الآن وقت الصلاة")
                 .setContentText("يرفع الآن أذان " + prayer)
                 .setContentIntent(content)
                 .setOngoing(true)
-                .addAction(android.R.drawable.ic_media_pause, "إيقاف الأذان", stopAction)
-                .build();
+                .addAction(android.R.drawable.ic_media_pause, "إيقاف الأذان", stopAction);
+        if (mosqueImage != null) {
+            builder.setLargeIcon(mosqueImage);
+            builder.setStyle(new Notification.BigPictureStyle()
+                    .bigPicture(mosqueImage)
+                    .bigLargeIcon((Bitmap) null)
+                    .setSummaryText("زاد المسلم — تقبّل الله صلاتكم"));
+        }
+        Notification notification = builder.build();
         try {
-            if (Build.VERSION.SDK_INT >= 29) {
-                startForeground(NOTIFICATION_ID, notification,
-                        android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
-            } else {
-                startForeground(NOTIFICATION_ID, notification);
-            }
+            // Replace the lightweight foreground notification with the full Azhar artwork.
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            if (notificationManager != null) notificationManager.notify(NOTIFICATION_ID, notification);
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().remove("adhan_last_start_error").remove("adhan_last_playback_error").putBoolean("adhan_playback_started", false).apply();
             String voice = intent == null ? "basit" : intent.getStringExtra("voice");
             playAdhan(voice, prayer);
@@ -88,6 +127,19 @@ public class AdhanPlaybackService extends Service {
             stopPlayback();
         }
         return START_NOT_STICKY;
+    }
+
+    private Bitmap createAzharMosqueBitmap() {
+        try {
+            Drawable drawable = getDrawable(R.drawable.azhar_mosque_bg);
+            if (drawable == null) return null;
+            int width = 720, height = 360;
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, width, height);
+            drawable.draw(canvas);
+            return bitmap;
+        } catch (Exception ignored) { return null; }
     }
 
     private void createChannel() {
@@ -107,6 +159,8 @@ public class AdhanPlaybackService extends Service {
             player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
                     .setUsage(androidx.media3.common.C.USAGE_MEDIA)
                     .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_SPEECH)
+                    // Media3 automatic audio focus supports USAGE_MEDIA. Use it here so
+                    // the adhan player never throws for an unsupported USAGE_ALARM focus request.
                     .build(), true);
             android.content.SharedPreferences prefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
             String volumePrayerKey = "dhuhr";
@@ -116,7 +170,7 @@ public class AdhanPlaybackService extends Service {
             else if (prayer != null && prayer.contains("العشاء")) volumePrayerKey = "isha";
             int savedVolume = prefs.getInt("adhan_volume_" + volumePrayerKey, prefs.getInt("adhan_volume", 100));
             player.setVolume(Math.max(0, Math.min(100, savedVolume)) / 100f);
-            String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"haram".equals(voice)||"doha".equals(voice)) ? voice : "doha";
+            String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"rifaat".equals(voice)||"haram".equals(voice)||"doha".equals(voice)||"fajr_cairo".equals(voice)||"fajr_haram".equals(voice)) ? voice : "doha";
             File audioDir = new File(getFilesDir(), "adhan");
             if ("doha".equals(safeVoice)) {
                 String prayerKey = "dhuhr";
@@ -146,8 +200,19 @@ public class AdhanPlaybackService extends Service {
                     if (state == Player.STATE_ENDED) {
                         boolean playDua = playDuaAfterCompletion;
                         playDuaAfterCompletion = false;
+                        boolean duaServiceRequested = false;
+                        if (playDua) {
+                            // Hand off to the dua foreground service before this adhan
+                            // service drops foreground status; otherwise Android may reject it.
+                            try {
+                                ReminderAudioService.play(AdhanPlaybackService.this, "dua");
+                                duaServiceRequested = true;
+                            } catch (Exception error) {
+                                android.util.Log.e("ZadAlmoslem", "Could not start post-adhan dua playback", error);
+                            }
+                        }
+                        deferBackgroundAudioResume = duaServiceRequested;
                         stopPlayback();
-                        if (playDua) ReminderAudioService.play(AdhanPlaybackService.this, "dua");
                     }
                 }
                 @Override public void onPlayerError(PlaybackException error) {
@@ -157,7 +222,17 @@ public class AdhanPlaybackService extends Service {
                     stopPlayback();
                 }
             });
-            player.setMediaItem(MediaItem.fromUri(Uri.fromFile(audioFile)));
+            boolean takbeerOnly = getSharedPreferences("zad_reminders", MODE_PRIVATE)
+                    .getString("adhan_mode", "adhan").equals("takbeer");
+            MediaItem.Builder mediaBuilder = new MediaItem.Builder().setUri(Uri.fromFile(audioFile));
+            if (takbeerOnly) {
+                // Play the opening takbeers from the selected adhan recording.
+                mediaBuilder.setClippingConfiguration(new MediaItem.ClippingConfiguration.Builder()
+                        .setStartPositionMs(0)
+                        .setEndPositionMs(15000)
+                        .build());
+            }
+            player.setMediaItem(mediaBuilder.build());
             player.prepare();
             player.play();
         } catch (Exception e) {
@@ -234,10 +309,13 @@ public class AdhanPlaybackService extends Service {
         }
         String file;
         switch (voice) {
+            case "fajr_cairo": file = "Adhan_Fajr_Cairo_Egypt_(أذان_الفجر_القاهرة_مصر).mp3"; break;
+            case "fajr_haram": file = "Adhan_Fajr_Al_Haram_Al_Maki_(أذان_الفجر_الحرم_المكي).mp3"; break;
             case "basit": file = "Abdulbasit_Abdusamad_1_-_Egypt_(عبد_الباسط_عبد_الصمد_-_مصر).mp3"; break;
             case "mustafa": file = "Mustafa_Ismail_-_Egypt_(مصطفى_إسماعيل_-_مصر).mp3"; break;
             case "husary": file = "Mahmoud_Khalil_Al_Hussary_-_Cairo_(محمود_خليل_الحصري_-_القاهرة).mp3"; break;
             case "banna": file = "Mahmoud_Ali_Al_Banna_-_Cairo_(محمود_علي_البنا_-_القاهرة).mp3"; break;
+            case "rifaat": file = "Muhammad_Refaat_-_Cairo_(محمد_رفعت_-_القاهرة).mp3"; break;
             case "haram": file = "Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(علي_بن_أحمد_ملا_-_الحرم_المكي).mp3"; break;
             default: return null;
         }
@@ -289,9 +367,21 @@ public class AdhanPlaybackService extends Service {
         }
     }
 
+    private void resumeBackgroundAudioAfterAdhan() {
+        Intent resumeAudio = new Intent(this, RadioPlaybackService.class);
+        resumeAudio.setAction(RadioPlaybackService.ACTION_RESUME_AFTER_ADHAN);
+        try { startService(resumeAudio); }
+        catch (Exception error) {
+            android.util.Log.w("ZadAlmoslem", "Could not resume background audio after adhan", error);
+        }
+    }
+
     private void stopPlayback() {
         getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_active", false).apply();
         stopPlayerOnly();
+        // Request radio/Quran resumption while this service is still foreground.
+        // This avoids starting another background service after dropping foreground status.
+        if (!deferBackgroundAudioResume) resumeBackgroundAudioAfterAdhan();
         stopForeground(true);
         stopSelf();
     }

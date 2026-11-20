@@ -51,8 +51,8 @@ public class AudioLibraryActivity extends Activity {
     }
     private GradientDrawable bg(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));return d;}
     private void build(){
-        ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(15),dp(15),dp(15),dp(25));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);setContentView(scroll);
-        TextView title=label("الإنشاد والرقية الشرعية",24,Color.WHITE,true);title.setGravity(Gravity.CENTER);
+        ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(15),dp(15),dp(15),dp(25));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);setContentView(AppTabs.wrap(this,scroll,"more"));
+        TextView title=label("الابتهالات والإنشاد الديني",24,Color.WHITE,true);title.setGravity(Gravity.CENTER);
         TextView sub=label("استماع من مشغّل Android في الخلفية",13,Color.rgb(222,239,229),false);sub.setGravity(Gravity.CENTER);
         LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(14),dp(18),dp(14),dp(18));hero.setBackground(bg(green,18));hero.addView(title);hero.addView(sub);root.addView(hero);
         TextView section=label("الابتهالات الدينية",18,green,true);section.setPadding(0,dp(16),0,dp(6));root.addView(section);
@@ -64,14 +64,17 @@ public class AudioLibraryActivity extends Activity {
         });
         Button play=new Button(this);play.setText("تشغيل الابتهال المختار");root.addView(play);
         play.setOnClickListener(v->playSelected());
-        Button stop=new Button(this);stop.setText("إيقاف الصوت");root.addView(stop);
+        Button stop=new Button(this);stop.setText("■ إيقاف الصوت");root.addView(stop);
         stop.setOnClickListener(v->stopAudio());
-        LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
-        TextView ruq=label("الرقية الشرعية — الشيخ محمود خليل الحصري",17,green,true);card.addView(ruq);
-        card.addView(label("تسجيل صوتي مباشر من المصدر الموجود في الموقع. يحتاج إلى اتصال بالإنترنت.",13,Color.DKGRAY,false));
-        Button ruqPlay=new Button(this);ruqPlay.setText("تشغيل الرقية الشرعية");card.addView(ruqPlay);root.addView(card);
-        ruqPlay.setOnClickListener(v->{selectedKind="ruqyah";startAudio(ruqyahUrl,"الرقية الشرعية — الشيخ محمود خليل الحصري");});
         status=label("اختر المنشد والتسجيل ثم اضغط تشغيل.",12,Color.DKGRAY,false);status.setPadding(0,dp(12),0,dp(4));root.addView(status);
+    }
+    private void addRuqyahCard(LinearLayout root,String title,String url){
+        LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);card.setPadding(dp(14),dp(11),dp(14),dp(10));card.setBackground(bg(Color.WHITE,15));
+        TextView name=label(title,16,green,true);card.addView(name);
+        TextView detail=label("تسجيل رقية شرعية — تشغيل من مشغل التطبيق",12,Color.DKGRAY,false);card.addView(detail);
+        Button play=new Button(this);play.setText("▶ تشغيل الرقية");card.addView(play);
+        play.setOnClickListener(v->{selectedKind="ruqyah";startAudio(url,"الرقية الشرعية — "+title);});
+        LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(9);root.addView(card,lp);
     }
     private void fillTracks(int artist){
         ArrayList<String> names=new ArrayList<>();
