@@ -7,6 +7,7 @@ import java.util.Calendar;
 
 public class BootReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context context,Intent intent) {
+        ReminderReceiver.ensureDefaultDailyReminders(context);
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
         for(String key:new String[]{"morning","evening","qiyam"}) {
             if(p.getBoolean(key+"_enabled",false))
