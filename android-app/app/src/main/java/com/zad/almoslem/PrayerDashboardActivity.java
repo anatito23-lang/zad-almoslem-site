@@ -111,7 +111,7 @@ public class PrayerDashboardActivity extends Activity {
         String method=METHODS[pos];prefs.edit().putString("native_country",country).putString("native_prayer_city",city).putString("native_prayer_method",method).apply();
         button.setEnabled(false);result.setText("جارٍ جلب المواقيت...");
         new Thread(()->{HttpURLConnection c=null;try{
-            String address="https://api.aladhan.com/v1/timingsByCity?city="+URLEncoder.encode(city,"UTF-8")+"&country="+URLEncoder.encode(country,"UTF-8")+"&method="+method;
+            String address="https://api.aladhan.com/v1/timingsByCity?city="+URLEncoder.encode(city,"UTF-8")+"&country="+URLEncoder.encode(country,"UTF-8")+"&method="+method+(pos==0?"&school=0":"");
             c=(HttpURLConnection)new URL(address).openConnection();c.setConnectTimeout(15000);c.setReadTimeout(20000);c.setRequestProperty("User-Agent","ZadAlmoslem Android");
             if(c.getResponseCode()!=200)throw new Exception("خدمة المواقيت لم تستجب");
             ByteArrayOutputStream out=new ByteArrayOutputStream();try(InputStream in=c.getInputStream()){byte[] b=new byte[4096];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}
