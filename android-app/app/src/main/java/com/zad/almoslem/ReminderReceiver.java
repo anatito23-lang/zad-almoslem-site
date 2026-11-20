@@ -163,7 +163,8 @@ public class ReminderReceiver extends BroadcastReceiver {
                 "لا تنس نصيب قلبك من القرآن والذكر.",
                 "اذكر الله في سرّك، يطمئن قلبك بذكره."
             };
-            int index=prefs.getInt("gentle_message_index",0)%messages.length;\n            if(index<0) index+=messages.length;
+            int index=prefs.getInt("gentle_message_index",0)%messages.length;
+            if(index<0) index+=messages.length;
             title=messages[index];
             prefs.edit().putInt("gentle_message_index",(index+1)%messages.length).apply();
             scheduleGentleReminder(context);
