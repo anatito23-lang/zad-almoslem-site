@@ -55,7 +55,7 @@ public class IslamicReelsActivity extends Activity {
         int minHeight=Math.max(dp(520),getResources().getDisplayMetrics().heightPixels-dp(150));
         page.setMinimumHeight(minHeight);
         page.setBackgroundColor(Color.BLACK);
-        page.addView(new IslamicBackdrop(palettes[index][0],palettes[index][1]),new FrameLayout.LayoutParams(-1,-1));
+        page.addView(new IslamicBackdrop(this,palettes[index][0],palettes[index][1]),new FrameLayout.LayoutParams(-1,-1));
         LinearLayout overlay=new LinearLayout(this);overlay.setOrientation(LinearLayout.VERTICAL);overlay.setPadding(dp(22),dp(22),dp(22),dp(20));
         FrameLayout.LayoutParams overlayLp=new FrameLayout.LayoutParams(-1,-1);page.addView(overlay,overlayLp);
         TextView brand=label("زَادُ الْمُسْلِم  •  تَذْكِرَةٌ تُحْيِي الْقَلْب",13,0xffffdf9b,true);
