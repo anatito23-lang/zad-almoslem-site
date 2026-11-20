@@ -19,13 +19,14 @@ public class AzkarActivity extends Activity {
         Zikr(String c,String t,String s,int n){category=c;text=t;source=s;count=n;}
     }
     private final ArrayList<Zikr> items=new ArrayList<>();
+    private final ArrayList<Zikr> localItems=new ArrayList<>();
     private final ArrayList<Zikr> shown=new ArrayList<>();
     private TextView zikrText, sourceText, countText, positionText;
     private Spinner categorySpinner;
     private int index=0, remaining=0;
     private String currentCategory="أذكار الصباح";
 
-    @Override public void onCreate(Bundle state){super.onCreate(state);AppThemeColors.apply(this);load();build();applyRemoteAzkar();RemoteContentRepository.sync(this, "azkar", this::applyRemoteAzkar);}
+    @Override public void onCreate(Bundle state){super.onCreate(state);AppThemeColors.apply(this);load();localItems.addAll(items);build();applyRemoteAzkar();RemoteContentRepository.sync(this, "azkar", this::applyRemoteAzkar);}
     private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
     private TextView label(String s,int size,int color,boolean bold){
         TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);
@@ -64,9 +65,12 @@ public class AzkarActivity extends Activity {
         add(prayer,"قراءة آية الكرسي: ﴿اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ...﴾ إلى آخر الآية.","ورد في فضلها حديث صحيح رواه النسائي في عمل اليوم والليلة وغيره",1);
     }
     private void applyRemoteAzkar(){
+        // Rebuild from bundled content plus the latest published snapshot.
+        // This removes remotely unpublished/deleted items and applies edits/count changes.
+        String previous=currentCategory;
+        items.clear();
+        items.addAll(localItems);
         JSONArray remote=RemoteContentRepository.cached(this,"azkar");
-        if(remote.length()==0)return;
-        boolean changed=false;
         for(int i=0;i<remote.length();i++){
             JSONObject row=remote.optJSONObject(i);if(row==null)continue;
             String category=row.optString("category","").trim();
@@ -78,15 +82,15 @@ public class AzkarActivity extends Activity {
             boolean exists=false;
             for(Zikr item:items){
                 if(item.category.equals(category)&&item.text.equals(text)&&item.source.equals(source)){
+                    item.count=count;
                     exists=true;break;
                 }
             }
-            if(!exists){items.add(new Zikr(category,text,source,count));changed=true;}
+            if(!exists)items.add(new Zikr(category,text,source,count));
         }
-        if(!changed)return;
-        String previous=currentCategory;
         ArrayList<String> categories=new ArrayList<>();
         for(Zikr z:items)if(!categories.contains(z.category))categories.add(z.category);
+        if(categories.isEmpty())return;
         ArrayAdapter<String> adapter=new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,categories);
         categorySpinner.setAdapter(adapter);
         int selected=categories.indexOf(previous);

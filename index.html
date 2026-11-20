@@ -1001,6 +1001,11 @@ footer{background:#071522;color:#c9d6e2}
   </section>
 
   
+  <section class="section" id="remoteWaqafatSection">
+    <div class="section-head"><div><h2>وقفات إيمانية</h2><p>كلمات إيمانية قصيرة تُنشر من لوحة الإدارة</p></div></div>
+    <div id="remoteWaqafatList" class="grid" aria-live="polite"></div>
+  </section>
+
   <section class="section" id="khutbahs">
     <div class="section-head">
       <div><h2>خطب الجمعة</h2><p>خطب مكتوبة ومسموعة من إعداد صاحب الموقع</p></div>
@@ -1081,6 +1086,7 @@ footer{background:#071522;color:#c9d6e2}
 
 عباد الله، إن الله يأمر بالعدل والإحسان وإيتاء ذي القربى، وينهى عن الفحشاء والمنكر والبغي، يعظكم لعلكم تذكرون. فاذكروا الله العظيم يذكركم، واشكروه على نعمه يزدكم، ولذكر الله أكبر، والله يعلم ما تصنعون. وأقم الصلاة.</div></details></article>
     </div>
+    <div id="remoteKhutbahList" class="grid" aria-live="polite"></div>
     <p class="small" style="margin-top:10px">جميع الخطب المنشورة هنا يضيفها صاحب الموقع فقط.</p>
   </section>
 
@@ -2094,6 +2100,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
+<script src="./faith-content.js?v=20261121a"></script>
 <script src="./app-pages.js?v=20261119prayer-tab-fix4"></script>
 </body>
 </html>
