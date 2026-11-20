@@ -128,7 +128,7 @@ public class AdhanPlaybackService extends Service {
         try {
             player = new ExoPlayer.Builder(this).setWakeMode(androidx.media3.common.C.WAKE_MODE_LOCAL).build();
             player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
-                    .setUsage(androidx.media3.common.C.USAGE_MEDIA)
+                    .setUsage(androidx.media3.common.C.USAGE_ALARM)
                     .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_SPEECH)
                     .build(), true);
             android.content.SharedPreferences prefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
