@@ -159,7 +159,9 @@ public class AdhanPlaybackService extends Service {
             player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
                     .setUsage(androidx.media3.common.C.USAGE_ALARM)
                     .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_SPEECH)
-                    .build(), true);
+                    // USAGE_ALARM is not supported by Media3 automatic audio-focus handling.
+                    // Radio is paused explicitly before adhan, so keep focus handling manual here.
+                    .build(), false);
             android.content.SharedPreferences prefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
             String volumePrayerKey = "dhuhr";
             if (prayer != null && prayer.contains("الفجر")) volumePrayerKey = "fajr";
