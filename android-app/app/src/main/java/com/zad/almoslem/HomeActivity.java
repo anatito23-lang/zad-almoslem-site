@@ -1,12 +1,12 @@
 package com.zad.almoslem;
-import android.app.Activity;import android.content.Intent;import android.graphics.Color;import android.graphics.Typeface;import android.graphics.drawable.GradientDrawable;import android.os.Bundle;import android.view.Gravity;import android.widget.*;
+import android.Manifest;import android.app.Activity;import android.content.pm.PackageManager;import android.os.Build;import java.util.Calendar;import android.content.Intent;import android.graphics.Color;import android.graphics.Typeface;import android.graphics.drawable.GradientDrawable;import android.os.Bundle;import android.view.Gravity;import android.widget.*;
 import java.util.Locale;
 public class HomeActivity extends Activity{
 String[] prayers={"الفجر","الظهر","العصر","المغرب","العشاء"};TextView[] times=new TextView[5];int dp(float n){return(int)(n*getResources().getDisplayMetrics().density+.5f);}
 GradientDrawable shape(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));return d;}
 TextView label(String s,int z,int c,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(z);t.setTextColor(c);t.setGravity(Gravity.CENTER);if(bold)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
 void open(Class<?> c){startActivity(new Intent(this,c));}
-@Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(Color.rgb(8,48,40));getWindow().setNavigationBarColor(Color.rgb(8,48,40));build();}
+@Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(Color.rgb(8,48,40));getWindow().setNavigationBarColor(Color.rgb(8,48,40));ReminderReceiver.ensureDefaultDailyReminders(this);if(Build.VERSION.SDK_INT>=33&&checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},2401);build();}
 void build(){ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(14),dp(14),dp(14),dp(22));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);
 TextView heading=label("زاد المسلم",24,Color.WHITE,true);TextView ayah=label("﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾",14,Color.rgb(232,211,158),true);TextView ref=label("سورة الرعد • الآية ٢٨",11,Color.rgb(222,239,229),false);TextClock clock=new TextClock(this);clock.setFormat12Hour("hh:mm a");clock.setFormat24Hour("HH:mm");clock.setTextSize(27);clock.setTextColor(Color.WHITE);clock.setGravity(Gravity.CENTER);clock.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
 LinearLayout hero=new LinearLayout(this);hero.setOrientation(1);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(14),dp(14),dp(14),dp(14));hero.setBackground(shape(Color.rgb(8,48,40),20));hero.addView(heading);hero.addView(clock);hero.addView(ayah);hero.addView(ref);root.addView(hero,new LinearLayout.LayoutParams(-1,-2));
@@ -19,5 +19,5 @@ addShortcut(root,"📖 المصحف الشريف",MushafPageActivity.class);addS
 setContentView(AppTabs.wrap(this,scroll,"home"));refreshTimes();}
 void addShortcut(LinearLayout root,String title,Class<?> c){Button b=new Button(this);b.setText(title);b.setOnClickListener(v->open(c));root.addView(b,new LinearLayout.LayoutParams(-1,-2));}
 void refreshTimes(){android.content.SharedPreferences p=getSharedPreferences("zad_reminders",MODE_PRIVATE);for(int i=0;i<prayers.length;i++){int h=p.getInt("native_time_hour_"+prayers[i],-1),m=p.getInt("native_time_minute_"+prayers[i],0);times[i].setText(h<0?"--:--":String.format(Locale.getDefault(),"%02d:%02d",h,m));}}
-@Override protected void onResume(){super.onResume();if(times[0]!=null)refreshTimes();}
+@Override protected void onResume(){super.onResume();if(times[0]!=null)refreshTimes();android.content.SharedPreferences p=getSharedPreferences("zad_reminders",MODE_PRIVATE);for(String prayer:prayers){int h=p.getInt("native_time_hour_"+prayer,-1);if(h>=0&&p.getBoolean("prayer_enabled_"+prayer,true)){Calendar next=Calendar.getInstance();next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,p.getInt("native_time_minute_"+prayer,0));next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);ReminderReceiver.schedulePrayer(this,prayer,next.getTimeInMillis());}}}
 }
