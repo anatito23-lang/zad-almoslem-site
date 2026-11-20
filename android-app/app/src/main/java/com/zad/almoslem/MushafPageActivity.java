@@ -104,13 +104,14 @@ public class MushafPageActivity extends Activity {
         root.addView(toolbar);
 
         LinearLayout pageFrame = new LinearLayout(this);
+        pageFrame.setOrientation(LinearLayout.VERTICAL);
         pageFrame.setGravity(Gravity.CENTER);
         pageFrame.setPadding(dp(5), dp(7), dp(5), dp(7));
         pageFrame.setBackground(shape(Color.rgb(255,253,244), 5, Color.rgb(177,157,112)));
         pageImage = new ImageView(this);
         pageImage.setAdjustViewBounds(true);
         pageImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        pageFrame.addView(pageImage, new LinearLayout.LayoutParams(-1, -2));
+        pageFrame.addView(pageImage, new LinearLayout.LayoutParams(-1, -1));
         LinearLayout.LayoutParams imageLp = new LinearLayout.LayoutParams(-1, 0, 1);
         imageLp.topMargin = dp(8);
         root.addView(pageFrame, imageLp);
@@ -132,6 +133,8 @@ public class MushafPageActivity extends Activity {
         status = label("صفحات المصحف تُحمّل وتُحفظ تلقائيًا على الهاتف", 12, Color.DKGRAY, false);
         status.setPadding(0, dp(5), 0, dp(5));
         root.addView(status);
+        TextView attribution = label("صور صفحات المصحف: Quran-Images — ترخيص MIT", 10, Color.GRAY, false);
+        root.addView(attribution);
 
         progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         progress.setIndeterminate(true);
