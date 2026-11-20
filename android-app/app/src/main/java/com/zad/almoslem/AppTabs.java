@@ -1,140 +1,21 @@
 package com.zad.almoslem;
-
-import android.app.Activity;
-import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
-import android.os.Build;
-import android.view.Gravity;
-import android.view.View;
-import android.view.WindowInsets;
-import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
-
-public final class AppTabs {
-    private AppTabs() {}
-
-    public static View wrap(Activity activity, View content, String active) {
-        ScrollView scroll;
-        if (content instanceof ScrollView) {
-            scroll = (ScrollView) content;
-        } else {
-            scroll = new ScrollView(activity);
-            scroll.setFillViewport(true);
-            scroll.addView(content);
-        }
-        scroll.setFillViewport(true);
-        scroll.setClipToPadding(false);
-
-        LinearLayout shell = new LinearLayout(activity);
-        shell.setOrientation(LinearLayout.VERTICAL);
-        shell.setBackgroundColor(Color.rgb(244,247,243));
-        shell.addView(scroll, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f));
-
-        LinearLayout bar = createBar(activity, active);
-        shell.addView(bar, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, dp(activity, 66)));
-
-        // Keep the navigation dock above Android's gesture/three-button navigation area.
-        shell.setOnApplyWindowInsetsListener((view, insets) -> {
-            int bottom = 0;
-            if (Build.VERSION.SDK_INT >= 30) {
-                android.graphics.Insets nav = insets.getInsets(
-                        WindowInsets.Type.navigationBars() | WindowInsets.Type.displayCutout());
-                bottom = nav.bottom;
-            } else {
-                bottom = insets.getSystemWindowInsetBottom();
-            }
-            int safeBottom = Math.max(0, bottom);
-            bar.setPadding(dp(activity, 10), 0, dp(activity, 10), safeBottom);
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) bar.getLayoutParams();
-            int desired = dp(activity, 66) + safeBottom;
-            if (params.height != desired) {
-                params.height = desired;
-                bar.setLayoutParams(params);
-            }
-            return insets;
-        });
-        shell.setFitsSystemWindows(false);
-        shell.requestApplyInsets();
-        return shell;
-    }
-
-    private static LinearLayout createBar(Activity activity, String active) {
-        String[] keys = {"home", "prayer", "mushaf", "radio", "library"};
-        String[] labels = {"الرئيسية", "الصلاة", "المصحف", "الإذاعة", "المكتبة"};
-        String[] icons = {"⌂", "☾", "۞", "♫", "▤"};
-        Class<?>[] screens = {MainActivity.class, PrayerDashboardActivity.class,
-                MushafPageActivity.class, RadioActivity.class, FaithLibraryActivity.class};
-
-        LinearLayout outer = new LinearLayout(activity);
-        outer.setOrientation(LinearLayout.VERTICAL);
-        outer.setGravity(Gravity.CENTER);
-        outer.setBackgroundColor(Color.rgb(16,34,54));
-        outer.setPadding(dp(activity, 6), dp(activity, 5), dp(activity, 6), 0);
-
-        LinearLayout dock = new LinearLayout(activity);
-        dock.setOrientation(LinearLayout.HORIZONTAL);
-        dock.setGravity(Gravity.CENTER);
-        dock.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-        GradientDrawable dockBg = new GradientDrawable();
-        dockBg.setColor(Color.rgb(16,34,54));
-        dockBg.setCornerRadius(0);
-        dock.setBackground(dockBg);
-        dock.setElevation(0);
-        dock.setPadding(dp(activity, 1), dp(activity, 2), dp(activity, 1), dp(activity, 2));
-        outer.addView(dock, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, dp(activity, 56)));
-
-        for (int i = 0; i < keys.length; i++) {
-            final String key = keys[i];
-            final Class<?> target = screens[i];
-            boolean selected = key.equals(active);
-
-            LinearLayout item = new LinearLayout(activity);
-            item.setOrientation(LinearLayout.VERTICAL);
-            item.setGravity(Gravity.CENTER);
-            item.setClickable(!selected);
-            item.setFocusable(!selected);
-            item.setPadding(dp(activity, 1), dp(activity, 2), dp(activity, 1), dp(activity, 2));
-
-            if (selected) {
-                GradientDrawable selectedBg = new GradientDrawable();
-                selectedBg.setColor(Color.rgb(29,57,78));
-                selectedBg.setCornerRadius(dp(activity, 9));
-                item.setBackground(selectedBg);
-            } else {
-                item.setBackgroundResource(android.R.drawable.list_selector_background);
-            }
-
-            TextView icon = new TextView(activity);
-            icon.setText(icons[i]);
-            icon.setTextSize(19);
-            icon.setGravity(Gravity.CENTER);
-            icon.setTextColor(Color.rgb(50,199,181));
-            icon.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-            item.addView(icon, new LinearLayout.LayoutParams(-1, dp(activity, 25)));
-
-            TextView label = new TextView(activity);
-            label.setText(labels[i]);
-            label.setTextSize(10);
-            label.setSingleLine(true);
-            label.setGravity(Gravity.CENTER);
-            label.setTextColor(selected ? Color.WHITE : Color.rgb(169,186,203));
-            label.setTypeface(Typeface.DEFAULT, selected ? Typeface.BOLD : Typeface.NORMAL);
-            item.addView(label, new LinearLayout.LayoutParams(-1, dp(activity, 19)));
-
-            item.setOnClickListener(v -> activity.startActivity(new Intent(activity, target)));
-            dock.addView(item, new LinearLayout.LayoutParams(0,
-                    LinearLayout.LayoutParams.MATCH_PARENT, 1f));
-        }
-        return outer;
-    }
-
-    private static int dp(Activity activity, float value) {
-        return (int) (value * activity.getResources().getDisplayMetrics().density + 0.5f);
-    }
+import android.app.Activity;import android.content.Intent;import android.graphics.Color;import android.graphics.Typeface;import android.graphics.drawable.GradientDrawable;import android.os.Build;import android.view.Gravity;import android.view.View;import android.view.WindowInsets;import android.widget.LinearLayout;import android.widget.ScrollView;import android.widget.TextView;
+public final class AppTabs{
+private AppTabs(){}
+public static View wrap(Activity a,View content,String active){
+ScrollView scroll;if(content instanceof ScrollView)scroll=(ScrollView)content;else{scroll=new ScrollView(a);scroll.setFillViewport(true);scroll.addView(content);}scroll.setFillViewport(true);scroll.setClipToPadding(false);
+LinearLayout shell=new LinearLayout(a);shell.setOrientation(1);shell.setBackgroundColor(Color.rgb(244,247,243));shell.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));LinearLayout bar=createBar(a,active);shell.addView(bar,new LinearLayout.LayoutParams(-1,dp(a,66)));
+shell.setOnApplyWindowInsetsListener((v,insets)->{int bottom=0;if(Build.VERSION.SDK_INT>=30){android.graphics.Insets nav=insets.getInsets(WindowInsets.Type.navigationBars()|WindowInsets.Type.displayCutout());bottom=nav.bottom;}else bottom=insets.getSystemWindowInsetBottom();int safe=Math.max(0,bottom);bar.setPadding(dp(a,8),0,dp(a,8),safe);LinearLayout.LayoutParams p=(LinearLayout.LayoutParams)bar.getLayoutParams();int h=dp(a,66)+safe;if(p.height!=h){p.height=h;bar.setLayoutParams(p);}return insets;});shell.setFitsSystemWindows(false);shell.requestApplyInsets();return shell;}
+private static LinearLayout createBar(Activity a,String active){
+String lang=a.getSharedPreferences("zad_settings",Activity.MODE_PRIVATE).getString("app_language","ar");
+String[] keys={"home","tasbeeh","mushaf","quran","more"};String[][] names={{"الرئيسية","Home","Accueil","مرکزی صفحہ","Ana Sayfa"},{"السبحة","Tasbeeh","Tasbih","تسبیح","Tesbih"},{"المصحف","Mushaf","Coran","قرآن","Mushaf"},{"القرآن","Quran","Coran","قرآن","Kur'an"},{"المزيد","More","Plus","مزید","Daha Fazla"}};
+String[] icons={"⌂","۞","▤","♫","•••"};Class<?>[] screens={MainActivity.class,TasbeehActivity.class,MushafPageActivity.class,RadioActivity.class,MoreActivity.class};
+int li="en".equals(lang)?1:"fr".equals(lang)?2:"ur".equals(lang)?3:"tr".equals(lang)?4:0;if("prayer".equals(active)||"library".equals(active))active="more";if("radio".equals(active))active="quran";
+LinearLayout outer=new LinearLayout(a);outer.setOrientation(1);outer.setGravity(Gravity.CENTER);outer.setBackgroundColor(Color.rgb(16,34,54));outer.setPadding(dp(a,6),dp(a,5),dp(a,6),0);
+LinearLayout dock=new LinearLayout(a);dock.setOrientation(0);dock.setGravity(Gravity.CENTER);dock.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);GradientDrawable d=new GradientDrawable();d.setColor(Color.rgb(16,34,54));dock.setBackground(d);dock.setPadding(dp(a,1),dp(a,2),dp(a,1),dp(a,2));outer.addView(dock,new LinearLayout.LayoutParams(-1,dp(a,56)));
+for(int i=0;i<5;i++){final String key=keys[i];final Class<?> target=screens[i];boolean selected=key.equals(active);LinearLayout item=new LinearLayout(a);item.setOrientation(1);item.setGravity(Gravity.CENTER);item.setClickable(!selected);item.setFocusable(!selected);item.setPadding(dp(a,1),dp(a,2),dp(a,1),dp(a,2));if(selected){GradientDrawable s=new GradientDrawable();s.setColor(Color.rgb(29,57,78));s.setCornerRadius(dp(a,9));item.setBackground(s);}else item.setBackgroundResource(android.R.drawable.list_selector_background);
+TextView icon=new TextView(a);icon.setText(icons[i]);icon.setTextSize(19);icon.setGravity(Gravity.CENTER);icon.setTextColor(Color.rgb(50,199,181));icon.setTypeface(Typeface.DEFAULT,Typeface.BOLD);item.addView(icon,new LinearLayout.LayoutParams(-1,dp(a,25)));
+TextView label=new TextView(a);label.setText(names[i][li]);label.setTextSize(10);label.setSingleLine(true);label.setGravity(Gravity.CENTER);label.setTextColor(selected?Color.WHITE:Color.rgb(169,186,203));label.setTypeface(Typeface.DEFAULT,selected?Typeface.BOLD:Typeface.NORMAL);item.addView(label,new LinearLayout.LayoutParams(-1,dp(a,19)));
+item.setOnClickListener(v->{Intent in=new Intent(a,target);in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);a.startActivity(in);});dock.addView(item,new LinearLayout.LayoutParams(0,-1,1f));}return outer;}
+private static int dp(Activity a,float n){return(int)(n*a.getResources().getDisplayMetrics().density+.5f);}
 }
