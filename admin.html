@@ -53,7 +53,7 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,collection,getDocs,addDoc,updateDoc,deleteDoc,doc,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,collection,getDocs,addDoc,updateDoc,deleteDoc,deleteField,doc,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const firebaseConfig={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
 const ADMIN_UID="5UkeBQyyGGZcICXULT9LUD0S4lt2";
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
@@ -99,7 +99,7 @@ $("contentForm").addEventListener("submit",async e=>{
  e.preventDefault();if(busy||auth.currentUser?.uid!==ADMIN_UID)return;
  const collectionName=$("collection").value,text=$("text").value.trim(),source=$("source").value.trim();
  if(!text||(collectionName==="duas"&&!source)){message("adminMessage",collectionName==="azkar"?"نص الذكر مطلوب.":"نص الدعاء ومصدره مطلوبان.",true);return;}
- const schemaForCollection=schema[collectionName],isPub=$("published").checked;const data={text,published:isPub,[schemaForCollection.text]:text,[schemaForCollection.published]:isPub,updatedAt:serverTimestamp()};if(source){data.source=source;if(schemaForCollection.source)data[schemaForCollection.source]=source;}
+ const schemaForCollection=schema[collectionName],isPub=$("published").checked;const data={text,published:isPub,[schemaForCollection.text]:text,[schemaForCollection.published]:isPub,updatedAt:serverTimestamp()};if(source){data.source=source;if(schemaForCollection.source)data[schemaForCollection.source]=source;}else if($("documentId").value){data.source=deleteField();if(schemaForCollection.source)data[schemaForCollection.source]=deleteField();}
  if(collectionName==="azkar"){const category=$("category").value.trim(),count=Number($("count").value);if(!category||!Number.isInteger(count)||count<1){message("adminMessage","أدخل تصنيفًا وعددًا صحيحًا للذكر.",true);return;}data.category=category;data.count=count;data[schemaForCollection.category]=category;data[schemaForCollection.count]=count;}
  else if($("category").value.trim())data.category=$("category").value.trim();
  setBusy(true);
