@@ -64,6 +64,8 @@ public class DailyReminderSettingsActivity extends Activity {
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(card,lp);
   card.addView(label(names[i],18,green,true));
   Switch enabled=new Switch(this);enabled.setText("تفعيل التنبيه");enabled.setTextSize(14);enabled.setChecked(prefs.getBoolean(key+"_enabled",false));card.addView(enabled);
+  Switch voice=new Switch(this);voice.setText("تشغيل تذكير صوتي مسموع");voice.setTextSize(14);voice.setChecked(prefs.getBoolean(key+"_audio_enabled",true));card.addView(voice);
+  voice.setOnCheckedChangeListener((button,checked)->prefs.edit().putBoolean(key+"_audio_enabled",checked).apply());
   LinearLayout row=new LinearLayout(this);row.setGravity(Gravity.CENTER_VERTICAL);
   timeLabels[i]=label(timeText(key,i),18,green,true);Button choose=new Button(this);choose.setText("تغيير الوقت");
   row.addView(timeLabels[i],new LinearLayout.LayoutParams(0,dp(48),1));row.addView(choose,new LinearLayout.LayoutParams(dp(130),dp(48)));card.addView(row);
