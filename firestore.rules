@@ -21,5 +21,15 @@ service cloud.firestore {
       allow read: if isAdmin() || isPublished();
       allow create, update, delete: if isAdmin();
     }
+
+    match /khutbahs/{document} {
+      allow read: if isAdmin() || isPublished();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /waqafat/{document} {
+      allow read: if isAdmin() || isPublished();
+      allow create, update, delete: if isAdmin();
+    }
   }
 }
