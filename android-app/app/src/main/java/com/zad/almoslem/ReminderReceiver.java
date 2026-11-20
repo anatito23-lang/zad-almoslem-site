@@ -199,7 +199,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         String prayerName = prayer ? key.substring("prayer_".length()) : "";
         boolean thisPrayerEnabled = prayer && prefs.getBoolean("prayer_enabled_" + prayerName, true);
         if (prayer && prefs.getBoolean("prayer_silent_" + prayerName, false)) activateSilentMode(context);
-        if(prayer && adhanEnabled && thisPrayerEnabled && "adhan".equals(adhanMode)) {
+        if(prayer && adhanEnabled && thisPrayerEnabled && ("adhan".equals(adhanMode) || "takbeer".equals(adhanMode))) {
             Intent audio=new Intent(context,AdhanPlaybackService.class);
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
             audio.putExtra("prayer",prayerName);
