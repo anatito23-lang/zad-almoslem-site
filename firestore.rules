@@ -1,18 +1,23 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid == '5UkeBQyyGGZcICXULT9LUD0S4lt2';
+    }
     function isPublished() {
       return resource.data.get('published', false) == true
         || resource.data.get('تم النشر', false) == true
         || resource.data.get('النشر', false) == true;
     }
     match /azkar/{document} {
-      allow read: if isPublished();
-      allow create, update, delete: if false;
+      allow read: if isPublished() || isAdmin();
+      allow create, update, delete: if isAdmin();
     }
     match /duas/{document} {
-      allow read: if isPublished();
-      allow create, update, delete: if false;
+      allow read: if isPublished() || isAdmin();
+      allow create, update, delete: if isAdmin();
     }
   }
 }
