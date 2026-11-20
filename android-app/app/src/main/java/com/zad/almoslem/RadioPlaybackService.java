@@ -146,6 +146,7 @@ public class RadioPlaybackService extends Service {
                     getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
                             .putBoolean("radio_ready", false).putBoolean("radio_playing", false)
                             .putString("radio_last_error", detail).apply();
+                    QuranHomeWidget.refreshAll(RadioPlaybackService.this);
                     android.util.Log.e("ZadAlmoslem", "Audio playback failed: " + url, error);
                     showRadioFailure(detail);
                     try { if (player != null) player.stop(); } catch (Exception ignored) {}
