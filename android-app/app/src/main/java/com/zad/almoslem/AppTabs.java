@@ -36,7 +36,7 @@ public final class AppTabs {
 
         LinearLayout bar = createBar(activity, active);
         shell.addView(bar, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, dp(activity, 70)));
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(activity, 66)));
 
         // Keep the navigation dock above Android's gesture/three-button navigation area.
         shell.setOnApplyWindowInsetsListener((view, insets) -> {
@@ -51,7 +51,7 @@ public final class AppTabs {
             int safeBottom = Math.max(0, bottom);
             bar.setPadding(dp(activity, 10), 0, dp(activity, 10), safeBottom);
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) bar.getLayoutParams();
-            int desired = dp(activity, 70) + safeBottom;
+            int desired = dp(activity, 66) + safeBottom;
             if (params.height != desired) {
                 params.height = desired;
                 bar.setLayoutParams(params);
@@ -73,21 +73,21 @@ public final class AppTabs {
         LinearLayout outer = new LinearLayout(activity);
         outer.setOrientation(LinearLayout.VERTICAL);
         outer.setGravity(Gravity.CENTER);
-        outer.setBackgroundColor(Color.rgb(244,247,243));
-        outer.setPadding(dp(activity, 10), dp(activity, 5), dp(activity, 10), 0);
+        outer.setBackgroundColor(Color.rgb(16,34,54));
+        outer.setPadding(dp(activity, 6), dp(activity, 5), dp(activity, 6), 0);
 
         LinearLayout dock = new LinearLayout(activity);
         dock.setOrientation(LinearLayout.HORIZONTAL);
         dock.setGravity(Gravity.CENTER);
         dock.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
         GradientDrawable dockBg = new GradientDrawable();
-        dockBg.setColor(Color.rgb(8,48,40));
-        dockBg.setCornerRadius(dp(activity, 20));
+        dockBg.setColor(Color.rgb(16,34,54));
+        dockBg.setCornerRadius(0);
         dock.setBackground(dockBg);
-        dock.setElevation(dp(activity, 5));
-        dock.setPadding(dp(activity, 3), dp(activity, 4), dp(activity, 3), dp(activity, 4));
+        dock.setElevation(0);
+        dock.setPadding(dp(activity, 1), dp(activity, 2), dp(activity, 1), dp(activity, 2));
         outer.addView(dock, new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT, dp(activity, 58)));
+                LinearLayout.LayoutParams.MATCH_PARENT, dp(activity, 56)));
 
         for (int i = 0; i < keys.length; i++) {
             final String key = keys[i];
@@ -99,12 +99,12 @@ public final class AppTabs {
             item.setGravity(Gravity.CENTER);
             item.setClickable(!selected);
             item.setFocusable(!selected);
-            item.setPadding(dp(activity, 2), dp(activity, 2), dp(activity, 2), dp(activity, 2));
+            item.setPadding(dp(activity, 1), dp(activity, 2), dp(activity, 1), dp(activity, 2));
 
             if (selected) {
                 GradientDrawable selectedBg = new GradientDrawable();
-                selectedBg.setColor(Color.rgb(28,112,82));
-                selectedBg.setCornerRadius(dp(activity, 15));
+                selectedBg.setColor(Color.rgb(29,57,78));
+                selectedBg.setCornerRadius(dp(activity, 9));
                 item.setBackground(selectedBg);
             } else {
                 item.setBackgroundResource(android.R.drawable.list_selector_background);
@@ -114,7 +114,7 @@ public final class AppTabs {
             icon.setText(icons[i]);
             icon.setTextSize(19);
             icon.setGravity(Gravity.CENTER);
-            icon.setTextColor(selected ? Color.WHITE : Color.rgb(215,232,222));
+            icon.setTextColor(Color.rgb(50,199,181));
             icon.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
             item.addView(icon, new LinearLayout.LayoutParams(-1, dp(activity, 25)));
 
@@ -123,7 +123,7 @@ public final class AppTabs {
             label.setTextSize(10);
             label.setSingleLine(true);
             label.setGravity(Gravity.CENTER);
-            label.setTextColor(selected ? Color.WHITE : Color.rgb(230,239,233));
+            label.setTextColor(selected ? Color.WHITE : Color.rgb(169,186,203));
             label.setTypeface(Typeface.DEFAULT, selected ? Typeface.BOLD : Typeface.NORMAL);
             item.addView(label, new LinearLayout.LayoutParams(-1, dp(activity, 19)));
 
