@@ -222,7 +222,17 @@ public class AdhanPlaybackService extends Service {
                     stopPlayback();
                 }
             });
-            player.setMediaItem(MediaItem.fromUri(Uri.fromFile(audioFile)));
+            boolean takbeerOnly = getSharedPreferences("zad_reminders", MODE_PRIVATE)
+                    .getString("adhan_mode", "adhan").equals("takbeer");
+            MediaItem.Builder mediaBuilder = new MediaItem.Builder().setUri(Uri.fromFile(audioFile));
+            if (takbeerOnly) {
+                // Play the opening takbeers from the selected adhan recording.
+                mediaBuilder.setClippingConfiguration(new MediaItem.ClippingConfiguration.Builder()
+                        .setStartPositionMs(0)
+                        .setEndPositionMs(15000)
+                        .build());
+            }
+            player.setMediaItem(mediaBuilder.build());
             player.prepare();
             player.play();
         } catch (Exception e) {
