@@ -133,8 +133,15 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
 
     private boolean isMujawwadMoshaf(org.json.JSONObject m){
         if(m==null)return false;
+        // MP3Quran v3 identifies the classic Al-Mushaf Al-Mojawwad type as 12.
+        // Keep name matching as a fallback because catalog labels can vary by language.
+        String type=m.optString("moshaf_type","").trim();
+        if("12".equals(type))return true;
         String n=m.optString("name","").toLowerCase(Locale.ROOT);
-        return n.contains("مجود")||n.contains("mujawwad")||n.contains("mujawad");
+        return n.contains("مجود")||n.contains("مجوّد")||
+            n.contains("mujawwad")||n.contains("mujawad")||
+            n.contains("mojawwad")||n.contains("mojawad")||
+            n.contains("tajweed")||n.contains("tajwid");
     }
     private String normalizeReciterName(String name){
         return (name==null?"":name).replace(" ","").replace("أ","ا").replace("إ","ا").replace("آ","ا").replace("ى","ي").replace("ـ","");
