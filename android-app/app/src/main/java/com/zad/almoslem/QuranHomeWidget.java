@@ -67,7 +67,7 @@ public class QuranHomeWidget extends AppWidgetProvider {
         String url=p.getString("last_quran_url","");
         if(url.isEmpty()){Intent open=new Intent(context,QuranListeningActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);context.startActivity(open);return;}
         String title=p.getString("last_quran_title","تلاوة القرآن الكريم");
-        startTrack(context,url,title);
+        startTrack(context,url,title,offlineTrackPath(context,p,p.getInt("last_quran_surah_id",0)));
     }
     private void changeSurah(Context context,int direction){
         SharedPreferences p=context.getSharedPreferences("zad_audio",Context.MODE_PRIVATE);
@@ -90,6 +90,9 @@ public class QuranHomeWidget extends AppWidgetProvider {
     private void startTrack(Context context,String url,String title){
         Intent play=new Intent(context,RadioPlaybackService.class);
         play.setAction(RadioPlaybackService.ACTION_PLAY);play.putExtra("url",url);play.putExtra("kind","quran");play.putExtra("label",title);
+        String localPath=offlineTrackPath(context,context.getSharedPreferences("zad_audio",Context.MODE_PRIVATE),
+                context.getSharedPreferences("zad_audio",Context.MODE_PRIVATE).getInt("last_quran_surah_id",0));
+        if(localPath!=null)play.putExtra("local_path",localPath);
         try{if(Build.VERSION.SDK_INT>=26)context.startForegroundService(play);else context.startService(play);}catch(Exception ignored){}
     }
 }
