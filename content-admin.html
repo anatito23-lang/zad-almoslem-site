@@ -69,7 +69,7 @@ function updateFields(){
  const type=$("collection").value,short=type==="azkar"||type==="duas",long=type==="khutbahs"||type==="waqafat";
  $("titleWrap").classList.toggle("hidden",short);$("title").required=long;
  $("sourceWrap").classList.toggle("hidden",long);$("source").required=type==="duas";
- $("categoryRow").classList.toggle("hidden",long);$("category").required=type==="azkar";
+ $("categoryRow").classList.toggle("hidden",type==="duas");$("category").required=type==="azkar";
  $("countWrap").classList.toggle("hidden",type!=="azkar");
  $("dateWrap").classList.toggle("hidden",!long);$("mediaWrap").classList.toggle("hidden",type!=="khutbahs");
  $("textLabel").textContent=type==="khutbahs"?"نص الخطبة *":type==="waqafat"?"نص الوقفة الإيمانية *":"النص *";
