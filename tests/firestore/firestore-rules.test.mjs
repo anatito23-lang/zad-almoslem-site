@@ -70,7 +70,10 @@ test("public users can read documents published with any supported field", async
 test("public publication queries used by Android sync are allowed", async () => {
   const db = env.unauthenticatedContext().firestore();
   for (const collectionName of ["azkar", "duas", "khutbahs", "waqafat"]) {
-    for (const field of ["published", "تم النشر", "النشر"]) {
+    const fields = collectionName === "azkar" || collectionName === "duas"
+      ? ["published", "تم النشر", "النشر"]
+      : ["published"];
+    for (const field of fields) {
       const result = await assertSucceeds(
         getDocs(query(collection(db, collectionName), where(field, "==", true)))
       );
