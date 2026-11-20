@@ -103,7 +103,7 @@ $("contentForm").addEventListener("submit",async e=>{
  if(collectionName==="azkar"){const category=$("category").value.trim(),count=Number($("count").value);if(!category||!Number.isInteger(count)||count<1){message("adminMessage","أدخل تصنيفًا وعددًا صحيحًا للذكر.",true);return;}data.category=category;data.count=count;data[schemaForCollection.category]=category;data[schemaForCollection.count]=count;}
  else if($("category").value.trim())data.category=$("category").value.trim();
  setBusy(true);
- try{const id=$("documentId").value;if(id){await updateDoc(doc(db,collectionName,id),data);message("adminMessage","تم حفظ التعديلات.");}else{data.createdAt=serverTimestamp();await addDoc(collection(db,collectionName),data);message("adminMessage","تمت إضافة المحتوى.");}resetForm();await loadItems();}
+ try{const id=$("documentId").value;if(id){await updateDoc(doc(db,collectionName,id),data);resetForm();message("adminMessage","تم حفظ التعديلات بنجاح.");}else{data.createdAt=serverTimestamp();await addDoc(collection(db,collectionName),data);resetForm();message("adminMessage","تمت إضافة المحتوى بنجاح.");}await loadItems();}
  catch(error){message("adminMessage","لم يتم الحفظ. تأكد من اتصال Firebase وصلاحية المسؤول. "+error.message,true);}
  finally{setBusy(false);}
 });
