@@ -57,14 +57,15 @@ public class ReminderAudioService extends Service {
         }
         String kind = intent == null ? "qiyam" : intent.getStringExtra("kind");
         if (!"morning".equals(kind) && !"evening".equals(kind) && !"dua".equals(kind)
-                && !"approach".equals(kind)) kind = "qiyam";
+                && !"approach".equals(kind) && !"gentle".equals(kind)) kind = "qiyam";
         activeKind = kind;
         String reminderMessage = intent == null ? null : intent.getStringExtra("message");
         createChannel();
         String title = "morning".equals(kind) ? "أذكار الصباح" :
                 "evening".equals(kind) ? "أذكار المساء" :
                 "dua".equals(kind) ? "دعاء ما بعد الأذان" :
-                "approach".equals(kind) ? "تنبيه اقتراب الصلاة" : "قيام الليل";
+                "approach".equals(kind) ? "تنبيه اقتراب الصلاة" :
+                "gentle".equals(kind) ? "تذكير بالذكر" : "قيام الليل";
         Notification.Builder b = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
@@ -82,9 +83,10 @@ public class ReminderAudioService extends Service {
         stopCurrentPlayers();
         if ("qiyam".equals(kind)) {
             speak("حان وقت قيام الليل، لا تنسَ نصيبك من صلاة الليل");
-        } else if ("approach".equals(kind)) {
+        } else if ("approach".equals(kind) || "gentle".equals(kind)) {
             speak(reminderMessage == null || reminderMessage.trim().isEmpty()
-                    ? "اقترب موعد الصلاة، استعد للقاء الله" : reminderMessage);
+                    ? ("approach".equals(kind) ? "اقترب موعد الصلاة، استعد للقاء الله" : "اذكر الله")
+                    : reminderMessage);
         } else {
             playFile(kind);
         }
