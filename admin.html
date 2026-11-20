@@ -67,7 +67,7 @@ function message(id,text,error=false){const el=$(id);el.textContent=text;el.clas
 function clearMessage(id){$(id).textContent="";$(id).classList.add("hidden");}
 function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function setBusy(value){busy=value;["loginButton","saveButton","refreshButton","logoutButton"].forEach(id=>$(id).disabled=value);}
-function updateFields(){const isAzkar=$("collection").value==="azkar";$("countWrap").classList.toggle("hidden",!isAzkar);$("categoryRow").classList.toggle("hidden",!isAzkar);$("category").required=isAzkar;}
+function updateFields(){const isAzkar=$("collection").value==="azkar";$("countWrap").classList.toggle("hidden",!isAzkar);$("categoryRow").classList.toggle("hidden",!isAzkar);$("category").required=isAzkar;$("source").required=!isAzkar;}
 function resetForm(){$("contentForm").reset();$("documentId").value="";$("published").checked=true;$("count").value="1";$("saveButton").textContent="حفظ المحتوى";updateFields();clearMessage("adminMessage");}
 async function loadItems(){
  if(auth.currentUser?.uid!==ADMIN_UID)return;
@@ -98,8 +98,8 @@ $("cancelEdit").addEventListener("click",resetForm);
 $("contentForm").addEventListener("submit",async e=>{
  e.preventDefault();if(busy||auth.currentUser?.uid!==ADMIN_UID)return;
  const collectionName=$("collection").value,text=$("text").value.trim(),source=$("source").value.trim();
- if(!text||!source){message("adminMessage","النص والمصدر مطلوبان.",true);return;}
- const schemaForCollection=schema[collectionName],isPub=$("published").checked;const data={text,source,published:isPub,[schemaForCollection.text]:text,[schemaForCollection.source]:source,[schemaForCollection.published]:isPub,updatedAt:serverTimestamp()};
+ if(!text||(collectionName==="duas"&&!source)){message("adminMessage",collectionName==="azkar"?"نص الذكر مطلوب.":"نص الدعاء ومصدره مطلوبان.",true);return;}
+ const schemaForCollection=schema[collectionName],isPub=$("published").checked;const data={text,published:isPub,[schemaForCollection.text]:text,[schemaForCollection.published]:isPub,updatedAt:serverTimestamp()};if(source){data.source=source;if(schemaForCollection.source)data[schemaForCollection.source]=source;}
  if(collectionName==="azkar"){const category=$("category").value.trim(),count=Number($("count").value);if(!category||!Number.isInteger(count)||count<1){message("adminMessage","أدخل تصنيفًا وعددًا صحيحًا للذكر.",true);return;}data.category=category;data.count=count;data[schemaForCollection.category]=category;data[schemaForCollection.count]=count;}
  else if($("category").value.trim())data.category=$("category").value.trim();
  setBusy(true);
