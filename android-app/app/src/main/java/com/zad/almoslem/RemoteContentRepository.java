@@ -75,7 +75,7 @@ public final class RemoteContentRepository {
             Map<String, JSONObject> merged, AtomicInteger completed,
             AtomicInteger failures, Runnable onUpdated) {
         if (completed.incrementAndGet() != 3) return;
-        if (failures.get() == 3) return; // Preserve last known cache if every query failed.
+        if (failures.get() > 0) return; // Preserve the last complete cache if any publication-field query fails.
         JSONArray rows = new JSONArray();
         synchronized (merged) {
             for (JSONObject row : merged.values()) rows.put(row);
