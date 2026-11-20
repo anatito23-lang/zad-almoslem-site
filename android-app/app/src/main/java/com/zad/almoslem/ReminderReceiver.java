@@ -28,6 +28,14 @@ public class ReminderReceiver extends BroadcastReceiver {
         context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE).edit().putBoolean(key+"_enabled",false).apply();
         cancel(context,key);
     }
+
+    public static void ensureDefaultDailyReminders(Context context) {
+        android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
+        if(!p.contains("morning_enabled"))
+            scheduleDaily(context,"morning",7,0,"حان وقت أذكار الصباح، لا تنس وردك من ذكر الله.");
+        if(!p.contains("evening_enabled"))
+            scheduleDaily(context,"evening",17,0,"حان وقت أذكار المساء، لا تنس وردك من ذكر الله.");
+    }
     private static void scheduleApproachAlert(Context context,String name,long prayerAt) {
         String alertKey="approach_"+name;
         android.content.SharedPreferences prefs=context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE);
