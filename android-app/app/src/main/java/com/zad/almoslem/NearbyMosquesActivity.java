@@ -55,7 +55,7 @@ public class NearbyMosquesActivity extends Activity {
             boolean fine=Build.VERSION.SDK_INT<23||checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED;
             boolean coarse=Build.VERSION.SDK_INT<23||checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED;
             if(!fine&&!coarse){startSearch();return;}
-            String[] providers=fine?new String[]{LocationManager.NETWORK_PROVIDER,LocationManager.GPS_PROVIDER}:new String[]{LocationManager.NETWORK_PROVIDER};
+            String[] providers=fine?new String[]{LocationManager.NETWORK_PROVIDER,LocationManager.GPS_PROVIDER,LocationManager.PASSIVE_PROVIDER}:new String[]{LocationManager.NETWORK_PROVIDER,LocationManager.PASSIVE_PROVIDER};
             for(String provider:providers){
                 if(!lm.isProviderEnabled(provider))continue;
                 try{
@@ -65,14 +65,14 @@ public class NearbyMosquesActivity extends Activity {
             }
             if(currentLocation!=null){searchMosques(currentLocation);return;}
             message.setText("جارٍ تحديد موقعك… تأكد من تشغيل خدمة الموقع.");
-            String provider=lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)?LocationManager.NETWORK_PROVIDER:(fine&&lm.isProviderEnabled(LocationManager.GPS_PROVIDER)?LocationManager.GPS_PROVIDER:null);
-            if(provider==null){message.setText("خدمة الموقع مغلقة. شغّلها أو استخدم البحث عبر الخرائط.");return;}
-            lm.requestSingleUpdate(provider,new LocationListener(){
-                public void onLocationChanged(Location l){currentLocation=l;searchMosques(l);}
-                public void onProviderDisabled(String p){message.setText("تعذر تحديد الموقع. افتح خرائط Google للبحث عن المساجد.");}
+            boolean requested=false;LocationListener listener=new LocationListener(){
+                public void onLocationChanged(Location l){if(l!=null&&(currentLocation==null||l.getAccuracy()<currentLocation.getAccuracy())){currentLocation=l;searchMosques(l);}}
+                public void onProviderDisabled(String p){}
                 public void onProviderEnabled(String p){}
                 public void onStatusChanged(String p,int s,android.os.Bundle b){}
-            },null);
+            };
+            for(String candidate:new String[]{LocationManager.NETWORK_PROVIDER,LocationManager.GPS_PROVIDER}){try{if((candidate.equals(LocationManager.NETWORK_PROVIDER)||fine)&&lm.isProviderEnabled(candidate)){lm.requestSingleUpdate(candidate,listener,null);requested=true;}}catch(Exception ignored){}}
+            if(!requested)message.setText("خدمة الموقع غير متاحة. شغّل GPS أو استخدم البحث عبر الخرائط.");
         }catch(SecurityException e){message.setText("تعذر الوصول للموقع. راجع أذونات التطبيق.");}
         catch(Exception e){message.setText("تعذر تحديد موقعك الآن. يمكنك فتح البحث عبر الخرائط.");}
     }
@@ -82,22 +82,21 @@ public class NearbyMosquesActivity extends Activity {
         worker.execute(()->{
             HttpURLConnection conn=null;
             try{
-                String q="[out:json][timeout:25];(node[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");way[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");relation[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");node[\"amenity\"=\"mosque\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");way[\"amenity\"=\"mosque\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");node[\"building\"=\"mosque\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");way[\"building\"=\"mosque\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+"););out center;";
-                String[] endpoints={"https://overpass.kumi.systems/api/interpreter","https://overpass-api.de/api/interpreter","https://overpass.private.coffee/api/interpreter"};
+                String q="[out:json][timeout:20];(nwr[\"amenity\"=\"mosque\"](around:10000,"+loc.getLatitude()+","+loc.getLongitude()+");nwr[\"building\"=\"mosque\"](around:10000,"+loc.getLatitude()+","+loc.getLongitude()+");nwr[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:10000,"+loc.getLatitude()+","+loc.getLongitude()+"););out center 50;";
+                String[] endpoints={"https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://overpass.private.coffee/api/interpreter"};
                 Exception last=null;JSONObject data=null;
                 for(String endpoint:endpoints){
-                    try{
-                        conn=(HttpURLConnection)new URL(endpoint).openConnection();
-                        conn.setConnectTimeout(12000);conn.setReadTimeout(30000);conn.setRequestMethod("POST");conn.setDoOutput(true);
-                        conn.setRequestProperty("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
-                        conn.setRequestProperty("User-Agent","ZadAlmoslem/1.0 (Android)");
-                        byte[] body=("data="+URLEncoder.encode(q,"UTF-8")).getBytes("UTF-8");
-                        conn.getOutputStream().write(body);
-                        int code=conn.getResponseCode();if(code!=200)throw new Exception("HTTP "+code);
-                        java.io.InputStream in=conn.getInputStream();java.io.ByteArrayOutputStream out=new java.io.ByteArrayOutputStream();byte[] buf=new byte[4096];int n;while((n=in.read(buf))!=-1)out.write(buf,0,n);
-                        data=new JSONObject(out.toString("UTF-8"));break;
-                    }catch(Exception ex){last=ex;}
-                    finally{if(conn!=null){conn.disconnect();conn=null;}}
+                    for(int method=0;method<2&&data==null;method++){
+                        try{
+                            String requestUrl=endpoint+(method==1?"?data="+URLEncoder.encode(q,"UTF-8"):"");
+                            conn=(HttpURLConnection)new URL(requestUrl).openConnection();conn.setConnectTimeout(10000);conn.setReadTimeout(22000);conn.setRequestProperty("Accept","application/json");conn.setRequestProperty("User-Agent","ZadAlmoslemAndroid/1.1");
+                            if(method==0){conn.setRequestMethod("POST");conn.setDoOutput(true);conn.setRequestProperty("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");byte[] body=("data="+URLEncoder.encode(q,"UTF-8")).getBytes("UTF-8");try(java.io.OutputStream os=conn.getOutputStream()){os.write(body);}}
+                            int code=conn.getResponseCode();if(code!=200)throw new Exception("Overpass HTTP "+code);
+                            try(java.io.InputStream in=conn.getInputStream();java.io.ByteArrayOutputStream out=new java.io.ByteArrayOutputStream()){byte[] buf=new byte[4096];int n;while((n=in.read(buf))!=-1)out.write(buf,0,n);data=new JSONObject(out.toString("UTF-8"));}
+                        }catch(Exception ex){last=ex;}
+                        finally{if(conn!=null){conn.disconnect();conn=null;}}
+                    }
+                    if(data!=null)break;
                 }
                 if(data==null)throw (last==null?new Exception("تعذر الاتصال بمصادر المساجد"):last);
                 JSONArray els=data.optJSONArray("elements");java.util.ArrayList<JSONObject> found=new java.util.ArrayList<>();
@@ -126,8 +125,8 @@ public class NearbyMosquesActivity extends Activity {
     private double distance(double a,double b,double c,double d){float[] r=new float[1];Location.distanceBetween(a,b,c,d,r);return r[0];}
     private void showResults(java.util.ArrayList<JSONObject> items){
         list.removeAllViews();
-        if(items.isEmpty()){message.setText("لم نعثر على مساجد مسجلة ضمن 5 كم. جرّب تحديث البحث أو افتح الخرائط.");return;}
-        message.setText("أقرب المساجد المسجلة ضمن نطاق 5 كم — "+items.size()+" نتيجة");
+        if(items.isEmpty()){message.setText("لم نعثر على مساجد مسجلة ضمن 10 كم. جرّب تحديث البحث أو افتح الخرائط.");return;}
+        message.setText("أقرب المساجد المسجلة ضمن نطاق 10 كم — "+items.size()+" نتيجة");
         for(JSONObject e:items){
             String name=e.optString("_displayName","مسجد");double lat=e.optDouble("_lat"),lon=e.optDouble("_lon"),meters=e.optDouble("_distance");
             LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(14),dp(11),dp(14),dp(11));card.setBackgroundColor(AppThemeColors.surface(this));
