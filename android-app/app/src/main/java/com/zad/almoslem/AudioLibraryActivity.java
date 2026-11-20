@@ -52,7 +52,7 @@ public class AudioLibraryActivity extends Activity {
     private GradientDrawable bg(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));return d;}
     private void build(){
         ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(15),dp(15),dp(15),dp(25));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);setContentView(AppTabs.wrap(this,scroll,"more"));
-        TextView title=label("الإنشاد والرقية الشرعية",24,Color.WHITE,true);title.setGravity(Gravity.CENTER);
+        TextView title=label("الابتهالات والإنشاد الديني",24,Color.WHITE,true);title.setGravity(Gravity.CENTER);
         TextView sub=label("استماع من مشغّل Android في الخلفية",13,Color.rgb(222,239,229),false);sub.setGravity(Gravity.CENTER);
         LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(14),dp(18),dp(14),dp(18));hero.setBackground(bg(green,18));hero.addView(title);hero.addView(sub);root.addView(hero);
         TextView section=label("الابتهالات الدينية",18,green,true);section.setPadding(0,dp(16),0,dp(6));root.addView(section);
@@ -64,15 +64,8 @@ public class AudioLibraryActivity extends Activity {
         });
         Button play=new Button(this);play.setText("تشغيل الابتهال المختار");root.addView(play);
         play.setOnClickListener(v->playSelected());
-        Button stop=new Button(this);stop.setText("إيقاف الصوت");root.addView(stop);
+        Button stop=new Button(this);stop.setText("■ إيقاف الصوت");root.addView(stop);
         stop.setOnClickListener(v->stopAudio());
-        TextView ruqTitle=label("الرقية الشرعية — اختر القارئ",18,green,true);ruqTitle.setPadding(0,dp(16),0,dp(8));root.addView(ruqTitle);
-        addRuqyahCard(root,"الشيخ محمود خليل الحصري",ruqyahUrl);
-        addRuqyahCard(root,"الشيخ مشاري راشد العفاسي","https://ia601709.us.archive.org/13/items/e3fasi-Rokia/e3fasi-seher.mp3");
-        addRuqyahCard(root,"الشيخ ناصر القطامي","https://ia600909.us.archive.org/4/items/alqtami-Roqiaa/alqtami-seher.mp3");
-        addRuqyahCard(root,"الشيخ ياسر الدوسري","https://ia601705.us.archive.org/34/items/dosari-Roqia/dosari-seher.mp3");
-        addRuqyahCard(root,"الشيخ علي الحذيفي","https://ia601808.us.archive.org/32/items/hothife-Roqia/hothife-seher.mp3");
-        addRuqyahCard(root,"الشيخ هاني الرفاعي","https://ia601708.us.archive.org/29/items/rifa3i-Roqia/rifa3i-seher.mp3");
         status=label("اختر المنشد والتسجيل ثم اضغط تشغيل.",12,Color.DKGRAY,false);status.setPadding(0,dp(12),0,dp(4));root.addView(status);
     }
     private void addRuqyahCard(LinearLayout root,String title,String url){
