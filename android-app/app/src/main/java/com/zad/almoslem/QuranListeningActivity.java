@@ -23,7 +23,7 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         LinearLayout card=column();card.setBackground(shape(Color.WHITE,16));card.setPadding(dp(14),dp(12),dp(14),dp(12));
         card.addView(text("اختر القارئ والسورة، وسيعمل الصوت في مشغل Android بالخلفية دون فتح الموقع.",13,AppThemeColors.muted(this),false));
         Spinner categorySpinner=new Spinner(this),reciterSpinner=new Spinner(this),surahSpinner=new Spinner(this);
-        categorySpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"القراء المصريون القدامى","القراء المصريون المعاصرون","التلاوات المجودة — القراء المصريون فقط"}));
+        categorySpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"كل القراء من مختلف الدول","القراء المصريون القدامى","القراء المصريون المعاصرون","القرآن المجوّد — المصريون فقط"}));
         card.addView(text("القسم",12,AppThemeColors.text(this),true));card.addView(categorySpinner,matchWrap());
         reciterSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"جارٍ تحميل القراء..."}));
         String[] surahs={"الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"};
@@ -36,7 +36,7 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         Button download=new Button(this);download.setText("تنزيل السورة للاستماع دون إنترنت");card.addView(download,matchWrap());
         ProgressBar quranProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);quranProgress.setMax(100);card.addView(quranProgress,matchWrap());
         TextView state=text("جارٍ تحميل قائمة القراء من مكتبة التسجيلات.",12,Color.rgb(80,100,90),false);card.addView(state);
-        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){} public void onItemSelected(AdapterView<?> p,View v,int pos,long id){reciterGroup=pos;mujawwadOnly=pos==2;applyReciterFilter(reciterSpinner,state);}});
+        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){} public void onItemSelected(AdapterView<?> p,View v,int pos,long id){reciterGroup=pos;mujawwadOnly=pos==3;applyReciterFilter(reciterSpinner,state);}});
         addCard(root,card);
         new Thread(()->{
             HttpURLConnection connection=null;
@@ -121,21 +121,27 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         String n=m.optString("name","").toLowerCase(Locale.ROOT);
         return n.contains("مجود")||n.contains("mujawwad")||n.contains("mujawad");
     }
+    private String normalizeReciterName(String name){
+        return (name==null?"":name).replace(" ","").replace("أ","ا").replace("إ","ا").replace("آ","ا").replace("ى","ي").replace("ـ","");
+    }
     private boolean isEgyptianReciter(String name,boolean old){
-        String n=name==null?"":name.replace(" ","");
-        String[] oldNames={"عبدالباسطعبدالصمد","محمدصديقالمنشاوي","محمودخليلالحصري","محمودعليالبنا","مصطفىإسماعيل","مصطفىاللاهونى","محمدالطبلاوي","محمودالطبلاوي","عليحجاجالسويسي","أحمدنعينع","محمدرفعت","كاملوسيفالبهتيمي","طهالفشني","عبدالفتاحالشعشاعي","راغبمصطفىغلوش","سيدمتولي","محمودالشيمي"};
-        String[] modernNames={"محمدجبريل","حاتمفريدالواعر","ياسرسلامة","إسلامصبحي","أحمدعامر","أحمدعيسىالمعصراوي","محمودعبدالحكم","صابرعبدالحكم","حسنصالح","عبداللهكامل","محمودالرفاعي","أحمدخليلشاهين","سيدرمضان"};
+        String n=normalizeReciterName(name);
+        String[] oldNames={"عبدالباسطعبدالصمد","محمدصديقالمنشاوي","محمودخليلالحصري","محمودعليالبنا","مصطفيإسماعيل","مصطفىاسماعيل","مصطفىاللاهونى","محمدالطبلاوي","محمودالطبلاوي","عليحجاجالسويسي","احمدنعينع","محمدرفعت","كاملوسيفالبهتيمي","طهالفشني","عبدالفتاحالشعشاعي","راغبمصطفىغلوش","سيدمتولي","السيدمتولي","السيدمتوليعبدالعال","محمودالشيمي","السيدسعيد","سيدسعيد","محمدالليثي","محمودالشحات","محمودالشحاتانور","الشحاتمحمدانور","حمديالزامل","محمدحصان","محمدعمران","محمدالطوخي","محمداحمدشبيب","محمدعبدالعزيزحصان"};
+        String[] modernNames={"محمدجبريل","حاتمفريدالواعر","ياسرسلامة","اسلامصبحي","احمدعامر","احمدعيسىالمعصراوي","محمودعبدالحكم","صابرعبدالحكم","حسنصالح","عبداللهكامل","محمودالرفاعي","احمدخليلشاهين","سيدرمضان","السيدسعيد","سيدسعيد","محمودالشحات","محمودالشحاتانور","الشحاتمحمدانور","السيدمتولي","السيدمتوليعبدالعال","محمدالليثي"};
         String[] names=old?oldNames:modernNames;
-        for(String candidate:names)if(n.contains(candidate))return true;
+        for(String candidate:names)if(n.contains(normalizeReciterName(candidate)))return true;
         return false;
     }
     private void applyReciterFilter(Spinner spinner,TextView state){
         reciters.clear();reciterNames.clear();
-        boolean old=reciterGroup==0;
         for(org.json.JSONObject item:allReciters){
             String name=item.optString("name","قارئ");
-            if(!isEgyptianReciter(name,mujawwadOnly?true:old)&&!mujawwadOnly)continue;
-            if(mujawwadOnly&&!isEgyptianReciter(name,true)&&!isEgyptianReciter(name,false))continue;
+            boolean include;
+            if(reciterGroup==0)include=true;
+            else if(reciterGroup==1)include=isEgyptianReciter(name,true);
+            else if(reciterGroup==2)include=isEgyptianReciter(name,false);
+            else include=isEgyptianReciter(name,true)||isEgyptianReciter(name,false);
+            if(!include)continue;
             if(mujawwadOnly){
                 boolean has=false;org.json.JSONArray m=item.optJSONArray("moshaf");
                 if(m!=null)for(int j=0;j<m.length();j++)if(isMujawwadMoshaf(m.optJSONObject(j))){has=true;break;}
@@ -144,7 +150,8 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
             reciters.add(item);reciterNames.add(name);
         }
         spinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,reciterNames));
-        state.setText(reciterNames.isEmpty()?(mujawwadOnly?"لا توجد تلاوات مجودة مصرية متاحة في المصدر حاليًا.":"لا توجد تسجيلات متاحة لهذا القسم حاليًا."):"تم تحميل "+reciterNames.size()+" قارئًا مصريًا في هذا القسم. اختر القارئ والسورة.");
+        String description=reciterGroup==0?"قارئًا من مختلف الدول":reciterGroup==3?"قارئًا مصريًا للتلاوات المجوّدة":"قارئًا مصريًا";
+        state.setText(reciterNames.isEmpty()?(mujawwadOnly?"لا توجد تلاوات مجوّدة مصرية متاحة في مصدر المكتبة حاليًا.":"لا توجد تسجيلات متاحة لهذا القسم حاليًا."):"تم تحميل "+reciterNames.size()+" "+description+". اختر القارئ والسورة.");
     }
 
     private org.json.JSONObject findMoshaf(org.json.JSONObject reciter,int surahId) throws Exception {
