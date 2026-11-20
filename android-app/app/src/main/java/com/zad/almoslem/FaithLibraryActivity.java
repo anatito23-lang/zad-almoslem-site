@@ -72,15 +72,23 @@ public class FaithLibraryActivity extends Activity {
   JSONArray rows=RemoteContentRepository.cached(this,collection);
   if(rows.length()==0)return;
   ArrayList<String[]> valid=new ArrayList<>();
+  String[][] existing="hadiths".equals(collection)?hadiths:duas;
+  for(String[] item:existing)valid.add(item);
+  boolean changed=false;
   for(int i=0;i<rows.length();i++){
    JSONObject row=rows.optJSONObject(i);if(row==null)continue;
    String text=row.optString("text","").trim();
    String source=row.optString("source","").trim();
-   if(!text.isEmpty()&&!source.isEmpty())valid.add(new String[]{text,source});
+   if(text.isEmpty()||source.isEmpty())continue;
+   boolean exists=false;
+   for(String[] item:valid){
+    if(item[0].equals(text)&&item[1].equals(source)){exists=true;break;}
+   }
+   if(!exists){valid.add(new String[]{text,source});changed=true;}
   }
-  if(valid.isEmpty())return;
-  if("hadiths".equals(collection)){hadiths=valid.toArray(new String[0][]);hadithIndex=0;renderHadith();}
-  else{duas=valid.toArray(new String[0][]);duaIndex=0;renderDua();}
+  if(!changed)return;
+  if("hadiths".equals(collection)){hadiths=valid.toArray(new String[0][]);renderHadith();}
+  else{duas=valid.toArray(new String[0][]);renderDua();}
  }
  private void renderHadith(){hadithText.setText("«"+hadiths[hadithIndex][0]+"»");hadithSource.setText(hadiths[hadithIndex][1]);}
  private void renderDua(){duaText.setText("﴿"+duas[duaIndex][0]+"﴾");duaSource.setText(duas[duaIndex][1]);}
