@@ -51,11 +51,11 @@ public class DailyReminderSettingsActivity extends Activity {
   card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(card,lp);
   card.addView(label("تذكيرات إيمانية خفيفة",18,green,true));
-  TextView desc=label("رسائل قصيرة تظهر من وقت لآخر: الصلاة على النبي ﷺ، والاستغفار، وذكر الله.",12,Color.GRAY,false);
+  TextView desc=label("آيات قصيرة من القرآن الكريم بصوت الشيخ عبدالباسط عبدالصمد، تتغير في كل تذكير.",12,Color.GRAY,false);
   desc.setPadding(0,dp(5),0,dp(8));card.addView(desc);
   Switch enabled=new Switch(this);enabled.setText("تفعيل التذكيرات الدورية");
   enabled.setChecked(prefs.getBoolean("gentle_enabled",true));card.addView(enabled);
-  Switch audio=new Switch(this);audio.setText("تشغيل التذكير بصوت مسموع");
+  Switch audio=new Switch(this);audio.setText("تشغيل آيات قرآنية بصوت الشيخ عبدالباسط");
   audio.setChecked(prefs.getBoolean("gentle_audio_enabled",true));card.addView(audio);
   audio.setOnCheckedChangeListener((button,checked)->prefs.edit().putBoolean("gentle_audio_enabled",checked).apply());
   TextView value=label("التذكير كل "+prefs.getInt("gentle_interval_hours",3)+" ساعات",14,green,false);card.addView(value);
@@ -76,7 +76,7 @@ public class DailyReminderSettingsActivity extends Activity {
   card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(card,lp);
   card.addView(label("التذكير باقتراب الصلاة",18,green,true));
-  Switch enabled=new Switch(this);enabled.setText("تنبيه صوتي قبل الصلاة");enabled.setChecked(prefs.getBoolean("approach_alert_enabled",true));card.addView(enabled);
+  Switch enabled=new Switch(this);enabled.setText("تشغيل تلاوة حقيقية قبل الصلاة بصوت الشيخ عبدالباسط");enabled.setChecked(prefs.getBoolean("approach_alert_enabled",true));card.addView(enabled);
   TextView value=label("قبل الصلاة بـ "+prefs.getInt("approach_alert_minutes",15)+" دقيقة",14,green,false);card.addView(value);
   SeekBar minutes=new SeekBar(this);minutes.setMax(59);minutes.setProgress(Math.max(1,Math.min(60,prefs.getInt("approach_alert_minutes",15)))-1);card.addView(minutes);
   enabled.setOnCheckedChangeListener((button,checked)->{
