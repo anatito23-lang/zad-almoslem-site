@@ -41,6 +41,7 @@ before(async () => {
       "النشر": false
     });
     await setDoc(doc(db, "duas", "draft"), { text: "دعاء مسودة", published: false });
+    await setDoc(doc(db, "duas", "published"), { text: "دعاء منشور", "النشر": true });
   });
 });
 
@@ -72,6 +73,11 @@ test("only the configured admin can read drafts and perform content CRUD", async
   await assertSucceeds(getDoc(doc(adminDb, "azkar", "draft")));
   await assertSucceeds(getDoc(doc(adminDb, "duas", "draft")));
 
+  const newDua = doc(adminDb, "duas", "admin-created");
+  await assertSucceeds(setDoc(newDua, { text: "دعاء جديد", source: "سورة البقرة: 201", published: false }));
+  await assertSucceeds(updateDoc(newDua, { text: "دعاء بعد التعديل" }));
+  await assertSucceeds(deleteDoc(newDua));
+
   const newDoc = doc(adminDb, "azkar", "admin-created");
   await assertSucceeds(setDoc(newDoc, { text: "ذكر جديد", published: false }));
   await assertSucceeds(updateDoc(newDoc, { text: "ذكر بعد التعديل" }));
@@ -84,4 +90,7 @@ test("authenticated non-admin users cannot read drafts or write content", async 
   await assertFails(setDoc(doc(userDb, "azkar", "not-allowed"), { text: "محاولة" }));
   await assertFails(updateDoc(doc(userDb, "azkar", "published-en"), { text: "تغيير غير مصرح" }));
   await assertFails(deleteDoc(doc(userDb, "azkar", "published-en")));
+  await assertFails(setDoc(doc(userDb, "duas", "not-allowed"), { text: "محاولة", published: false }));
+  await assertFails(updateDoc(doc(userDb, "duas", "published"), { text: "تغيير غير مصرح" }));
+  await assertFails(deleteDoc(doc(userDb, "duas", "published")));
 });
