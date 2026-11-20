@@ -7,6 +7,9 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.media.AudioAttributes;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -63,14 +66,21 @@ public class AdhanPlaybackService extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder builder = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this);
-        Notification notification = builder
-                .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+        Bitmap mosqueImage = createAzharMosqueBitmap();
+        builder.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle("حان الآن وقت الصلاة")
                 .setContentText("يرفع الآن أذان " + prayer)
                 .setContentIntent(content)
                 .setOngoing(true)
-                .addAction(android.R.drawable.ic_media_pause, "إيقاف الأذان", stopAction)
-                .build();
+                .addAction(android.R.drawable.ic_media_pause, "إيقاف الأذان", stopAction);
+        if (mosqueImage != null) {
+            builder.setLargeIcon(mosqueImage);
+            builder.setStyle(new Notification.BigPictureStyle()
+                    .bigPicture(mosqueImage)
+                    .bigLargeIcon((Bitmap) null)
+                    .setSummaryText("زاد المسلم — تقبّل الله صلاتكم"));
+        }
+        Notification notification = builder.build();
         try {
             if (Build.VERSION.SDK_INT >= 29) {
                 startForeground(NOTIFICATION_ID, notification,
@@ -88,6 +98,19 @@ public class AdhanPlaybackService extends Service {
             stopPlayback();
         }
         return START_NOT_STICKY;
+    }
+
+    private Bitmap createAzharMosqueBitmap() {
+        try {
+            Drawable drawable = getDrawable(R.drawable.azhar_mosque_bg);
+            if (drawable == null) return null;
+            int width = 720, height = 360;
+            Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, width, height);
+            drawable.draw(canvas);
+            return bitmap;
+        } catch (Exception ignored) { return null; }
     }
 
     private void createChannel() {
