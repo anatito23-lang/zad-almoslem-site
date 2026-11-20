@@ -141,6 +141,11 @@ public class RadioPlaybackService extends Service {
                     }
                 }
                 @Override public void onPlayerError(PlaybackException error) {
+                    // Cancel the startup timeout so it cannot overwrite the real playback error.
+                    if (startupTimeout != null) {
+                        playbackHandler.removeCallbacks(startupTimeout);
+                        startupTimeout = null;
+                    }
                     String detail = error.getErrorCodeName() + ": " +
                             (error.getMessage() == null ? error.toString() : error.getMessage());
                     getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
