@@ -1,0 +1,31 @@
+package com.zad.almoslem;
+import android.app.Activity;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
+import android.os.Bundle;
+import android.view.Gravity;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.*;
+public class AdhanFullScreenActivity extends Activity {
+ private final String[] ids={"azhar_mosque_bg","kaaba_wallpaper","madinah_wallpaper","aqsa_wallpaper","quran_wallpaper"};
+ private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
+ @Override public void onCreate(Bundle b){super.onCreate(b);
+  if(Build.VERSION.SDK_INT>=27){setShowWhenLocked(true);setTurnScreenOn(true);}
+  getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON|WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED|WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON|WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+  getWindow().setStatusBarColor(Color.TRANSPARENT);getWindow().setNavigationBarColor(Color.BLACK);getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
+  String prayer=getIntent().getStringExtra("prayer");if(prayer==null)prayer="الصلاة";
+  int choice=getSharedPreferences("zad_reminders",MODE_PRIVATE).getInt("adhan_wallpaper",0);if(choice<0||choice>=ids.length)choice=0;
+  FrameLayout frame=new FrameLayout(this);ImageView image=new ImageView(this);image.setScaleType(ImageView.ScaleType.CENTER_CROP);image.setImageResource(getResources().getIdentifier(ids[choice],"drawable",getPackageName()));frame.addView(image,new FrameLayout.LayoutParams(-1,-1));
+  View shade=new View(this);shade.setBackgroundColor(0x77000000);frame.addView(shade,new FrameLayout.LayoutParams(-1,-1));
+  LinearLayout content=new LinearLayout(this);content.setOrientation(1);content.setGravity(Gravity.CENTER);content.setPadding(dp(24),dp(40),dp(24),dp(40));
+  TextView brand=new TextView(this);brand.setText("زاد المسلم");brand.setTextColor(Color.WHITE);brand.setTextSize(19);brand.setTypeface(Typeface.DEFAULT,Typeface.BOLD);brand.setGravity(Gravity.CENTER);
+  TextView title=new TextView(this);title.setText("حان الآن وقت صلاة");title.setTextColor(Color.WHITE);title.setTextSize(24);title.setGravity(Gravity.CENTER);title.setPadding(0,dp(24),0,dp(8));
+  TextView name=new TextView(this);name.setText(prayer);name.setTextColor(Color.WHITE);name.setTextSize(38);name.setTypeface(Typeface.DEFAULT,Typeface.BOLD);name.setGravity(Gravity.CENTER);
+  TextView call=new TextView(this);call.setText("الصلاة نور وطمأنينة");call.setTextColor(Color.WHITE);call.setTextSize(18);call.setGravity(Gravity.CENTER);call.setPadding(0,dp(12),0,dp(30));
+  Button close=new Button(this);close.setText("إغلاق");close.setOnClickListener(v->finish());
+  content.addView(brand);content.addView(title);content.addView(name);content.addView(call);content.addView(close);frame.addView(content,new FrameLayout.LayoutParams(-1,-1));setContentView(frame);
+ }
+}

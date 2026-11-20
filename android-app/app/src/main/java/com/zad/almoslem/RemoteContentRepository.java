@@ -15,11 +15,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/** Synchronizes published azkar and duas while retaining an offline cache. */
+/** Synchronizes published faith content and keeps the last complete offline cache. */
 public final class RemoteContentRepository {
     private static final String PREFS = "zad_remote_content_cache";
     private static final Handler MAIN = new Handler(Looper.getMainLooper());
-
     private RemoteContentRepository() {}
 
     public static JSONArray cached(Context context, String collection) {
@@ -30,7 +29,8 @@ public final class RemoteContentRepository {
     }
 
     public static void sync(Context context, String collection, Runnable onUpdated) {
-        if (!"azkar".equals(collection) && !"duas".equals(collection)) return;
+        if (!"azkar".equals(collection) && !"duas".equals(collection)
+                && !"khutbahs".equals(collection) && !"waqafat".equals(collection)) return;
         Context app = context.getApplicationContext();
         String[] publicationFields = {"published", "تم النشر", "النشر"};
         Map<String, JSONObject> merged = new HashMap<>();
@@ -48,16 +48,24 @@ public final class RemoteContentRepository {
                                 if (row == null) row = new JSONObject();
                                 try {
                                     Map<String, Object> data = doc.getData();
-                                    Object text = data.containsKey("text") ? data.get("text") : data.get("نص");
-                                    Object source = data.containsKey("source") ? data.get("source") : data.get("مصدر");
-                                    Object category = data.containsKey("category") ? data.get("category") : data.get("فئة");
-                                    Object count = data.containsKey("count") ? data.get("count") : data.get("عدد");
-                                    if (text != null) row.put("text", text);
-                                    if (source != null) row.put("source", source);
-                                    if (category != null) row.put("category", category);
-                                    if (count != null) row.put("count", count);
-                                    row.put("id", doc.getId());
-                                    row.put("published", true);
+                                    putIfPresent(row, "id", doc.getId());
+                                    putIfPresent(row, "published", true);
+                                    if ("khutbahs".equals(collection) || "waqafat".equals(collection)) {
+                                        putIfPresent(row, "title", data.get("title"));
+                                        Object body = first(data, "body", "text", "نص");
+                                        putIfPresent(row, "body", body);
+                                        putIfPresent(row, "date", data.get("date"));
+                                        putIfPresent(row, "category", data.get("category"));
+                                    } else {
+                                        Object text = first(data, "text", "نص");
+                                        Object source = first(data, "source", "مصدر");
+                                        Object category = first(data, "category", "فئة");
+                                        Object count = first(data, "count", "عدد");
+                                        putIfPresent(row, "text", text);
+                                        putIfPresent(row, "source", source);
+                                        putIfPresent(row, "category", category);
+                                        putIfPresent(row, "count", count);
+                                    }
                                     merged.put(doc.getId(), row);
                                 } catch (Exception ignored) {}
                             }
@@ -71,11 +79,23 @@ public final class RemoteContentRepository {
         }
     }
 
+    private static Object first(Map<String, Object> data, String... keys) {
+        for (String key : keys) {
+            Object value = data.get(key);
+            if (value != null) return value;
+        }
+        return null;
+    }
+
+    private static void putIfPresent(JSONObject row, String key, Object value) throws Exception {
+        if (value != null) row.put(key, value);
+    }
+
     private static void finishIfReady(Context app, String collection,
             Map<String, JSONObject> merged, AtomicInteger completed,
             AtomicInteger failures, Runnable onUpdated) {
         if (completed.incrementAndGet() != 3) return;
-        if (failures.get() > 0) return; // Preserve the last complete cache if any publication-field query fails.
+        if (failures.get() > 0) return;
         JSONArray rows = new JSONArray();
         synchronized (merged) {
             for (JSONObject row : merged.values()) rows.put(row);

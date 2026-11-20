@@ -12,19 +12,19 @@ TextView title=label("المزيد من خدمات زاد المسلم",23,AppTh
 section(root,"🕌 الصلاة والأذان");
 add(root,"مواقيت الصلاة","عرض المواقيت وتحديثها واختيار المدينة",PrayerDashboardActivity.class);
 add(root,"إعدادات الأذان","اختيار صوت كل صلاة والتحكم في مستوى الصوت والتنزيل",MainActivity.class);
+add(root,"خلفيات شاشة الأذان","اختر صورة تظهر على الشاشة كاملة عند دخول وقت الصلاة",AdhanWallpaperSettingsActivity.class);
 add(root,"التنبيهات اليومية","إدارة التذكيرات والأذكار والتنبيهات",DailyReminderSettingsActivity.class);
 section(root,"📿 الرقية والابتهالات");
 add(root,"الرقية الشرعية","اختيار القارئ وتشغيل الرقية أو إيقافها",RuqyahActivity.class);
 add(root,"الابتهالات والإنشاد","تسجيلات الابتهالات الدينية",AudioLibraryActivity.class);
 section(root,"🎞️ محتوى إيماني");
 add(root,"ريلز إسلامي","بطاقات إيمانية رأسية: آيات وأحاديث صحيحة وأدعية، اسحب للتنقل بينها",IslamicReelsActivity.class);
+add(root,"الوقفات الإيمانية","وقفة قصيرة متجددة من المحتوى المنشور في لوحة الإدارة",FaithReflectionsActivity.class);
+add(root,"مكتبة خطب الجمعة","خطب محفوظة وخطب جديدة من لوحة الإدارة",KhutbahLibraryActivity.class);
 section(root,"🧭 خدمات إسلامية");
 add(root,"بوصلة القبلة","تحديد اتجاه القبلة",QiblaActivity.class);
-
-add(root,"مكتبة خطب الجمعة","الخطب والموضوعات الدعوية",KhutbahLibraryActivity.class);
 add(root,"المكتبة الإسلامية","الكتب والسنة والأدعية",FaithLibraryActivity.class);
 add(root,"التقويم الهجري والميلادي","المناسبات والتواريخ",CalendarActivity.class);
-
 section(root,"☀️ الأذكار والأوراد");
 add(root,"مكتبة الأذكار","أذكار الصباح والمساء والنوم وبعد الصلاة مع النص والمصدر والعداد",AzkarActivity.class);
 add(root,"وردي اليومي","متابعة الورد والأذكار اليومية",DailyWirdActivity.class);

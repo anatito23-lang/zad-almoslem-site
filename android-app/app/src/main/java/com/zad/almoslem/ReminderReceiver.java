@@ -288,11 +288,20 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
         Intent open=new Intent(context,MainActivity.class);
         PendingIntent content=PendingIntent.getActivity(context,0,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent fullScreen=null;
+        if(prayer && adhanEnabled && thisPrayerEnabled && !"off".equals(adhanMode)) {
+            Intent screen=new Intent(context,AdhanFullScreenActivity.class);
+            screen.putExtra("prayer",prayerName);
+            screen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            fullScreen=PendingIntent.getActivity(context,7300+Math.abs(prayerName.hashCode()%1000),screen,
+                    PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+        }
         Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,channelId):new Notification.Builder(context);
         String startError = prayer ? prefs.getString("adhan_last_start_error", "") : "";
         String notificationText = title==null?"تذكير من زاد المسلم":title;
         if (!startError.isEmpty()) notificationText = "تعذر بدء الأذان: " + startError;
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle(gentle?"تذكير لطيف من زاد المسلم":"قلبي اطمأن – زاد المسلم").setContentText(notificationText).setAutoCancel(true).setContentIntent(content);
+        if(fullScreen!=null) b.setFullScreenIntent(fullScreen,true);
         if(prayer && adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode)) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
         else if(prayer && adhanEnabled && thisPrayerEnabled && "off".equals(adhanMode)) { /* no alert */ }
         else if((gentle && exactAlarmAudioAllowed) || fallbackAudioNotification) b.setDefaults(0);
