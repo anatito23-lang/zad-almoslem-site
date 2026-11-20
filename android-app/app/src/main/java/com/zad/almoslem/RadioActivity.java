@@ -22,8 +22,7 @@ public class RadioActivity extends Activity {
 
     @Override public void onCreate(Bundle b) {
         super.onCreate(b);
-        getWindow().setStatusBarColor(Color.rgb(8,48,40));
-        getWindow().setNavigationBarColor(Color.rgb(8,48,40));
+        AppThemeColors.apply(this);
         if (Build.VERSION.SDK_INT >= 29) getWindow().setNavigationBarContrastEnforced(false);
         build();
         handler.post(statusTicker);
@@ -32,8 +31,8 @@ public class RadioActivity extends Activity {
     private void build() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(24, 24, 24, 24);
-        root.setBackgroundColor(Color.rgb(244,247,243));
+        root.setPadding(dp(16), dp(16), dp(16), dp(24));
+        root.setBackgroundColor(AppThemeColors.bg(this));
         setContentView(AppTabs.wrap(this, root, "radio"));
 
         TextView title = new TextView(this);
@@ -42,9 +41,9 @@ public class RadioActivity extends Activity {
         title.setTextColor(Color.WHITE);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         title.setGravity(Gravity.CENTER);
-        title.setPadding(12, 25, 12, 25);
+        title.setPadding(dp(12), dp(22), dp(12), dp(22));
         GradientDrawable bg = new GradientDrawable();
-        bg.setColor(Color.rgb(8,48,40));
+        bg.setColor(AppThemeColors.primary(this));
         bg.setCornerRadius(28);
         title.setBackground(bg);
         root.addView(title, match());
@@ -52,8 +51,8 @@ public class RadioActivity extends Activity {
         TextView desc = new TextView(this);
         desc.setText("اختر المحطة التي تحب الاستماع إليها. يستمر البث في الخلفية بعد مغادرة الصفحة.");
         desc.setTextSize(15);
-        desc.setTextColor(Color.DKGRAY);
-        desc.setPadding(0, 18, 0, 16);
+        desc.setTextColor(AppThemeColors.muted(this));
+        desc.setPadding(0, dp(18), 0, dp(16));
         root.addView(desc, match());
 
         addStation(root, "🇪🇬 إذاعة القرآن الكريم من القاهرة",
@@ -78,8 +77,8 @@ public class RadioActivity extends Activity {
 
         status = new TextView(this);
         status.setText("اختر محطة واضغط تشغيل. حالة الاتصال ستظهر هنا.");
-        status.setTextColor(Color.rgb(30,70,50));
-        status.setPadding(0, 18, 0, 18);
+        status.setTextColor(AppThemeColors.text(this));
+        status.setPadding(0, dp(18), 0, dp(18));
         root.addView(status, match());
     }
 
@@ -87,9 +86,9 @@ public class RadioActivity extends Activity {
                             String label, String station, String officialUrl) {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding(16, 14, 16, 12);
+        card.setPadding(dp(16), dp(14), dp(16), dp(12));
         GradientDrawable cardBg = new GradientDrawable();
-        cardBg.setColor(Color.WHITE);
+        cardBg.setColor(AppThemeColors.surface(this));
         cardBg.setCornerRadius(18);
         card.setBackground(cardBg);
         LinearLayout.LayoutParams cardLp = match();
@@ -100,13 +99,13 @@ public class RadioActivity extends Activity {
         heading.setText(name);
         heading.setTextSize(17);
         heading.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        heading.setTextColor(Color.rgb(8,48,40));
+        heading.setTextColor(AppThemeColors.text(this));
         card.addView(heading, match());
 
         TextView subtitle = new TextView(this);
         subtitle.setText(detail);
         subtitle.setTextSize(12);
-        subtitle.setTextColor(Color.DKGRAY);
+        subtitle.setTextColor(AppThemeColors.muted(this));
         subtitle.setPadding(0, dp(4), 0, dp(8));
         card.addView(subtitle, match());
 
