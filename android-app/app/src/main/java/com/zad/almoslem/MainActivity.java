@@ -38,6 +38,7 @@ public class MainActivity extends Activity {
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
         prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+        ReminderReceiver.ensureDefaultDailyReminders(this);
         getWindow().setStatusBarColor(Color.rgb(8,48,40));
         getWindow().setNavigationBarColor(Color.rgb(8,48,40));
         requestNotificationPermission();
