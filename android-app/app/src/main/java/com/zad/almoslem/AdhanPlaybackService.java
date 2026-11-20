@@ -54,6 +54,13 @@ public class AdhanPlaybackService extends Service {
         playDuaAfterCompletion = intent != null && intent.getBooleanExtra("play_dua_after", false);
         getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_active", true).apply();
         ReminderAudioService.stop(this);
+        // Keep the current radio/Quran player alive and pause it until the adhan finishes.
+        Intent pauseAudio = new Intent(this, RadioPlaybackService.class);
+        pauseAudio.setAction(RadioPlaybackService.ACTION_PAUSE_FOR_ADHAN);
+        try { startService(pauseAudio); }
+        catch (Exception error) {
+            android.util.Log.w("ZadAlmoslem", "Could not pause background audio for adhan", error);
+        }
         String prayer = intent == null ? "الصلاة" : intent.getStringExtra("prayer");
         activePrayer = prayer;
         createChannel();
@@ -315,10 +322,20 @@ public class AdhanPlaybackService extends Service {
         }
     }
 
+    private void resumeBackgroundAudioAfterAdhan() {
+        Intent resumeAudio = new Intent(this, RadioPlaybackService.class);
+        resumeAudio.setAction(RadioPlaybackService.ACTION_RESUME_AFTER_ADHAN);
+        try { startService(resumeAudio); }
+        catch (Exception error) {
+            android.util.Log.w("ZadAlmoslem", "Could not resume background audio after adhan", error);
+        }
+    }
+
     private void stopPlayback() {
         getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_active", false).apply();
         stopPlayerOnly();
         stopForeground(true);
+        resumeBackgroundAudioAfterAdhan();
         stopSelf();
     }
 
