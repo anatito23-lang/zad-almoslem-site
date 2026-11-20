@@ -220,18 +220,76 @@ public class MainActivity extends Activity {
         addNativeQuranPlayer(root);
 
         LinearLayout tasbeeh=column();
-        tasbeeh.setBackground(shape(Color.WHITE,16));tasbeeh.setPadding(dp(14),dp(12),dp(14),dp(12));
-        TextView tasTitle=text("السبحة الإلكترونية",17,Color.rgb(20,55,43),true);
-        TextView tasDesc=text("سبحان الله وبحمده — ذكر ثابت في السنة.",13,Color.DKGRAY,false);
-        TextView count=text("0",34,Color.rgb(17,91,68),true);count.setGravity(Gravity.CENTER);
-        int saved=prefs.getInt("native_tasbeeh_count",0);count.setText(String.valueOf(saved));
+        tasbeeh.setBackground(shape(Color.rgb(17,65,51),22));
+        tasbeeh.setPadding(dp(18),dp(18),dp(18),dp(18));
+        TextView tasTitle=text("السبحة الإلكترونية",20,Color.WHITE,true);
+        tasTitle.setGravity(Gravity.CENTER);
+        TextView tasDesc=text("وَاذْكُرُوا اللَّهَ كَثِيرًا",14,Color.rgb(224,199,133),true);
+        tasDesc.setGravity(Gravity.CENTER);
+        String[] tasbeehDhikr={"سبحان الله","الحمد لله","الله أكبر","لا إله إلا الله","أستغفر الله وأتوب إليه","اللهم صلِّ وسلم على نبينا محمد"};
+        int[] tasbeehGoals={33,66,99};
+        Spinner tasbeehGoal=new Spinner(this);
+        tasbeehGoal.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"٣٣ مرة","٦٦ مرة","٩٩ مرة"}));
+        int savedGoal=prefs.getInt("native_tasbeeh_goal",33);
+        int goalIndex=savedGoal==66?1:(savedGoal==99?2:0);
+        tasbeehGoal.setSelection(goalIndex);
+        TextView currentDhikr=text("",21,Color.WHITE,true);currentDhikr.setGravity(Gravity.CENTER);
+        currentDhikr.setPadding(dp(4),dp(20),dp(4),dp(10));
+        TextView count=text("0",54,Color.rgb(232,203,137),true);count.setGravity(Gravity.CENTER);
+        TextView target=text("",13,Color.rgb(225,225,215),false);target.setGravity(Gravity.CENTER);
+        TextView tasProgress=text("",13,Color.rgb(225,225,215),false);tasProgress.setGravity(Gravity.CENTER);
+        int[] dhikrIndex={prefs.getInt("native_tasbeeh_dhikr",0)};
+        int[] currentCount={prefs.getInt("native_tasbeeh_count",0)};
+        int[] goal={savedGoal};
+        Runnable drawTasbeeh=()->{
+            dhikrIndex[0]=Math.floorMod(dhikrIndex[0],tasbeehDhikr.length);
+            currentCount[0]=Math.max(0,Math.min(currentCount[0],goal[0]));
+            currentDhikr.setText(tasbeehDhikr[dhikrIndex[0]]);
+            count.setText(String.valueOf(currentCount[0]));
+            target.setText("الهدف: "+goal[0]+" مرة");
+            tasProgress.setText("الذكر "+(dhikrIndex[0]+1)+" من "+tasbeehDhikr.length+"  •  "+currentCount[0]+" / "+goal[0]);
+        };
         LinearLayout actions=row();
-        Button add=new Button(this);add.setText("تسبيح");add.setTextSize(14);
-        Button reset=new Button(this);reset.setText("تصفير");reset.setTextSize(14);
-        actions.addView(add,new LinearLayout.LayoutParams(0,dp(48),1));actions.addView(reset,new LinearLayout.LayoutParams(0,dp(48),1));
-        add.setOnClickListener(v->{int n=prefs.getInt("native_tasbeeh_count",0)+1;prefs.edit().putInt("native_tasbeeh_count",n).apply();count.setText(String.valueOf(n));});
-        reset.setOnClickListener(v->{prefs.edit().putInt("native_tasbeeh_count",0).apply();count.setText("0");});
-        tasbeeh.addView(tasTitle);tasbeeh.addView(tasDesc);tasbeeh.addView(count);tasbeeh.addView(actions);
+        Button add=new Button(this);add.setText("سَبِّح");add.setTextSize(17);
+        Button reset=new Button(this);reset.setText("إعادة");
+        actions.addView(add,new LinearLayout.LayoutParams(0,dp(54),2));
+        actions.addView(reset,new LinearLayout.LayoutParams(0,dp(54),1));
+        tasbeehGoal.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            public void onNothingSelected(AdapterView<?> parent){}
+            public void onItemSelected(AdapterView<?> parent,View view,int position,long id){
+                goal[0]=tasbeehGoals[position];
+                currentCount[0]=0;
+                prefs.edit().putInt("native_tasbeeh_goal",goal[0]).putInt("native_tasbeeh_count",0).apply();
+                drawTasbeeh.run();
+            }
+        });
+        add.setOnClickListener(v->{
+            if(currentCount[0]<goal[0]) currentCount[0]++;
+            if(currentCount[0]>=goal[0]){
+                prefs.edit().putInt("native_tasbeeh_count",0)
+                    .putInt("native_tasbeeh_dhikr",(dhikrIndex[0]+1)%tasbeehDhikr.length).apply();
+                dhikrIndex[0]=(dhikrIndex[0]+1)%tasbeehDhikr.length;
+                currentCount[0]=0;
+                drawTasbeeh.run();
+                android.widget.Toast.makeText(this,"أحسنت، اكتمل الذكر. انتقلنا إلى الذكر التالي",android.widget.Toast.LENGTH_SHORT).show();
+            }else{
+                prefs.edit().putInt("native_tasbeeh_count",currentCount[0])
+                    .putInt("native_tasbeeh_dhikr",dhikrIndex[0]).apply();
+                drawTasbeeh.run();
+            }
+        });
+        reset.setOnClickListener(v->{
+            currentCount[0]=0;
+            prefs.edit().putInt("native_tasbeeh_count",0).apply();
+            drawTasbeeh.run();
+        });
+        tasbeeh.addView(tasTitle);tasbeeh.addView(tasDesc);
+        tasbeeh.addView(text("اختر عدد التسبيحات",13,Color.WHITE,true));
+        tasbeeh.addView(tasbeehGoal,matchWrap());
+        tasbeeh.addView(currentDhikr);tasbeeh.addView(count);
+        tasbeeh.addView(target);tasbeeh.addView(tasProgress);
+        tasbeeh.addView(actions);
+        drawTasbeeh.run();
         addCard(root,tasbeeh);
 
         LinearLayout dhikr=column();
