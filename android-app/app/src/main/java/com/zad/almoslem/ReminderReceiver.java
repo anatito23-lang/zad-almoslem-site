@@ -16,6 +16,7 @@ public class ReminderReceiver extends BroadcastReceiver {
     private static final String PRAYER_CHANNEL_ID = "zad_prayer_alerts";
     private static final String PRAYER_TONE_CHANNEL_ID = "zad_prayer_tone";
     private static final String GENTLE_CHANNEL_ID = "zad_gentle_reminders";
+    private static final String GENTLE_FALLBACK_CHANNEL_ID = "zad_gentle_audio_fallback";
 
     public static void scheduleDaily(Context context, String key, int hour, int minute, String title) {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders", Context.MODE_PRIVATE);
@@ -233,7 +234,8 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
         NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
         boolean gentle="gentle_reminder".equals(key);
-        String channelId=prayer?((adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode))?PRAYER_TONE_CHANNEL_ID:PRAYER_CHANNEL_ID):(gentle?GENTLE_CHANNEL_ID:CHANNEL_ID);
+        boolean gentleAudioEnabled = prefs.getBoolean("gentle_audio_enabled", true);
+        String channelId=prayer?((adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode))?PRAYER_TONE_CHANNEL_ID:PRAYER_CHANNEL_ID):(gentle?((!exactAlarmAudioAllowed && gentleAudioEnabled)?GENTLE_FALLBACK_CHANNEL_ID:GENTLE_CHANNEL_ID):CHANNEL_ID);
         if(Build.VERSION.SDK_INT>=26){
             NotificationChannel ch;
             if(prayer){
@@ -247,10 +249,24 @@ public class ReminderReceiver extends BroadcastReceiver {
                 toneCh.enableVibration(true);
                 nm.createNotificationChannel(toneCh);
             } else if(gentle) {
-                ch=new NotificationChannel(GENTLE_CHANNEL_ID,"تذكيرات إيمانية خفيفة",NotificationManager.IMPORTANCE_LOW);
-                ch.setDescription("تذكيرات قصيرة بالصلاة على النبي والذكر والاستغفار، دون صوت أو اهتزاز");
-                ch.setSound(null,null);
-                ch.enableVibration(false);
+                if (!exactAlarmAudioAllowed && gentleAudioEnabled) {
+                    // Without exact-alarm access Android may not allow a background
+                    // foreground-service launch. Keep the reminder audible via its
+                    // notification channel instead of silently dropping all sound.
+                    ch=new NotificationChannel(GENTLE_FALLBACK_CHANNEL_ID,"تنبيه صوتي احتياطي للتذكير بالذكر",NotificationManager.IMPORTANCE_DEFAULT);
+                    ch.setDescription("صوت إشعار بديل عند عدم توفر إذن تشغيل التذكير الصوتي");
+                    ch.setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI,
+                            new android.media.AudioAttributes.Builder()
+                                    .setUsage(android.media.AudioAttributes.USAGE_NOTIFICATION)
+                                    .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                    .build());
+                    ch.enableVibration(true);
+                } else {
+                    ch=new NotificationChannel(GENTLE_CHANNEL_ID,"تذكيرات إيمانية خفيفة",NotificationManager.IMPORTANCE_LOW);
+                    ch.setDescription("تذكيرات قصيرة بالصلاة على النبي والذكر والاستغفار، دون صوت أو اهتزاز");
+                    ch.setSound(null,null);
+                    ch.enableVibration(false);
+                }
             } else {
                 ch=new NotificationChannel(CHANNEL_ID,"تنبيهات زاد المسلم",NotificationManager.IMPORTANCE_HIGH);
                 ch.setDescription("تنبيهات الأذكار وقيام الليل");
@@ -266,7 +282,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle(gentle?"تذكير لطيف من زاد المسلم":"قلبي اطمأن – زاد المسلم").setContentText(notificationText).setAutoCancel(true).setContentIntent(content);
         if(prayer && adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode)) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
         else if(prayer && adhanEnabled && thisPrayerEnabled && "off".equals(adhanMode)) { /* no alert */ }
-        else if(gentle) b.setDefaults(0);
+        else if(gentle && exactAlarmAudioAllowed) b.setDefaults(0);
         else b.setDefaults(Notification.DEFAULT_VIBRATE);
         if(!prayer || (adhanEnabled && thisPrayerEnabled && !"off".equals(adhanMode))) nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
