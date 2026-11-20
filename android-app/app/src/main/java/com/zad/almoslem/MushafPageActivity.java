@@ -235,7 +235,7 @@ public class MushafPageActivity extends Activity {
     private void showSurahIndex() {
         String[] entries = new String[SURAHS.length];
         for (int i = 0; i < SURAHS.length; i++)
-            entries[i] = String.format(Locale ArabicLocaleHolder.LOCALE, "%03d  سورة %s  —  صفحة %d", i + 1, SURAHS[i], SURAH_PAGES[i]);
+            entries[i] = String.format(ArabicLocaleHolder.LOCALE, "%03d  سورة %s  —  صفحة %d", i + 1, SURAHS[i], SURAH_PAGES[i]);
         new AlertDialog.Builder(this)
                 .setTitle("فهرس سور القرآن الكريم")
                 .setItems(entries, (dialog, which) -> showPage(SURAH_PAGES[which]))
