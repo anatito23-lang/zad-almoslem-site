@@ -33,6 +33,7 @@ public class PrayerDashboardActivity extends Activity {
     private LinearLayout prayerHero;
     private final TextView[] timeViews=new TextView[5];
     private final TextView[] remainingViews=new TextView[5];
+    private TextView sunriseView;
     private final Handler handler=new Handler();
     private final Runnable ticker=new Runnable(){@Override public void run(){refreshCountdowns();handler.postDelayed(this,1000);}};
     private int green;
@@ -92,7 +93,7 @@ public class PrayerDashboardActivity extends Activity {
             remainingViews[i]=label("المتبقي: —",12,AppThemeColors.muted(this),false);remainingViews[i].setGravity(Gravity.CENTER);card.addView(remainingViews[i]);
             LinearLayout.LayoutParams cp=full();cp.bottomMargin=dp(9);root.addView(card,cp);
         }
-        LinearLayout sunriseCard=col();sunriseCard.setPadding(dp(14),dp(10),dp(14),dp(10));sunriseCard.setBackground(bg(AppThemeColors.surface(this),15));TextView sunriseName=label("🌄  الشروق — دون أذان",18,green,true);sunriseName.setGravity(Gravity.CENTER);sunriseCard.addView(sunriseName,new LinearLayout.LayoutParams(-1,dp(42)));TextView sunriseValue=label(savedSunrise(),20,green,true);sunriseValue.setGravity(Gravity.CENTER);sunriseCard.addView(sunriseValue);LinearLayout.LayoutParams sunriseLp=full();sunriseLp.bottomMargin=dp(9);root.addView(sunriseCard,sunriseLp);
+        LinearLayout sunriseCard=col();sunriseCard.setPadding(dp(14),dp(10),dp(14),dp(10));sunriseCard.setBackground(bg(AppThemeColors.surface(this),15));TextView sunriseName=label("🌄  الشروق — دون أذان",18,green,true);sunriseName.setGravity(Gravity.CENTER);sunriseCard.addView(sunriseName,new LinearLayout.LayoutParams(-1,dp(42)));sunriseView=label(savedSunrise(),20,green,true);sunriseView.setGravity(Gravity.CENTER);sunriseCard.addView(sunriseView);LinearLayout.LayoutParams sunriseLp=full();sunriseLp.bottomMargin=dp(9);root.addView(sunriseCard,sunriseLp);
         TextView trackerTitle=label("متتبع الصلوات اليومي",19,AppThemeColors.text(this),true);trackerTitle.setPadding(0,dp(16),0,dp(5));root.addView(trackerTitle);
         TextView trackerHint=label("علّم الصلاة بعد أدائها، وسيُحفظ إنجازك لهذا اليوم على الهاتف.",12,AppThemeColors.muted(this),false);root.addView(trackerHint);
         trackerCount=label("",14,green,true);trackerCount.setPadding(0,dp(7),0,dp(7));root.addView(trackerCount);
@@ -117,6 +118,7 @@ public class PrayerDashboardActivity extends Activity {
     }
     private long nextTime(String p){int h=prefs.getInt("native_time_hour_"+p,-1);if(h<0)return -1;Calendar c=Calendar.getInstance();c.set(Calendar.HOUR_OF_DAY,h);c.set(Calendar.MINUTE,prefs.getInt("native_time_minute_"+p,0));c.set(Calendar.SECOND,0);c.set(Calendar.MILLISECOND,0);if(c.getTimeInMillis()<=System.currentTimeMillis())c.add(Calendar.DAY_OF_YEAR,1);return c.getTimeInMillis();}
     private void refreshCountdowns(){
+        if(sunriseView!=null)sunriseView.setText(savedSunrise());
         long now=System.currentTimeMillis(),soon=Long.MAX_VALUE;int next=-1;long[] times=new long[5];
         for(int i=0;i<5;i++){String p=PRAYERS[i];timeViews[i].setText(savedTime(p));times[i]=nextTime(p);if(times[i]>0&&times[i]<soon){soon=times[i];next=i;}}
         for(int i=0;i<5;i++){if(times[i]>0){long diff=Math.max(0,times[i]-now)/1000;remainingViews[i].setText("المتبقي: "+format(diff)+(i==next?"  • الصلاة القادمة":""));}else remainingViews[i].setText("حدّث المواقيت لعرض الوقت المتبقي");}
