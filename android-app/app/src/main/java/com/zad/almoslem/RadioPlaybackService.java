@@ -66,7 +66,7 @@ public class RadioPlaybackService extends Service {
              "https://stream.radiojar.com/8s5u5tpdtwzuv".equals(url) ||
              "https://qurango.net/radio/mishary_alafasi".equals(url) ||
              "https://live.kwikmotion.com/sbrksaquranradiolive/srpksaquranradio/playlist.m3u8".equals(url) ||
-             "http://www.quran-radio.org:8002/".equals(url);
+             false;
         boolean allowedQuran=false,allowedLocal=false,allowedAudio=false;
         File localFile=null;
         String localPath=intent==null?null:intent.getStringExtra("local_path");
