@@ -50,12 +50,12 @@ public class MushafPageActivity extends Activity {
     private Button previous, next;
     private ProgressBar progress;
     private GestureDetector gesture;
-    private final int green = Color.rgb(8,48,40);
+    private int green;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
-        getWindow().setStatusBarColor(green);
-        getWindow().setNavigationBarColor(green);
+        green=AppThemeColors.primary(this);
+        AppThemeColors.apply(this);
         page = Math.max(1, Math.min(604, getIntent().getIntExtra("page",
                 getSharedPreferences("zad_mushaf", MODE_PRIVATE).getInt("last_page", 1))));
         build();
@@ -87,7 +87,7 @@ public class MushafPageActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(3), dp(3), dp(3), dp(4));
-        root.setBackgroundColor(Color.rgb(242,240,230));
+        root.setBackgroundColor(AppThemeColors.bg(this));
 
         LinearLayout toolbar = new LinearLayout(this);
         toolbar.setGravity(Gravity.CENTER_VERTICAL);
@@ -99,7 +99,7 @@ public class MushafPageActivity extends Activity {
         toolbar.addView(index, new LinearLayout.LayoutParams(0, dp(38), 1));
         index.setOnClickListener(v -> showSurahIndex());
 
-        pageLabel = label("", 15, green, true);
+        pageLabel = label("", 15, AppThemeColors.text(this), true);
         toolbar.addView(pageLabel, new LinearLayout.LayoutParams(0, dp(38), 1));
         root.addView(toolbar);
 
@@ -133,11 +133,11 @@ public class MushafPageActivity extends Activity {
         pageImage.setOnTouchListener((v, event) -> gesture.onTouchEvent(event));
         pageFrame.setOnTouchListener((v, event) -> gesture.onTouchEvent(event));
 
-        status = label("صفحات المصحف تُحمّل وتُحفظ تلقائيًا على الهاتف", 12, Color.DKGRAY, false);
+        status = label("صفحات المصحف تُحمّل وتُحفظ تلقائيًا على الهاتف", 12, AppThemeColors.muted(this), false);
         status.setTextSize(10);
         status.setPadding(0, dp(2), 0, dp(2));
         root.addView(status);
-        TextView attribution = label("صور صفحات المصحف: Quran-Images — ترخيص MIT", 9, Color.GRAY, false);
+        TextView attribution = label("صور صفحات المصحف: Quran-Images — ترخيص MIT", 9, AppThemeColors.muted(this), false);
         root.addView(attribution);
 
         progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
