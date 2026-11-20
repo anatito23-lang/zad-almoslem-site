@@ -36,6 +36,14 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         Button download=new Button(this);download.setText("تنزيل السورة للاستماع دون إنترنت");card.addView(download,matchWrap());
         ProgressBar quranProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);quranProgress.setMax(100);card.addView(quranProgress,matchWrap());
         TextView state=text("جارٍ تحميل قائمة القراء من مكتبة التسجيلات.",12,Color.rgb(80,100,90),false);card.addView(state);
+        TextView extraTitle=text("مصادر إضافية للتلاوات المجوّدة",16,AppThemeColors.primary(this),true);
+        extraTitle.setPadding(0,dp(18),0,dp(6));card.addView(extraTitle);
+        TextView extraNote=text("بعض القراء الذين طلبتهم غير موجودين في مكتبة MP3Quran الحالية؛ هذه روابط مباشرة لمصادرهم، وتفتح صفحة المصدر للاستماع. لن نعرضهم كأنهم مدمجون في المشغل قبل التحقق من ملفاتهم.",12,AppThemeColors.muted(this),false);
+        extraNote.setPadding(0,0,0,dp(8));card.addView(extraNote);
+        addExternalSourceButton(card,"السيد متولي عبد العال — تلاوات مجوّدة","https://etilawa.com/reciters/seidmetwallyabdelaal/");
+        addExternalSourceButton(card,"محمد الليثي — الموقع الرسمي","https://www.sheikhleithy.com/");
+        addExternalSourceButton(card,"السيد سعيد — 15 تلاوة مجوّدة","https://www.daresouli.com/2023/01/quraan-reciting-by-sayed-saeed-mp3.html");
+        addExternalSourceButton(card,"محمود الشحات أنور — التلاوات","https://play.anghami.com/artist/3222944?lang=ar");
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){} public void onItemSelected(AdapterView<?> p,View v,int pos,long id){reciterGroup=pos;mujawwadOnly=pos==3;applyReciterFilter(reciterSpinner,state);}});
         addCard(root,card);
         new Thread(()->{
@@ -115,6 +123,15 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         });
     }
 
+
+    private void addExternalSourceButton(LinearLayout parent,String label,String url){
+        Button button=new Button(this);button.setText(label);button.setAllCaps(false);
+        button.setOnClickListener(v->{
+            try{startActivity(new Intent(Intent.ACTION_VIEW,android.net.Uri.parse(url)));}
+            catch(Exception e){Toast.makeText(this,"تعذر فتح مصدر التلاوة",Toast.LENGTH_SHORT).show();}
+        });
+        parent.addView(button,matchWrap());
+    }
 
     private boolean isMujawwadMoshaf(org.json.JSONObject m){
         if(m==null)return false;
