@@ -9,11 +9,11 @@ private void build(){ScrollView scroll=new ScrollView(this);LinearLayout root=ne
 TextView title=label("الرقية الشرعية",24,AppThemeColors.text(this),true);title.setGravity(Gravity.CENTER);root.addView(title);
 TextView intro=label("اختر تسجيل الرقية والقارئ. يمكنك إيقاف الصوت من الزر الموجود أسفل كل تسجيل.",14,AppThemeColors.muted(this),false);intro.setPadding(0,dp(8),0,dp(16));root.addView(intro);
 addCard(root,"الشيخ محمود خليل الحصري","https://archive.org/download/20240228_20240228_1849/041%20%2011%20%20%20%D8%A7%D9%84%D8%B1%D9%82%D9%8A%D8%A9%20%D8%A7%D9%84%D8%B4%D8%B1%D8%B9%D9%8A%D8%A9%20%D9%84%D8%B9%D9%84%D8%A7%D8%AC%20%D8%A7%D9%84%D8%B3%D8%AD%D8%B1%20%D8%A7%D9%84%D9%85%D8%B3%20%D8%A7%D9%84%D8%AD%D8%B3%D8%AF%20%D8%A8%D8%B5%D9%88%D8%AA%20%D8%A7%D9%84%D8%B4%D9%8A%D8%AE%20%D9%85%D8%AD%D9%85%D9%88%D8%AF%20%D8%AE%D9%84%D9%8A%D9%84%20%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%89%20%D8%B1%D8%AD%D9%85%D9%87%20%D8%A7%D9%84%D9%84%D9%87%20%D8%AC%D9%88%D8%AF%D8%A9%20%D8%B9%D8%A7%D9%84%D9%8A%D8%A9.mp3");
-addCard(root,"الشيخ مشاري راشد العفاسي","https://ia601709.us.archive.org/13/items/e3fasi-Rokia/e3fasi-seher.mp3");
-addCard(root,"الشيخ ناصر القطامي","https://ia600909.us.archive.org/4/items/alqtami-Roqiaa/alqtami-seher.mp3");
-addCard(root,"الشيخ ياسر الدوسري","https://ia601705.us.archive.org/34/items/dosari-Roqia/dosari-seher.mp3");
-addCard(root,"الشيخ علي الحذيفي","https://ia601808.us.archive.org/32/items/hothife-Roqia/hothife-seher.mp3");
-addCard(root,"الشيخ هاني الرفاعي","https://ia601708.us.archive.org/29/items/rifa3i-Roqia/rifa3i-seher.mp3");
+addCard(root,"الشيخ مشاري راشد العفاسي","https://archive.org/download/e3fasi-Rokia/e3fasi-seher.mp3");
+addCard(root,"الشيخ ناصر القطامي","https://archive.org/download/alqtami-Roqiaa/alqtami-seher.mp3");
+addCard(root,"الشيخ ياسر الدوسري","https://archive.org/download/dosari-Roqia/dosari-seher.mp3");
+addCard(root,"الشيخ علي الحذيفي","https://archive.org/download/hothife-Roqia/hothife-seher.mp3");
+addCard(root,"الشيخ هاني الرفاعي","https://archive.org/download/rifa3i-Roqia/rifa3i-seher.mp3");
 status=label("إذا لم يبدأ أحد التسجيلات، ستظهر رسالة توضح سبب تعذر الاتصال بالمصدر.",12,AppThemeColors.muted(this),false);status.setPadding(0,dp(12),0,0);root.addView(status);
 setContentView(AppTabs.wrap(this,scroll,"more"));}
 private void addCard(LinearLayout root,String name,String url){LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(AppThemeColors.surface(this),16));TextView title=label(name,16,AppThemeColors.text(this),true);card.addView(title);
