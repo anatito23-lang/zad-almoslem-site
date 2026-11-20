@@ -1,0 +1,36 @@
+name: Firestore Rules Tests
+
+on:
+  pull_request:
+    branches:
+      - feature/firebase-content-sync
+      - feature/firebase-admin-panel
+    paths:
+      - 'firestore.rules'
+      - 'firebase.json'
+      - 'tests/firestore/**'
+      - '.github/workflows/firestore-rules-tests.yml'
+  push:
+    branches:
+      - feature/firebase-content-sync
+      - feature/firebase-admin-panel
+    paths:
+      - 'firestore.rules'
+      - 'firebase.json'
+      - 'tests/firestore/**'
+      - '.github/workflows/firestore-rules-tests.yml'
+
+jobs:
+  firestore-rules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Firebase test dependencies
+        run: npm install --no-save --no-package-lock --no-audit --no-fund firebase@11.10.0 @firebase/rules-unit-testing@4.0.1 firebase-tools@14.11.2
+      - name: Test Firestore security rules in emulator
+        run: npx firebase-tools emulators:exec --only firestore --project demo-zad-almoslem "node --test tests/firestore/firestore-rules.test.mjs"

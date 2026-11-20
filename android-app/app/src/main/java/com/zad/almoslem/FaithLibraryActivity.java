@@ -7,10 +7,12 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.widget.*;
 import java.util.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class FaithLibraryActivity extends Activity {
  private final int green=Color.rgb(8,48,40);
- private final String[][] hadiths={
+ private String[][] hadiths={
   {"إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى","متفق عليه"},
   {"لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه","متفق عليه"},
   {"من كان يؤمن بالله واليوم الآخر فليقل خيرًا أو ليصمت","متفق عليه"},
@@ -19,7 +21,7 @@ public class FaithLibraryActivity extends Activity {
   {"من سلك طريقًا يلتمس فيه علمًا سهل الله له به طريقًا إلى الجنة","رواه مسلم"},
   {"انظروا إلى من أسفل منكم، ولا تنظروا إلى من هو فوقكم؛ فهو أجدر ألا تزدروا نعمة الله عليكم","رواه مسلم (2963)"}
  };
- private final String[][] duas={
+ private String[][] duas={
   {"رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ","سورة البقرة: 201"},
   {"رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا وَهَبْ لَنَا مِنْ لَدُنْكَ رَحْمَةً إِنَّكَ أَنْتَ الْوَهَّابُ","سورة آل عمران: 8"},
   {"رَبَّنَا ظَلَمْنَا أَنْفُسَنَا وَإِنْ لَمْ تَغْفِرْ لَنَا وَتَرْحَمْنَا لَنَكُونَنَّ مِنَ الْخَاسِرِينَ","سورة الأعراف: 23"},
@@ -27,9 +29,10 @@ public class FaithLibraryActivity extends Activity {
   {"رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ وَاجْعَلْنَا لِلْمُتَّقِينَ إِمَامًا","سورة الفرقان: 74"}
  };
  private int hadithIndex=0,duaIndex=0;
+ private String[][] localDuas;
  private TextView hadithText,hadithSource,duaText,duaSource,khatmaResult;
  private EditText daysInput;
- @Override public void onCreate(Bundle state){super.onCreate(state);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);build();}
+ @Override public void onCreate(Bundle state){super.onCreate(state);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);localDuas=duas.clone();build();applyRemoteRows("duas");RemoteContentRepository.sync(this,"duas",()->applyRemoteRows("duas"));}
  private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
  private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.RIGHT);t.setTextDirection(android.view.View.TEXT_DIRECTION_RTL);t.setLineSpacing(dp(4),1.08f);if(bold)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
  private GradientDrawable bg(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));return d;}
@@ -65,6 +68,27 @@ public class FaithLibraryActivity extends Activity {
   topics.addView(label("﴿أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ﴾ — الرعد: 28",18,green,true));
   topics.addView(label("القناعة لا تعني أن تتوقف عن السعي، بل أن تسعى من غير حسد، وتطلب الرزق من غير سخط، وتفرح بما أعطاك الله وأنت تعمل لتحسين حالك بالحلال.",14,Color.rgb(50,65,55),false));
   topics.addView(label("المحافظة على الصلاة: اجعل الصلاة أول ما تهتم به في يومك، وحافظ عليها في وقتها.\n\nبر الوالدين وصلة الرحم: من أعظم أبواب البر الإحسان إلى الوالدين والسؤال عن الأقارب وجبر الخواطر.\n\nالتوبة والاستغفار: باب التوبة مفتوح، فلا يقنط عبد من رحمة الله، وليتبع السيئة حسنة تمحها.\n\nالرفق بالأبناء: الطفل يحتاج إلى من يسمعه ويحتويه قبل أن يوجهه؛ فالكلمة الطيبة والقدوة الحسنة تبني قلبًا آمنًا.\n\nضبط الغضب قبل الكلام: إذا احتد النقاش، توقف لحظة واستعذ بالله ولا تتعجل الرد. اترك لنفسك وقتًا تهدأ فيه، ثم ارجع إلى الحوار بصوت هادئ؛ فالهدف حل المشكلة لا كسب الجولة.\n\nشكر النعمة بالفعل: سمّ النعمة واعترف بأنها من الله، واحفظها من الحرام، واستعملها في الخير؛ فشكر الصحة يكون بالطاعة، وشكر المال بالإنفاق الحلال ومساعدة المحتاج.",14,Color.rgb(50,65,55),false));
+ }
+ private void applyRemoteRows(String collection){
+  if(!"duas".equals(collection))return;
+  JSONArray rows=RemoteContentRepository.cached(this,collection);
+  ArrayList<String[]> valid=new ArrayList<>();
+  for(String[] item:localDuas)valid.add(item);
+  for(int i=0;i<rows.length();i++){
+   JSONObject row=rows.optJSONObject(i);if(row==null)continue;
+   String text=row.optString("text","").trim();
+   String source=row.optString("source","").trim();
+   if(text.isEmpty())continue;
+   if(source.isEmpty())source="المصدر غير مذكور";
+   boolean exists=false;
+   for(String[] item:valid){
+    if(item[0].equals(text)&&item[1].equals(source)){exists=true;break;}
+   }
+   if(!exists)valid.add(new String[]{text,source});
+  }
+  duas=valid.toArray(new String[0][]);
+  if(duaIndex>=duas.length)duaIndex=0;
+  renderDua();
  }
  private void renderHadith(){hadithText.setText("«"+hadiths[hadithIndex][0]+"»");hadithSource.setText(hadiths[hadithIndex][1]);}
  private void renderDua(){duaText.setText("﴿"+duas[duaIndex][0]+"﴾");duaSource.setText(duas[duaIndex][1]);}

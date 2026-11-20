@@ -3,15 +3,21 @@ name: Build Zad Almoslem APK
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main, native-android-app]
+    branches: [main, native-android-app, feature/firebase-content-sync, feature/firebase-admin-panel]
     paths:
       - 'android-app/**'
       - '.github/workflows/build-apk.yml'
+      - 'admin.html'
+      - 'content-admin.html'
+      - 'firestore.rules'
   push:
     paths:
       - 'android-app/**'
       - '.github/workflows/build-apk.yml'
-    branches: [main, feat/per-prayer-adhan-voices, native-android-app, update-v3-prayer-mushaf-tabs]
+      - 'admin.html'
+      - 'content-admin.html'
+      - 'firestore.rules'
+    branches: [main, feat/per-prayer-adhan-voices, native-android-app, feature/firebase-content-sync, feature/firebase-admin-panel, update-v3-prayer-mushaf-tabs]
 
 jobs:
   build:

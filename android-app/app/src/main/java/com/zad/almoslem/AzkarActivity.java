@@ -9,6 +9,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
 import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class AzkarActivity extends Activity {
     private final int green=Color.rgb(8,48,40), ink=Color.rgb(40,58,48);
@@ -17,13 +19,14 @@ public class AzkarActivity extends Activity {
         Zikr(String c,String t,String s,int n){category=c;text=t;source=s;count=n;}
     }
     private final ArrayList<Zikr> items=new ArrayList<>();
+    private final ArrayList<Zikr> localItems=new ArrayList<>();
     private final ArrayList<Zikr> shown=new ArrayList<>();
     private TextView zikrText, sourceText, countText, positionText;
     private Spinner categorySpinner;
     private int index=0, remaining=0;
     private String currentCategory="أذكار الصباح";
 
-    @Override public void onCreate(Bundle state){super.onCreate(state);AppThemeColors.apply(this);load();build();}
+    @Override public void onCreate(Bundle state){super.onCreate(state);AppThemeColors.apply(this);load();localItems.addAll(items);build();applyRemoteAzkar();RemoteContentRepository.sync(this, "azkar", this::applyRemoteAzkar);}
     private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
     private TextView label(String s,int size,int color,boolean bold){
         TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);
@@ -61,6 +64,40 @@ public class AzkarActivity extends Activity {
         add(prayer,"اللهم أعني على ذكرك وشكرك وحسن عبادتك.","رواه أبو داود والنسائي، وصححه أهل العلم",1);
         add(prayer,"قراءة آية الكرسي: ﴿اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ...﴾ إلى آخر الآية.","ورد في فضلها حديث صحيح رواه النسائي في عمل اليوم والليلة وغيره",1);
     }
+    private void applyRemoteAzkar(){
+        // Rebuild from bundled content plus the latest published snapshot.
+        // This removes remotely unpublished/deleted items and applies edits/count changes.
+        String previous=currentCategory;
+        items.clear();
+        items.addAll(localItems);
+        JSONArray remote=RemoteContentRepository.cached(this,"azkar");
+        for(int i=0;i<remote.length();i++){
+            JSONObject row=remote.optJSONObject(i);if(row==null)continue;
+            String category=row.optString("category","").trim();
+            String text=row.optString("text","").trim();
+            String source=row.optString("source","").trim();
+            int count=row.optInt("count",1);
+            if(category.isEmpty()||text.isEmpty()||count<1)continue;
+            if(source.isEmpty())source="لم يُذكر المصدر في بيانات الذكر";
+            boolean exists=false;
+            for(Zikr item:items){
+                if(item.category.equals(category)&&item.text.equals(text)&&item.source.equals(source)){
+                    item.count=count;
+                    exists=true;break;
+                }
+            }
+            if(!exists)items.add(new Zikr(category,text,source,count));
+        }
+        ArrayList<String> categories=new ArrayList<>();
+        for(Zikr z:items)if(!categories.contains(z.category))categories.add(z.category);
+        if(categories.isEmpty())return;
+        ArrayAdapter<String> adapter=new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,categories);
+        categorySpinner.setAdapter(adapter);
+        int selected=categories.indexOf(previous);
+        categorySpinner.setSelection(selected>=0?selected:0);
+        currentCategory=categories.get(selected>=0?selected:0);
+        filter();
+    }
     private void build(){
         ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(1);
         root.setPadding(dp(16),dp(16),dp(16),dp(28));root.setBackgroundColor(AppThemeColors.bg(this));scroll.addView(root);
@@ -82,7 +119,7 @@ public class AzkarActivity extends Activity {
         prev.setText("السابق");next.setText("التالي");nav.addView(prev,new LinearLayout.LayoutParams(0,dp(48),1));nav.addView(next,new LinearLayout.LayoutParams(0,dp(48),1));root.addView(nav);
         positionText=label("",12,AppThemeColors.muted(this),false);root.addView(positionText);
         TextView note=label("تنبيه: تختلف أعداد بعض الأذكار باختلاف الروايات؛ التزمنا بالعدد المشهور في المصدر المذكور، وما لم يثبت له عدد محدد نُبّه عليه.",11,AppThemeColors.muted(this),false);note.setPadding(0,dp(14),0,0);root.addView(note);
-        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){} public void onItemSelected(AdapterView<?> p,View v,int pos,long id){currentCategory=categories[pos];filter();}});
+        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){} public void onItemSelected(AdapterView<?> p,View v,int pos,long id){Object selected=p.getItemAtPosition(pos);if(selected!=null){currentCategory=selected.toString();filter();}}});
         count.setOnClickListener(v->{if(remaining>0){remaining--;render();}if(remaining==0&&index<shown.size()-1){index++;remaining=shown.get(index).count;render();}});
         reset.setOnClickListener(v->{if(!shown.isEmpty()){remaining=shown.get(index).count;render();}});
         prev.setOnClickListener(v->{if(index>0){index--;remaining=shown.get(index).count;render();}});
