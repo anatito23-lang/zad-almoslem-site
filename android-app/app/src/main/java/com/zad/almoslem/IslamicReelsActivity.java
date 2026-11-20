@@ -75,8 +75,8 @@ public class IslamicReelsActivity extends Activity {
         Button next=new Button(this);next.setText("التالي");next.setOnClickListener(v->move(1));
         controls.addView(previous,new LinearLayout.LayoutParams(0,dp(48),1));controls.addView(next,new LinearLayout.LayoutParams(0,dp(48),1));overlay.addView(controls);
         page.setOnTouchListener((v,event)->{
-            if(event.getAction()==MotionEvent.ACTION_DOWN){downY=event.getY();return true;}
-            if(event.getAction()==MotionEvent.ACTION_UP){float delta=downY-event.getY();if(Math.abs(delta)>dp(45))move(delta>0?1:-1);return true;}
+            if(event.getAction()==MotionEvent.ACTION_DOWN){downY=event.getY();if(v.getParent()!=null)v.getParent().requestDisallowInterceptTouchEvent(true);return true;}
+            if(event.getAction()==MotionEvent.ACTION_UP){float delta=downY-event.getY();if(v.getParent()!=null)v.getParent().requestDisallowInterceptTouchEvent(false);if(Math.abs(delta)>dp(45))move(delta>0?1:-1);return true;}
             return true;
         });
         setContentView(AppTabs.wrap(this,page,"more"));
