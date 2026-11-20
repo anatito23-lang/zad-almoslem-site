@@ -1,6 +1,11 @@
 package com.zad.almoslem;
 import android.app.Activity;import android.content.Intent;import android.graphics.Color;import android.graphics.Typeface;import android.graphics.drawable.GradientDrawable;import android.os.Build;import android.os.Bundle;import android.view.Gravity;import android.view.View;import android.widget.*;import java.io.*;import java.net.HttpURLConnection;import java.net.URL;import java.util.Locale;import java.util.ArrayList;
 public class QuranListeningActivity extends Activity{
+private boolean mujawwadOnly=false;
+private int reciterGroup=0;
+private final ArrayList<org.json.JSONObject> allReciters=new ArrayList<>();
+private final ArrayList<org.json.JSONObject> reciters=new ArrayList<>();
+private final ArrayList<String> reciterNames=new ArrayList<>();
 private int dp(float n){return(int)(n*getResources().getDisplayMetrics().density+.5f);}
 private LinearLayout column(){LinearLayout l=new LinearLayout(this);l.setOrientation(LinearLayout.VERTICAL);return l;}
 private TextView text(String value,int size,int color,boolean bold){TextView v=new TextView(this);v.setText(value);v.setTextSize(size);v.setTextColor(color);v.setGravity(Gravity.RIGHT);if(bold)v.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return v;}
@@ -17,7 +22,10 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         section.setPadding(0,dp(18),0,dp(8));root.addView(section);
         LinearLayout card=column();card.setBackground(shape(Color.WHITE,16));card.setPadding(dp(14),dp(12),dp(14),dp(12));
         card.addView(text("اختر القارئ والسورة، وسيعمل الصوت في مشغل Android بالخلفية دون فتح الموقع.",13,Color.DKGRAY,false));
-        Spinner reciterSpinner=new Spinner(this),surahSpinner=new Spinner(this);
+        Spinner categorySpinner=new Spinner(this),reciterSpinner=new Spinner(this),surahSpinner=new Spinner(this);
+        categorySpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"القراء المصريون القدامى","القراء المصريون المعاصرون","التلاوات المجودة — القراء المصريون فقط"}));
+        card.addView(text("القسم",12,Color.DKGRAY,true));card.addView(categorySpinner,matchWrap());
+        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){} public void onItemSelected(AdapterView<?> p,View v,int pos,long id){reciterGroup=pos;mujawwadOnly=pos==2;applyReciterFilter(reciterSpinner,state);}});
         reciterSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"جارٍ تحميل القراء..."}));
         String[] surahs={"الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"};
         surahSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,surahs));
@@ -30,8 +38,6 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         ProgressBar quranProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);quranProgress.setMax(100);card.addView(quranProgress,matchWrap());
         TextView state=text("جارٍ تحميل قائمة القراء من مكتبة التسجيلات.",12,Color.rgb(80,100,90),false);card.addView(state);
         addCard(root,card);
-        final ArrayList<org.json.JSONObject> reciters=new ArrayList<>();
-        final ArrayList<String> reciterNames=new ArrayList<>();
         new Thread(()->{
             HttpURLConnection connection=null;
             try{
@@ -41,11 +47,9 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
                 ByteArrayOutputStream out=new ByteArrayOutputStream();
                 try(InputStream in=connection.getInputStream()){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}
                 org.json.JSONArray array=new org.json.JSONObject(out.toString("UTF-8")).getJSONArray("reciters");
-                for(int i=0;i<array.length();i++){org.json.JSONObject item=array.getJSONObject(i);if(item.has("moshaf")&&item.getJSONArray("moshaf").length()>0){reciters.add(item);reciterNames.add(item.optString("name","قارئ"));}}
+                for(int i=0;i<array.length();i++){org.json.JSONObject item=array.getJSONObject(i);if(item.has("moshaf")&&item.getJSONArray("moshaf").length()>0)allReciters.add(item);}
                 runOnUiThread(()->{
-                    if(reciterNames.isEmpty()){state.setText("لا توجد قائمة قراء متاحة حاليًا.");return;}
-                    reciterSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,reciterNames));
-                    state.setText("تم تحميل "+reciterNames.size()+" قارئًا. اختر القارئ والسورة.");
+                    applyReciterFilter(reciterSpinner,state);
                 });
             }catch(Exception e){runOnUiThread(()->state.setText("تعذر تحميل القراء. تحقق من الإنترنت ثم أعد فتح التطبيق."));}
             finally{if(connection!=null)connection.disconnect();}
@@ -102,10 +106,44 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         });
     }
 
+
+    private boolean isMujawwadMoshaf(org.json.JSONObject m){
+        if(m==null)return false;
+        String n=m.optString("name","").toLowerCase(Locale.ROOT);
+        return n.contains("مجود")||n.contains("mujawwad")||n.contains("mujawad");
+    }
+    private boolean isEgyptianReciter(String name,boolean old){
+        String n=name==null?"":name.replace(" ","");
+        String[] oldNames={"عبدالباسطعبدالصمد","محمدصديقالمنشاوي","محمودخليلالحصري","محمودعليالبنا","مصطفىإسماعيل","مصطفىاللاهونى","محمدالطبلاوي","محمودالطبلاوي","عليحجاجالسويسي","أحمدنعينع","محمدرفعت","كاملوسيفالبهتيمي","طهالفشني","عبدالفتاحالشعشاعي","راغبمصطفىغلوش","سيدمتولي","محمودالشيمي"};
+        String[] modernNames={"محمدجبريل","حاتمفريدالواعر","ياسرسلامة","إسلامصبحي","أحمدعامر","أحمدعيسىالمعصراوي","محمودعبدالحكم","صابرعبدالحكم","حسنصالح","عبداللهكامل","محمودالرفاعي","أحمدخليلشاهين","سيدرمضان"};
+        String[] names=old?oldNames:modernNames;
+        for(String candidate:names)if(n.contains(candidate))return true;
+        return false;
+    }
+    private void applyReciterFilter(Spinner spinner,TextView state){
+        reciters.clear();reciterNames.clear();
+        boolean old=reciterGroup==0;
+        for(org.json.JSONObject item:allReciters){
+            String name=item.optString("name","قارئ");
+            if(!isEgyptianReciter(name,mujawwadOnly?true:old)&&!mujawwadOnly)continue;
+            if(mujawwadOnly&&!isEgyptianReciter(name,true)&&!isEgyptianReciter(name,false))continue;
+            if(mujawwadOnly){
+                boolean has=false;org.json.JSONArray m=item.optJSONArray("moshaf");
+                if(m!=null)for(int j=0;j<m.length();j++)if(isMujawwadMoshaf(m.optJSONObject(j))){has=true;break;}
+                if(!has)continue;
+            }
+            reciters.add(item);reciterNames.add(name);
+        }
+        spinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,reciterNames));
+        state.setText(reciterNames.isEmpty()?(mujawwadOnly?"لا توجد تلاوات مجودة مصرية متاحة في المصدر حاليًا.":"لا توجد تسجيلات متاحة لهذا القسم حاليًا."):"تم تحميل "+reciterNames.size()+" قارئًا مصريًا في هذا القسم. اختر القارئ والسورة.");
+    }
+
     private String resolveQuranAudioUrl(org.json.JSONObject reciter,int surahId) throws Exception {
         org.json.JSONArray moshafs=reciter.getJSONArray("moshaf");
         for(int i=0;i<moshafs.length();i++){
-            org.json.JSONObject m=moshafs.getJSONObject(i);String list=m.optString("surah_list","");
+            org.json.JSONObject m=moshafs.getJSONObject(i);
+            if(mujawwadOnly&&!isMujawwadMoshaf(m))continue;
+            String list=m.optString("surah_list","");
             boolean includes=false;
             for(String id:list.split(",")){try{if(Integer.parseInt(id.trim())==surahId){includes=true;break;}}catch(Exception ignored){}}
             String server=m.optString("server","");
