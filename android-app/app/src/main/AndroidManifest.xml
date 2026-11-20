@@ -25,6 +25,7 @@
         <activity android:name=".CalendarActivity" android:exported="false" />
         <activity android:name=".AudioLibraryActivity" android:exported="false" />
         <activity android:name=".KidsCornerActivity" android:exported="false" />
+        <activity android:name=".AzkarActivity" android:exported="false" />
         <activity android:name=".FridayWirdActivity" android:exported="false" />
         <activity android:name=".FaithLibraryActivity" android:exported="false" />
         <activity android:name=".DailyWirdActivity" android:exported="false" />
