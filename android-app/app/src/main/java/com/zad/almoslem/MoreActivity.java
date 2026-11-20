@@ -21,8 +21,9 @@ add(root,"بوصلة القبلة","تحديد اتجاه القبلة",QiblaAct
 add(root,"مكتبة خطب الجمعة","الخطب والموضوعات الدعوية",KhutbahLibraryActivity.class);
 add(root,"المكتبة الإسلامية","الكتب والسنة والأدعية",FaithLibraryActivity.class);
 add(root,"التقويم الهجري والميلادي","المناسبات والتواريخ",CalendarActivity.class);
-add(root,"ركن الأطفال","محتوى إيماني للصغار",KidsCornerActivity.class);
+
 section(root,"☀️ الأذكار والأوراد");
+add(root,"مكتبة الأذكار","أذكار الصباح والمساء والنوم وبعد الصلاة مع النص والمصدر والعداد",AzkarActivity.class);
 add(root,"وردي اليومي","متابعة الورد والأذكار اليومية",DailyWirdActivity.class);
 add(root,"ورد يوم الجمعة","أذكار وأعمال يوم الجمعة",FridayWirdActivity.class);
 section(root,"⚙️ إعدادات التطبيق");
