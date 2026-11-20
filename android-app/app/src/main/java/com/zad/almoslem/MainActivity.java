@@ -162,6 +162,10 @@ public class MainActivity extends Activity {
         Button downloadDua = new Button(this); downloadDua.setText("تنزيل دعاء الشعراوي على الهاتف");
         duaCard.addView(downloadDua,matchWrap());
         TextView duaStatus = text("يُنزّل مرة واحدة ليعمل بعد الأذان دون إنترنت.",11,Color.rgb(80,90,82),false);
+        File savedDua = new File(new File(getFilesDir(), "reminders"), "dua.mp3");
+        if (isAudioFileValid(savedDua)) {
+            duaStatus.setText("دعاء الشعراوي محفوظ داخل التطبيق وجاهز للتشغيل بعد الأذان.");
+        }
         duaCard.addView(duaStatus);
         downloadDua.setOnClickListener(v->{downloadDuaRecording(downloadDua,duaStatus);});
         root.addView(duaCard,matchWrap());
@@ -810,7 +814,12 @@ public class MainActivity extends Activity {
             if (chosen != null) valid++;
             report.append(prayer).append(": ").append(chosen == null ? "ملف غير موجود/غير صالح" : "ملف سليم — " + android.text.format.Formatter.formatShortFileSize(this, chosen.length())).append("\\n");
         }
-        report.append("ملفات الأذان الصالحة للصلاة المختارة: ").append(valid).append(" من 5");
+        report.append("ملفات الأذان الصالحة للصلاة المختارة: ").append(valid).append(" من 5").append("\\n");
+        File duaFile = new File(new File(getFilesDir(), "reminders"), "dua.mp3");
+        report.append("دعاء الشعراوي بعد الأذان: ")
+                .append(isAudioFileValid(duaFile)
+                        ? "محفوظ — " + android.text.format.Formatter.formatShortFileSize(this, duaFile.length())
+                        : "غير موجود أو غير صالح");
         return report.toString();
     }
 
