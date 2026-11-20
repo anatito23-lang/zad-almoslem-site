@@ -15,6 +15,9 @@ import android.graphics.drawable.GradientDrawable;
 public class RadioActivity extends Activity {
     private static final String GREEN = "#083028";
     private TextView status;
+    private LinearLayout equalizer;
+    private final int[] equalizerHeights = {8, 15, 23, 13, 20, 10, 17};
+    private int equalizerFrame = 0;
     private final Handler handler = new Handler();
     private final Runnable statusTicker = new Runnable() {
         @Override public void run() { refreshStatus(); handler.postDelayed(this, 1000); }
@@ -52,8 +55,63 @@ public class RadioActivity extends Activity {
         desc.setText("اختر المحطة التي تحب الاستماع إليها. يستمر البث في الخلفية بعد مغادرة الصفحة.");
         desc.setTextSize(15);
         desc.setTextColor(AppThemeColors.muted(this));
-        desc.setPadding(0, dp(18), 0, dp(16));
+        desc.setPadding(0, dp(14), 0, dp(14));
         root.addView(desc, match());
+
+        // Branded radio deck: animated only while the actual stream is ready.
+        LinearLayout deck = new LinearLayout(this);
+        deck.setOrientation(LinearLayout.VERTICAL);
+        deck.setGravity(Gravity.CENTER);
+        deck.setPadding(dp(18), dp(20), dp(18), dp(20));
+        GradientDrawable deckBg = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                new int[]{Color.rgb(8,48,40), Color.rgb(17,91,68), Color.rgb(6,37,32)});
+        deckBg.setCornerRadius(dp(24));
+        deck.setBackground(deckBg);
+        TextView emblem = new TextView(this);
+        emblem.setText("۞");
+        emblem.setTextSize(48);
+        emblem.setTextColor(Color.rgb(226,197,130));
+        emblem.setGravity(Gravity.CENTER);
+        deck.addView(emblem, new LinearLayout.LayoutParams(-1, dp(62)));
+        TextView deckTitle = new TextView(this);
+        deckTitle.setText("راديو زاد المسلم");
+        deckTitle.setTextSize(21);
+        deckTitle.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        deckTitle.setTextColor(Color.WHITE);
+        deckTitle.setGravity(Gravity.CENTER);
+        deck.addView(deckTitle, match());
+        TextView deckSub = new TextView(this);
+        deckSub.setText("أنصت بقلبك… واطمئن بذكر الله");
+        deckSub.setTextSize(13);
+        deckSub.setTextColor(Color.rgb(231,220,190));
+        deckSub.setGravity(Gravity.CENTER);
+        deckSub.setPadding(0, dp(5), 0, dp(12));
+        deck.addView(deckSub, match());
+        equalizer = new LinearLayout(this);
+        equalizer.setGravity(Gravity.CENTER);
+        equalizer.setOrientation(LinearLayout.HORIZONTAL);
+        for (int i = 0; i < 7; i++) {
+            View bar = new View(this);
+            GradientDrawable barBg = new GradientDrawable();
+            barBg.setColor(Color.rgb(232,198,126));
+            barBg.setCornerRadius(dp(4));
+            bar.setBackground(barBg);
+            LinearLayout.LayoutParams barLp = new LinearLayout.LayoutParams(dp(5), dp(8));
+            barLp.setMargins(dp(4), 0, dp(4), 0);
+            equalizer.addView(bar, barLp);
+        }
+        deck.addView(equalizer, new LinearLayout.LayoutParams(-1, dp(30)));
+        TextView liveHint = new TextView(this);
+        liveHint.setText("اختر محطة لبدء البث المباشر");
+        liveHint.setTextSize(11);
+        liveHint.setTextColor(Color.rgb(220,232,220));
+        liveHint.setGravity(Gravity.CENTER);
+        liveHint.setPadding(0, dp(8), 0, 0);
+        deck.addView(liveHint, match());
+        LinearLayout.LayoutParams deckLp = match();
+        deckLp.bottomMargin = dp(16);
+        root.addView(deck, deckLp);
 
         addStation(root, "🇪🇬 إذاعة القرآن الكريم من القاهرة",
                 "البث المصري", "https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8",
@@ -148,9 +206,21 @@ public class RadioActivity extends Activity {
                 "saudi".equals(station) ? "إذاعة القرآن الكريم السعودية" :
                 "palestine".equals(station) ? "إذاعة القرآن الكريم من نابلس – فلسطين" : "إذاعة القرآن الكريم";
         if (ready) status.setText("● البث يعمل الآن — " + stationName);
-        else if (playing) status.setText("جارٍ الاتصال بـ " + stationName + "...");
+        else if (playing) status.setText("◌ جارٍ الاتصال بـ " + stationName + "...");
         else if (error != null && !error.isEmpty()) status.setText("تعذر تشغيل " + stationName + ": " + error);
         else status.setText("اختر محطة ثم اضغط تشغيل لبدء البث.");
+        // A genuine playback indicator: bars stay still while connecting or stopped.
+        if (equalizer != null) {
+            boolean live = ready && playing;
+            for (int i = 0; i < equalizer.getChildCount(); i++) {
+                View bar = equalizer.getChildAt(i);
+                int h = live ? equalizerHeights[(i + equalizerFrame) % equalizerHeights.length] : 6;
+                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) bar.getLayoutParams();
+                lp.height = dp(h);
+                bar.setLayoutParams(lp);
+            }
+            if (live) equalizerFrame = (equalizerFrame + 1) % equalizerHeights.length;
+        }
     }
 
     @Override protected void onDestroy() {
