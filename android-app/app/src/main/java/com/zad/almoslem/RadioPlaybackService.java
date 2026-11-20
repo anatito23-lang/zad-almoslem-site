@@ -39,6 +39,8 @@ public class RadioPlaybackService extends Service {
         if(intent!=null && ACTION_STOP.equals(intent.getAction())) { stopRadio(); return START_NOT_STICKY; }
         if(intent!=null && ACTION_PAUSE_FOR_ADHAN.equals(intent.getAction())) {
             pauseForAdhan();
+            // No active stream to preserve: do not leave an idle background service running.
+            if (player == null) stopSelf();
             return START_NOT_STICKY;
         }
         if(intent!=null && ACTION_RESUME_AFTER_ADHAN.equals(intent.getAction())) {
