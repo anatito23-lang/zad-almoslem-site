@@ -34,6 +34,7 @@ public class MainActivity extends Activity {
     private Button downloadButton;
     private boolean downloading = false;
     private SharedPreferences prefs;
+    private final TextView[] homePrayerTimeViews = new TextView[5];
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -90,6 +91,7 @@ public class MainActivity extends Activity {
             String time=h<0?"--:--":String.format(Locale.getDefault(),"%02d:%02d",h,minute);
             TextView value=text(time,13,Color.rgb(8,48,40),true);
             value.setGravity(Gravity.CENTER);
+            homePrayerTimeViews[i]=value;
             cell.addView(icon);cell.addView(name);cell.addView(value);
             times.addView(cell,new LinearLayout.LayoutParams(0,-2,1f));
         }
@@ -801,6 +803,11 @@ public class MainActivity extends Activity {
     }
     @Override protected void onResume() {
         super.onResume();
+        for(int i=0;i<PRAYERS.length;i++){
+            int h=prefs.getInt("native_time_hour_"+PRAYERS[i],-1);
+            int minute=prefs.getInt("native_time_minute_"+PRAYERS[i],0);
+            if(homePrayerTimeViews[i]!=null)homePrayerTimeViews[i].setText(h<0?"--:--":String.format(Locale.getDefault(),"%02d:%02d",h,minute));
+        }
         {
             android.app.AlarmManager alarms=(android.app.AlarmManager)getSystemService(ALARM_SERVICE);
             if(alarms!=null){
