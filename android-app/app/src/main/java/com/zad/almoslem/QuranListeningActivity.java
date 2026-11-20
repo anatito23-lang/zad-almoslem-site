@@ -36,18 +36,8 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         Button download=new Button(this);download.setText("تنزيل السورة للاستماع دون إنترنت");card.addView(download,matchWrap());
         ProgressBar quranProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);quranProgress.setMax(100);card.addView(quranProgress,matchWrap());
         TextView state=text("جارٍ تحميل قائمة القراء من مكتبة التسجيلات.",12,Color.rgb(80,100,90),false);card.addView(state);
-        TextView extraTitle=text("مصادر إضافية لتلاوات القرّاء",16,AppThemeColors.primary(this),true);
-        extraTitle.setPadding(0,dp(18),0,dp(6));card.addView(extraTitle);
-        TextView extraNote=text("بعض القراء الذين طلبتهم غير موجودين في مكتبة MP3Quran الحالية؛ أضفنا مصادر موثقة بدرجة التوفر ونوع التسجيل. الروابط تفتح صفحة المصدر، ولا تُعد تشغيلًا مدمجًا داخل المشغل.",12,AppThemeColors.muted(this),false);
-        extraNote.setPadding(0,0,0,dp(8));card.addView(extraNote);
-        addExternalSourceButton(card,"السيد متولي عبد العال — 36 سورة مجوّدة بحفص","https://etilawa.com/reciters/seidmetwallyabdelaal/");
-        addExternalSourceButton(card,"محمد الليثي — الموقع الرسمي وتسجيلات صافور والاستوديو","https://www.sheikhleithy.com/");
-        addExternalSourceButton(card,"محمد الليثي — أرشيف التلاوات والحفلات","https://alkabbah.com/scholar/2462/mohmd-allythy/recitations");
-        addExternalSourceButton(card,"السيد سعيد — تسجيلات الشيخ","https://www.nourelquran.com/swars-168.html");
-        addExternalSourceButton(card,"السيد سعيد — مصحف حفص وتلاوات مختارة","https://way2quran.com/ar/reciters/alsaid-saeed");
-        addExternalSourceButton(card,"الشحات محمد أنور — مصحف مرتّل (114 سورة)","https://etilawa.com/reciters/al-shahat-muhammad-anwar/");
-        addExternalSourceButton(card,"محمود الشحات أنور — قائمة تلاوات ومصحف مجوّد","https://alkabbah.com/recitations/playlist/518396/tlaoat-khashaa-289-tlao-o-hfl-mgod-mshf-mhmod-alshhat-anor-almshf-almgod");
-        addExternalSourceButton(card,"القارئ سيد سعد — قناته وتلاواته","https://www.youtube.com/@sayed.saad.24");
+        TextView libraryNote=text("المكتبة الداخلية تعرض القراء والتسجيلات المتاحة في مصدر القرآن. اختر القارئ والسورة ثم استمع أو نزّل الملف ليُحفظ داخل التطبيق. لا توجد روابط لمواقع خارجية في هذه الصفحة.",12,AppThemeColors.muted(this),false);
+        libraryNote.setPadding(0,dp(18),0,dp(6));card.addView(libraryNote);
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){} public void onItemSelected(AdapterView<?> p,View v,int pos,long id){reciterGroup=pos;mujawwadOnly=pos==3;applyReciterFilter(reciterSpinner,state);}});
         addCard(root,card);
         new Thread(()->{
@@ -139,15 +129,6 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         if(id.isEmpty())id=normalizeReciterName(reciter==null?"":reciter.optString("name","reciter"));
         id=id.replaceAll("[^A-Za-z0-9_-]","_");
         return id.isEmpty()?"unknown":id;
-    }
-
-    private void addExternalSourceButton(LinearLayout parent,String label,String url){
-        Button button=new Button(this);button.setText(label);button.setAllCaps(false);
-        button.setOnClickListener(v->{
-            try{startActivity(new Intent(Intent.ACTION_VIEW,android.net.Uri.parse(url)));}
-            catch(Exception e){Toast.makeText(this,"تعذر فتح مصدر التلاوة",Toast.LENGTH_SHORT).show();}
-        });
-        parent.addView(button,matchWrap());
     }
 
     private boolean isMujawwadMoshaf(org.json.JSONObject m){
