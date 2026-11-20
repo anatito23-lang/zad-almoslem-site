@@ -139,7 +139,10 @@ public class ReminderReceiver extends BroadcastReceiver {
             Intent audio=new Intent(context,AdhanPlaybackService.class);
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
             audio.putExtra("prayer",prayerName);
-            audio.putExtra("voice",prefs.getString("adhan_voice_" + prayerName,prefs.getString("adhan_voice","basit")));
+            String selectedVoice = "الفجر".equals(prayerName)
+                    ? prefs.getString("adhan_fajr_voice", "doha")
+                    : prefs.getString("adhan_voice_" + prayerName, prefs.getString("adhan_voice","basit"));
+            audio.putExtra("voice", selectedVoice);
             audio.putExtra("play_dua_after",prefs.getBoolean("dua_after_adhan_enabled",true));
             try {
                 prefs.edit().remove("adhan_last_start_error").apply();
