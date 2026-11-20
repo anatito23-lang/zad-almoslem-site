@@ -170,6 +170,23 @@ public class MainActivity extends Activity {
         downloadDua.setOnClickListener(v->{downloadDuaRecording(downloadDua,duaStatus);});
         root.addView(duaCard,matchWrap());
 
+        LinearLayout reminderAudioCard=column();
+        reminderAudioCard.setBackground(shape(Color.WHITE,16));
+        reminderAudioCard.setPadding(dp(14),dp(12),dp(14),dp(12));
+        TextView reminderAudioTitle=text("التذكيرات الصوتية — تسجيلات الشيخ عبدالباسط",16,Color.rgb(8,48,40),true);
+        reminderAudioCard.addView(reminderAudioTitle);
+        TextView reminderAudioInfo=text("آيات قرآنية بصوت الشيخ عبدالباسط عبدالصمد. تُنزّل مرة واحدة وتحفظ داخل التطبيق لتعمل دون إنترنت. لن نستخدم الصوت الآلي في تذكير اقتراب الصلاة أو تذكير الذكر.",12,Color.rgb(80,90,82),false);
+        reminderAudioInfo.setPadding(0,dp(5),0,dp(8));
+        reminderAudioCard.addView(reminderAudioInfo);
+        Button downloadReminderAudio=new Button(this);
+        downloadReminderAudio.setText("تنزيل تسجيلات التذكير");
+        reminderAudioCard.addView(downloadReminderAudio,matchWrap());
+        TextView reminderAudioStatus=text("",11,Color.rgb(80,90,82),false);
+        reminderAudioCard.addView(reminderAudioStatus);
+        refreshReminderAudioStatus(reminderAudioStatus);
+        downloadReminderAudio.setOnClickListener(v->downloadReminderRecitations(downloadReminderAudio,reminderAudioStatus));
+        root.addView(reminderAudioCard,matchWrap());
+
         TextView silentInfo = text("يمكنك اختيار الصلوات التي تريد فيها تفعيل الوضع الصامت وقت الأذان، ثم يعود الهاتف لوضعه السابق تلقائيًا. يتطلب ذلك إذن عدم الإزعاج من إعدادات Android.",13,Color.rgb(70,85,75),false);
         addCard(root,silentInfo);
         Button silentPermission = new Button(this);
@@ -730,6 +747,51 @@ public class MainActivity extends Activity {
         downloadFile(url,voice+".mp3");
     }
  
+    private static final String[] REMINDER_AUDIO_FILES={"approach","gentle_0","gentle_1","gentle_2","gentle_3"};
+    private static final String[] REMINDER_AUDIO_AYAT={"002238","013028","002152","033041","003191"};
+
+    private void refreshReminderAudioStatus(TextView label) {
+        File dir=new File(getFilesDir(),"reminders"); int ready=0;
+        for(String name:REMINDER_AUDIO_FILES) if(isAudioFileValid(new File(dir,name+".mp3"))) ready++;
+        label.setText("التسجيلات المحفوظة: "+ready+" من "+REMINDER_AUDIO_FILES.length);
+    }
+
+    private void downloadReminderRecitations(Button button,TextView label) {
+        button.setEnabled(false); label.setText("جارٍ تنزيل آيات الشيخ عبدالباسط...");
+        new Thread(()->{
+            List<String> failed=new ArrayList<>(); File dir=new File(getFilesDir(),"reminders");
+            if(!dir.exists())dir.mkdirs();
+            for(int i=0;i<REMINDER_AUDIO_FILES.length;i++){
+                String filename=REMINDER_AUDIO_FILES[i]+".mp3";
+                String url="https://everyayah.com/data/Abdul_Basit_Murattal_192kbps/"+REMINDER_AUDIO_AYAT[i]+".mp3";
+                HttpURLConnection connection=null; File temp=new File(dir,filename+".part"), target=new File(dir,filename);
+                try{
+                    connection=(HttpURLConnection)new URL(url).openConnection();
+                    connection.setConnectTimeout(20000); connection.setReadTimeout(60000);
+                    connection.setInstanceFollowRedirects(true);
+                    int code=connection.getResponseCode(); if(code!=200)throw new Exception("HTTP "+code);
+                    long received=0;
+                    try(InputStream in=connection.getInputStream();FileOutputStream out=new FileOutputStream(temp)){
+                        byte[] buffer=new byte[8192]; int n;
+                        while((n=in.read(buffer))!=-1){received+=n;if(received>8L*1024*1024)throw new Exception("حجم التسجيل غير متوقع");out.write(buffer,0,n);}
+                        out.getFD().sync();
+                    }
+                    if(received<10000||!validAudio(temp))throw new Exception("ملف صوت غير صالح");
+                    if(target.exists()&&!target.delete())throw new Exception("تعذر استبدال الملف");
+                    if(!temp.renameTo(target))throw new Exception("تعذر حفظ الملف");
+                }catch(Exception error){failed.add(filename+": "+(error.getMessage()==null?"فشل":error.getMessage()));}
+                finally{if(connection!=null)connection.disconnect();if(temp.exists())temp.delete();}
+                final int completed=i+1;
+                runOnUiThread(()->label.setText("تم تجهيز "+completed+" من "+REMINDER_AUDIO_FILES.length+" تسجيلات..."));
+            }
+            runOnUiThread(()->{
+                button.setEnabled(true); refreshReminderAudioStatus(label);
+                if(!failed.isEmpty())label.append(" — تعذر تنزيل: "+android.text.TextUtils.join("، ",failed));
+                else label.append(" — جاهزة للتشغيل دون إنترنت.");
+            });
+        },"reminder-recitation-download").start();
+    }
+
     private void downloadDuaRecording(Button button,TextView label) {
         button.setEnabled(false); label.setText("جارٍ تنزيل تسجيل دعاء الشعراوي...");
         new Thread(()->{
