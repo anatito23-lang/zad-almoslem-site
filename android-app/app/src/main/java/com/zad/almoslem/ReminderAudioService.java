@@ -111,7 +111,11 @@ public class ReminderAudioService extends Service {
         try {
             File file = new File(new File(getFilesDir(), "reminders"), kind + ".mp3");
             if (!file.isFile() || file.length() < 10000) {
-                if ("dua".equals(kind)) { finishPlayback(); return; }
+                if ("dua".equals(kind) || "approach".equals(kind) || kind.startsWith("gentle_")) {
+                    android.util.Log.w("ZadAlmoslem", "Recorded reminder audio is missing: " + kind);
+                    finishPlayback();
+                    return;
+                }
                 speak("حان وقت " + ("morning".equals(kind) ? "أذكار الصباح" : "أذكار المساء") + "، لا تنسَ ذكر الله");
                 return;
             }
