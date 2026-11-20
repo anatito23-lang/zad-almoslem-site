@@ -106,8 +106,6 @@ public class QuranHomeWidget extends AppWidgetProvider {
     private void startTrack(Context context,String url,String title,String localPath){
         Intent play=new Intent(context,RadioPlaybackService.class);
         play.setAction(RadioPlaybackService.ACTION_PLAY);play.putExtra("url",url);play.putExtra("kind","quran");play.putExtra("label",title);
-        String localPath=offlineTrackPath(context,context.getSharedPreferences("zad_audio",Context.MODE_PRIVATE),
-                context.getSharedPreferences("zad_audio",Context.MODE_PRIVATE).getInt("last_quran_surah_id",0));
         if(localPath!=null)play.putExtra("local_path",localPath);
         try{if(Build.VERSION.SDK_INT>=26)context.startForegroundService(play);else context.startService(play);}catch(Exception ignored){}
     }
