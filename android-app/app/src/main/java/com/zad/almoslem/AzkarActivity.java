@@ -66,7 +66,7 @@ public class AzkarActivity extends Activity {
     private void applyRemoteAzkar(){
         JSONArray remote=RemoteContentRepository.cached(this,"azkar");
         if(remote.length()==0)return;
-        ArrayList<Zikr> updated=new ArrayList<>();
+        boolean changed=false;
         for(int i=0;i<remote.length();i++){
             JSONObject row=remote.optJSONObject(i);if(row==null)continue;
             String category=row.optString("category","").trim();
@@ -74,10 +74,15 @@ public class AzkarActivity extends Activity {
             String source=row.optString("source","").trim();
             int count=row.optInt("count",1);
             if(category.isEmpty()||text.isEmpty()||source.isEmpty()||count<1)continue;
-            updated.add(new Zikr(category,text,source,count));
+            boolean exists=false;
+            for(Zikr item:items){
+                if(item.category.equals(category)&&item.text.equals(text)&&item.source.equals(source)){
+                    exists=true;break;
+                }
+            }
+            if(!exists){items.add(new Zikr(category,text,source,count));changed=true;}
         }
-        if(updated.isEmpty())return;
-        items.clear();items.addAll(updated);
+        if(!changed)return;
         String previous=currentCategory;
         ArrayList<String> categories=new ArrayList<>();
         for(Zikr z:items)if(!categories.contains(z.category))categories.add(z.category);
@@ -109,7 +114,7 @@ public class AzkarActivity extends Activity {
         prev.setText("السابق");next.setText("التالي");nav.addView(prev,new LinearLayout.LayoutParams(0,dp(48),1));nav.addView(next,new LinearLayout.LayoutParams(0,dp(48),1));root.addView(nav);
         positionText=label("",12,AppThemeColors.muted(this),false);root.addView(positionText);
         TextView note=label("تنبيه: تختلف أعداد بعض الأذكار باختلاف الروايات؛ التزمنا بالعدد المشهور في المصدر المذكور، وما لم يثبت له عدد محدد نُبّه عليه.",11,AppThemeColors.muted(this),false);note.setPadding(0,dp(14),0,0);root.addView(note);
-        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){} public void onItemSelected(AdapterView<?> p,View v,int pos,long id){currentCategory=categories[pos];filter();}});
+        categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){} public void onItemSelected(AdapterView<?> p,View v,int pos,long id){Object selected=p.getItemAtPosition(pos);if(selected!=null){currentCategory=selected.toString();filter();}}});
         count.setOnClickListener(v->{if(remaining>0){remaining--;render();}if(remaining==0&&index<shown.size()-1){index++;remaining=shown.get(index).count;render();}});
         reset.setOnClickListener(v->{if(!shown.isEmpty()){remaining=shown.get(index).count;render();}});
         prev.setOnClickListener(v->{if(index>0){index--;remaining=shown.get(index).count;render();}});
