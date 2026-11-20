@@ -115,7 +115,22 @@ public class ReminderAudioService extends Service {
         try {
             tts = new TextToSpeech(this, status -> {
                 if (status != TextToSpeech.SUCCESS || tts == null) { finishPlayback(); return; }
-                tts.setLanguage(new Locale("ar"));
+                if (Build.VERSION.SDK_INT >= 21) {
+                    tts.setAudioAttributes(new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ALARM)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                            .build());
+                }
+                int languageResult = tts.setLanguage(new Locale("ar", "EG"));
+                if (languageResult == TextToSpeech.LANG_MISSING_DATA
+                        || languageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    languageResult = tts.setLanguage(new Locale("ar"));
+                }
+                if (languageResult == TextToSpeech.LANG_MISSING_DATA
+                        || languageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    finishPlayback();
+                    return;
+                }
                 tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                     @Override public void onStart(String id) {}
                     @Override public void onDone(String id) { finishPlayback(); }
