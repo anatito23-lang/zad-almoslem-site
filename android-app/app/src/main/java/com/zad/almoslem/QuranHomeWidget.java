@@ -85,9 +85,25 @@ public class QuranHomeWidget extends AppWidgetProvider {
         String reciter=p.getString("last_quran_reciter","");
         String title="سورة "+SURAHS[surah]+" — "+reciter;
         p.edit().putInt("last_quran_surah_id",surah).putString("last_quran_url",url).putString("last_quran_title",title).putBoolean("radio_playing",true).putString("active_kind","quran").apply();
-        startTrack(context,url,title);
+        startTrack(context,url,title,offlineTrackPath(context,p,surah));
+    }
+    private String offlineTrackPath(Context context,SharedPreferences p,int surahId){
+        String key=p.getString("last_quran_storage_key","");
+        if(key.isEmpty()||surahId<1||surahId>114)return null;
+        try{
+            java.io.File dir=new java.io.File(context.getFilesDir(),"quran");
+            java.io.File file=new java.io.File(dir,"reciter_"+key+"_surah_"+surahId+".mp3").getCanonicalFile();
+            java.io.File canonicalDir=dir.getCanonicalFile();
+            if(file.isFile()&&file.length()>10000&&file.getPath().startsWith(canonicalDir.getPath()+java.io.File.separator))
+                return file.getAbsolutePath();
+        }catch(Exception ignored){}
+        return null;
     }
     private void startTrack(Context context,String url,String title){
+        SharedPreferences p=context.getSharedPreferences("zad_audio",Context.MODE_PRIVATE);
+        startTrack(context,url,title,offlineTrackPath(context,p,p.getInt("last_quran_surah_id",0)));
+    }
+    private void startTrack(Context context,String url,String title,String localPath){
         Intent play=new Intent(context,RadioPlaybackService.class);
         play.setAction(RadioPlaybackService.ACTION_PLAY);play.putExtra("url",url);play.putExtra("kind","quran");play.putExtra("label",title);
         String localPath=offlineTrackPath(context,context.getSharedPreferences("zad_audio",Context.MODE_PRIVATE),
