@@ -66,6 +66,23 @@ public class PrayerDashboardActivity extends Activity {
         result=label("اختر الدولة والمدينة ثم حدّث المواقيت.",12,AppThemeColors.muted(this),false);root.addView(result,full());updateButton.setOnClickListener(v->fetchTimes(updateButton));
 
         TextView prayersTitle=label("الصلوات الخمس",19,AppThemeColors.text(this),true);prayersTitle.setPadding(0,dp(18),0,dp(8));root.addView(prayersTitle);
+
+        TextView clockTitle=label("تنسيق عرض الوقت",14,AppThemeColors.text(this),true);
+        clockTitle.setPadding(0,dp(4),0,dp(4));root.addView(clockTitle,full());
+        RadioGroup clockFormat=new RadioGroup(this);
+        clockFormat.setOrientation(RadioGroup.HORIZONTAL);
+        clockFormat.setGravity(Gravity.CENTER);
+        RadioButton format24=new RadioButton(this);format24.setText("24 ساعة");format24.setId(View.generateViewId());
+        RadioButton format12=new RadioButton(this);format12.setText("12 ساعة");format12.setId(View.generateViewId());
+        clockFormat.addView(format24);clockFormat.addView(format12);
+        boolean use24=prefs.getBoolean("prayer_time_format_24",true);
+        clockFormat.check(use24?format24.getId():format12.getId());
+        clockFormat.setOnCheckedChangeListener((group,checkedId)->{
+            prefs.edit().putBoolean("prayer_time_format_24",checkedId==format24.getId()).apply();
+            refreshCountdowns();
+        });
+        root.addView(clockFormat,full());
+
         String[] icons={"🌅","☀️","🌤️","🌇","🌙"};
         for(int i=0;i<5;i++){
             LinearLayout card=col();card.setPadding(dp(14),dp(10),dp(14),dp(10));card.setBackground(bg(AppThemeColors.surface(this),15));
@@ -89,7 +106,13 @@ public class PrayerDashboardActivity extends Activity {
     }
     private String trackerKey(String p){return "prayer_tracker_"+new SimpleDateFormat("yyyyMMdd",Locale.US).format(new Date())+"_"+p;}
     private void refreshTracker(){int done=0;for(String p:PRAYERS)if(prefs.getBoolean(trackerKey(p),false))done++;if(trackerCount!=null)trackerCount.setText("أنجزت "+done+" من 5 صلوات اليوم");}
-    private String savedTime(String p){int h=prefs.getInt("native_time_hour_"+p,-1),m=prefs.getInt("native_time_minute_"+p,0);return h<0?"—":String.format(Locale.getDefault(),"%02d:%02d",h,m);}
+    private String savedTime(String p){
+        int h=prefs.getInt("native_time_hour_"+p,-1),m=prefs.getInt("native_time_minute_"+p,0);
+        if(h<0)return "—";
+        if(prefs.getBoolean("prayer_time_format_24",true))return String.format(Locale.getDefault(),"%02d:%02d",h,m);
+        int displayHour=h%12;if(displayHour==0)displayHour=12;
+        return String.format(Locale.getDefault(),"%d:%02d %s",displayHour,m,h<12?"ص":"م");
+    }
     private long nextTime(String p){int h=prefs.getInt("native_time_hour_"+p,-1);if(h<0)return -1;Calendar c=Calendar.getInstance();c.set(Calendar.HOUR_OF_DAY,h);c.set(Calendar.MINUTE,prefs.getInt("native_time_minute_"+p,0));c.set(Calendar.SECOND,0);c.set(Calendar.MILLISECOND,0);if(c.getTimeInMillis()<=System.currentTimeMillis())c.add(Calendar.DAY_OF_YEAR,1);return c.getTimeInMillis();}
     private void refreshCountdowns(){
         long now=System.currentTimeMillis(),soon=Long.MAX_VALUE;int next=-1;long[] times=new long[5];
