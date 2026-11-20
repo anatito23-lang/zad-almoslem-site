@@ -15,7 +15,7 @@ LinearLayout prayerCard=new LinearLayout(this);prayerCard.setOrientation(0);pray
 for(int i=0;i<prayers.length;i++){LinearLayout cell=new LinearLayout(this);cell.setOrientation(1);cell.setGravity(Gravity.CENTER);cell.addView(label(new String[]{"🌅","☀️","🌤️","🌇","🌙"}[i],17,Color.rgb(25,90,70),false));cell.addView(label(prayers[i],11,AppThemeColors.muted(this),true));times[i]=label("--:--",13,AppThemeColors.text(this),true);cell.addView(times[i]);prayerCard.addView(cell,new LinearLayout.LayoutParams(0,-2,1));}root.addView(prayerCard);
 Button details=new Button(this);details.setText("عرض مواقيت الصلاة بالتفصيل");details.setOnClickListener(v->open(PrayerDashboardActivity.class));root.addView(details,new LinearLayout.LayoutParams(-1,-2));
 TextView quick=label("تصفّح عبادتك",18,AppThemeColors.text(this),true);quick.setGravity(Gravity.RIGHT);quick.setPadding(0,dp(14),0,dp(5));root.addView(quick);
-addShortcut(root,"📖 المصحف الشريف",MushafPageActivity.class);addShortcut(root,"🎧 استماع القرآن الكريم",QuranListeningActivity.class);addShortcut(root,"📻 إذاعة القرآن الكريم",RadioActivity.class);addShortcut(root,"۞ السبحة الإلكترونية",TasbeehActivity.class);
+addShortcut(root,"📖 المصحف الشريف",MushafPageActivity.class);addShortcut(root,"🎧 استماع القرآن الكريم",QuranListeningActivity.class);addShortcut(root,"📻 إذاعة القرآن الكريم",RadioActivity.class);addShortcut(root,"۞ السبحة الإلكترونية",TasbeehActivity.class);addShortcut(root,"🎞️ ريلز إسلامي",IslamicReelsActivity.class);
 setContentView(AppTabs.wrap(this,scroll,"home"));refreshTimes();}
 void addShortcut(LinearLayout root,String title,Class<?> c){
 LinearLayout card=new LinearLayout(this);card.setOrientation(0);card.setGravity(Gravity.CENTER_VERTICAL);card.setPadding(dp(15),dp(12),dp(15),dp(12));
