@@ -139,7 +139,7 @@ public class AdhanPlaybackService extends Service {
             else if (prayer != null && prayer.contains("العشاء")) volumePrayerKey = "isha";
             int savedVolume = prefs.getInt("adhan_volume_" + volumePrayerKey, prefs.getInt("adhan_volume", 100));
             player.setVolume(Math.max(0, Math.min(100, savedVolume)) / 100f);
-            String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"rifaat".equals(voice)||"haram".equals(voice)||"doha".equals(voice)) ? voice : "doha";
+            String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"rifaat".equals(voice)||"haram".equals(voice)||"doha".equals(voice)||"fajr_cairo".equals(voice)||"fajr_haram".equals(voice)) ? voice : "doha";
             File audioDir = new File(getFilesDir(), "adhan");
             if ("doha".equals(safeVoice)) {
                 String prayerKey = "dhuhr";
@@ -257,6 +257,8 @@ public class AdhanPlaybackService extends Service {
         }
         String file;
         switch (voice) {
+            case "fajr_cairo": file = "Adhan_Fajr_Cairo_Egypt_(أذان_الفجر_القاهرة_مصر).mp3"; break;
+            case "fajr_haram": file = "Adhan_Fajr_Al_Haram_Al_Maki_(أذان_الفجر_الحرم_المكي).mp3"; break;
             case "basit": file = "Abdulbasit_Abdusamad_1_-_Egypt_(عبد_الباسط_عبد_الصمد_-_مصر).mp3"; break;
             case "mustafa": file = "Mustafa_Ismail_-_Egypt_(مصطفى_إسماعيل_-_مصر).mp3"; break;
             case "husary": file = "Mahmoud_Khalil_Al_Hussary_-_Cairo_(محمود_خليل_الحصري_-_القاهرة).mp3"; break;
