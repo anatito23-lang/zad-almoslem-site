@@ -640,7 +640,7 @@ public class MainActivity extends Activity {
         SeekBar seek=new SeekBar(this); seek.setMax(100); seek.setProgress(prefs.getInt("adhan_volume_"+key,100));
         card.addView(seek,matchWrap()); volumeBars.put(prayer,seek);
         seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
-            public void onProgressChanged(SeekBar b,int value,boolean user){volLabel.setText("مستوى الصوت: "+value+"%"); if(user)prefs.edit().putInt("adhan_volume_"+key,value).apply();}
+            public void onProgressChanged(SeekBar b,int value,boolean user){volLabel.setText("مستوى الصوت: "+value+"%"); if(user){prefs.edit().putInt("adhan_volume_"+key,value).apply();Intent volumeIntent=new Intent(MainActivity.this,AdhanPlaybackService.class);volumeIntent.setAction(AdhanPlaybackService.ACTION_SET_PRAYER_VOLUME);volumeIntent.putExtra("prayer",prayer);volumeIntent.putExtra("volume",value);try{startService(volumeIntent);}catch(Exception ignored){}}}
             public void onStartTrackingTouch(SeekBar b){}
             public void onStopTrackingTouch(SeekBar b){}
         });
