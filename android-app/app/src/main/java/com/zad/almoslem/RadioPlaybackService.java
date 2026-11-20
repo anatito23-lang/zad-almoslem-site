@@ -20,6 +20,11 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 public class RadioPlaybackService extends Service {
     public static final String ACTION_PLAY="com.zad.almoslem.PLAY_RADIO";
     public static final String ACTION_STOP="com.zad.almoslem.STOP_RADIO";
+    public static final String ACTION_PAUSE_FOR_ADHAN="com.zad.almoslem.PAUSE_FOR_ADHAN";
+    public static final String ACTION_RESUME_AFTER_ADHAN="com.zad.almoslem.RESUME_AFTER_ADHAN";
+    private boolean pausedForAdhan;
+    private boolean resumeAfterAdhan;
+    private long positionBeforeAdhan;
     private static final String CHANNEL="zad_radio_playback";
     private static final int NOTIFICATION=7410;
     private ExoPlayer player;
@@ -28,6 +33,14 @@ public class RadioPlaybackService extends Service {
 
     @Override public int onStartCommand(Intent intent,int flags,int startId) {
         if(intent!=null && ACTION_STOP.equals(intent.getAction())) { stopRadio(); return START_NOT_STICKY; }
+        if(intent!=null && ACTION_PAUSE_FOR_ADHAN.equals(intent.getAction())) {
+            pauseForAdhan();
+            return START_NOT_STICKY;
+        }
+        if(intent!=null && ACTION_RESUME_AFTER_ADHAN.equals(intent.getAction())) {
+            resumeAfterAdhan();
+            return START_NOT_STICKY;
+        }
         createChannel();
         Intent open=new Intent(this,HomeActivity.class);
         PendingIntent content=PendingIntent.getActivity(this,7411,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
@@ -84,6 +97,31 @@ public class RadioPlaybackService extends Service {
         play(url,allowedLocal?localFile:null);
         return START_NOT_STICKY;
     }
+    private void pauseForAdhan() {
+        if (player == null || pausedForAdhan) return;
+        resumeAfterAdhan = player.getPlayWhenReady() &&
+                player.getPlaybackState() != Player.STATE_IDLE &&
+                player.getPlaybackState() != Player.STATE_ENDED;
+        if (!resumeAfterAdhan) return;
+        positionBeforeAdhan = Math.max(0L, player.getCurrentPosition());
+        pausedForAdhan = true;
+        player.pause();
+        android.util.Log.i("ZadAlmoslem", "Audio paused for adhan at " + positionBeforeAdhan);
+    }
+
+    private void resumeAfterAdhan() {
+        if (player == null || !pausedForAdhan) return;
+        boolean shouldResume = resumeAfterAdhan;
+        long savedPosition = positionBeforeAdhan;
+        pausedForAdhan = false;
+        resumeAfterAdhan = false;
+        if (shouldResume) {
+            player.seekTo(savedPosition);
+            player.play();
+            android.util.Log.i("ZadAlmoslem", "Audio resumed after adhan at " + savedPosition);
+        }
+    }
+
     private void createChannel() {
         if(Build.VERSION.SDK_INT>=26) {
             NotificationManager nm=getSystemService(NotificationManager.class);
