@@ -34,11 +34,33 @@ public class DailyReminderSettingsActivity extends Activity {
   TextView title=label("تنبيهاتك اليومية",24,Color.WHITE,true);title.setGravity(Gravity.CENTER);TextView sub=label("اختر مواعيد التذكير التي تناسب يومك",13,Color.rgb(222,239,229),false);sub.setGravity(Gravity.CENTER);
   LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(14),dp(18),dp(14),dp(18));hero.setBackground(bg(green,18));hero.addView(title);hero.addView(sub);root.addView(hero);
   for(int i=0;i<keys.length;i++)addReminder(root,i);
-  addPrayerApproachSettings(root);
+  addGentleReminders(root);\n  addPrayerApproachSettings(root);
   TextView note=label("تحتاج التنبيهات إلى السماح بإشعارات التطبيق. وإذا لم يتوفر إذن المنبهات الدقيقة، يستخدم Android تنبيهًا بديلًا قد يتأخر قليلًا.",12,Color.GRAY,false);note.setPadding(0,dp(10),0,0);root.addView(note);
  }
 
- private void addPrayerApproachSettings(LinearLayout root){
+
+ private void addGentleReminders(LinearLayout root){
+  LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
+  card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
+  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(card,lp);
+  card.addView(label("تذكيرات إيمانية خفيفة",18,green,true));
+  TextView desc=label("رسائل قصيرة تظهر من وقت لآخر: الصلاة على النبي ﷺ، والاستغفار، وذكر الله. الإشعار بلا صوت أو اهتزاز.",12,Color.GRAY,false);
+  desc.setPadding(0,dp(5),0,dp(8));card.addView(desc);
+  Switch enabled=new Switch(this);enabled.setText("تفعيل التذكيرات الدورية");
+  enabled.setChecked(prefs.getBoolean("gentle_enabled",true));card.addView(enabled);
+  TextView value=label("التذكير كل "+prefs.getInt("gentle_interval_hours",3)+" ساعات",14,green,false);card.addView(value);
+  SeekBar interval=new SeekBar(this);interval.setMax(5);interval.setProgress(Math.max(1,Math.min(6,prefs.getInt("gentle_interval_hours",3)))-1);card.addView(interval);
+  enabled.setOnCheckedChangeListener((button,checked)->ReminderReceiver.setGentleRemindersEnabled(this,checked));
+  interval.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+   public void onProgressChanged(SeekBar bar,int progress,boolean fromUser){
+    int hours=progress+1;value.setText("التذكير كل "+hours+" "+(hours==1?"ساعة":"ساعات"));
+    if(fromUser)ReminderReceiver.setGentleReminderInterval(DailyReminderSettingsActivity.this,hours);
+   }
+   public void onStartTrackingTouch(SeekBar bar){}
+   public void onStopTrackingTouch(SeekBar bar){}
+  });
+ }
+\n private void addPrayerApproachSettings(LinearLayout root){
   LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
   card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(card,lp);
