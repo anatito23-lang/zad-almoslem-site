@@ -20,6 +20,7 @@ section(root,"🎞️ محتوى إيماني");
 add(root,"ريلز إسلامي","بطاقات إيمانية رأسية: آيات وأحاديث صحيحة وأدعية، اسحب للتنقل بينها",IslamicReelsActivity.class);
 section(root,"🧭 خدمات إسلامية");
 add(root,"بوصلة القبلة","تحديد اتجاه القبلة",QiblaActivity.class);
+add(root,"المساجد القريبة","ابحث عن المساجد حول موقعك واعرف المسافة والاتجاه",NearbyMosquesActivity.class);
 add(root,"مكتبة خطب الجمعة","الخطب والموضوعات الدعوية",KhutbahLibraryActivity.class);
 add(root,"المكتبة الإسلامية","الكتب والسنة والأدعية",FaithLibraryActivity.class);
 add(root,"التقويم الهجري والميلادي","المناسبات والتواريخ",CalendarActivity.class);
