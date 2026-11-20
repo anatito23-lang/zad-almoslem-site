@@ -64,6 +64,8 @@ public class ReminderReceiver extends BroadcastReceiver {
             scheduleDaily(context,"morning",7,0,"حان وقت أذكار الصباح، لا تنس وردك من ذكر الله.");
         if(!p.contains("evening_enabled"))
             scheduleDaily(context,"evening",17,0,"حان وقت أذكار المساء، لا تنس وردك من ذكر الله.");
+        if(!p.contains("gentle_enabled")) p.edit().putBoolean("gentle_enabled",true).putInt("gentle_interval_hours",3).apply();
+        if(p.getBoolean("gentle_enabled",false) && p.getLong("gentle_next_at",0L)<=System.currentTimeMillis()) scheduleGentleReminder(context);
     }
     private static void scheduleApproachAlert(Context context,String name,long prayerAt) {
         String alertKey="approach_"+name;
@@ -224,6 +226,11 @@ public class ReminderReceiver extends BroadcastReceiver {
                 toneCh.setDescription("نغمة قصيرة عند دخول وقت الصلاة");
                 toneCh.enableVibration(true);
                 nm.createNotificationChannel(toneCh);
+            } else if(gentle) {
+                ch=new NotificationChannel(GENTLE_CHANNEL_ID,"تذكيرات إيمانية خفيفة",NotificationManager.IMPORTANCE_LOW);
+                ch.setDescription("تذكيرات قصيرة بالصلاة على النبي والذكر والاستغفار، دون صوت أو اهتزاز");
+                ch.setSound(null,null);
+                ch.enableVibration(false);
             } else {
                 ch=new NotificationChannel(CHANNEL_ID,"تنبيهات زاد المسلم",NotificationManager.IMPORTANCE_HIGH);
                 ch.setDescription("تنبيهات الأذكار وقيام الليل");
