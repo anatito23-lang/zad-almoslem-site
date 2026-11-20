@@ -19,6 +19,7 @@ import java.util.Locale;
 public class ReminderAudioService extends Service {
     public static final String ACTION_PLAY = "com.zad.almoslem.PLAY_REMINDER_AUDIO";
     public static final String ACTION_STOP = "com.zad.almoslem.STOP_REMINDER_AUDIO";
+    public static final String ACTION_SET_VOLUME = "com.zad.almoslem.SET_REMINDER_AUDIO_VOLUME";
     private static final String CHANNEL = "zad_reminder_audio";
     private static final int NOTIFICATION_ID = 7520;
     private MediaPlayer player;
@@ -44,6 +45,11 @@ public class ReminderAudioService extends Service {
     }
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent != null && ACTION_SET_VOLUME.equals(intent.getAction())) {
+            int volume=Math.max(0,Math.min(100,intent.getIntExtra("volume",80)));
+            if(player!=null)player.setVolume(volume/100f,volume/100f);
+            return START_NOT_STICKY;
+        }
         if (intent != null && ACTION_STOP.equals(intent.getAction())) {
             finishPlayback();
             return START_NOT_STICKY;
@@ -103,7 +109,7 @@ public class ReminderAudioService extends Service {
             player.setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
-            player.setOnCompletionListener(mp -> finishPlayback());
+            if ("dua".equals(kind)) {\n                int volume=getSharedPreferences("zad_reminders",MODE_PRIVATE).getInt("dua_after_adhan_volume",80);\n                player.setVolume(volume/100f,volume/100f);\n            }\n            player.setOnCompletionListener(mp -> finishPlayback());
             player.setOnErrorListener((mp, what, extra) -> { finishPlayback(); return true; });
             player.setOnPreparedListener(MediaPlayer::start);
             player.setDataSource(file.getAbsolutePath());
