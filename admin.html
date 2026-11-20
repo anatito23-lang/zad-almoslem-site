@@ -2,116 +2,85 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0c3b32"><title>لوحة إدارة المحتوى | زاد المسلم</title>
+<meta name="theme-color" content="#0c3b32"><title>إدارة الخطب | زاد المسلم</title>
 <style>
-:root{--green:#0c3b32;--gold:#c9a45c;--bg:#f5f7f3;--line:#e5ebe5;--muted:#71817b;--red:#9b3030}
+:root{--green:#0c3b32;--gold:#c9a45c;--bg:#f5f7f3;--line:#e5ebe5;--muted:#71817b}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:#18332d;font:16px/1.8 Tahoma,Arial,sans-serif}
-header{background:linear-gradient(135deg,#082d27,#155443);color:white;padding:22px 18px}
-.wrap{max-width:900px;margin:22px auto;padding:0 14px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
-h1{font-size:24px;margin:0}h2{font-size:19px;color:var(--green);margin:0 0 12px}
-label{display:block;font-weight:700;margin:10px 0 5px}input,textarea,select{width:100%;padding:11px;border:1px solid #dce5dc;border-radius:10px;font:inherit;color:#18332d;background:#fff}
-textarea{min-height:140px;resize:vertical}button{border:0;border-radius:10px;padding:10px 15px;background:var(--green);color:white;font:inherit;font-weight:700;cursor:pointer}
-button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(--green)}.danger{background:var(--red)}.gold{background:#8a6a2d}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.row>*{flex:1}
-.small{font-size:13px;color:var(--muted)}.notice{padding:11px 13px;border-radius:10px;background:#edf5ef;color:#24533d;margin:10px 0}
-.error{background:#fff0ef;color:#8b2828}.item{border:1px solid var(--line);border-radius:12px;padding:13px;margin:10px 0}
-.item p{white-space:pre-wrap;margin:8px 0}.tag{display:inline-block;border-radius:20px;padding:2px 9px;background:#edf3ee;color:#24533d;font-size:12px}
-.hidden{display:none!important}.check{display:flex;align-items:center;gap:8px}.check input{width:auto}
+header{background:linear-gradient(135deg,#082d27,#155443);color:white;padding:24px 18px}
+.wrap{max-width:850px;margin:24px auto;padding:0 14px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+h1{font-size:25px;margin:0}h2{font-size:19px;color:var(--green);margin:0 0 10px}
+label{display:block;font-weight:700;margin:12px 0 5px}input,textarea{width:100%;padding:11px;border:1px solid #dce5dc;border-radius:10px;font:inherit;color:#18332d}
+textarea{min-height:220px;resize:vertical}button,.btn{display:inline-block;border:0;border-radius:10px;padding:10px 15px;background:var(--green);color:white;font:inherit;font-weight:700;text-decoration:none;cursor:pointer}
+.secondary{background:#edf3ee;color:var(--green)}.danger{background:#8c3434}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.note{padding:12px;border-radius:12px;background:#fff7e7;color:#705521;font-size:14px}
+.item{border:1px solid var(--line);border-radius:12px;padding:12px;margin:9px 0}.item strong{display:block}.small{font-size:13px;color:var(--muted)}
+#jsonOutput{min-height:160px;direction:ltr;text-align:left;font:13px/1.6 monospace}
 </style>
 </head>
 <body>
-<header><div class="wrap" style="margin:0 auto"><h1>لوحة إدارة المحتوى — زاد المسلم</h1><div class="small" style="color:#d5e5dc">إدارة الأذكار والأدعية المنشورة في التطبيق</div></div></header>
+<header><div class="wrap" style="margin:0 auto"><h1>إدارة خطب الجمعة — زاد المسلم</h1><p style="margin:5px 0 0;color:#d5e5dc">أضف خطبتك وجهّزها للنشر على الموقع</p></div></header>
 <main class="wrap">
-<section class="card" id="loginCard">
-<h2>دخول المسؤول</h2>
-<p class="small">سجّل الدخول بالبريد الإلكتروني وكلمة المرور اللذين أنشأتهما في Firebase Authentication.</p>
-<form id="loginForm">
-<label for="email">البريد الإلكتروني</label><input id="email" type="email" autocomplete="username" required>
-<label for="password">كلمة المرور</label><input id="password" type="password" autocomplete="current-password" required>
-<div class="actions"><button id="loginButton" type="submit">تسجيل الدخول</button></div>
-</form><div id="loginMessage" class="notice hidden" role="status"></div>
-</section>
-<section class="card hidden" id="adminPanel">
-<div class="row"><div><h2 style="margin:0">إدارة المحتوى</h2><div id="adminEmail" class="small"></div></div><button class="secondary" id="logoutButton" type="button">تسجيل الخروج</button></div>
-<div class="notice">التغييرات المنشورة تصل إلى التطبيق عند المزامنة بالإنترنت. لا تحتاج إضافة محتوى جديد إلى إصدار APK جديد.</div>
-<label for="collection">نوع المحتوى</label>
-<select id="collection">
-<option value="azkar">الأذكار</option><option value="duas">الأدعية</option>
-</select>
-<form id="contentForm">
-<input id="documentId" type="hidden">
-<label for="text">النص *</label><textarea id="text" required maxlength="12000" placeholder="اكتب النص بدقة مع مراجعة المصدر"></textarea>
-<label for="source">المصدر (اختياري للأذكار، مطلوب للأدعية)</label><input id="source" required maxlength="300" placeholder="مثال: رواه مسلم، أو سورة البقرة: 201">
-<div class="row" id="categoryRow"><div><label for="category">التصنيف</label><input id="category" maxlength="100" placeholder="مثال: تسبيح"></div><div id="countWrap"><label for="count">عدد التكرار</label><input id="count" type="number" min="1" max="10000" value="1"></div></div>
-<label class="check"><input id="published" type="checkbox" checked> نشر المحتوى للمستخدمين</label>
-<div class="actions"><button id="saveButton" type="submit">حفظ المحتوى</button><button class="secondary" id="cancelEdit" type="button">إلغاء التعديل</button><button class="secondary" id="refreshButton" type="button">تحديث القائمة</button></div>
-</form>
-<div id="adminMessage" class="notice hidden" role="status"></div>
-</section>
-<section class="card hidden" id="listCard"><h2>المحتوى المسجل</h2><div id="itemsList"><p class="small">جارٍ التحميل…</p></div></section>
+  <div class="card"><h2>إدارة الأذكار والأدعية</h2><p class="small">لوحة مستقلة لإدارة محتوى التطبيق عبر Firebase.</p><div class="actions"><a class="btn" href="./content-admin.html">فتح لوحة الأذكار والأدعية</a></div></div>
+  <div class="card">
+    <h2>قبل النشر</h2>
+    <p class="note">النشر النهائي يتم من خلال حساب GitHub الذي يملك الموقع. لا توجد كلمة مرور داخل هذه الصفحة؛ صلاحية التعديل والحفظ يحميها GitHub، لذلك لا يستطيع الزوار نشر خطب أو تغييرها من الموقع.</p>
+  </div>
+  <form class="card" id="khutbahForm">
+    <h2>إضافة خطبة</h2>
+    <label for="title">عنوان الخطبة *</label><input id="title" required maxlength="140" placeholder="مثال: اغتنم حياتك قبل موتك">
+    <label for="date">تاريخ النشر</label><input id="date" type="date">
+    <label for="category">التصنيف</label><input id="category" maxlength="60" placeholder="خطبة الجمعة">
+    <label for="body">نص الخطبة</label><textarea id="body" placeholder="اكتب نص الخطبة هنا..."></textarea>
+    <label for="audio">رابط التسجيل الصوتي (اختياري)</label><input id="audio" type="url" placeholder="https://...">
+    <label for="pdf">رابط ملف PDF (اختياري)</label><input id="pdf" type="url" placeholder="https://...">
+    <div class="actions"><button type="submit">إضافة إلى قائمة النشر</button><button class="secondary" type="button" id="clearForm">مسح الحقول</button></div>
+  </form>
+  <section class="card">
+    <h2>الخطب التي جهزتها</h2><p class="small">يمكنك إضافة أكثر من خطبة، أو حذف خطبة من القائمة قبل النشر.</p>
+    <div id="draftList"><p class="small">لم تضف خطبًا بعد.</p></div>
+    <div class="actions"><button type="button" id="makeJson">تجهيز ملف النشر</button><button type="button" class="secondary" id="copyJson">نسخ البيانات</button></div>
+    <label for="jsonOutput">بيانات النشر (انسخها كاملة)</label><textarea id="jsonOutput" readonly placeholder="اضغط «تجهيز ملف النشر»"></textarea>
+  </section>
+  <section class="card">
+    <h2>خطوة النشر على الموقع</h2>
+    <ol>
+      <li>اضغط «تجهيز ملف النشر»، ثم «نسخ البيانات».</li>
+      <li>افتح ملف الخطب في GitHub من الزر التالي وسجّل الدخول بحساب مالك الموقع.</li>
+      <li>استبدل محتوى الملف بالبيانات المنسوخة، ثم اضغط Commit changes لحفظ النشر.</li>
+      <li>بعد دقائق، ستظهر الخطب تلقائيًا في قسم «خطب الجمعة» بالموقع.</li>
+    </ol>
+    <div class="actions">
+      <a class="btn" href="https://github.com/anatito23-lang/zad-almoslem-site/edit/main/khutbahs.json" target="_blank" rel="noopener">فتح ملف النشر على GitHub</a>
+      <a class="btn secondary" href="./index.html#khutbahs">عرض قسم الخطب بالموقع</a>
+    </div>
+    <p class="small">ملاحظة: من لا يملك صلاحية الكتابة في مستودع GitHub لن يستطيع اعتماد التغييرات، حتى لو فتح رابط التعديل.</p>
+  </section>
 </main>
-<script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,collection,getDocs,addDoc,updateDoc,deleteDoc,deleteField,doc,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-const firebaseConfig={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
-const ADMIN_UID="5UkeBQyyGGZcICXULT9LUD0S4lt2";
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-const $=id=>document.getElementById(id);
-const names={azkar:"الأذكار",duas:"الأدعية"};
-const schema={azkar:{text:"نص",source:"مصدر",category:"فئة",count:"عدد",published:"تم النشر"},duas:{text:"نص",source:"مصدر",category:"",count:"",published:"النشر"}};
-function field(item,key){const arabic=schema[$("collection").value][key];return item[key]??(arabic?item[arabic]:undefined);}
-function isPublished(item){return field(item,"published")===true;}
-let busy=false;
-function message(id,text,error=false){const el=$(id);el.textContent=text;el.classList.remove("hidden","error");if(error)el.classList.add("error");}
-function clearMessage(id){$(id).textContent="";$(id).classList.add("hidden");}
-function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
-function setBusy(value){busy=value;["loginButton","saveButton","refreshButton","logoutButton"].forEach(id=>$(id).disabled=value);}
-function updateFields(){const isAzkar=$("collection").value==="azkar";$("countWrap").classList.toggle("hidden",!isAzkar);$("categoryRow").classList.toggle("hidden",!isAzkar);$("category").required=isAzkar;$("source").required=!isAzkar;}
-function resetForm(){$("contentForm").reset();$("documentId").value="";$("published").checked=true;$("count").value="1";$("saveButton").textContent="حفظ المحتوى";updateFields();clearMessage("adminMessage");}
-async function loadItems(){
- if(auth.currentUser?.uid!==ADMIN_UID)return;
- setBusy(true);$("itemsList").innerHTML='<p class="small">جارٍ تحميل المحتوى…</p>';
- try{
-  const snap=await getDocs(collection(db,$("collection").value));
-  if(snap.empty){$("itemsList").innerHTML='<p class="small">لا توجد مستندات في هذا القسم حتى الآن.</p>';return;}
-  const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
-  $("itemsList").innerHTML=rows.map(item=>{
-   const title=escapeHtml(field(item,"text")||"بدون نص");
-   const meta=[field(item,"source"),field(item,"category"),field(item,"count")?("العدد: "+field(item,"count")):""].filter(Boolean).map(escapeHtml).join(" · ");
-   return '<article class="item"><div class="row"><strong>'+title+'</strong><span class="tag">'+(isPublished(item)?"منشور":"مسودة")+'</span></div><p class="small">'+meta+'</p><div class="actions"><button type="button" class="secondary" data-edit="'+escapeHtml(item.id)+'">تعديل</button><button type="button" class="gold" data-toggle="'+escapeHtml(item.id)+'" data-published="'+(isPublished(item)?'true':'false')+'">'+(isPublished(item)?"إلغاء النشر":"نشر")+'</button><button type="button" class="danger" data-delete="'+escapeHtml(item.id)+'">حذف</button></div></article>';
-  }).join("");
-  $("itemsList").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editItem(rows.find(x=>x.id===b.dataset.edit))));
-  $("itemsList").querySelectorAll("[data-toggle]").forEach(b=>b.addEventListener("click",()=>togglePublished(b.dataset.toggle,b.dataset.published==="true")));
-  $("itemsList").querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>removeItem(b.dataset.delete)));
- }catch(error){$("itemsList").textContent="تعذر تحميل المحتوى: "+error.message;}
- finally{setBusy(false);}
-}
-function editItem(item){if(!item)return;$("documentId").value=item.id;$("text").value=field(item,"text")||"";$("source").value=field(item,"source")||"";$("category").value=field(item,"category")||"";$("count").value=field(item,"count")||1;$("published").checked=isPublished(item);$("saveButton").textContent="حفظ التعديلات";window.scrollTo({top:0,behavior:"smooth"});clearMessage("adminMessage");}
-async function togglePublished(id,wasPublished){if(!confirm(wasPublished?"هل تريد إلغاء نشر هذا المحتوى؟":"هل تريد نشر هذا المحتوى؟"))return;setBusy(true);try{const pubKey=schema[$("collection").value].published;await updateDoc(doc(db,$("collection").value,id),{published:!wasPublished,[pubKey]:!wasPublished,updatedAt:serverTimestamp()});message("adminMessage",wasPublished?"تم إلغاء النشر.":"تم نشر المحتوى.");await loadItems();}catch(e){message("adminMessage","تعذر تحديث حالة النشر: "+e.message,true);}finally{setBusy(false);}}
-async function removeItem(id){if(!confirm("تأكيد حذف هذا المحتوى نهائيًا؟"))return;setBusy(true);try{await deleteDoc(doc(db,$("collection").value,id));message("adminMessage","تم حذف المحتوى.");await loadItems();}catch(e){message("adminMessage","تعذر الحذف: "+e.message,true);}finally{setBusy(false);}}
-$("loginForm").addEventListener("submit",async e=>{e.preventDefault();if(busy)return;setBusy(true);clearMessage("loginMessage");try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);}catch(error){message("loginMessage","تعذر تسجيل الدخول. راجع البريد وكلمة المرور وإعدادات Firebase Authentication.",true);}finally{setBusy(false);}});
-$("logoutButton").addEventListener("click",()=>signOut(auth));
-$("collection").addEventListener("change",()=>{resetForm();loadItems();});
-$("refreshButton").addEventListener("click",loadItems);
-$("cancelEdit").addEventListener("click",resetForm);
-$("contentForm").addEventListener("submit",async e=>{
- e.preventDefault();if(busy||auth.currentUser?.uid!==ADMIN_UID)return;
- const collectionName=$("collection").value,text=$("text").value.trim(),source=$("source").value.trim();
- if(!text||(collectionName==="duas"&&!source)){message("adminMessage",collectionName==="azkar"?"نص الذكر مطلوب.":"نص الدعاء ومصدره مطلوبان.",true);return;}
- const schemaForCollection=schema[collectionName],isPub=$("published").checked;const data={text,published:isPub,[schemaForCollection.text]:text,[schemaForCollection.published]:isPub,updatedAt:serverTimestamp()};if(source){data.source=source;if(schemaForCollection.source)data[schemaForCollection.source]=source;}else if($("documentId").value){data.source=deleteField();if(schemaForCollection.source)data[schemaForCollection.source]=deleteField();}
- if(collectionName==="azkar"){const category=$("category").value.trim(),count=Number($("count").value);if(!category||!Number.isInteger(count)||count<1){message("adminMessage","أدخل تصنيفًا وعددًا صحيحًا للذكر.",true);return;}data.category=category;data.count=count;data[schemaForCollection.category]=category;data[schemaForCollection.count]=count;}
- else if($("category").value.trim())data.category=$("category").value.trim();
- setBusy(true);
- try{const id=$("documentId").value;if(id){await updateDoc(doc(db,collectionName,id),data);message("adminMessage","تم حفظ التعديلات.");}else{data.createdAt=serverTimestamp();await addDoc(collection(db,collectionName),data);message("adminMessage","تمت إضافة المحتوى.");}resetForm();await loadItems();}
- catch(error){message("adminMessage","لم يتم الحفظ. تأكد من اتصال Firebase وصلاحية المسؤول. "+error.message,true);}
- finally{setBusy(false);}
-});
-updateFields();
-onAuthStateChanged(auth,async user=>{
- if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");return;}
- if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return;}
- $("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";await loadItems();
-});
+<script>
+(() => {
+ const KEY='zad_khutbah_drafts_v1';
+ let drafts=[]; try{drafts=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(drafts))drafts=[]}catch(e){drafts=[]}
+ const $=id=>document.getElementById(id);
+ const save=()=>localStorage.setItem(KEY,JSON.stringify(drafts));
+ const render=()=>{
+  $('draftList').innerHTML=drafts.length?drafts.map((x,i)=>'<div class="item"><strong>'+escapeHtml(x.title)+'</strong><span class="small">'+escapeHtml(x.date||'')+'</span> <button class="danger" type="button" data-remove="'+i+'">حذف</button></div>').join(''):'<p class="small">لم تضف خطبًا بعد.</p>';
+  $('draftList').querySelectorAll('[data-remove]').forEach(b=>b.addEventListener('click',()=>{drafts.splice(Number(b.dataset.remove),1);save();render()}));
+ };
+ function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+ $('khutbahForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const title=$('title').value.trim(); if(!title)return;
+  drafts.push({title,date:$('date').value,category:$('category').value.trim()||'خطبة الجمعة',body:$('body').value,audio:$('audio').value.trim(),pdf:$('pdf').value.trim()});
+  save();render();$('khutbahForm').reset();
+ });
+ $('clearForm').addEventListener('click',()=>$('khutbahForm').reset());
+ $('makeJson').addEventListener('click',()=>$('jsonOutput').value=JSON.stringify(drafts,null,2));
+ $('copyJson').addEventListener('click',async()=>{
+  if(!$('jsonOutput').value)$('jsonOutput').value=JSON.stringify(drafts,null,2);
+  try{await navigator.clipboard.writeText($('jsonOutput').value);alert('تم نسخ بيانات النشر. افتح ملف GitHub والصقها.')}
+  catch(e){$('jsonOutput').focus();$('jsonOutput').select();alert('تعذر النسخ التلقائي. حدّد النص وانسخه يدويًا.')}
+ });
+ render();
+})();
 </script>
 </body></html>
