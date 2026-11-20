@@ -14,6 +14,9 @@ on:
     paths:
       - 'android-app/**'
       - '.github/workflows/build-apk.yml'
+      - 'admin.html'
+      - 'content-admin.html'
+      - 'firestore.rules'
     branches: [main, feat/per-prayer-adhan-voices, native-android-app, feature/firebase-content-sync, feature/firebase-admin-panel, update-v3-prayer-mushaf-tabs]
 
 jobs:
