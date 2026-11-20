@@ -133,10 +133,8 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
 
     private boolean isMujawwadMoshaf(org.json.JSONObject m){
         if(m==null)return false;
-        // MP3Quran v3 identifies the classic Al-Mushaf Al-Mojawwad type as 12.
-        // Keep name matching as a fallback because catalog labels can vary by language.
-        String type=m.optString("moshaf_type","").trim();
-        if("12".equals(type))return true;
+        // Do not infer tajweed style from moshaf_type: that field identifies a
+        // recitation/riwaya category in the catalog. Detect Mojawwad by its label.
         String n=m.optString("name","").toLowerCase(Locale.ROOT);
         return n.contains("مجود")||n.contains("مجوّد")||
             n.contains("mujawwad")||n.contains("mujawad")||
