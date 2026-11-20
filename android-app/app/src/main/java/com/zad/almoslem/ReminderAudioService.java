@@ -24,6 +24,7 @@ public class ReminderAudioService extends Service {
     private static final int NOTIFICATION_ID = 7520;
     private MediaPlayer player;
     private TextToSpeech tts;
+    private String activeKind;
 
     public static void play(Context context, String kind) {
         play(context, kind, null);
@@ -57,6 +58,7 @@ public class ReminderAudioService extends Service {
         String kind = intent == null ? "qiyam" : intent.getStringExtra("kind");
         if (!"morning".equals(kind) && !"evening".equals(kind) && !"dua".equals(kind)
                 && !"approach".equals(kind)) kind = "qiyam";
+        activeKind = kind;
         String reminderMessage = intent == null ? null : intent.getStringExtra("message");
         createChannel();
         String title = "morning".equals(kind) ? "أذكار الصباح" :
@@ -72,9 +74,11 @@ public class ReminderAudioService extends Service {
         startForeground(NOTIFICATION_ID, b.build());
         boolean adhanActive = getSharedPreferences("zad_reminders", MODE_PRIVATE).getBoolean("adhan_active", false);
         if (adhanActive && !"dua".equals(kind)) { finishPlayback(); return START_NOT_STICKY; }
-        Intent stopRadio = new Intent(this, RadioPlaybackService.class);
-        stopRadio.setAction(RadioPlaybackService.ACTION_STOP);
-        try { startService(stopRadio); } catch (Exception ignored) {}
+        if (!"dua".equals(kind)) {
+            Intent stopRadio = new Intent(this, RadioPlaybackService.class);
+            stopRadio.setAction(RadioPlaybackService.ACTION_STOP);
+            try { startService(stopRadio); } catch (Exception ignored) {}
+        }
         stopCurrentPlayers();
         if ("qiyam".equals(kind)) {
             speak("حان وقت قيام الليل، لا تنسَ نصيبك من صلاة الليل");
@@ -167,8 +171,18 @@ public class ReminderAudioService extends Service {
     }
 
     private void finishPlayback() {
+        boolean resumeRadio = "dua".equals(activeKind);
         stopCurrentPlayers();
         stopForeground(true);
+        if (resumeRadio) {
+            Intent resumeAudio = new Intent(this, RadioPlaybackService.class);
+            resumeAudio.setAction(RadioPlaybackService.ACTION_RESUME_AFTER_ADHAN);
+            try { startService(resumeAudio); }
+            catch (Exception error) {
+                android.util.Log.w("ZadAlmoslem", "Could not resume background audio after post-adhan dua", error);
+            }
+        }
+        activeKind = null;
         stopSelf();
     }
 
