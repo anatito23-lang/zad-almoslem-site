@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0c3b32"><title>لوحة إدارة المحتوى | زاد المسلم</title>
+<style>
+:root{--green:#0c3b32;--gold:#c9a45c;--bg:#f5f7f3;--line:#e5ebe5;--muted:#71817b;--red:#9b3030}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#18332d;font:16px/1.8 Tahoma,Arial,sans-serif}
+header{background:linear-gradient(135deg,#082d27,#155443);color:white;padding:22px 18px}
+.wrap{max-width:900px;margin:22px auto;padding:0 14px}.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px}
+h1{font-size:24px;margin:0}h2{font-size:19px;color:var(--green);margin:0 0 12px}
+label{display:block;font-weight:700;margin:10px 0 5px}input,textarea,select{width:100%;padding:11px;border:1px solid #dce5dc;border-radius:10px;font:inherit;color:#18332d;background:#fff}
+textarea{min-height:140px;resize:vertical}button{border:0;border-radius:10px;padding:10px 15px;background:var(--green);color:white;font:inherit;font-weight:700;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(--green)}.danger{background:var(--red)}.gold{background:#8a6a2d}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.row>*{flex:1}
+.small{font-size:13px;color:var(--muted)}.notice{padding:11px 13px;border-radius:10px;background:#edf5ef;color:#24533d;margin:10px 0}
+.error{background:#fff0ef;color:#8b2828}.item{border:1px solid var(--line);border-radius:12px;padding:13px;margin:10px 0}
+.item p{white-space:pre-wrap;margin:8px 0}.tag{display:inline-block;border-radius:20px;padding:2px 9px;background:#edf3ee;color:#24533d;font-size:12px}
+.hidden{display:none!important}.check{display:flex;align-items:center;gap:8px}.check input{width:auto}
+</style>
+</head>
+<body>
+<header><div class="wrap" style="margin:0 auto"><h1>لوحة إدارة المحتوى — زاد المسلم</h1><div class="small" style="color:#d5e5dc">إدارة الأذكار والأدعية المنشورة في التطبيق</div></div></header>
+<main class="wrap">
+<section class="card" id="loginCard">
+<h2>دخول المسؤول</h2>
+<p class="small">سجّل الدخول بالبريد الإلكتروني وكلمة المرور اللذين أنشأتهما في Firebase Authentication.</p>
+<form id="loginForm">
+<label for="email">البريد الإلكتروني</label><input id="email" type="email" autocomplete="username" required>
+<label for="password">كلمة المرور</label><input id="password" type="password" autocomplete="current-password" required>
+<div class="actions"><button id="loginButton" type="submit">تسجيل الدخول</button></div>
+</form><div id="loginMessage" class="notice hidden" role="status"></div>
+</section>
+<section class="card hidden" id="adminPanel">
+<div class="row"><div><h2 style="margin:0">إدارة المحتوى</h2><div id="adminEmail" class="small"></div></div><button class="secondary" id="logoutButton" type="button">تسجيل الخروج</button></div>
+<div class="notice">التغييرات المنشورة تصل إلى التطبيق عند المزامنة بالإنترنت. لا تحتاج إضافة محتوى جديد إلى إصدار APK جديد.</div>
+<label for="collection">نوع المحتوى</label>
+<select id="collection">
+<option value="azkar">الأذكار</option><option value="duas">الأدعية</option>
+</select>
+<form id="contentForm">
+<input id="documentId" type="hidden">
+<label for="text">النص *</label><textarea id="text" required maxlength="12000" placeholder="اكتب النص بدقة مع مراجعة المصدر"></textarea>
+<label for="source">المصدر (اختياري للأذكار، مطلوب للأدعية)</label><input id="source" required maxlength="300" placeholder="مثال: رواه مسلم، أو سورة البقرة: 201">
+<div class="row" id="categoryRow"><div><label for="category">التصنيف</label><input id="category" maxlength="100" placeholder="مثال: تسبيح"></div><div id="countWrap"><label for="count">عدد التكرار</label><input id="count" type="number" min="1" max="10000" value="1"></div></div>
+<label class="check"><input id="published" type="checkbox" checked> نشر المحتوى للمستخدمين</label>
+<div class="actions"><button id="saveButton" type="submit">حفظ المحتوى</button><button class="secondary" id="cancelEdit" type="button">إلغاء التعديل</button><button class="secondary" id="refreshButton" type="button">تحديث القائمة</button></div>
+</form>
+<div id="adminMessage" class="notice hidden" role="status"></div>
+</section>
+<section class="card hidden" id="listCard"><h2>المحتوى المسجل</h2><div id="itemsList"><p class="small">جارٍ التحميل…</p></div></section>
+</main>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,collection,getDocs,addDoc,updateDoc,deleteDoc,deleteField,doc,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const firebaseConfig={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
+const ADMIN_UID="5UkeBQyyGGZcICXULT9LUD0S4lt2";
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const $=id=>document.getElementById(id);
+const names={azkar:"الأذكار",duas:"الأدعية"};
+const schema={azkar:{text:"نص",source:"مصدر",category:"فئة",count:"عدد",published:"تم النشر"},duas:{text:"نص",source:"مصدر",category:"",count:"",published:"النشر"}};
+function field(item,key){const arabic=schema[$("collection").value][key];return item[key]??(arabic?item[arabic]:undefined);}
+function isPublished(item){return item.published===true||item["تم النشر"]===true||item["النشر"]===true;}
+let busy=false;
+function message(id,text,error=false){const el=$(id);el.textContent=text;el.classList.remove("hidden","error");if(error)el.classList.add("error");}
+function clearMessage(id){$(id).textContent="";$(id).classList.add("hidden");}
+function escapeHtml(value){return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function setBusy(value){busy=value;["loginButton","saveButton","refreshButton","logoutButton"].forEach(id=>$(id).disabled=value);}
+function updateFields(){const isAzkar=$("collection").value==="azkar";$("countWrap").classList.toggle("hidden",!isAzkar);$("categoryRow").classList.toggle("hidden",!isAzkar);$("category").required=isAzkar;$("source").required=!isAzkar;}
+function resetForm(){$("contentForm").reset();$("documentId").value="";$("published").checked=true;$("count").value="1";$("saveButton").textContent="حفظ المحتوى";updateFields();clearMessage("adminMessage");}
+async function loadItems(){
+ if(auth.currentUser?.uid!==ADMIN_UID)return;
+ setBusy(true);$("itemsList").innerHTML='<p class="small">جارٍ تحميل المحتوى…</p>';
+ try{
+  const snap=await getDocs(collection(db,$("collection").value));
+  if(snap.empty){$("itemsList").innerHTML='<p class="small">لا توجد مستندات في هذا القسم حتى الآن.</p>';return;}
+  const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
+  $("itemsList").innerHTML=rows.map(item=>{
+   const title=escapeHtml(field(item,"text")||"بدون نص");
+   const meta=[field(item,"source"),field(item,"category"),field(item,"count")?("العدد: "+field(item,"count")):""].filter(Boolean).map(escapeHtml).join(" · ");
+   return '<article class="item"><div class="row"><strong>'+title+'</strong><span class="tag">'+(isPublished(item)?"منشور":"مسودة")+'</span></div><p class="small">'+meta+'</p><div class="actions"><button type="button" class="secondary" data-edit="'+escapeHtml(item.id)+'">تعديل</button><button type="button" class="gold" data-toggle="'+escapeHtml(item.id)+'" data-published="'+(isPublished(item)?'true':'false')+'">'+(isPublished(item)?"إلغاء النشر":"نشر")+'</button><button type="button" class="danger" data-delete="'+escapeHtml(item.id)+'">حذف</button></div></article>';
+  }).join("");
+  $("itemsList").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editItem(rows.find(x=>x.id===b.dataset.edit))));
+  $("itemsList").querySelectorAll("[data-toggle]").forEach(b=>b.addEventListener("click",()=>togglePublished(b.dataset.toggle,b.dataset.published==="true")));
+  $("itemsList").querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>removeItem(b.dataset.delete)));
+ }catch(error){$("itemsList").textContent="تعذر تحميل المحتوى: "+error.message;}
+ finally{setBusy(false);}
+}
+function editItem(item){if(!item)return;$("documentId").value=item.id;$("text").value=field(item,"text")||"";$("source").value=field(item,"source")||"";$("category").value=field(item,"category")||"";$("count").value=field(item,"count")||1;$("published").checked=isPublished(item);$("saveButton").textContent="حفظ التعديلات";window.scrollTo({top:0,behavior:"smooth"});clearMessage("adminMessage");}
+async function togglePublished(id,wasPublished){if(!confirm(wasPublished?"هل تريد إلغاء نشر هذا المحتوى؟":"هل تريد نشر هذا المحتوى؟"))return;setBusy(true);try{const pubKey=schema[$("collection").value].published;await updateDoc(doc(db,$("collection").value,id),{published:!wasPublished,"تم النشر":!wasPublished,"النشر":!wasPublished,updatedAt:serverTimestamp()});message("adminMessage",wasPublished?"تم إلغاء النشر.":"تم نشر المحتوى.");await loadItems();}catch(e){message("adminMessage","تعذر تحديث حالة النشر: "+e.message,true);}finally{setBusy(false);}}
+async function removeItem(id){if(!confirm("تأكيد حذف هذا المحتوى نهائيًا؟"))return;setBusy(true);try{await deleteDoc(doc(db,$("collection").value,id));message("adminMessage","تم حذف المحتوى.");await loadItems();}catch(e){message("adminMessage","تعذر الحذف: "+e.message,true);}finally{setBusy(false);}}
+$("loginForm").addEventListener("submit",async e=>{e.preventDefault();if(busy)return;setBusy(true);clearMessage("loginMessage");try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);}catch(error){message("loginMessage","تعذر تسجيل الدخول. راجع البريد وكلمة المرور وإعدادات Firebase Authentication.",true);}finally{setBusy(false);}});
+$("logoutButton").addEventListener("click",()=>signOut(auth));
+$("collection").addEventListener("change",()=>{resetForm();loadItems();});
+$("refreshButton").addEventListener("click",loadItems);
+$("cancelEdit").addEventListener("click",resetForm);
+$("contentForm").addEventListener("submit",async e=>{
+ e.preventDefault();if(busy||auth.currentUser?.uid!==ADMIN_UID)return;
+ const collectionName=$("collection").value,text=$("text").value.trim(),source=$("source").value.trim();
+ if(!text||(collectionName==="duas"&&!source)){message("adminMessage",collectionName==="azkar"?"نص الذكر مطلوب.":"نص الدعاء ومصدره مطلوبان.",true);return;}
+ const schemaForCollection=schema[collectionName],isPub=$("published").checked;const data={text,published:isPub,"تم النشر":isPub,"النشر":isPub,[schemaForCollection.text]:text,updatedAt:serverTimestamp()};if(source){data.source=source;if(schemaForCollection.source)data[schemaForCollection.source]=source;}else if($("documentId").value){data.source=deleteField();if(schemaForCollection.source)data[schemaForCollection.source]=deleteField();}
+ if(collectionName==="azkar"){const category=$("category").value.trim(),count=Number($("count").value);if(!category||!Number.isInteger(count)||count<1){message("adminMessage","أدخل تصنيفًا وعددًا صحيحًا للذكر.",true);return;}data.category=category;data.count=count;data[schemaForCollection.category]=category;data[schemaForCollection.count]=count;}
+ else if($("category").value.trim())data.category=$("category").value.trim();
+ setBusy(true);
+ try{const id=$("documentId").value;if(id){await updateDoc(doc(db,collectionName,id),data);resetForm();message("adminMessage","تم حفظ التعديلات بنجاح.");}else{data.createdAt=serverTimestamp();await addDoc(collection(db,collectionName),data);resetForm();message("adminMessage","تمت إضافة المحتوى بنجاح.");}await loadItems();}
+ catch(error){message("adminMessage","لم يتم الحفظ. تأكد من اتصال Firebase وصلاحية المسؤول. "+error.message,true);}
+ finally{setBusy(false);}
+});
+updateFields();
+onAuthStateChanged(auth,async user=>{
+ if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");return;}
+ if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return;}
+ $("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";await loadItems();
+});
+</script>
+</body></html>
