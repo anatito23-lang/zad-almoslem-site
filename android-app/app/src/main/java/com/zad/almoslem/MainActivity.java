@@ -23,8 +23,8 @@ public class MainActivity extends Activity {
     private static final String PREFS = "zad_reminders";
     private static final String[] PRAYERS = {"الفجر","الظهر","العصر","المغرب","العشاء"};
     private static final String[] KEYS = {"fajr","dhuhr","asr","maghrib","isha"};
-    private static final String[] VOICES = {"doha","basit","mustafa","husary","banna","haram"};
-    private static final String[] VOICE_LABELS = {"أذان الدوحة","عبد الباسط عبد الصمد","مصطفى إسماعيل","محمود خليل الحصري","محمود علي البنا","أذان الحرم المكي"};
+    private static final String[] VOICES = {"doha","basit","mustafa","husary","banna","rifaat","haram"};
+    private static final String[] VOICE_LABELS = {"أذان الدوحة","عبد الباسط عبد الصمد","مصطفى إسماعيل","محمود خليل الحصري","محمود علي البنا","الشيخ محمد رفعت","أذان الحرم المكي"};
     private final Map<String, Spinner> voiceSpinners = new LinkedHashMap<>();
     private final Map<String, SeekBar> volumeBars = new LinkedHashMap<>();
     private final Map<String, TextView> timeLabels = new LinkedHashMap<>();
@@ -672,6 +672,7 @@ public class MainActivity extends Activity {
             case "mustafa": file="Mustafa_Ismail_-_Egypt_(مصطفى_إسماعيل_-_مصر).mp3"; break;
             case "husary": file="Mahmoud_Khalil_Al_Hussary_-_Cairo_(محمود_خليل_الحصري_-_القاهرة).mp3"; break;
             case "banna": file="Mahmoud_Ali_Al_Banna_-_Cairo_(محمود_علي_البنا_-_القاهرة).mp3"; break;
+            case "rifaat": file="Muhammad_Refaat_-_Cairo_(محمد_رفعت_-_القاهرة).mp3"; break;
             case "haram": file="Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(علي_بن_أحمد_ملا_-_الحرم_المكي).mp3"; break;
             default: throw new Exception("هذا الصوت غير متاح");
         }
