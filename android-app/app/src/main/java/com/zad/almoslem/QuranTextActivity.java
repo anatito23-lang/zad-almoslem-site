@@ -49,6 +49,20 @@ public class QuranTextActivity extends Activity {
         root.addView(label("القارئ",13,green,true));
         reciterPicker=new Spinner(this);
         reciterPicker.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,RECITER_NAMES));
+        int savedReciter=getPreferences(MODE_PRIVATE).getInt("ayah_reciter",0);
+        reciterPicker.setSelection(Math.max(0,Math.min(RECITER_NAMES.length-1,savedReciter)));
+        reciterPicker.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+            @Override public void onItemSelected(AdapterView<?> parent,View view,int position,long id) {
+                getPreferences(MODE_PRIVATE).edit().putInt("ayah_reciter",position).apply();
+                if(player!=null){
+                    stopAudio();
+                    status.setText("تم اختيار "+RECITER_NAMES[position]+". اضغط على الآية للاستماع بالصوت الجديد.");
+                } else if(status!=null) {
+                    status.setText("القارئ المختار: "+RECITER_NAMES[position]+". اضغط على أي آية للاستماع.");
+                }
+            }
+        });
         root.addView(reciterPicker);
         LinearLayout controls=new LinearLayout(this);controls.setOrientation(LinearLayout.HORIZONTAL);
         Button stop=new Button(this);stop.setText("إيقاف");
@@ -104,9 +118,10 @@ public class QuranTextActivity extends Activity {
         JSONObject ayah=ayahs.get(index);
         int global=ayah.optInt("number",0);
         if(global<1){status.setText("تعذر تحديد رقم الآية الصوتي.");return;}
-        String edition=RECITER_IDS[Math.max(0,Math.min(RECITER_IDS.length-1,reciterPicker.getSelectedItemPosition()))];
+        int selectedReciter=Math.max(0,Math.min(RECITER_IDS.length-1,reciterPicker.getSelectedItemPosition()));
+        String edition=RECITER_IDS[selectedReciter];
         String audioUrl="https://cdn.islamic.network/quran/audio/"+("ar.abdulbasitmurattal".equals(edition)?"192":"128")+"/"+edition+"/"+global+".mp3";
-        status.setText("جارٍ تشغيل الآية "+ayah.optInt("numberInSurah",index+1)+" بصوت "+RECITER_NAMES[reciterPicker.getSelectedItemPosition()]);
+        status.setText("جارٍ تشغيل الآية "+ayah.optInt("numberInSurah",index+1)+" بصوت "+RECITER_NAMES[selectedReciter]);
         try{
             player=new MediaPlayer();
             player.setOnPreparedListener(mp->{if(player==mp){mp.start();}});
