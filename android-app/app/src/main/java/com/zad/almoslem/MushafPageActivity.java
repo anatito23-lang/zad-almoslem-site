@@ -103,16 +103,12 @@ public class MushafPageActivity extends Activity {
         pageLabel = label("", 15, AppThemeColors.text(this), true);
         toolbar.addView(pageLabel, new LinearLayout.LayoutParams(0, dp(38), 1));
         Button correction = new Button(this);
-        correction.setText("استماع وتصحيح");
+        correction.setText("الآيات التفاعلية");
         correction.setTextSize(11);
         toolbar.addView(correction, new LinearLayout.LayoutParams(0, dp(38), 1));
         correction.setOnClickListener(v -> {
-            Intent open = new Intent(this, QuranTextActivity.class);
-            open.putExtra("page_number", page);
-            startActivity(open);
+            openInteractivePage();
         });
-        root.addView(toolbar);
-
         LinearLayout pageFrame = new LinearLayout(this);
         pageFrame.setOrientation(LinearLayout.VERTICAL);
         pageFrame.setGravity(Gravity.CENTER);
@@ -127,8 +123,15 @@ public class MushafPageActivity extends Activity {
         imageLp.topMargin = dp(2);
         root.addView(pageFrame, imageLp);
 
+        // Keep navigation controls below the scanned page so they never cover its header.
+        root.addView(toolbar);
+
         gesture = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override public boolean onDown(MotionEvent e) { return true; }
+            @Override public boolean onSingleTapUp(MotionEvent e) {
+                openInteractivePage();
+                return true;
+            }
             @Override public boolean onFling(MotionEvent e1, MotionEvent e2, float vx, float vy) {
                 if (e1 == null || e2 == null || busy) return false;
                 float dx = e2.getX() - e1.getX();
@@ -167,6 +170,12 @@ public class MushafPageActivity extends Activity {
         next.setOnClickListener(v -> { if (page < 604) showPage(page + 1); });
 
         setContentView(AppTabs.wrap(this, root, "mushaf"));
+    }
+
+    private void openInteractivePage() {
+        Intent open = new Intent(this, QuranTextActivity.class);
+        open.putExtra("page_number", page);
+        startActivity(open);
     }
 
     private File pageFile(int number) {
