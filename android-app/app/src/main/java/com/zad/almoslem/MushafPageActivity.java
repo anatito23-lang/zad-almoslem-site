@@ -128,10 +128,13 @@ public class MushafPageActivity extends Activity {
                 return true;
             }
         });
-        pageImage.setClickable(true);\n        pageImage.setOnTouchListener((v, event) -> gesture.onTouchEvent(event));\n        pageFrame.setOnTouchListener((v, event) -> gesture.onTouchEvent(event));
+        pageImage.setClickable(true);
+        pageImage.setOnTouchListener((v, event) -> gesture.onTouchEvent(event));
+        pageFrame.setOnTouchListener((v, event) -> gesture.onTouchEvent(event));
 
         status = label("صفحات المصحف تُحمّل وتُحفظ تلقائيًا على الهاتف", 12, Color.DKGRAY, false);
-        status.setTextSize(10);\n        status.setPadding(0, dp(2), 0, dp(2));
+        status.setTextSize(10);
+        status.setPadding(0, dp(2), 0, dp(2));
         root.addView(status);
         TextView attribution = label("صور صفحات المصحف: Quran-Images — ترخيص MIT", 9, Color.GRAY, false);
         root.addView(attribution);
