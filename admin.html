@@ -41,7 +41,7 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <form id="contentForm">
 <input id="documentId" type="hidden">
 <label for="text">النص *</label><textarea id="text" required maxlength="12000" placeholder="اكتب النص بدقة مع مراجعة المصدر"></textarea>
-<label for="source">المصدر *</label><input id="source" required maxlength="300" placeholder="مثال: رواه مسلم، أو سورة البقرة: 201">
+<label for="source">المصدر (اختياري للأذكار، مطلوب للأدعية)</label><input id="source" required maxlength="300" placeholder="مثال: رواه مسلم، أو سورة البقرة: 201">
 <div class="row" id="categoryRow"><div><label for="category">التصنيف</label><input id="category" maxlength="100" placeholder="مثال: تسبيح"></div><div id="countWrap"><label for="count">عدد التكرار</label><input id="count" type="number" min="1" max="10000" value="1"></div></div>
 <label class="check"><input id="published" type="checkbox" checked> نشر المحتوى للمستخدمين</label>
 <div class="actions"><button id="saveButton" type="submit">حفظ المحتوى</button><button class="secondary" id="cancelEdit" type="button">إلغاء التعديل</button><button class="secondary" id="refreshButton" type="button">تحديث القائمة</button></div>
@@ -79,7 +79,7 @@ async function loadItems(){
   $("itemsList").innerHTML=rows.map(item=>{
    const title=escapeHtml(field(item,"text")||"بدون نص");
    const meta=[field(item,"source"),field(item,"category"),field(item,"count")?("العدد: "+field(item,"count")):""].filter(Boolean).map(escapeHtml).join(" · ");
-   return '<article class="item"><div class="row"><strong>'+title+'</strong><span class="tag">'+(isPublished(item)?"منشور":"مسودة")+'</span></div><p class="small">'+meta+'</p><div class="actions"><button type="button" class="secondary" data-edit="'+escapeHtml(item.id)+'">تعديل</button><button type="button" class="gold" data-toggle="'+escapeHtml(item.id)+'" data-published="'+(item.published===true?'true':'false')+'">'+(item.published===true?"إلغاء النشر":"نشر")+'</button><button type="button" class="danger" data-delete="'+escapeHtml(item.id)+'">حذف</button></div></article>';
+   return '<article class="item"><div class="row"><strong>'+title+'</strong><span class="tag">'+(isPublished(item)?"منشور":"مسودة")+'</span></div><p class="small">'+meta+'</p><div class="actions"><button type="button" class="secondary" data-edit="'+escapeHtml(item.id)+'">تعديل</button><button type="button" class="gold" data-toggle="'+escapeHtml(item.id)+'" data-published="'+(isPublished(item)?'true':'false')+'">'+(isPublished(item)?"إلغاء النشر":"نشر")+'</button><button type="button" class="danger" data-delete="'+escapeHtml(item.id)+'">حذف</button></div></article>';
   }).join("");
   $("itemsList").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editItem(rows.find(x=>x.id===b.dataset.edit))));
   $("itemsList").querySelectorAll("[data-toggle]").forEach(b=>b.addEventListener("click",()=>togglePublished(b.dataset.toggle,b.dataset.published==="true")));
