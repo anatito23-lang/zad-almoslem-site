@@ -157,11 +157,11 @@ public class AdhanPlaybackService extends Service {
         try {
             player = new ExoPlayer.Builder(this).setWakeMode(androidx.media3.common.C.WAKE_MODE_LOCAL).build();
             player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
-                    .setUsage(androidx.media3.common.C.USAGE_ALARM)
+                    .setUsage(androidx.media3.common.C.USAGE_MEDIA)
                     .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_SPEECH)
-                    // USAGE_ALARM is not supported by Media3 automatic audio-focus handling.
-                    // Radio is paused explicitly before adhan, so keep focus handling manual here.
-                    .build(), false);
+                    // Media3 automatic audio focus supports USAGE_MEDIA. Use it here so
+                    // the adhan player never throws for an unsupported USAGE_ALARM focus request.
+                    .build(), true);
             android.content.SharedPreferences prefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
             String volumePrayerKey = "dhuhr";
             if (prayer != null && prayer.contains("الفجر")) volumePrayerKey = "fajr";
