@@ -25,7 +25,7 @@ public class AzkarActivity extends Activity {
     private int index=0, remaining=0;
     private String currentCategory="أذكار الصباح";
 
-    @Override public void onCreate(Bundle state){super.onCreate(state);AppThemeColors.apply(this);load();build();RemoteContentRepository.sync(this, "azkar", this::applyRemoteAzkar);}
+    @Override public void onCreate(Bundle state){super.onCreate(state);AppThemeColors.apply(this);load();build();applyRemoteAzkar();RemoteContentRepository.sync(this, "azkar", this::applyRemoteAzkar);}
     private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
     private TextView label(String s,int size,int color,boolean bold){
         TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);
