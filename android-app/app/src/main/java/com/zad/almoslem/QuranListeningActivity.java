@@ -46,6 +46,8 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         addExternalSourceButton(card,"السيد سعيد — تسجيلات الشيخ","https://www.nourelquran.com/swars-168.html");
         addExternalSourceButton(card,"السيد سعيد — مصحف حفص وتلاوات مختارة","https://way2quran.com/ar/reciters/alsaid-saeed");
         addExternalSourceButton(card,"الشحات محمد أنور — مصحف مرتّل (114 سورة)","https://etilawa.com/reciters/al-shahat-muhammad-anwar/");
+        addExternalSourceButton(card,"محمود الشحات أنور — قائمة تلاوات ومصحف مجوّد","https://alkabbah.com/recitations/playlist/518396/tlaoat-khashaa-289-tlao-o-hfl-mgod-mshf-mhmod-alshhat-anor-almshf-almgod");
+        addExternalSourceButton(card,"القارئ سيد سعد — قناته وتلاواته","https://www.youtube.com/@sayed.saad.24");
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){} public void onItemSelected(AdapterView<?> p,View v,int pos,long id){reciterGroup=pos;mujawwadOnly=pos==3;applyReciterFilter(reciterSpinner,state);}});
         addCard(root,card);
         new Thread(()->{
@@ -146,7 +148,7 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
     private boolean isEgyptianReciter(String name,boolean old){
         String n=normalizeReciterName(name);
         String[] oldNames={"عبدالباسطعبدالصمد","محمدصديقالمنشاوي","محمودخليلالحصري","محمودعليالبنا","مصطفيإسماعيل","مصطفىاسماعيل","مصطفىاللاهونى","محمدالطبلاوي","محمودالطبلاوي","عليحجاجالسويسي","احمدنعينع","محمدرفعت","كاملوسيفالبهتيمي","طهالفشني","عبدالفتاحالشعشاعي","راغبمصطفىغلوش" ,"محمودالشيمي","حمديالزامل","محمدحصان","محمدعمران","محمدالطوخي","محمداحمدشبيب","محمدعبدالعزيزحصان"};
-        String[] modernNames={"محمدجبريل","حاتمفريدالواعر","ياسرسلامة","اسلامصبحي","احمدعامر","احمدعيسىالمعصراوي","محمودعبدالحكم","صابرعبدالحكم","حسنصالح","عبداللهكامل","محمودالرفاعي","احمدخليلشاهين","سيدرمضان","السيدسعيد","سيدسعد","السيدمتولي","السيدمتوليعبدالعال","سيدمتولي","محمدالليثي","محمدليثي","محمودالشحات","محمودالشحاتانور","الشحاتمحمدانور"};
+        String[] modernNames={"محمدجبريل","حاتمفريدالواعر","ياسرسلامة","اسلامصبحي","احمدعامر","احمدعيسىالمعصراوي","محمودعبدالحكم","صابرعبدالحكم","حسنصالح","عبداللهكامل","محمودالرفاعي","احمدخليلشاهين","سيدرمضان","السيدسعيد","سيدسعد","السيدمتولي","السيدمتوليعبدالعال","سيدمتولي","محمدالليثي","محمدليثي","محمودالشحات","محمودالشحاتانور","الشحاتمحمدانور","عبدالبارئمحمد","العشري عمران","محمدعبدالعزيز","الحسينيالعزازي","وليدعاطف","محمدمعبد","محمودابوالوفاالصعيدي","احمدالسعيدمندور","محمدهاشمعبدالعزيز","ياسرسرحانالديب","محمدفريدالسنديوني","هشامعبدالباري","محمودسيدالطيب","عبدالمنعمعبدالمبدئ","سامحطهقنديل","محمدمصطفىالزيات"};
         String[] names=old?oldNames:modernNames;
         for(String candidate:names)if(n.contains(normalizeReciterName(candidate)))return true;
         return false;
