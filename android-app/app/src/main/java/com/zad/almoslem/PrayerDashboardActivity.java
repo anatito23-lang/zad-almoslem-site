@@ -101,7 +101,7 @@ public class PrayerDashboardActivity extends Activity {
             int h=prefs.getInt("native_time_hour_"+PRAYERS[i],-1);
             if(h>=0){Calendar prayer=Calendar.getInstance();prayer.set(Calendar.HOUR_OF_DAY,h);prayer.set(Calendar.MINUTE,prefs.getInt("native_time_minute_"+PRAYERS[i],0));prayer.set(Calendar.SECOND,0);prayer.set(Calendar.MILLISECOND,0);long elapsed=now-prayer.getTimeInMillis();if(elapsed>=0&&elapsed<15*60*1000L)active=i;}
         }
-        if(active>=0){adhanNow.setText("🕌 حان الآن وقت صلاة "+PRAYERS[active]+" — تقبّل الله");prayerHero.setBackgroundResource(R.drawable.azhar_mosque_bg);}
+        if(active>=0||prefs.getBoolean("adhan_active",false)){adhanNow.setText(active>=0?"🕌 حان الآن وقت صلاة "+PRAYERS[active]+" — تقبّل الله":"🕌 يرفع الأذان الآن — تقبّل الله");prayerHero.setBackgroundResource(R.drawable.azhar_mosque_bg);}
         else {if(next>=0)adhanNow.setText("الصلاة القادمة: "+PRAYERS[next]);prayerHero.setBackground(bg(green,18));}
         if(next>=0)nextCountdown.setText("متبقي على "+PRAYERS[next]+": "+format(Math.max(0,soon-now)/1000));
         else nextCountdown.setText("حدّث مواقيت الصلاة لبدء العد التنازلي");
