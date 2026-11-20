@@ -1,5 +1,5 @@
 package com.zad.almoslem;
-import android.Manifest;import android.app.Activity;import android.content.pm.PackageManager;import android.os.Build;import java.util.Calendar;import android.content.Intent;import android.graphics.Color;import android.graphics.Typeface;import android.graphics.drawable.GradientDrawable;import android.os.Bundle;import android.os.Handler;import android.os.Looper;import android.view.Gravity;import android.widget.*;
+import android.Manifest;import android.app.Activity;import android.content.pm.PackageManager;import android.os.Build;import java.util.Calendar;import android.content.Intent;import android.graphics.Color;import android.graphics.Typeface;import android.graphics.drawable.GradientDrawable;import android.os.Bundle;import android.os.Handler;import android.os.Looper;import android.view.Gravity;import android.view.View;import android.widget.*;
 import java.util.Locale;
 public class HomeActivity extends Activity{
 String[] prayers={"الفجر","الظهر","العصر","المغرب","العشاء"};TextView[] times=new TextView[5];LinearLayout prayerHero;Handler visualHandler=new Handler(Looper.getMainLooper());Runnable visualTicker=new Runnable(){public void run(){refreshAdhanVisual();visualHandler.postDelayed(this,1000);}};int dp(float n){return(int)(n*getResources().getDisplayMetrics().density+.5f);}
