@@ -1,6 +1,11 @@
-plugins { id 'com.android.application' }
+plugins {
+    id 'com.android.application'
+    id 'com.google.gms.google-services'
+}
 
 dependencies {
+    implementation platform('com.google.firebase:firebase-bom:33.7.0')
+    implementation 'com.google.firebase:firebase-firestore'
     implementation 'androidx.media3:media3-exoplayer:1.5.1'
     implementation 'androidx.media3:media3-exoplayer-hls:1.5.1'
 }
