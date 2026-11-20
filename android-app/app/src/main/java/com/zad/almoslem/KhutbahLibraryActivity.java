@@ -20,7 +20,8 @@ public class KhutbahLibraryActivity extends Activity {
     private JSONArray sermons = new JSONArray();
     private LinearLayout root, list;
     private EditText search;
-    private Spinner categorySpinner;
+    private TextView countView;
+    private String currentQuery = "";
     private String selectedCategory="الكل";
     private int green = Color.rgb(8,48,40), ink = Color.rgb(30,55,45);
 
@@ -30,6 +31,20 @@ public class KhutbahLibraryActivity extends Activity {
         getWindow().setNavigationBarColor(green);
         loadSermons();
         showList("");
+        RemoteContentRepository.sync(this, "khutbahs", () -> {
+            loadSermons();
+            if (countView != null) countView.setText("عدد الخطب: " + sermons.length());
+            fillList(currentQuery);
+        });
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        RemoteContentRepository.sync(this, "khutbahs", () -> {
+            loadSermons();
+            if (countView != null) countView.setText("عدد الخطب: " + sermons.length());
+            fillList(currentQuery);
+        });
     }
 
     private int dp(float n) { return (int)(n * getResources().getDisplayMetrics().density + .5f); }
@@ -43,10 +58,29 @@ public class KhutbahLibraryActivity extends Activity {
         return t;
     }
     private void loadSermons() {
+        JSONArray combined = new JSONArray();
         try (InputStream in = getAssets().open("khutbahs.json"); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             byte[] b = new byte[8192]; int n; while ((n=in.read(b))!=-1) out.write(b,0,n);
-            sermons = new JSONArray(new String(out.toByteArray(), StandardCharsets.UTF_8));
-        } catch (Exception ignored) { sermons = new JSONArray(); }
+            JSONArray local = new JSONArray(new String(out.toByteArray(), StandardCharsets.UTF_8));
+            for (int i=0;i<local.length();i++) combined.put(local.optJSONObject(i));
+        } catch (Exception ignored) {}
+        JSONArray remote = RemoteContentRepository.cached(this, "khutbahs");
+        for (int i=0;i<remote.length();i++) {
+            JSONObject item = remote.optJSONObject(i);
+            if (item == null) continue;
+            String id = item.optString("id", "");
+            String title = item.optString("title", "");
+            boolean exists = false;
+            for (int j=0;j<combined.length();j++) {
+                JSONObject old = combined.optJSONObject(j);
+                if (old != null && ((!id.isEmpty() && id.equals(old.optString("id", "")))
+                        || (!title.isEmpty() && title.equals(old.optString("title", ""))))) {
+                    exists = true; break;
+                }
+            }
+            if (!exists) combined.put(item);
+        }
+        sermons = combined;
     }
     private void base(String title, String subtitle) {
         ScrollView scroll = new ScrollView(this);
@@ -60,9 +94,10 @@ public class KhutbahLibraryActivity extends Activity {
         hero.addView(heading); hero.addView(sub); root.addView(hero);
     }
     private void showList(String query) {
-        base("مكتبة خطب الجمعة","خطب محفوظة داخل التطبيق — تعمل دون إنترنت");
-        TextView count = label("عدد الخطب: "+sermons.length(),14,ink,true);
-        count.setPadding(0,dp(14),0,dp(8)); root.addView(count);
+        currentQuery = query;
+        base("مكتبة خطب الجمعة","خطب محفوظة داخل التطبيق وخطب منشورة من لوحة الإدارة");
+        countView = label("عدد الخطب: "+sermons.length(),14,ink,true);
+        countView.setPadding(0,dp(14),0,dp(8)); root.addView(countView);
         search = new EditText(this); search.setSingleLine(true); search.setText(query);
         search.setHint("ابحث بعنوان الخطبة"); search.setTextSize(15);
         search.setPadding(dp(12),dp(10),dp(12),dp(10)); search.setBackground(bg(Color.WHITE,12));
@@ -72,7 +107,7 @@ public class KhutbahLibraryActivity extends Activity {
         fillList(query);
         search.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence s,int st,int c,int a){}
-            public void onTextChanged(CharSequence s,int st,int before,int count){fillList(s.toString());}
+            public void onTextChanged(CharSequence s,int st,int before,int count){currentQuery=s.toString();fillList(currentQuery);}
             public void afterTextChanged(Editable e){}
         });
     }
@@ -102,8 +137,8 @@ public class KhutbahLibraryActivity extends Activity {
     private void showDetail(JSONObject item) {
         base(item.optString("title","خطبة الجمعة"),item.optString("date",""));
         Button back=new Button(this); back.setText("العودة إلى قائمة الخطب");
-        root.addView(back); back.setOnClickListener(v->showList(""));
-        TextView body=label(item.optString("body","لا يوجد نص لهذه الخطبة."),17,ink,false);
+        root.addView(back); back.setOnClickListener(v->showList(currentQuery));
+        TextView body=label(item.optString("body",item.optString("text","لا يوجد نص لهذه الخطبة.")),17,ink,false);
         body.setLineSpacing(dp(5),1f); body.setPadding(dp(3),dp(18),dp(3),dp(24));
         root.addView(body);
     }

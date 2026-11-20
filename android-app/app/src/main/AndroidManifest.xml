@@ -19,8 +19,8 @@
         <activity android:name=".MoreActivity" android:exported="false" />
         <activity android:name=".LanguageSettingsActivity" android:exported="false" />
         <activity android:name=".KhutbahLibraryActivity" android:exported="false" />
+        <activity android:name=".FaithReflectionsActivity" android:exported="false" />
         <activity android:name=".QiblaActivity" android:exported="false" />
-        
         <activity android:name=".QuranTextActivity" android:exported="false" />
         <activity android:name=".PrayerDashboardActivity" android:exported="false" />
         <activity android:name=".MushafPageActivity" android:exported="false" />
@@ -38,11 +38,7 @@
         <service android:name=".RadioTileService" android:label="إذاعة القرآن" android:icon="@drawable/ic_launcher_new" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:exported="true"><intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter></service>
         <receiver android:name=".QuranHomeWidget" android:exported="true">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
-            <intent-filter>
-                <action android:name="com.zad.almoslem.WIDGET_QURAN_TOGGLE" />
-                <action android:name="com.zad.almoslem.WIDGET_QURAN_NEXT" />
-                <action android:name="com.zad.almoslem.WIDGET_QURAN_PREVIOUS" />
-            </intent-filter>
+            <intent-filter><action android:name="com.zad.almoslem.WIDGET_QURAN_TOGGLE" /><action android:name="com.zad.almoslem.WIDGET_QURAN_NEXT" /><action android:name="com.zad.almoslem.WIDGET_QURAN_PREVIOUS" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/quran_widget_info" />
         </receiver>
         <service android:name=".QuranTileService" android:label="استماع القرآن" android:icon="@drawable/ic_launcher_new" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:exported="true"><intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter></service>
@@ -51,12 +47,7 @@
         <service android:name=".ReminderAudioService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
         <receiver android:name=".ReminderReceiver" android:enabled="true" android:exported="false" />
         <receiver android:name=".BootReceiver" android:enabled="true" android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.TIME_SET" />
-                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-            </intent-filter>
+            <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /><action android:name="android.intent.action.TIME_SET" /><action android:name="android.intent.action.TIMEZONE_CHANGED" /><action android:name="android.intent.action.MY_PACKAGE_REPLACED" /></intent-filter>
         </receiver>
     </application>
 </manifest>

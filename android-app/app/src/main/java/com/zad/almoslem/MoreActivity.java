@@ -18,13 +18,12 @@ add(root,"الرقية الشرعية","اختيار القارئ وتشغيل �
 add(root,"الابتهالات والإنشاد","تسجيلات الابتهالات الدينية",AudioLibraryActivity.class);
 section(root,"🎞️ محتوى إيماني");
 add(root,"ريلز إسلامي","بطاقات إيمانية رأسية: آيات وأحاديث صحيحة وأدعية، اسحب للتنقل بينها",IslamicReelsActivity.class);
+add(root,"الوقفات الإيمانية","وقفة قصيرة متجددة من المحتوى المنشور في لوحة الإدارة",FaithReflectionsActivity.class);
+add(root,"مكتبة خطب الجمعة","خطب محفوظة وخطب جديدة من لوحة الإدارة",KhutbahLibraryActivity.class);
 section(root,"🧭 خدمات إسلامية");
 add(root,"بوصلة القبلة","تحديد اتجاه القبلة",QiblaActivity.class);
-
-add(root,"مكتبة خطب الجمعة","الخطب والموضوعات الدعوية",KhutbahLibraryActivity.class);
 add(root,"المكتبة الإسلامية","الكتب والسنة والأدعية",FaithLibraryActivity.class);
 add(root,"التقويم الهجري والميلادي","المناسبات والتواريخ",CalendarActivity.class);
-
 section(root,"☀️ الأذكار والأوراد");
 add(root,"مكتبة الأذكار","أذكار الصباح والمساء والنوم وبعد الصلاة مع النص والمصدر والعداد",AzkarActivity.class);
 add(root,"وردي اليومي","متابعة الورد والأذكار اليومية",DailyWirdActivity.class);
