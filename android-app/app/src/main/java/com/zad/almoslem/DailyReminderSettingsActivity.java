@@ -34,7 +34,8 @@ public class DailyReminderSettingsActivity extends Activity {
   TextView title=label("تنبيهاتك اليومية",24,Color.WHITE,true);title.setGravity(Gravity.CENTER);TextView sub=label("اختر مواعيد التذكير التي تناسب يومك",13,Color.rgb(222,239,229),false);sub.setGravity(Gravity.CENTER);
   LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(14),dp(18),dp(14),dp(18));hero.setBackground(bg(green,18));hero.addView(title);hero.addView(sub);root.addView(hero);
   for(int i=0;i<keys.length;i++)addReminder(root,i);
-  addGentleReminders(root);\n  addPrayerApproachSettings(root);
+  addGentleReminders(root);
+  addPrayerApproachSettings(root);
   TextView note=label("تحتاج التنبيهات إلى السماح بإشعارات التطبيق. وإذا لم يتوفر إذن المنبهات الدقيقة، يستخدم Android تنبيهًا بديلًا قد يتأخر قليلًا.",12,Color.GRAY,false);note.setPadding(0,dp(10),0,0);root.addView(note);
  }
 
@@ -60,7 +61,8 @@ public class DailyReminderSettingsActivity extends Activity {
    public void onStopTrackingTouch(SeekBar bar){}
   });
  }
-\n private void addPrayerApproachSettings(LinearLayout root){
+
+ private void addPrayerApproachSettings(LinearLayout root){
   LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
   card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(card,lp);
