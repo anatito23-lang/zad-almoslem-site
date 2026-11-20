@@ -86,8 +86,12 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
                 QuranHomeWidget.refreshAll(this);
                 Intent intent=new Intent(this,RadioPlaybackService.class);intent.setAction(RadioPlaybackService.ACTION_PLAY);
                 intent.putExtra("url",audioUrl);intent.putExtra("kind","quran");intent.putExtra("label",label);
-                File offline=new File(new File(getFilesDir(),"quran"),"reciter_"+ri+"_surah_"+si+".mp3");
+                File quranDir=new File(getFilesDir(),"quran");
+                File offline=new File(quranDir,"reciter_"+reciterStorageKey(reciter)+"_surah_"+si+".mp3");
+                // Keep compatibility with files downloaded by older app versions, which used the filtered list index.
+                File legacyOffline=new File(quranDir,"reciter_"+ri+"_surah_"+si+".mp3");
                 if(offline.isFile()&&offline.length()>10000)intent.putExtra("local_path",offline.getAbsolutePath());
+                else if(legacyOffline.isFile()&&legacyOffline.length()>10000)intent.putExtra("local_path",legacyOffline.getAbsolutePath());
                 if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);
                 state.setText("يتم تشغيل "+label+" في الخلفية.");
             }catch(Exception e){state.setText("تعذر بدء التلاوة: "+e.getMessage());}
@@ -104,7 +108,7 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
                     HttpURLConnection connection=null;File temp=null;
                     try{
                         File dir=new File(getFilesDir(),"quran");if(!dir.exists()&&!dir.mkdirs())throw new Exception("تعذر إنشاء مجلد القرآن");
-                        File target=new File(dir,"reciter_"+ri+"_surah_"+si+".mp3");temp=new File(dir,target.getName()+".part");
+                        File target=new File(dir,"reciter_"+reciterStorageKey(reciters.get(ri))+"_surah_"+si+".mp3");temp=new File(dir,target.getName()+".part");
                         connection=(HttpURLConnection)new URL(url).openConnection();connection.setConnectTimeout(20000);connection.setReadTimeout(90000);connection.setInstanceFollowRedirects(true);
                         if(connection.getResponseCode()!=200)throw new Exception("مصدر التلاوة غير متاح");
                         long total=connection.getContentLength(),got=0;
@@ -127,6 +131,13 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         });
     }
 
+
+    private String reciterStorageKey(org.json.JSONObject reciter){
+        String id=reciter==null?"":reciter.optString("id","").trim();
+        if(id.isEmpty())id=normalizeReciterName(reciter==null?"":reciter.optString("name","reciter"));
+        id=id.replaceAll("[^A-Za-z0-9_-]","_");
+        return id.isEmpty()?"unknown":id;
+    }
 
     private void addExternalSourceButton(LinearLayout parent,String label,String url){
         Button button=new Button(this);button.setText(label);button.setAllCaps(false);
