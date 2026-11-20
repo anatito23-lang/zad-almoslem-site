@@ -526,7 +526,7 @@ public class MainActivity extends Activity {
             new Thread(()->{
                 HttpURLConnection connection=null;
                 try{
-                    String url="https://api.aladhan.com/v1/timingsByCity?city="+java.net.URLEncoder.encode(cityEn,"UTF-8")+"&country=Egypt&method=5";
+                    String url="https://api.aladhan.com/v1/timingsByCity?city="+java.net.URLEncoder.encode(cityEn,"UTF-8")+"&country=Egypt&method=5&school=0";
                     connection=(HttpURLConnection)new URL(url).openConnection();connection.setConnectTimeout(15000);connection.setReadTimeout(20000);
                     connection.setRequestMethod("GET");
                     if(connection.getResponseCode()!=200)throw new Exception("تعذر الاتصال بخدمة المواقيت");
