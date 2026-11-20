@@ -31,7 +31,7 @@ public class FaithLibraryActivity extends Activity {
  private int hadithIndex=0,duaIndex=0;
  private TextView hadithText,hadithSource,duaText,duaSource,khatmaResult;
  private EditText daysInput;
- @Override public void onCreate(Bundle state){super.onCreate(state);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);build();RemoteContentRepository.sync(this,"hadiths",()->applyRemoteRows("hadiths"));RemoteContentRepository.sync(this,"duas",()->applyRemoteRows("duas"));}
+ @Override public void onCreate(Bundle state){super.onCreate(state);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);build();applyRemoteRows("hadiths");applyRemoteRows("duas");RemoteContentRepository.sync(this,"hadiths",()->applyRemoteRows("hadiths"));RemoteContentRepository.sync(this,"duas",()->applyRemoteRows("duas"));}
  private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
  private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.RIGHT);t.setTextDirection(android.view.View.TEXT_DIRECTION_RTL);t.setLineSpacing(dp(4),1.08f);if(bold)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
  private GradientDrawable bg(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));return d;}
