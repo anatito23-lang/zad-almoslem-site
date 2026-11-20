@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 public class QuranTextActivity extends Activity {
     private final String[] names={"الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"};
-    private static final String[] RECITER_IDS={"ar.abdulbasitmurattal","ar.husary"};
+    private static final String[] RECITER_IDS={"ar.abdulbasit","ar.husary"};
     private static final String[] RECITER_NAMES={"الشيخ عبدالباسط عبدالصمد","الشيخ محمود خليل الحصري"};
     private int green=Color.rgb(8,48,40), pageNumber=0, surahNumber=1, currentIndex=-1;
     private boolean busy=false, pageMode=false, autoAdvance=false;
@@ -120,7 +120,7 @@ public class QuranTextActivity extends Activity {
         if(global<1){status.setText("تعذر تحديد رقم الآية الصوتي.");return;}
         int selectedReciter=Math.max(0,Math.min(RECITER_IDS.length-1,reciterPicker.getSelectedItemPosition()));
         String edition=RECITER_IDS[selectedReciter];
-        String audioUrl="https://cdn.islamic.network/quran/audio/"+("ar.abdulbasitmurattal".equals(edition)?"192":"128")+"/"+edition+"/"+global+".mp3";
+        String audioUrl="https://cdn.islamic.network/quran/audio/"+("ar.abdulbasit".equals(edition)?"192":"128")+"/"+edition+"/"+global+".mp3";
         status.setText("جارٍ تشغيل الآية "+ayah.optInt("numberInSurah",index+1)+" بصوت "+RECITER_NAMES[selectedReciter]);
         try{
             player=new MediaPlayer();
