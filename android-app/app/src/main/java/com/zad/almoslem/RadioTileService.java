@@ -23,7 +23,7 @@ public class RadioTileService extends TileService {
         if(playing) { p.edit().putBoolean("radio_playing",false).putString("active_kind","").apply(); i.setAction(RadioPlaybackService.ACTION_STOP); }
         else {
             String stream=p.getString("radio_stream","main");
-            String url="backup".equals(stream)?"https://qurango.net/radio/tarateel":"https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8";
+            String url="backup".equals(stream)?"https://qurango.net/radio/tarateel":"https://stream.radiojar.com/8s5u5tpdtwzuv";
             p.edit().putBoolean("radio_playing",true).putString("active_kind","radio").apply();
             i.setAction(RadioPlaybackService.ACTION_PLAY); i.putExtra("url",url); i.putExtra("label",p.getString("radio_label","إذاعة القرآن الكريم")); i.putExtra("kind","radio");
         }
