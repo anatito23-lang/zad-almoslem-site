@@ -38,6 +38,19 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         TextView state=text("جارٍ تحميل قائمة القراء من مكتبة التسجيلات.",12,Color.rgb(80,100,90),false);card.addView(state);
         TextView libraryNote=text("المكتبة الداخلية تعرض القراء والتسجيلات المتاحة في مصدر القرآن. اختر القارئ والسورة ثم استمع أو نزّل الملف ليُحفظ داخل التطبيق. لا توجد روابط لمواقع خارجية في هذه الصفحة.",12,AppThemeColors.muted(this),false);
         libraryNote.setPadding(0,dp(18),0,dp(6));card.addView(libraryNote);
+        // Restore the last catalog first so previously downloaded recitations remain selectable offline.
+        String cachedCatalog=getSharedPreferences("zad_audio",MODE_PRIVATE).getString("quran_reciters_cache","");
+        if(!cachedCatalog.isEmpty()){
+            try{
+                org.json.JSONArray cached=new org.json.JSONObject(cachedCatalog).getJSONArray("reciters");
+                for(int i=0;i<cached.length();i++){
+                    org.json.JSONObject item=cached.getJSONObject(i);
+                    if(item.has("moshaf")&&item.getJSONArray("moshaf").length()>0)allReciters.add(item);
+                }
+                applyReciterFilter(reciterSpinner,state);
+                state.setText("تم تحميل قائمة القراء المحفوظة. يمكنك تشغيل السور التي نزّلتها دون إنترنت.");
+            }catch(Exception ignored){allReciters.clear();}
+        }
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){} public void onItemSelected(AdapterView<?> p,View v,int pos,long id){reciterGroup=pos;mujawwadOnly=pos==3;applyReciterFilter(reciterSpinner,state);}});
         addCard(root,card);
         new Thread(()->{
@@ -48,12 +61,21 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
                 if(connection.getResponseCode()!=200)throw new Exception("تعذر تحميل قائمة القراء");
                 ByteArrayOutputStream out=new ByteArrayOutputStream();
                 try(InputStream in=connection.getInputStream()){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}
-                org.json.JSONArray array=new org.json.JSONObject(out.toString("UTF-8")).getJSONArray("reciters");
-                for(int i=0;i<array.length();i++){org.json.JSONObject item=array.getJSONObject(i);if(item.has("moshaf")&&item.getJSONArray("moshaf").length()>0)allReciters.add(item);}
+                String catalogJson=out.toString("UTF-8");
+                org.json.JSONArray array=new org.json.JSONObject(catalogJson).getJSONArray("reciters");
                 runOnUiThread(()->{
+                    allReciters.clear();
+                    for(int i=0;i<array.length();i++){
+                        org.json.JSONObject item=array.optJSONObject(i);
+                        if(item!=null&&item.has("moshaf")&&item.optJSONArray("moshaf")!=null&&item.optJSONArray("moshaf").length()>0)allReciters.add(item);
+                    }
+                    getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putString("quran_reciters_cache",catalogJson).apply();
                     applyReciterFilter(reciterSpinner,state);
                 });
-            }catch(Exception e){runOnUiThread(()->state.setText("تعذر تحميل القراء. تحقق من الإنترنت ثم أعد فتح التطبيق."));}
+            }catch(Exception e){runOnUiThread(()->{
+                if(allReciters.isEmpty())state.setText("تعذر تحميل القراء. اتصل بالإنترنت مرة واحدة لتحميل القائمة، ثم ستظل متاحة دون إنترنت.");
+                else state.setText("لا يوجد اتصال الآن؛ تستخدم قائمة القراء المحفوظة ويمكن تشغيل الملفات التي نزّلتها.");
+            });}
             finally{if(connection!=null)connection.disconnect();}
         }).start();
         play.setOnClickListener(v->{
