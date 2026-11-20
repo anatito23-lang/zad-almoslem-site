@@ -62,7 +62,9 @@ public class AzkarActivity extends Activity {
         add(prayer,"اللهم أنت السلام، ومنك السلام، تباركت يا ذا الجلال والإكرام.","رواه مسلم",1);
         add(prayer,"سبحان الله، والحمد لله، والله أكبر؛ ثلاثًا وثلاثين، ثم تمام المائة: لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.","رواه مسلم",1);
         add(prayer,"اللهم أعني على ذكرك وشكرك وحسن عبادتك.","رواه أبو داود والنسائي، وصححه أهل العلم",1);
-        add(prayer,"قراءة آية الكرسي: ﴿اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ...﴾ إل    private void applyRemoteAzkar(){
+        add(prayer,"قراءة آية الكرسي: ﴿اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ...﴾ إلى آخر الآية.","ورد في فضلها حديث صحيح رواه النسائي في عمل اليوم والليلة وغيره",1);
+    }
+    private void applyRemoteAzkar(){
         // Rebuild from bundled content plus the latest published snapshot.
         // This removes remotely unpublished/deleted items and applies edits/count changes.
         String previous=currentCategory;
