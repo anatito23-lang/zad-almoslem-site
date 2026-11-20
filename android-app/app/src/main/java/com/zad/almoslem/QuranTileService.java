@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.service.quicksettings.Tile;
 import android.service.quicksettings.TileService;
 import android.os.Build;
+import java.io.File;
 
 public class QuranTileService extends TileService {
     @Override public void onStartListening() { super.onStartListening(); refresh(); }
@@ -25,6 +26,12 @@ public class QuranTileService extends TileService {
             if(url.isEmpty()) { startActivityAndCollapse(new Intent(this,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)); return; }
             p.edit().putBoolean("radio_playing",true).putString("active_kind","quran").apply();
             i.setAction(RadioPlaybackService.ACTION_PLAY); i.putExtra("url",url); i.putExtra("label",p.getString("last_quran_title","تلاوة القرآن الكريم")); i.putExtra("kind","quran");
+            String storageKey=p.getString("last_quran_storage_key","");
+            int surahId=p.getInt("last_quran_surah_id",0);
+            if(!storageKey.isEmpty()&&surahId>=1&&surahId<=114){
+                File offline=new File(new File(getFilesDir(),"quran"),"reciter_"+storageKey+"_surah_"+surahId+".mp3");
+                if(offline.isFile()&&offline.length()>10000)i.putExtra("local_path",offline.getAbsolutePath());
+            }
         }
         if(Build.VERSION.SDK_INT>=26) startForegroundService(i); else startService(i);
         refresh();
