@@ -81,7 +81,7 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
                     .putString("last_quran_url",audioUrl).putString("last_quran_title",label)
                     .putString("last_quran_server",selectedMoshaf.optString("server",""))
                     .putString("last_quran_surah_list",selectedMoshaf.optString("surah_list",""))
-                    .putString("last_quran_reciter",reciterName).putInt("last_quran_surah_id",si)
+                    .putString("last_quran_reciter",reciterName).putString("last_quran_storage_key",reciterStorageKey(reciter)).putInt("last_quran_surah_id",si)
                     .putBoolean("radio_playing",true).putString("active_kind","quran").apply();
                 QuranHomeWidget.refreshAll(this);
                 Intent intent=new Intent(this,RadioPlaybackService.class);intent.setAction(RadioPlaybackService.ACTION_PLAY);
