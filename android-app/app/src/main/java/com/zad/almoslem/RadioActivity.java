@@ -114,6 +114,10 @@ public class RadioActivity extends Activity {
         play.setText("▶ تشغيل المحطة");
         card.addView(play, match());
         play.setOnClickListener(v -> start(url, label, station));
+        Button stopStation = new Button(this);
+        stopStation.setText("■ إيقاف المحطة");
+        card.addView(stopStation, match());
+        stopStation.setOnClickListener(v -> stopPlayback());
 
         TextView official = new TextView(this);
         official.setText("الموقع الرسمي للمحطة");
@@ -156,6 +160,13 @@ public class RadioActivity extends Activity {
     @Override protected void onDestroy() {
         handler.removeCallbacks(statusTicker);
         super.onDestroy();
+    }
+
+    private void stopPlayback() {
+        Intent i = new Intent(this, RadioPlaybackService.class);
+        i.setAction(RadioPlaybackService.ACTION_STOP);
+        try { startService(i); if (status != null) status.setText("تم إرسال طلب إيقاف الإذاعة."); }
+        catch (Exception e) { if (status != null) status.setText("تعذر إيقاف الإذاعة: " + e.getMessage()); }
     }
 
     private void start(String url, String label, String station) {
