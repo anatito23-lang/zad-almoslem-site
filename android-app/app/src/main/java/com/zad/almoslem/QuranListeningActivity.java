@@ -1,5 +1,5 @@
 package com.zad.almoslem;
-import android.app.Activity;import android.content.Intent;import android.graphics.Color;import android.graphics.Typeface;import android.graphics.drawable.GradientDrawable;import android.os.Build;import android.os.Bundle;import android.view.Gravity;import android.view.View;import android.widget.*;import java.io.*;import java.net.HttpURLConnection;import java.net.URL;import java.util.Locale;
+import android.app.Activity;import android.content.Intent;import android.graphics.Color;import android.graphics.Typeface;import android.graphics.drawable.GradientDrawable;import android.os.Build;import android.os.Bundle;import android.view.Gravity;import android.view.View;import android.widget.*;import java.io.*;import java.net.HttpURLConnection;import java.net.URL;import java.util.Locale;import java.util.ArrayList;
 public class QuranListeningActivity extends Activity{
 private int dp(float n){return(int)(n*getResources().getDisplayMetrics().density+.5f);}
 private LinearLayout column(){LinearLayout l=new LinearLayout(this);l.setOrientation(LinearLayout.VERTICAL);return l;}
@@ -25,7 +25,7 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         card.addView(text("السورة",12,Color.DKGRAY,true));card.addView(surahSpinner,matchWrap());
         Button play=new Button(this);play.setText("استمع الآن");card.addView(play,matchWrap());
         Button stop=new Button(this);stop.setText("■ إيقاف التلاوة");card.addView(stop,matchWrap());
-        stop.setOnClickListener(v->{Intent stopIntent=new Intent(this,RadioPlaybackService.class);stopIntent.setAction(RadioPlaybackService.ACTION_STOP);try{startService(stopIntent);state.setText("تم إرسال طلب إيقاف التلاوة.");}catch(Exception e){state.setText("تعذر إيقاف التلاوة: "+e.getMessage());}});
+        stop.setOnClickListener(v->{Intent stopIntent=new Intent(this,RadioPlaybackService.class);stopIntent.setAction(RadioPlaybackService.ACTION_STOP);try{startService(stopIntent);Toast.makeText(this,"تم إيقاف التلاوة",Toast.LENGTH_SHORT).show();}catch(Exception e){Toast.makeText(this,"تعذر إيقاف التلاوة",Toast.LENGTH_SHORT).show();}});
         Button download=new Button(this);download.setText("تنزيل السورة للاستماع دون إنترنت");card.addView(download,matchWrap());
         ProgressBar quranProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);quranProgress.setMax(100);card.addView(quranProgress,matchWrap());
         TextView state=text("جارٍ تحميل قائمة القراء من مكتبة التسجيلات.",12,Color.rgb(80,100,90),false);card.addView(state);
@@ -115,17 +115,7 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
     }
 
 
-    private String resolveQuranAudioUrl(org.json.JSONObject reciter,int surahId) throws Exception {
-        org.json.JSONArray moshafs=reciter.getJSONArray("moshaf");
-        for(int i=0;i<moshafs.length();i++){
-            org.json.JSONObject m=moshafs.getJSONObject(i);String list=m.optString("surah_list","");
-            boolean includes=false;
-            for(String id:list.split(",")){try{if(Integer.parseInt(id.trim())==surahId){includes=true;break;}}catch(Exception ignored){}}
-            String server=m.optString("server","");
-            if(includes&&!server.isEmpty()){if(!server.endsWith("/"))server+="/";return server+String.format(Locale.US,"%03d.mp3",surahId);}
-        }
-        return null;
-    }
+
 
 
 }
