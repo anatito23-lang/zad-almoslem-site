@@ -203,12 +203,13 @@ public class RadioPlaybackService extends Service {
                 }
             });
             Uri source = localFile != null ? Uri.fromFile(localFile) : Uri.parse(url);
-            boolean radioStream = "radio".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""));
             boolean hls = localFile == null && url != null && url.toLowerCase().contains(".m3u8");
+            // Keep explicit MIME selection for HLS playlists only. Progressive radio
+            // streams may be MP3, AAC, or ICY-wrapped; let Media3 sniff the response
+            // instead of forcing every non-HLS station to be parsed as audio/mpeg.
             MediaItem item = hls
                     ? new MediaItem.Builder().setUri(source).setMimeType(androidx.media3.common.MimeTypes.APPLICATION_M3U8).build()
-                    : ((localFile != null || !radioStream) ? MediaItem.fromUri(source)
-                    : new MediaItem.Builder().setUri(source).setMimeType(androidx.media3.common.MimeTypes.AUDIO_MPEG).build());
+                    : MediaItem.fromUri(source);
             player.setMediaItem(item);
             player.prepare();
             if (adhanPauseRequested) {
