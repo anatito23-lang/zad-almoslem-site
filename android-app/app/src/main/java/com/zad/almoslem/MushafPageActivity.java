@@ -119,7 +119,7 @@ public class MushafPageActivity extends Activity {
         pageImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
         pageFrame.addView(pageImage, new LinearLayout.LayoutParams(-1, -1));
         LinearLayout.LayoutParams imageLp = new LinearLayout.LayoutParams(-1,
-                Math.max(dp(420), getResources().getDisplayMetrics().heightPixels - dp(260)));
+                Math.max(dp(360), getResources().getDisplayMetrics().heightPixels - dp(360)));
         imageLp.topMargin = dp(2);
         root.addView(pageFrame, imageLp);
 
