@@ -69,31 +69,68 @@ public class MainActivity extends Activity {
         l.setGravity(Gravity.CENTER_VERTICAL); return l;
     }
     private void pad(View v, int all) { v.setPadding(dp(all),dp(all),dp(all),dp(all)); }
+    private void addHomePrayerSummary(LinearLayout root) {
+        TextView title=text("مواقيت الصلاة",19,Color.rgb(20,55,43),true);
+        title.setPadding(0,0,0,dp(7));
+        root.addView(title);
+        LinearLayout card=column();
+        card.setBackground(shape(Color.WHITE,16));
+        card.setPadding(dp(8),dp(10),dp(8),dp(10));
+        LinearLayout times=row();
+        String[] icons={"🌅","☀️","🌤️","🌇","🌙"};
+        for(int i=0;i<PRAYERS.length;i++){
+            LinearLayout cell=column();
+            cell.setGravity(Gravity.CENTER);
+            TextView icon=text(icons[i],17,Color.rgb(25,90,70),false);
+            icon.setGravity(Gravity.CENTER);
+            TextView name=text(PRAYERS[i],11,Color.rgb(70,85,75),true);
+            name.setGravity(Gravity.CENTER);
+            int h=prefs.getInt("native_time_hour_"+PRAYERS[i],-1);
+            int minute=prefs.getInt("native_time_minute_"+PRAYERS[i],0);
+            String time=h<0?"--:--":String.format(Locale.getDefault(),"%02d:%02d",h,minute);
+            TextView value=text(time,13,Color.rgb(8,48,40),true);
+            value.setGravity(Gravity.CENTER);
+            cell.addView(icon);cell.addView(name);cell.addView(value);
+            times.addView(cell,new LinearLayout.LayoutParams(0,-2,1f));
+        }
+        card.addView(times);
+        TextView note=text("المواقيت المحفوظة على هاتفك",10,Color.rgb(115,125,115),false);
+        note.setGravity(Gravity.CENTER);
+        note.setPadding(0,dp(6),0,0);
+        card.addView(note);
+        LinearLayout.LayoutParams lp=matchWrap();lp.bottomMargin=dp(10);
+        root.addView(card,lp);
+    }
+
     private void buildScreen() {
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
         LinearLayout root = column();
-        root.setPadding(dp(16),dp(18),dp(16),dp(28));
+        root.setPadding(dp(12),dp(10),dp(12),dp(24));
         root.setBackgroundColor(Color.rgb(244,247,243));
         scroll.addView(root);
-        TextView heading = text("زاد المسلم",26,Color.WHITE,true);
+        addHomePrayerSummary(root);
+        TextView heading = text("زاد المسلم",22,Color.WHITE,true);
         heading.setGravity(Gravity.CENTER);
-        TextView ayah = text("﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾",16,Color.rgb(232,211,158),true);
+        TextView ayah = text("﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾",13,Color.rgb(232,211,158),true);
         ayah.setGravity(Gravity.CENTER);
         TextView ayahRef = text("سورة الرعد • الآية ٢٨",11,Color.rgb(222,239,229),false);
         ayahRef.setGravity(Gravity.CENTER);
         TextClock liveClock = new TextClock(this);
         liveClock.setFormat12Hour("hh:mm:ss a");
         liveClock.setFormat24Hour("HH:mm:ss");
-        liveClock.setTextSize(30);
+        liveClock.setTextSize(22);
         liveClock.setTextColor(Color.WHITE);
         liveClock.setGravity(Gravity.CENTER);
         liveClock.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
-        liveClock.setPadding(0,dp(8),0,dp(5));
+        liveClock.setPadding(0,dp(3),0,dp(2));
         LinearLayout hero = column(); hero.setGravity(Gravity.CENTER);
-        hero.setBackground(shape(Color.rgb(8,48,40),20)); hero.setPadding(dp(18),dp(18),dp(18),dp(18));
+        hero.setBackground(shape(Color.rgb(8,48,40),18)); hero.setPadding(dp(12),dp(9),dp(12),dp(9));
         hero.addView(heading); hero.addView(liveClock); hero.addView(ayah); hero.addView(ayahRef);
         root.addView(hero, matchWrap());
+        Button prayerDetails = new Button(this); prayerDetails.setText("عرض مواقيت الصلاة بالتفصيل");
+        prayerDetails.setOnClickListener(v -> startActivity(new Intent(this, PrayerDashboardActivity.class)));
+        root.addView(prayerDetails, matchWrap());
         Button libraryButton = new Button(this); libraryButton.setText("📚  مكتبة خطب الجمعة");
         libraryButton.setOnClickListener(v -> startActivity(new Intent(this, KhutbahLibraryActivity.class)));
         root.addView(libraryButton, matchWrap());
@@ -230,9 +267,9 @@ public class MainActivity extends Activity {
         addNativeQuranPlayer(root);
 
         LinearLayout tasbeeh=column();
-        tasbeeh.setBackground(shape(Color.rgb(17,65,51),22));
-        tasbeeh.setPadding(dp(18),dp(18),dp(18),dp(18));
-        TextView tasTitle=text("السبحة الإلكترونية",20,Color.WHITE,true);
+        tasbeeh.setBackground(shape(Color.rgb(17,65,51),20));
+        tasbeeh.setPadding(dp(12),dp(12),dp(12),dp(12));
+        TextView tasTitle=text("السبحة الإلكترونية",18,Color.WHITE,true);
         tasTitle.setGravity(Gravity.CENTER);
         TextView tasDesc=text("وَاذْكُرُوا اللَّهَ كَثِيرًا",14,Color.rgb(224,199,133),true);
         tasDesc.setGravity(Gravity.CENTER);
@@ -243,9 +280,9 @@ public class MainActivity extends Activity {
         int savedGoal=prefs.getInt("native_tasbeeh_goal",33);
         int goalIndex=savedGoal==66?1:(savedGoal==99?2:0);
         tasbeehGoal.setSelection(goalIndex);
-        TextView currentDhikr=text("",21,Color.WHITE,true);currentDhikr.setGravity(Gravity.CENTER);
+        TextView currentDhikr=text("",17,Color.WHITE,true);currentDhikr.setGravity(Gravity.CENTER);
         currentDhikr.setPadding(dp(4),dp(20),dp(4),dp(10));
-        TextView count=text("0",54,Color.rgb(232,203,137),true);count.setGravity(Gravity.CENTER);
+        TextView count=text("0",34,Color.rgb(232,203,137),true);count.setGravity(Gravity.CENTER);\n        android.graphics.drawable.GradientDrawable countRing=new android.graphics.drawable.GradientDrawable();\n        countRing.setShape(android.graphics.drawable.GradientDrawable.OVAL);\n        countRing.setColor(Color.rgb(10,49,40));countRing.setStroke(dp(3),Color.rgb(218,185,112));\n        android.widget.FrameLayout countCircle=new android.widget.FrameLayout(this);\n        countCircle.setBackground(countRing);\n        countCircle.addView(count,new android.widget.FrameLayout.LayoutParams(dp(104),dp(104),Gravity.CENTER));\n        LinearLayout circleHolder=row();circleHolder.setGravity(Gravity.CENTER);circleHolder.addView(countCircle,new LinearLayout.LayoutParams(dp(112),dp(112)));
         TextView target=text("",13,Color.rgb(225,225,215),false);target.setGravity(Gravity.CENTER);
         TextView tasProgress=text("",13,Color.rgb(225,225,215),false);tasProgress.setGravity(Gravity.CENTER);
         int[] dhikrIndex={prefs.getInt("native_tasbeeh_dhikr",0)};
@@ -299,7 +336,7 @@ public class MainActivity extends Activity {
         tasbeeh.addView(tasTitle);tasbeeh.addView(tasDesc);
         tasbeeh.addView(text("اختر عدد التسبيحات",13,Color.WHITE,true));
         tasbeeh.addView(tasbeehGoal,matchWrap());
-        tasbeeh.addView(currentDhikr);tasbeeh.addView(count);
+        tasbeeh.addView(currentDhikr);tasbeeh.addView(circleHolder);
         tasbeeh.addView(target);tasbeeh.addView(tasProgress);
         tasbeeh.addView(actions);
         drawTasbeeh.run();
