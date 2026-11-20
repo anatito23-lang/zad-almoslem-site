@@ -91,9 +91,9 @@ public class ReminderAudioService extends Service {
             speak("حان وقت قيام الليل، لا تنسَ نصيبك من صلاة الليل");
         } else if ("approach".equals(kind) || "gentle".equals(kind)) {
             // These reminders use real recorded Quran recitation, never Android TextToSpeech.
-            playFile(requestedAudioFile == null ? ("approach".equals(kind) ? "approach" : "gentle_0") : requestedAudioFile);
+            playFile(requestedAudioFile == null ? ("approach".equals(kind) ? "approach" : "gentle_0") : requestedAudioFile, reminderMessage);
         } else {
-            playFile(kind);
+            playFile(kind, null);
         }
         return START_NOT_STICKY;
     }
@@ -107,13 +107,20 @@ public class ReminderAudioService extends Service {
         }
     }
 
-    private void playFile(String kind) {
+    private void playFile(String kind, String fallbackMessage) {
         try {
             File file = new File(new File(getFilesDir(), "reminders"), kind + ".mp3");
             if (!file.isFile() || file.length() < 10000) {
-                if ("dua".equals(kind) || "approach".equals(kind) || kind.startsWith("gentle_")) {
+                if ("dua".equals(kind)) {
                     android.util.Log.w("ZadAlmoslem", "Recorded reminder audio is missing: " + kind);
                     finishPlayback();
+                    return;
+                }
+                if ("approach".equals(kind) || kind.startsWith("gentle_")) {
+                    android.util.Log.w("ZadAlmoslem", "Recorded reminder audio is missing; using Arabic speech fallback: " + kind);
+                    speak(fallbackMessage == null || fallbackMessage.trim().isEmpty()
+                            ? "تذكير من زاد المسلم، لا تنس ذكر الله"
+                            : fallbackMessage);
                     return;
                 }
                 speak("حان وقت " + ("morning".equals(kind) ? "أذكار الصباح" : "أذكار المساء") + "، لا تنسَ ذكر الله");
