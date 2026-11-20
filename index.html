@@ -459,6 +459,22 @@ footer{background:#071522;color:#c9d6e2}
   
 
 
+  <section class="section" id="nearbyMosques">
+    <div class="section-head"><div><h2>المساجد القريبة منك</h2><p>اعثر على أقرب مسجد حسب موقعك الحالي</p></div><span class="small">بحث اختياري</span></div>
+    <div class="card">
+      <div class="row" style="align-items:end">
+        <label style="display:grid;gap:5px">نطاق البحث
+          <select id="mosqueRadius"><option value="3000">3 كم</option><option value="5000" selected>5 كم</option><option value="10000">10 كم</option></select>
+        </label>
+        <button class="btn green" id="findNearbyMosques" type="button">📍 ابحث عن المساجد القريبة</button>
+      </div>
+      <p class="small" style="margin-top:10px">لن نطلب موقعك إلا عند الضغط على زر البحث. تُستخدم إحداثياتك لجلب النتائج القريبة، ولا يحفظها موقع زاد المسلم.</p>
+      <p id="mosqueSearchStatus" class="small" role="status" aria-live="polite">اضغط على زر البحث لعرض المساجد الأقرب إليك.</p>
+      <div id="nearbyMosqueResults" class="list" style="margin-top:10px"></div>
+      <a id="mosqueMapFallback" class="btn light hidden" href="https://www.openstreetmap.org/" target="_blank" rel="noopener">افتح خريطة المساجد</a>
+    </div>
+  </section>
+
   <section class="section" id="calendar">
     <div class="section-head"><div><h2>التقويم الشهري</h2><p>التاريخ الميلادي وما يقابله بالهجري لكل يوم من أيام الشهر</p></div></div>
     <div class="card monthly-calendar-card">
@@ -1981,5 +1997,67 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
 </script>
 <script src="./app-pages.js?v=20261120site-v86"></script>
 <script src="./website-enhancements.js?v=20261120site-v86"></script>
+
+<style id="nearby-mosques-style">
+#nearbyMosqueResults .mosque-result{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:12px}
+#nearbyMosqueResults .mosque-result strong{display:block;color:var(--green)}
+#nearbyMosqueResults .mosque-result small{display:block;color:var(--muted);font-size:12px}
+#nearbyMosqueResults .mosque-result a{flex:0 0 auto;text-decoration:none}
+@media(max-width:520px){#nearbyMosqueResults .mosque-result{align-items:flex-start;flex-direction:column}}
+</style>
+<script id="nearby-mosques-script">
+(()=>{
+ const button=document.getElementById('findNearbyMosques');
+ const status=document.getElementById('mosqueSearchStatus');
+ const results=document.getElementById('nearbyMosqueResults');
+ const radius=document.getElementById('mosqueRadius');
+ const fallback=document.getElementById('mosqueMapFallback');
+ if(!button||!status||!results)return;
+ const distanceKm=(a,b,c,d)=>{
+  const rad=x=>x*Math.PI/180,R=6371;
+  const x=rad(c-a),y=rad(d-b);
+  const h=Math.sin(x/2)**2+Math.cos(rad(a))*Math.cos(rad(c))*Math.sin(y/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+ };
+ const el=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
+ button.addEventListener('click',()=>{
+  results.replaceChildren();fallback.classList.add('hidden');
+  if(!('geolocation' in navigator)){status.textContent='المتصفح لا يدعم تحديد الموقع. يمكنك فتح الخريطة والبحث يدويًا.';fallback.classList.remove('hidden');return;}
+  button.disabled=true;button.textContent='جارٍ تحديد موقعك...';status.textContent='نطلب إذن الموقع من جهازك؛ لن يبدأ البحث إلا بعد موافقتك.';
+  navigator.geolocation.getCurrentPosition(async position=>{
+   const lat=position.coords.latitude,lon=position.coords.longitude,meters=Number(radius.value)||5000;
+   status.textContent='تم تحديد موقعك. جارٍ البحث عن المساجد القريبة...';
+   const query='[out:json][timeout:25];(nwr(around:'+meters+','+lat+','+lon+')["amenity"="mosque"];nwr(around:'+meters+','+lat+','+lon+')["amenity"="place_of_worship"]["religion"~"muslim"];);out center tags;';
+   try{
+    const response=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:'data='+encodeURIComponent(query)});
+    if(!response.ok)throw new Error('overpass');
+    const data=await response.json();
+    const found=(data.elements||[]).map(item=>{
+     const p=item.center||item;
+     if(typeof p.lat!=='number'||typeof p.lon!=='number')return null;
+     const tags=item.tags||{};
+     return {name:tags['name:ar']||tags.name||tags['name:en']||'مسجد بدون اسم مسجل',lat:p.lat,lon:p.lon,dist:distanceKm(lat,lon,p.lat,p.lon),type:tags.amenity};
+    }).filter(Boolean).sort((a,b)=>a.dist-b.dist);
+    const unique=[];const seen=new Set();
+    found.forEach(m=>{const key=m.lat.toFixed(5)+','+m.lon.toFixed(5);if(!seen.has(key)){seen.add(key);unique.push(m);}});
+    if(!unique.length){status.textContent='لم نعثر على مسجد مسجل داخل النطاق المحدد. جرّب توسيع نطاق البحث.';return;}
+    unique.slice(0,25).forEach(m=>{
+     const card=el('div','mosque-result'),info=el('div',''),name=el('strong','',m.name),dist=el('small','',m.dist<1?Math.round(m.dist*1000)+' متر':'يبعد '+m.dist.toFixed(1)+' كم');
+     const link=el('a','btn light','الاتجاهات');
+     link.href='https://www.google.com/maps/dir/?api=1&destination='+m.lat+','+m.lon;link.target='_blank';link.rel='noopener';
+     info.append(name,dist);card.append(info,link);results.append(card);
+    });
+    status.textContent='وجدنا '+unique.length+' مسجدًا مسجلًا، مرتبة من الأقرب. بيانات الأماكن من OpenStreetMap وقد تكون بعض الإدخالات غير مكتملة.';
+   }catch(error){status.textContent='تعذر تحميل نتائج المساجد الآن. تحقق من اتصال الإنترنت وحاول مرة أخرى.';fallback.href='https://www.openstreetmap.org/#map=15/'+lat+'/'+lon;fallback.classList.remove('hidden');}
+   finally{button.disabled=false;button.textContent='📍 ابحث عن المساجد القريبة';}
+  },error=>{
+   button.disabled=false;button.textContent='📍 ابحث عن المساجد القريبة';
+   status.textContent=error.code===1?'لم تسمح بالوصول للموقع. يمكنك السماح به من إعدادات المتصفح ثم المحاولة، أو فتح الخريطة يدويًا.':'تعذر تحديد موقعك. تأكد من تفعيل خدمة الموقع وحاول مجددًا.';
+   fallback.href='https://www.openstreetmap.org/';fallback.classList.remove('hidden');
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+ });
+})();
+</script>
+
 </body>
 </html>
