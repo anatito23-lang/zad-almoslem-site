@@ -1,6 +1,9 @@
 package com.zad.almoslem;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -10,67 +13,234 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 public class MushafPageActivity extends Activity {
-    private int page=1;private boolean busy=false;private TextView pageTitle,status,content;private Button previous,next,save;private SeekBar pageSeek;private GestureDetector pageGesture;
-    private final int green=Color.rgb(8,48,40);
-    @Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);page=getIntent().getIntExtra("page",getSharedPreferences("zad_mushaf",MODE_PRIVATE).getInt("last_page",1));build();showPage(page);}
-    private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
-    private GradientDrawable bg(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));d.setStroke(dp(1),Color.rgb(190,170,120));return d;}
-    private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.CENTER);t.setTextDirection(View.TEXT_DIRECTION_RTL);if(bold)t.setTypeface(Typeface.DEFAULT,bold?Typeface.BOLD:Typeface.NORMAL);return t;}
-    private void build(){
-        ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(14),dp(14),dp(14),dp(24));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);setContentView(AppTabs.wrap(this,scroll,"mushaf"));
-        TextView title=label("المصحف الشريف — صفحات",24,Color.WHITE,true);title.setPadding(dp(12),dp(20),dp(12),dp(20));title.setBackground(bg(green,16));root.addView(title);
-        pageTitle=label("",16,green,true);pageTitle.setPadding(0,dp(10),0,dp(4));root.addView(pageTitle);
-        TextView swipeHint=label("اسحب الصفحة يمينًا أو يسارًا للتقليب مثل المصحف الورقي",12,Color.DKGRAY,false);swipeHint.setPadding(0,dp(2),0,dp(8));root.addView(swipeHint);
-        pageGesture=new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){
-            @Override public boolean onDown(MotionEvent e){return true;}
-            @Override public boolean onFling(MotionEvent e1,MotionEvent e2,float velocityX,float velocityY){
-                if(e1==null||e2==null)return false;
-                float dx=e2.getX()-e1.getX(),dy=e2.getY()-e1.getY();
-                if(Math.abs(dx)<dp(55)||Math.abs(dx)<Math.abs(dy)*1.25f||Math.abs(velocityX)<dp(180))return false;
-                if(busy)return true;
-                if(dx<0&&page<604)showPage(page+1);
-                else if(dx>0&&page>1)showPage(page-1);
+    private static final String IMAGE_BASE = "https://raw.githubusercontent.com/Miftah-Fentaw/Quran_webp/main/png/";
+    private static final String[] SURAHS = {
+        "الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس",
+        "هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه",
+        "الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم",
+        "لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر",
+        "فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق",
+        "الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة",
+        "الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج",
+        "نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس",
+        "التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد",
+        "الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات",
+        "القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر",
+        "المسد","الإخلاص","الفلق","الناس"
+    };
+    private static final int[] SURAH_PAGES = {
+        1,2,50,77,106,128,151,177,187,208,221,235,249,255,262,267,282,293,305,312,
+        322,332,342,350,359,367,377,385,396,404,411,415,418,428,434,440,446,453,458,467,
+        477,483,489,496,499,502,507,511,515,518,520,523,526,528,531,534,537,542,545,549,
+        551,553,554,556,558,560,562,564,566,568,570,572,574,575,577,578,580,582,583,585,
+        586,587,589,590,591,591,592,593,594,595,595,596,596,597,597,598,598,599,599,600,
+        600,601,601,601,602,602,602,603,603,603,604,604,604,604
+    };
+
+    private int page = 1;
+    private boolean busy = false;
+    private TextView pageLabel, status;
+    private ImageView pageImage;
+    private Button previous, next;
+    private ProgressBar progress;
+    private GestureDetector gesture;
+    private final int green = Color.rgb(8,48,40);
+
+    @Override public void onCreate(Bundle state) {
+        super.onCreate(state);
+        getWindow().setStatusBarColor(green);
+        getWindow().setNavigationBarColor(green);
+        page = Math.max(1, Math.min(604, getIntent().getIntExtra("page",
+                getSharedPreferences("zad_mushaf", MODE_PRIVATE).getInt("last_page", 1))));
+        build();
+        showPage(page);
+    }
+
+    private int dp(float n) { return (int)(n * getResources().getDisplayMetrics().density + .5f); }
+
+    private GradientDrawable shape(int color, int radius, int stroke) {
+        GradientDrawable d = new GradientDrawable();
+        d.setColor(color);
+        d.setCornerRadius(dp(radius));
+        if (stroke != 0) d.setStroke(dp(1), stroke);
+        return d;
+    }
+
+    private TextView label(String value, int size, int color, boolean bold) {
+        TextView t = new TextView(this);
+        t.setText(value);
+        t.setTextSize(size);
+        t.setTextColor(color);
+        t.setGravity(Gravity.CENTER);
+        t.setTextDirection(View.TEXT_DIRECTION_RTL);
+        if (bold) t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        return t;
+    }
+
+    private void build() {
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dp(12), dp(10), dp(12), dp(12));
+        root.setBackgroundColor(Color.rgb(242,240,230));
+
+        LinearLayout toolbar = new LinearLayout(this);
+        toolbar.setGravity(Gravity.CENTER_VERTICAL);
+        toolbar.setOrientation(LinearLayout.HORIZONTAL);
+
+        Button index = new Button(this);
+        index.setText("☰ فهرس السور");
+        index.setTextSize(13);
+        toolbar.addView(index, new LinearLayout.LayoutParams(0, dp(46), 1));
+        index.setOnClickListener(v -> showSurahIndex());
+
+        pageLabel = label("", 15, green, true);
+        toolbar.addView(pageLabel, new LinearLayout.LayoutParams(0, dp(46), 1));
+        root.addView(toolbar);
+
+        LinearLayout pageFrame = new LinearLayout(this);
+        pageFrame.setGravity(Gravity.CENTER);
+        pageFrame.setPadding(dp(5), dp(7), dp(5), dp(7));
+        pageFrame.setBackground(shape(Color.rgb(255,253,244), 5, Color.rgb(177,157,112)));
+        pageImage = new ImageView(this);
+        pageImage.setAdjustViewBounds(true);
+        pageImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        pageFrame.addView(pageImage, new LinearLayout.LayoutParams(-1, -2));
+        LinearLayout.LayoutParams imageLp = new LinearLayout.LayoutParams(-1, 0, 1);
+        imageLp.topMargin = dp(8);
+        root.addView(pageFrame, imageLp);
+
+        gesture = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override public boolean onDown(MotionEvent e) { return true; }
+            @Override public boolean onFling(MotionEvent e1, MotionEvent e2, float vx, float vy) {
+                if (e1 == null || e2 == null || busy) return false;
+                float dx = e2.getX() - e1.getX();
+                float dy = e2.getY() - e1.getY();
+                if (Math.abs(dx) < dp(45) || Math.abs(dx) < Math.abs(dy) || Math.abs(vx) < dp(120)) return false;
+                if (dx < 0 && page < 604) showPage(page + 1);
+                else if (dx > 0 && page > 1) showPage(page - 1);
                 return true;
             }
         });
-        LinearLayout nav=new LinearLayout(this);nav.setOrientation(LinearLayout.HORIZONTAL);
-        previous=new Button(this);previous.setText("الصفحة السابقة");next=new Button(this);next.setText("الصفحة التالية");
-        nav.addView(previous,new LinearLayout.LayoutParams(0,dp(48),1));nav.addView(next,new LinearLayout.LayoutParams(0,dp(48),1));root.addView(nav);
-        previous.setOnClickListener(v->{if(page>1)showPage(page-1);});next.setOnClickListener(v->{if(page<604)showPage(page+1);});
-        pageSeek=new SeekBar(this);pageSeek.setMax(603);pageSeek.setProgress(page-1);root.addView(pageSeek);pageSeek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int p,boolean user){if(user)pageTitle.setText("الصفحة "+(p+1)+" من 604");}public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){showPage(b.getProgress()+1);}});
-        save=new Button(this);save.setText("حفظ الصفحة للقراءة دون إنترنت");root.addView(save);save.setOnClickListener(v->load(page,true));
-        status=label("جارٍ تجهيز المصحف...",12,Color.DKGRAY,false);root.addView(status);
-        LinearLayout pageFrame=new LinearLayout(this);pageFrame.setOrientation(LinearLayout.VERTICAL);pageFrame.setPadding(dp(18),dp(22),dp(18),dp(22));pageFrame.setBackground(bg(Color.rgb(255,253,242),8));
-        content=label("",22,Color.rgb(45,45,38),false);content.setGravity(Gravity.CENTER);content.setLineSpacing(dp(13),1.12f);pageFrame.addView(content,new LinearLayout.LayoutParams(-1,-2));
-        pageFrame.setClickable(true);pageFrame.setOnTouchListener((v,event)->pageGesture.onTouchEvent(event));
-        content.setOnTouchListener((v,event)->pageGesture.onTouchEvent(event));
-        LinearLayout.LayoutParams fp=new LinearLayout.LayoutParams(-1,-2);fp.topMargin=dp(10);root.addView(pageFrame,fp);
-        Button back=new Button(this);back.setText("العودة للأقسام");root.addView(back);back.setOnClickListener(v->finish());
+        pageImage.setOnTouchListener((v, event) -> gesture.onTouchEvent(event));
+
+        status = label("صفحات المصحف تُحمّل وتُحفظ تلقائيًا على الهاتف", 12, Color.DKGRAY, false);
+        status.setPadding(0, dp(5), 0, dp(5));
+        root.addView(status);
+
+        progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        progress.setIndeterminate(true);
+        root.addView(progress, new LinearLayout.LayoutParams(-1, dp(3)));
+
+        LinearLayout nav = new LinearLayout(this);
+        nav.setGravity(Gravity.CENTER);
+        previous = new Button(this);
+        previous.setText("السابق");
+        next = new Button(this);
+        next.setText("التالي");
+        nav.addView(previous, new LinearLayout.LayoutParams(0, dp(48), 1));
+        nav.addView(next, new LinearLayout.LayoutParams(0, dp(48), 1));
+        root.addView(nav);
+        previous.setOnClickListener(v -> { if (page > 1) showPage(page - 1); });
+        next.setOnClickListener(v -> { if (page < 604) showPage(page + 1); });
+
+        setContentView(AppTabs.wrap(this, root, "mushaf"));
     }
-    private File file(int n){File d=new File(getFilesDir(),"mushaf_pages");if(!d.exists())d.mkdirs();return new File(d,"page_"+n+".json");}
-    private void showPage(int n){if(n<1||n>604)return;page=n;getSharedPreferences("zad_mushaf",MODE_PRIVATE).edit().putInt("last_page",page).apply();pageTitle.setText("الصفحة "+page+" من 604");if(pageSeek!=null)pageSeek.setProgress(page-1);previous.setEnabled(page>1);next.setEnabled(page<604);load(page,false);}
-    private void load(int n,boolean saveToDisk){
-        if(busy)return;File f=file(n);if(f.isFile()&&f.length()>100){read(f,n,saveToDisk?"الصفحة محفوظة على الهاتف وتعمل دون إنترنت.":"تم فتح الصفحة المحفوظة.");return;}
-        busy=true;save.setEnabled(false);previous.setEnabled(false);next.setEnabled(false);pageSeek.setEnabled(false);status.setText("جارٍ تحميل صفحة المصحف "+n+"...");
-        new Thread(()->{HttpURLConnection c=null;File temp=new File(f.getParentFile(),"page_"+n+".part");try{
-            c=(HttpURLConnection)new URL("https://api.alquran.cloud/v1/page/"+n+"/quran-uthmani").openConnection();c.setConnectTimeout(15000);c.setReadTimeout(30000);c.setRequestProperty("User-Agent","ZadAlmoslem Android");
-            if(c.getResponseCode()!=200)throw new Exception("تعذر الاتصال بمصدر المصحف");
-            ByteArrayOutputStream out=new ByteArrayOutputStream();try(InputStream in=c.getInputStream()){byte[] b=new byte[8192];int k;while((k=in.read(b))!=-1)out.write(b,0,k);}
-            String json=new String(out.toByteArray(),StandardCharsets.UTF_8);JSONObject root=new JSONObject(json);if(root.optInt("code")!=200)throw new Exception("بيانات الصفحة غير مكتملة");
-            JSONObject data=root.getJSONObject("data");JSONArray ayahs=data.getJSONArray("ayahs");if(ayahs.length()==0)throw new Exception("الصفحة فارغة");
-            if(saveToDisk){try(FileOutputStream fos=new FileOutputStream(temp)){fos.write(json.getBytes(StandardCharsets.UTF_8));fos.getFD().sync();}if(f.exists())f.delete();if(!temp.renameTo(f))throw new Exception("تعذر حفظ الصفحة");}
-            runOnUiThread(()->{render(ayahs,n);status.setText(saveToDisk?"تم حفظ الصفحة دون إنترنت.":"يمكنك حفظ الصفحة لتعمل دون إنترنت.");});
-        }catch(Exception e){runOnUiThread(()->status.setText("تعذر فتح الصفحة: "+(e.getMessage()==null?"تحقق من الإنترنت":e.getMessage())));}
-        finally{if(c!=null)c.disconnect();if(temp.exists())temp.delete();runOnUiThread(()->{busy=false;save.setEnabled(true);previous.setEnabled(page>1);next.setEnabled(page<604);pageSeek.setEnabled(true);});}}).start();
+
+    private File pageFile(int number) {
+        File dir = new File(getFilesDir(), "mushaf_images");
+        if (!dir.exists()) dir.mkdirs();
+        return new File(dir, number + ".png");
     }
-    private void read(File f,int n,String message){try(FileInputStream in=new FileInputStream(f)){ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] b=new byte[8192];int k;while((k=in.read(b))!=-1)out.write(b,0,k);JSONObject root=new JSONObject(new String(out.toByteArray(),StandardCharsets.UTF_8));render(root.getJSONObject("data").getJSONArray("ayahs"),n);status.setText(message);}catch(Exception e){status.setText("تعذر قراءة الصفحة المحفوظة.");}}
-    private void render(JSONArray ayahs,int n){StringBuilder text=new StringBuilder();String lastSurah="";for(int i=0;i<ayahs.length();i++){JSONObject a=ayahs.optJSONObject(i);if(a==null)continue;JSONObject surah=a.optJSONObject("surah");String name=surah==null?"":surah.optString("name","");if(!name.equals(lastSurah)){text.append("\n۞ ").append(name).append(" ۞\n");lastSurah=name;}text.append(a.optString("text","")).append(" ﴿").append(a.optInt("numberInSurah",0)).append("﴾  ");}content.setText(text.toString());content.setTypeface(Typeface.create("serif",Typeface.NORMAL));pageTitle.setText("الصفحة "+n+" من 604");}
+
+    private void showPage(int number) {
+        if (number < 1 || number > 604 || busy) return;
+        page = number;
+        getSharedPreferences("zad_mushaf", MODE_PRIVATE).edit().putInt("last_page", page).apply();
+        pageLabel.setText("صفحة " + page + " من 604");
+        previous.setEnabled(page > 1);
+        next.setEnabled(page < 604);
+        loadImage(page);
+    }
+
+    private void loadImage(int number) {
+        File cached = pageFile(number);
+        if (cached.isFile() && cached.length() > 10000) {
+            Bitmap bitmap = BitmapFactory.decodeFile(cached.getAbsolutePath());
+            if (bitmap != null) {
+                pageImage.setImageBitmap(bitmap);
+                status.setText("صفحة محفوظة على الهاتف — يمكنك القراءة دون إنترنت");
+                progress.setVisibility(View.GONE);
+                return;
+            }
+        }
+        busy = true;
+        progress.setVisibility(View.VISIBLE);
+        status.setText("جارٍ تحميل صفحة المصحف " + number + "...");
+        previous.setEnabled(false);
+        next.setEnabled(false);
+        new Thread(() -> {
+            HttpURLConnection connection = null;
+            File temp = new File(cached.getParentFile(), number + ".part");
+            try {
+                URL url = new URL(IMAGE_BASE + number + ".png");
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setConnectTimeout(20000);
+                connection.setReadTimeout(30000);
+                connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
+                connection.connect();
+                if (connection.getResponseCode() != 200) throw new IOException("HTTP " + connection.getResponseCode());
+                try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
+                    byte[] buffer = new byte[8192];
+                    int count;
+                    while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
+                    out.getFD().sync();
+                }
+                if (temp.length() < 10000) throw new IOException("ملف الصفحة غير مكتمل");
+                if (cached.exists()) cached.delete();
+                if (!temp.renameTo(cached)) throw new IOException("تعذر حفظ الصفحة");
+                Bitmap bitmap = BitmapFactory.decodeFile(cached.getAbsolutePath());
+                if (bitmap == null) throw new IOException("تعذر قراءة صورة الصفحة");
+                runOnUiThread(() -> {
+                    if (page == number) {
+                        pageImage.setImageBitmap(bitmap);
+                        status.setText("تم تحميل الصفحة وحفظها على الهاتف");
+                    }
+                });
+            } catch (Exception error) {
+                runOnUiThread(() -> {
+                    if (page == number) status.setText("تعذر تحميل الصفحة. تحقق من الإنترنت ثم أعد المحاولة.");
+                });
+            } finally {
+                if (connection != null) connection.disconnect();
+                if (temp.exists()) temp.delete();
+                runOnUiThread(() -> {
+                    busy = false;
+                    progress.setVisibility(View.GONE);
+                    previous.setEnabled(page > 1);
+                    next.setEnabled(page < 604);
+                });
+            }
+        }).start();
+    }
+
+    private void showSurahIndex() {
+        String[] entries = new String[SURAHS.length];
+        for (int i = 0; i < SURAHS.length; i++)
+            entries[i] = String.format(Locale ArabicLocaleHolder.LOCALE, "%03d  سورة %s  —  صفحة %d", i + 1, SURAHS[i], SURAH_PAGES[i]);
+        new AlertDialog.Builder(this)
+                .setTitle("فهرس سور القرآن الكريم")
+                .setItems(entries, (dialog, which) -> showPage(SURAH_PAGES[which]))
+                .setNegativeButton("إغلاق", null)
+                .show();
+    }
+
+    private static final class ArabicLocaleHolder {
+        static final Locale LOCALE = new Locale("ar");
+    }
 }
