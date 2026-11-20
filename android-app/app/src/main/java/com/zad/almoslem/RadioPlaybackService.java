@@ -80,6 +80,7 @@ public class RadioPlaybackService extends Service {
             else startForeground(NOTIFICATION,n2);
         }
         getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",true).putBoolean("radio_ready",false).remove("radio_last_error").putString("active_kind",kind==null?"radio":kind).putString("radio_station",intent==null?"":intent.getStringExtra("station")).apply();
+        QuranHomeWidget.refreshAll(this);
         play(url,allowedLocal?localFile:null);
         return START_NOT_STICKY;
     }
@@ -130,6 +131,7 @@ public class RadioPlaybackService extends Service {
                             getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
                                     .putBoolean("radio_ready", true).putBoolean("radio_playing", true)
                                     .remove("radio_last_error").apply();
+                            QuranHomeWidget.refreshAll(RadioPlaybackService.this);
                             updateRadioNotification("إذاعة القرآن الكريم", "البث يعمل الآن");
                         } else {
                             String title = "quran".equals(active) ? "استماع القرآن الكريم" :
@@ -231,7 +233,7 @@ public class RadioPlaybackService extends Service {
             player = null;
         }
     }
-    private void stopRadio() { getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").apply(); releasePlayer(); stopForeground(true); stopSelf(); }
+    private void stopRadio() { getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").apply(); QuranHomeWidget.refreshAll(this); releasePlayer(); stopForeground(true); stopSelf(); }
     @Override public void onDestroy(){releasePlayer();super.onDestroy();}
     @Override public IBinder onBind(Intent intent){return null;}
 }
