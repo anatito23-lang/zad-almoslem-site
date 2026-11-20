@@ -121,7 +121,7 @@ public class MainActivity extends Activity {
         addCard(root,intro);
 
         Switch master = new Switch(this);
-        master.setText("تفعيل الأذان عند مواقيت الصلاة");
+        master.setText("تشغيل الأذان بصوت المؤذن عند مواقيت الصلاة");
         master.setTextColor(Color.rgb(30,55,45));
         master.setChecked(prefs.getBoolean("adhan_enabled",true));
         master.setOnCheckedChangeListener((b,checked)->prefs.edit().putBoolean("adhan_enabled",checked).apply());
@@ -209,7 +209,7 @@ public class MainActivity extends Activity {
                 String stream="https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8";
                 intent.setAction(RadioPlaybackService.ACTION_PLAY);
                 intent.putExtra("url",stream);intent.putExtra("kind","radio");intent.putExtra("label","إذاعة القرآن الكريم من القاهرة");intent.putExtra("station","egypt");
-                audio.edit().putString("last_quran_url",stream).putString("last_quran_title","إذاعة القرآن الكريم").putBoolean("radio_playing",true).putString("active_kind","radio").apply();
+                audio.edit().putBoolean("radio_playing",true).putString("active_kind","radio").apply();
             }
             try{if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);radioButton.postDelayed(refreshRadio,500);}
             catch(Exception e){status.setText("تعذر تشغيل الإذاعة: "+e.getMessage());}
