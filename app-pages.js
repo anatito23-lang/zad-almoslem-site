@@ -7,7 +7,7 @@ document.getElementById('kids')?.remove();
 document.querySelectorAll('a[href="#kids"]').forEach(link=>link.remove());
 if(!main||!header||$('zadAppPages'))return;
 
-const meta=[['calendar','التقويم الشهري','🗓️'],['prayer','مواقيت الصلاة','🕰️'],['quran','استماع القرآن','📖'],['mushaf','المصحف الشريف','۞'],['ruqyah','الرقية الشرعية','🤲'],['radio-egypt','إذاعة القرآن الكريم','📻'],['azkar','الأذكار اليومية','☀️'],['books-library','مكتبة الكتب الإسلامية','📚'],...(!nativeApp?[['kids','ركن الأطفال','🧒']]:[]),['reminders','تنبيهات الصلاة والأذان','🕌'],['hadith-dua','السنة والدعاء','🌿'],['daily-wird','وردي اليومي','📿'],['friday-wird','ورد الجمعة','🌙'],['qalbi-itmaann','قلبي اطمأن','💚'],['library','نفحات إيمانية','✨'],['khutbahs','خطب الجمعة','🎙️'],['nasheed','الإنشاد والابتهالات','🎵']];
+const meta=[['calendar','التقويم الشهري','🗓️'],['prayer','مواقيت الصلاة','🕰️'],['quran','استماع القرآن','📖'],['mushaf','المصحف الشريف','۞'],['ruqyah','الرقية الشرعية','🤲'],['radio-egypt','إذاعة القرآن الكريم','📻'],['azkar','الأذكار اليومية','☀️'],['books-library','مكتبة الكتب الإسلامية','📚'],...(!nativeApp?[['kids','ركن الأطفال','🧒']]:[]),['reminders','التذكيرات اليومية','🌿'],['hadith-dua','السنة والدعاء','🌿'],['daily-wird','وردي اليومي','📿'],['friday-wird','ورد الجمعة','🌙'],['qalbi-itmaann','قلبي اطمأن','💚'],['library','نفحات إيمانية','✨'],['khutbahs','خطب الجمعة','🎙️'],['nasheed','الإنشاد والابتهالات','🎵']];
 const root=document.createElement('div');root.id='zadAppPages';
 const home=document.createElement('div');home.className='zad-page is-active';home.id='zad-page-home';home.dataset.page='home';
 const pages=document.createElement('div');pages.className='zad-pages-content';
@@ -164,13 +164,16 @@ if(nativeApp){
 
  }
 }
-// تثبيت إعدادات الأذان داخل صفحة مواقيت الصلاة في موضع واضح ومستقل.
-const prayerSection=$('prayer');
-const adhanSettings=prayerSection?.querySelector('.adhan-settings');
-if(adhanSettings){
- let audioSlot=$('zadAudioSettingsSlot');
- if(!audioSlot){audioSlot=document.createElement('div');audioSlot.id='zadAudioSettingsSlot';audioSlot.className='zad-prayer-audio-settings';adhanSettings.parentNode.insertBefore(audioSlot,adhanSettings);}
- audioSlot.append(adhanSettings);
+// إعدادات الأذان تخص تطبيق أندرويد فقط؛ الموقع يعرض مواقيت الصلاة دون تشغيل الأذان.
+if(!nativeApp){
+ $('prayer')?.querySelector('.adhan-settings')?.remove();
+ const reminderSection=$('daily-reminder-settings');
+ reminderSection?.querySelectorAll('.card').forEach(card=>{
+  const heading=card.querySelector('h3')?.textContent||'';
+  if(heading.includes('دعاء الشيخ الشعراوي بعد الأذان')||heading.includes('الأذان عند دخول وقت الصلاة'))card.remove();
+ });
+ const qiyamText=reminderSection?.querySelector('h3')?.parentElement?.querySelector('p');
+ if(qiyamText)qiyamText.textContent=qiyamText.textContent.replace('قبل أذان الفجر','قبل الفجر');
 }
 // تبقى تنبيهات الأذكار اليومية ضمن إعدادات البرنامج.
 const reminderSettings=$('daily-reminder-settings');

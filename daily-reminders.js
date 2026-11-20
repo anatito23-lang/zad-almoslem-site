@@ -77,7 +77,7 @@
      const level=volumeControl?Math.max(0,Math.min(100,parseInt(volumeControl.value,10)||0)):savedVolume;
      if(volumeValue)volumeValue.textContent=level+'%';
      localStorage.setItem('zad_adhan_volume',String(level));
-     document.querySelectorAll('audio').forEach(audio=>{try{audio.volume=level/100;}catch(e){}});
+     const adhanAudio=$('adhanPreview');if(adhanAudio)adhanAudio.volume=level/100;
      if(window.ZadAndroid&&typeof window.ZadAndroid.setAdhanVolume==='function')window.ZadAndroid.setAdhanVolume(level);
    }
    if(volumeControl)volumeControl.addEventListener('input',applyAdhanVolume);

@@ -365,7 +365,7 @@ footer{background:#071522;color:#c9d6e2}
         <span class="small" id="nextPrayerAt">حسب المدينة المختارة</span>
       </div>
       <div class="next-prayer-clock">
-        <span class="next-prayer-kicker">متبقي على الأذان</span>
+        <span class="next-prayer-kicker">متبقي على الصلاة</span>
         <strong id="nextPrayerRemaining" dir="ltr">--:--:--</strong>
         <span class="small" id="nextPrayerMessage">يتم تحديث العداد تلقائيًا</span>
       </div>
@@ -458,6 +458,22 @@ footer{background:#071522;color:#c9d6e2}
 
   
 
+
+  <section class="section" id="nearbyMosques">
+    <div class="section-head"><div><h2>المساجد القريبة منك</h2><p>اعثر على أقرب مسجد حسب موقعك الحالي</p></div><span class="small">بحث اختياري</span></div>
+    <div class="card">
+      <div class="row" style="align-items:end">
+        <label style="display:grid;gap:5px">نطاق البحث
+          <select id="mosqueRadius"><option value="3000">3 كم</option><option value="5000" selected>5 كم</option><option value="10000">10 كم</option></select>
+        </label>
+        <button class="btn green" id="findNearbyMosques" type="button">📍 ابحث عن المساجد القريبة</button>
+      </div>
+      <p class="small" style="margin-top:10px">لن نطلب موقعك إلا عند الضغط على زر البحث. تُستخدم إحداثياتك لجلب النتائج القريبة، ولا يحفظها موقع زاد المسلم.</p>
+      <p id="mosqueSearchStatus" class="small" role="status" aria-live="polite">اضغط على زر البحث لعرض المساجد الأقرب إليك.</p>
+      <div id="nearbyMosqueResults" class="list" style="margin-top:10px"></div>
+      <a id="mosqueMapFallback" class="btn light hidden" href="https://www.openstreetmap.org/" target="_blank" rel="noopener">افتح خريطة المساجد</a>
+    </div>
+  </section>
 
   <section class="section" id="calendar">
     <div class="section-head"><div><h2>التقويم الشهري</h2><p>التاريخ الميلادي وما يقابله بالهجري لكل يوم من أيام الشهر</p></div></div>
@@ -1345,21 +1361,6 @@ updatePrayerCountdown();
 setInterval(updatePrayerCountdown,1000);
 
 let surahs=[];
-const reciterMatches={
- basit:['عبدالباسطعبدالصمد','عبدالباسطعبدالصمد'],
- minshawi:['محمدصديقالمنشاوي','محمدالمنشاوي'],
- husary:['محمودخليلالحصري','الحصري'],
- mustafa:['مصطفىاسماعيل','مصطفياسماعيل'],
- banna:['محمودعليالبنا','محمودالبنا']
-};
-const normalizeReciterName=s=>(s||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/[\u064B-\u065F\u0670]/g,'').replace(/[^\u0621-\u064A]/g,'');
-window.zadReciterData={};
-async function loadSurahs(){
- try{
-  const r=await zadFetchTimeout('https://api.alquran.cloud/v1/surah',{},8000);if(!r.ok)throw new Error('surah list');const j=await r.json();if(!j.data||!Array.isArray(j.data))throw new Error('surah data');surahs=j.data;
-  $('surahSelect').innerHTML=surahs.map(s=>`<option value="${s.number}">${s.number}. ${s.name}</option>`).join('');
- }catch(e){$('surahSelect').innerHTML='<option value="">تعذر تحميل السور</option>';}
-}
 let mushafSurahs=[];
 let mushafCurrentPage=1;
 let mushafRequestNumber=0;
@@ -1577,90 +1578,8 @@ mushafSwipeArea.addEventListener('pointerup',event=>{
 });
 mushafSwipeArea.addEventListener('pointercancel',()=>{mushafMouseStart=null;});
 
-async function loadOldEgyptianReciters(){
- try{
-  const r=await zadFetchTimeout('https://mp3quran.net/api/v3/reciters?language=ar',{},8000);
-  if(!r.ok)throw new Error('reciter api');
-  const data=await r.json();
-  const all=data.reciters||[];
-  Object.entries(reciterMatches).forEach(([key,tokens])=>{
-   const found=all.find(rec=>{
-    const n=normalizeReciterName(rec.name);
-    return tokens.some(token=>n.includes(normalizeReciterName(token)));
-   });
-   if(found)window.zadReciterData[key]=found;
-  });
-  const missing=Object.keys(reciterMatches).filter(key=>!window.zadReciterData[key]);
-  $('quranStatus').textContent=missing.length
-   ? 'تم تحميل المصادر. إذا لم يظهر تسجيل أحد الشيوخ فالمصدر لا يوفره حاليًا.'
-   : 'تم تحميل تسجيلات الشيوخ. اختر الشيخ والسورة ثم اضغط «استمع الآن».';
- }catch(e){
-  $('quranStatus').textContent='تعذر الاتصال بمكتبة التسجيلات الآن. تحقق من الإنترنت ثم أعد تحميل الصفحة.';
- }
-}
-function showShuaishaTracks(){
- const tracks=[
-  [2,'البقرة','al-baqara'],[3,'آل عمران','aal-e-imran'],[4,'النساء','an-nisa'],[6,'الأنعام','al-anaam'],
-  [9,'التوبة','at-taubah'],[13,'الرعد','ar-rad'],[14,'إبراهيم','ibrahim'],[16,'النحل','an-nahl'],
-  [17,'الإسراء','al-isra'],[22,'الحج','al-hajj'],[28,'القصص','al-qasas'],[33,'الأحزاب','al-ahzab']
- ];
- $('audio').pause();$('audio').removeAttribute('src');$('audio').classList.add('hidden');
- $('surahSelect').classList.add('hidden');$('showSurah').classList.add('hidden');
- $('quranStatus').textContent='المتاح حاليًا للشيخ أبو العينين شعيشع 12 سورة مسجلة برواية حفص عن عاصم.';
- $('shuaishaTracks').innerHTML=tracks.map(([id,name,slug])=>`<a class="surah-item" href="https://ar.assabile.com/abul-ainain-shu-aisha/quran/${slug}" rel="noopener"><span>${id}. سورة ${name}</span><strong>استمع ↗</strong></a>`).join('');
- $('shuaishaTracks').classList.remove('hidden');
-}
-function showEzzatTracks(){
- const tracks=[
-  ['الأحزاب','18:03','https://tilawah.net/audios/aazt-alsyd-rashd-alahzab-38807'],
-  ['الحج','19:32','https://tilawah.net/audios/aazt-alsyd-rashd-alhg-38810'],
-  ['الدخان','13:23','https://tilawah.net/audios/aazt-alsyd-rashd-aldkhan-38811'],
-  ['الفرقان','18:43','https://tilawah.net/audios/aazt-alsyd-rashd-alfrkan-38812'],
-  ['مريم وطه','20:51','https://tilawah.net/audios/aazt-alsyd-rashd-mrym-oth-38815']
- ];
- const player=$('audio');
- player.pause();player.removeAttribute('src');player.load();player.classList.add('hidden');
- $('surahSelect').classList.add('hidden');$('showSurah').classList.add('hidden');
- $('reciter').value='ezzat';
- $('quranStatus').textContent='اختر التلاوة؛ ستُفتح صفحة الاستماع الخارجية في تبويب جديد.';
- $('shuaishaTracks').innerHTML=tracks.map(([name,duration,url])=>'<a class="surah-item" href="'+url+'" target="_blank" rel="noopener noreferrer"><span><b>سورة '+name+'</b><span class="small" style="display:block">المدة: '+duration+'</span></span><strong>استمع ↗</strong></a>').join('');
- $('shuaishaTracks').classList.remove('hidden');
-}
-function resetQuranPlayer(){
- $('shuaishaTracks').classList.add('hidden');
- $('surahSelect').classList.remove('hidden');$('showSurah').classList.remove('hidden');
-}
-$('reciter').addEventListener('change',()=>{
- if($('reciter').value==='shuaisha'){showShuaishaTracks();}
- else if($('reciter').value==='ezzat'){showEzzatTracks();}
- else{resetQuranPlayer();$('quranStatus').textContent='اختر السورة ثم اضغط «استمع الآن».';}
-});
-$('ezzatShortcut').addEventListener('click',showEzzatTracks);
-$('showSurah').addEventListener('click',()=>{
- const id=Number($('surahSelect').value);if(!id)return;
- const key=$('reciter').value;
- const reciter=window.zadReciterData[key];
- if(!reciter){$('quranStatus').textContent='تسجيلات هذا الشيخ غير متاحة من المصدر حاليًا. جرّب بعد قليل أو اختر شيخًا آخر.';return;}
- const moshaf=(reciter.moshaf||[]).find(m=>{
-  const ids=(m.surah_list||'').split(',').map(Number);
-  return ids.includes(id);
- });
- if(!moshaf||!moshaf.server){$('quranStatus').textContent='هذه السورة غير متاحة في التسجيل المختار.';return;}
- const server=moshaf.server.endsWith('/')?moshaf.server:moshaf.server+'/';
- const url=server+String(id).padStart(3,'0')+'.mp3';
- $('shuaishaTracks').classList.add('hidden');
- const trackTitle=`سورة ${surahs.find(s=>s.number===id)?.name||''} — ${reciter.name}`;
- $('quranStatus').textContent=`تلاوة ${trackTitle}.`;
- if(window.ZadAndroid && typeof window.ZadAndroid.playQuranAudio==='function'){
-  $('audio').pause();$('audio').removeAttribute('src');$('audio').classList.add('hidden');
-  window.ZadAndroid.playQuranAudio(url,trackTitle);
-  $('quranStatus').textContent+=' يستمر التشغيل في الخلفية، ويمكنك الخروج من التطبيق.';
- } else {
-  $('audio').src=url;$('audio').classList.remove('hidden');$('audio').load();
-  $('audio').play().catch(()=>{$('quranStatus').textContent+=' اضغط زر التشغيل في مشغل الصوت.';});
- }
-});
-loadSurahs();loadOldEgyptianReciters();
+// مشغل القرآن الموحد مع التطبيق موجود في website-enhancements.js.
+
 const azkar={
  morning:{title:'أذكار الصباح',items:[['أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.',1],['اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت وإليك النشور.',1],['رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا.',3],['سبحان الله وبحمده.',100],['أستغفر الله وأتوب إليه.',100]]},
  evening:{title:'أذكار المساء',items:[['أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.',1],['اللهم بك أمسينا وبك أصبحنا وبك نحيا وبك نموت وإليك المصير.',1],['رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا.',3],['سبحان الله وبحمده.',100],['أستغفر الله وأتوب إليه.',100]]},
@@ -2061,126 +1980,11 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
 <div id="google_translate_element" aria-hidden="true"></div>
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" async></script>
 <script src="./khutbahs.js?v=20261118b"></script>
-<script>
-(function(){
- const audio=document.getElementById('egyptQuranRadio');
- const status=document.getElementById('radioStatus');
- const fallback=document.getElementById('radioFallbackBtn');
- const primary=document.getElementById('radioPrimaryBtn');
- if(!audio||!status||!fallback||!primary)return;
- const cairo='https://stream.radiojar.com/8s5u5tpdtwzuv';
- const backup='https://qurango.net/radio/tarateel';
- function setStream(url,label){
-  audio.pause(); audio.src=url; audio.load();
-  status.textContent=label+' — اضغط تشغيل لبدء الاستماع.';
- }
- fallback.addEventListener('click',function(){
-  setStream(backup,'تم اختيار البث البديل لتلاوات القرآن الكريم');
-  audio.play().catch(function(){status.textContent='تم اختيار البث البديل. اضغط زر التشغيل في مشغل الصوت.';});
- });
- primary.addEventListener('click',function(){
-  setStream(cairo,'إذاعة القرآن الكريم من القاهرة');
-  audio.play().catch(function(){status.textContent='تم اختيار بث إذاعة القاهرة. اضغط زر التشغيل في مشغل الصوت.';});
- });
- audio.addEventListener('playing',function(){status.textContent='البث يعمل الآن. تقبّل الله طاعتكم.';});
- audio.addEventListener('error',function(){status.textContent='تعذر الاتصال بمصدر البث الحالي. جرّب «تشغيل البث البديل» أو أعد المحاولة لاحقًا.';});
- audio.addEventListener('stalled',function(){status.textContent='البث متوقف مؤقتًا أو الاتصال بطيء. يمكنك تجربة البث البديل.';});
-})();
-</script>
 <script src="./daily-reminders.js?v=20261119native-diagnostics1"></script>
-<script id="zad-prayer-audio-fallback">
-(function(){
- const sources={
-  doha:{
-   'الفجر':'https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_01_Fajr_Adhan.mp3',
-   'الظهر':'https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_02_Dhuhr_Adhan.mp3',
-   'العصر':'https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_03_Asr_Adhan.mp3',
-   'المغرب':'https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_04_Maghrib_Adhan.mp3',
-   'العشاء':'https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_05_Isha_Adhan.mp3'
-  },
-  basit:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Abdulbasit_Abdusamad_1_-_Egypt_(%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%A8%D8%A7%D8%B3%D8%B7_%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%B5%D9%85%D8%AF_-_%D9%85%D8%B5%D8%B1).mp3',
-  mustafa:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mustafa_Ismail_-_Egypt_(%D9%85%D8%B5%D8%B7%D9%81%D9%89_%D8%A5%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84_-_%D9%85%D8%B5%D8%B1).mp3',
-  husary:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mahmoud_Khalil_Al_Hussary_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%AE%D9%84%D9%8A%D9%84_%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%8A_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',
-  banna:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Mahmoud_Ali_Al_Banna_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%B9%D9%84%D9%8A_%D8%A7%D9%84%D8%A8%D9%86%D8%A7_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3',
-  haram:'https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(%D8%B9%D9%84%D9%8A_%D8%A8%D9%86_%D8%A3%D8%AD%D9%85%D8%AF_%D9%85%D9%84%D8%A7_-_%D8%A7%D9%84%D8%AD%D8%B1%D9%85_%D8%A7%D9%84%D9%85%D9%83%D9%8A).mp3'
- };
- function bind(){
-  document.addEventListener('click',function(e){
-   const btn=e.target.closest('.prayer-adhan-preview');
-   if(!btn)return;
-   e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
-   const prayer=btn.dataset.prayer, select=document.querySelector('.prayer-adhan-voice[data-prayer="'+prayer+'"]');
-   const status=document.getElementById('prayerAdhanDownloadStatus'), audio=document.getElementById('adhanPreview');
-   const say=t=>{if(status)status.textContent=t;};
-   if(!select||!audio){say('تعذر العثور على مشغل الصوت أو اختيار المؤذن.');return;}
-   const key=select.value;
-   if(window.ZadAndroid){
-    try{
-     if(typeof window.ZadAndroid.previewPrayerAdhan==='function'&&window.ZadAndroid.isAdhanDownloaded(key)){
-      window.ZadAndroid.previewPrayerAdhan(key,prayer);say('يتم تشغيل معاينة المؤذن المختار.');
-     }else if(typeof window.ZadAndroid.downloadAdhan==='function'){
-      say('جارٍ تنزيل التسجيل المختار ثم تشغيله داخل التطبيق...');
-      window.onPrayerPreviewDownloadComplete=function(which,ok,reason){
-       if(which!==key)return;
-       if(ok&&typeof window.ZadAndroid.previewPrayerAdhan==='function'){window.ZadAndroid.previewPrayerAdhan(key,prayer);say('تم تنزيل التسجيل وتشغيله.');}
-       else say('تعذّر تشغيل التسجيل: '+(reason||'فشل التنزيل'));
-      };
-      window.onPrayerPreviewDownloadComplete.voiceKey=key;
-      window.ZadAndroid.downloadAdhan(key);
-     }else say('تشغيل الصوت غير مدعوم في هذه النسخة.');
-    }catch(err){say('حدث خطأ أثناء تشغيل الصوت: '+(err.message||'غير معروف'));}
-    return;
-   }
-   const url=key==='doha'?(sources.doha[prayer]||''):sources[key];
-   if(!url){say('مصدر هذا التسجيل غير متاح.');return;}
-   (async()=>{
-    let source=url;
-    try{
-     if('caches' in window){
-      const cache=await caches.open('zad-prayer-audio-v1');
-      const saved=await cache.match(url);
-      if(saved){source=URL.createObjectURL(await saved.blob());if(audio.dataset.objectUrl)URL.revokeObjectURL(audio.dataset.objectUrl);audio.dataset.objectUrl=source;}
-     }
-    }catch(error){}
-    audio.hidden=false;audio.controls=true;audio.pause();audio.removeAttribute('src');audio.src=source;
-    const prayerVolume=document.querySelector('.prayer-adhan-volume[data-prayer="'+prayer+'"]');audio.dataset.prayer=prayer;audio.volume=Math.max(0,Math.min(100,Number(prayerVolume?.value??document.getElementById('adhanVolume')?.value??100))/100);
-    audio.load();say((source.startsWith('blob:')?'تشغيل التسجيل المحفوظ على هذا الجهاز. ':'جارٍ تحميل التسجيل من الإنترنت. ')+'صوت '+select.options[select.selectedIndex].text+' لصلاة '+prayer+'...');
-    const p=audio.play();
-    if(p&&p.catch)p.catch(err=>say('تعذّر التشغيل: '+(err.name==='NotAllowedError'?'اضغط زر التشغيل في مشغل الصوت.':'تحقق من اتصال الإنترنت أو مصدر التسجيل.')));
-   })();
-  },true);
-  const audio=document.getElementById('adhanPreview'),status=document.getElementById('prayerAdhanDownloadStatus');
-  if(audio)audio.addEventListener('error',()=>{if(status)status.textContent='فشل تحميل ملف الصوت من المصدر. تم إصلاح استجابة زر المعاينة، لكن مصدر التسجيل لم يستجب.';});
- }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
-})();
-</script>
-<script id="zad-prayer-volume-controls">
-(function(){
- const prayers=['الفجر','الظهر','العصر','المغرب','العشاء'];
- const audio=document.getElementById('adhanPreview');
- prayers.forEach((prayer,index)=>{
-  const control=document.querySelector('.prayer-adhan-volume[data-prayer="'+prayer+'"]');
-  const value=document.getElementById('adhanPrayerVolumeValue_'+index);
-  if(!control)return;
-  const key='zad_adhan_volume_'+prayer;
-  const saved=localStorage.getItem(key);
-  control.value=saved===null?'100':String(Math.max(0,Math.min(100,parseInt(saved,10)||0)));
-  if(value)value.textContent=control.value+'%';
-  if(window.ZadAndroid&&typeof window.ZadAndroid.setPrayerAdhanVolume==='function')window.ZadAndroid.setPrayerAdhanVolume(prayer,Number(control.value));
-  control.addEventListener('input',function(){
-   const level=Math.max(0,Math.min(100,Number(control.value)||0));
-   control.value=String(level);
-   localStorage.setItem(key,String(level));
-   if(value)value.textContent=level+'%';
-   if(audio&&audio.dataset.prayer===prayer)audio.volume=level/100;
-   if(window.ZadAndroid&&typeof window.ZadAndroid.setPrayerAdhanVolume==='function')window.ZadAndroid.setPrayerAdhanVolume(prayer,level);
-  });
- });
-})();
-</script>
+
+
 <script>
-if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261119prayer-volume1", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261120site-v86", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
 </script>
 
 <style id="hide-floating-shortcuts">
@@ -2191,6 +1995,69 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261119prayer-tab-fix4"></script>
+<script src="./app-pages.js?v=20261120site-v86"></script>
+<script src="./website-enhancements.js?v=20261120site-v86"></script>
+
+<style id="nearby-mosques-style">
+#nearbyMosqueResults .mosque-result{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:#fff;border:1px solid var(--line);border-radius:12px}
+#nearbyMosqueResults .mosque-result strong{display:block;color:var(--green)}
+#nearbyMosqueResults .mosque-result small{display:block;color:var(--muted);font-size:12px}
+#nearbyMosqueResults .mosque-result a{flex:0 0 auto;text-decoration:none}
+@media(max-width:520px){#nearbyMosqueResults .mosque-result{align-items:flex-start;flex-direction:column}}
+</style>
+<script id="nearby-mosques-script">
+(()=>{
+ const button=document.getElementById('findNearbyMosques');
+ const status=document.getElementById('mosqueSearchStatus');
+ const results=document.getElementById('nearbyMosqueResults');
+ const radius=document.getElementById('mosqueRadius');
+ const fallback=document.getElementById('mosqueMapFallback');
+ if(!button||!status||!results)return;
+ const distanceKm=(a,b,c,d)=>{
+  const rad=x=>x*Math.PI/180,R=6371;
+  const x=rad(c-a),y=rad(d-b);
+  const h=Math.sin(x/2)**2+Math.cos(rad(a))*Math.cos(rad(c))*Math.sin(y/2)**2;
+  return 2*R*Math.asin(Math.sqrt(h));
+ };
+ const el=(tag,cls,txt)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;};
+ button.addEventListener('click',()=>{
+  results.replaceChildren();fallback.classList.add('hidden');
+  if(!('geolocation' in navigator)){status.textContent='المتصفح لا يدعم تحديد الموقع. يمكنك فتح الخريطة والبحث يدويًا.';fallback.classList.remove('hidden');return;}
+  button.disabled=true;button.textContent='جارٍ تحديد موقعك...';status.textContent='نطلب إذن الموقع من جهازك؛ لن يبدأ البحث إلا بعد موافقتك.';
+  navigator.geolocation.getCurrentPosition(async position=>{
+   const lat=position.coords.latitude,lon=position.coords.longitude,meters=Number(radius.value)||5000;
+   status.textContent='تم تحديد موقعك. جارٍ البحث عن المساجد القريبة...';
+   const query='[out:json][timeout:25];(nwr(around:'+meters+','+lat+','+lon+')["amenity"="mosque"];nwr(around:'+meters+','+lat+','+lon+')["amenity"="place_of_worship"]["religion"~"muslim"];);out center tags;';
+   try{
+    const response=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:'data='+encodeURIComponent(query)});
+    if(!response.ok)throw new Error('overpass');
+    const data=await response.json();
+    const found=(data.elements||[]).map(item=>{
+     const p=item.center||item;
+     if(typeof p.lat!=='number'||typeof p.lon!=='number')return null;
+     const tags=item.tags||{};
+     return {name:tags['name:ar']||tags.name||tags['name:en']||'مسجد بدون اسم مسجل',lat:p.lat,lon:p.lon,dist:distanceKm(lat,lon,p.lat,p.lon),type:tags.amenity};
+    }).filter(Boolean).sort((a,b)=>a.dist-b.dist);
+    const unique=[];const seen=new Set();
+    found.forEach(m=>{const key=m.lat.toFixed(5)+','+m.lon.toFixed(5);if(!seen.has(key)){seen.add(key);unique.push(m);}});
+    if(!unique.length){status.textContent='لم نعثر على مسجد مسجل داخل النطاق المحدد. جرّب توسيع نطاق البحث.';return;}
+    unique.slice(0,25).forEach(m=>{
+     const card=el('div','mosque-result'),info=el('div',''),name=el('strong','',m.name),dist=el('small','',m.dist<1?Math.round(m.dist*1000)+' متر':'يبعد '+m.dist.toFixed(1)+' كم');
+     const link=el('a','btn light','الاتجاهات');
+     link.href='https://www.google.com/maps/dir/?api=1&destination='+m.lat+','+m.lon;link.target='_blank';link.rel='noopener';
+     info.append(name,dist);card.append(info,link);results.append(card);
+    });
+    status.textContent='وجدنا '+unique.length+' مسجدًا مسجلًا، مرتبة من الأقرب. بيانات الأماكن من OpenStreetMap وقد تكون بعض الإدخالات غير مكتملة.';
+   }catch(error){status.textContent='تعذر تحميل نتائج المساجد الآن. تحقق من اتصال الإنترنت وحاول مرة أخرى.';fallback.href='https://www.openstreetmap.org/#map=15/'+lat+'/'+lon;fallback.classList.remove('hidden');}
+   finally{button.disabled=false;button.textContent='📍 ابحث عن المساجد القريبة';}
+  },error=>{
+   button.disabled=false;button.textContent='📍 ابحث عن المساجد القريبة';
+   status.textContent=error.code===1?'لم تسمح بالوصول للموقع. يمكنك السماح به من إعدادات المتصفح ثم المحاولة، أو فتح الخريطة يدويًا.':'تعذر تحديد موقعك. تأكد من تفعيل خدمة الموقع وحاول مجددًا.';
+   fallback.href='https://www.openstreetmap.org/';fallback.classList.remove('hidden');
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+ });
+})();
+</script>
+
 </body>
 </html>
