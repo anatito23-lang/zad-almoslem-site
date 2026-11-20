@@ -108,66 +108,18 @@ public class MainActivity extends Activity {
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
         LinearLayout root = column();
-        root.setPadding(dp(12),dp(10),dp(12),dp(24));
+        root.setPadding(dp(16),dp(16),dp(16),dp(28));
         root.setBackgroundColor(Color.rgb(244,247,243));
         scroll.addView(root);
-        addHomePrayerSummary(root);
-        TextView heading = text("زاد المسلم",22,Color.WHITE,true);
+
+        TextView heading = text("إعدادات الأذان",24,Color.rgb(8,48,40),true);
         heading.setGravity(Gravity.CENTER);
-        TextView ayah = text("﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾",13,Color.rgb(232,211,158),true);
-        ayah.setGravity(Gravity.CENTER);
-        TextView ayahRef = text("سورة الرعد • الآية ٢٨",11,Color.rgb(222,239,229),false);
-        ayahRef.setGravity(Gravity.CENTER);
-        TextClock liveClock = new TextClock(this);
-        liveClock.setFormat12Hour("hh:mm:ss a");
-        liveClock.setFormat24Hour("HH:mm:ss");
-        liveClock.setTextSize(22);
-        liveClock.setTextColor(Color.WHITE);
-        liveClock.setGravity(Gravity.CENTER);
-        liveClock.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
-        liveClock.setPadding(0,dp(3),0,dp(2));
-        LinearLayout hero = column(); hero.setGravity(Gravity.CENTER);
-        hero.setBackground(shape(Color.rgb(8,48,40),18)); hero.setPadding(dp(12),dp(9),dp(12),dp(9));
-        hero.addView(heading); hero.addView(liveClock); hero.addView(ayah); hero.addView(ayahRef);
-        root.addView(hero, matchWrap());
-        Button prayerDetails = new Button(this); prayerDetails.setText("عرض مواقيت الصلاة بالتفصيل");
-        prayerDetails.setOnClickListener(v -> startActivity(new Intent(this, PrayerDashboardActivity.class)));
-        root.addView(prayerDetails, matchWrap());
-        Button libraryButton = new Button(this); libraryButton.setText("📚  مكتبة خطب الجمعة");
-        libraryButton.setOnClickListener(v -> startActivity(new Intent(this, KhutbahLibraryActivity.class)));
-        root.addView(libraryButton, matchWrap());
-        Button qiblaButton = new Button(this); qiblaButton.setText("🧭  بوصلة القبلة");
-        qiblaButton.setOnClickListener(v -> startActivity(new Intent(this, QiblaActivity.class)));
-        root.addView(qiblaButton, matchWrap());
-        Button mushafButton = new Button(this); mushafButton.setText("📖  المصحف الشريف");
-        mushafButton.setOnClickListener(v -> startActivity(new Intent(this, MushafPageActivity.class)));
-        root.addView(mushafButton, matchWrap());
-        Button booksButton = new Button(this); booksButton.setText("📚  مكتبة الكتب الإسلامية");
-        booksButton.setOnClickListener(v -> startActivity(new Intent(this, BookLibraryActivity.class)));
-        root.addView(booksButton, matchWrap());
-        Button calendarButton = new Button(this); calendarButton.setText("🗓️  التقويم الهجري والميلادي");
-        calendarButton.setOnClickListener(v -> startActivity(new Intent(this, CalendarActivity.class)));
-        root.addView(calendarButton, matchWrap());
-        Button audioLibraryButton = new Button(this); audioLibraryButton.setText("🎧  الابتهالات والرقية الشرعية");
-        audioLibraryButton.setOnClickListener(v -> startActivity(new Intent(this, AudioLibraryActivity.class)));
-        root.addView(audioLibraryButton, matchWrap());
-        Button kidsButton = new Button(this); kidsButton.setText("🧒  ركن الأطفال");
-        kidsButton.setOnClickListener(v -> startActivity(new Intent(this, KidsCornerActivity.class)));
-        root.addView(kidsButton, matchWrap());
-        Button fridayButton = new Button(this); fridayButton.setText("🌙  ورد يوم الجمعة");
-        fridayButton.setOnClickListener(v -> startActivity(new Intent(this, FridayWirdActivity.class)));
-        root.addView(fridayButton, matchWrap());
-        Button faithButton = new Button(this); faithButton.setText("📚  المكتبة الإيمانية والسنة والأدعية");
-        faithButton.setOnClickListener(v -> startActivity(new Intent(this, FaithLibraryActivity.class)));
-        root.addView(faithButton, matchWrap());
-        Button dailyWirdButton = new Button(this); dailyWirdButton.setText("☀️  وردي اليومي");
-        dailyWirdButton.setOnClickListener(v -> startActivity(new Intent(this, DailyWirdActivity.class)));
-        root.addView(dailyWirdButton, matchWrap());
-        Button remindersButton = new Button(this); remindersButton.setText("⏰  إعدادات التنبيهات اليومية");
-        remindersButton.setOnClickListener(v -> startActivity(new Intent(this, DailyReminderSettingsActivity.class)));
-        root.addView(remindersButton, matchWrap());
-        TextView intro = text("إعدادات الأذان",20,Color.rgb(20,55,43),true);
-        intro.setPadding(0,dp(20),0,dp(8)); root.addView(intro);
+        heading.setPadding(0,dp(8),0,dp(16));
+        root.addView(heading);
+
+        TextView intro = text("تحكم في تشغيل الأذان وأصواته ومستوى الصوت لكل صلاة بصورة مستقلة.",14,Color.rgb(65,80,70),false);
+        addCard(root,intro);
+
         Switch master = new Switch(this);
         master.setText("تفعيل الأذان عند مواقيت الصلاة");
         master.setTextColor(Color.rgb(30,55,45));
@@ -175,7 +127,7 @@ public class MainActivity extends Activity {
         master.setOnCheckedChangeListener((b,checked)->prefs.edit().putBoolean("adhan_enabled",checked).apply());
         addCard(root,master);
 
-        TextView silentInfo = text("يمكنك اختيار الصلوات التي تريد أن يتحول فيها الهاتف إلى الوضع الصامت وقت الأذان، ثم يعود إلى وضعه السابق تلقائيًا بعد 15 دقيقة. يتطلب ذلك منح إذن عدم الإزعاج من إعدادات Android.",13,Color.rgb(70,85,75),false);
+        TextView silentInfo = text("يمكنك اختيار الصلوات التي تريد فيها تفعيل الوضع الصامت وقت الأذان، ثم يعود الهاتف لوضعه السابق تلقائيًا. يتطلب ذلك إذن عدم الإزعاج من إعدادات Android.",13,Color.rgb(70,85,75),false);
         addCard(root,silentInfo);
         Button silentPermission = new Button(this);
         silentPermission.setText("إعداد إذن الوضع الصامت");
@@ -185,36 +137,33 @@ public class MainActivity extends Activity {
                 Toast.makeText(this,"إذن الوضع الصامت مفعّل بالفعل",Toast.LENGTH_SHORT).show();
                 return;
             }
-            try {
-                startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS));
-            } catch (Exception e) {
-                Toast.makeText(this,"تعذر فتح إعداد الإذن في الهاتف",Toast.LENGTH_LONG).show();
-            }
+            try { startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)); }
+            catch (Exception e) { Toast.makeText(this,"تعذر فتح إعداد الإذن في الهاتف",Toast.LENGTH_LONG).show(); }
         });
-        addCard(root,silentPermission);
+        root.addView(silentPermission,matchWrap());
 
-        addStandaloneTools(root);
-        addNativeAzkar(root);
-
+        TextView prayerSettingsTitle=text("إعدادات كل صلاة",19,Color.rgb(20,55,43),true);
+        prayerSettingsTitle.setPadding(0,dp(18),0,dp(8));root.addView(prayerSettingsTitle);
         for (int i=0;i<PRAYERS.length;i++) addPrayerCard(root,i);
-        addPrayerTimesUpdater(root);
 
-        TextView downloadTitle = text("حفظ التسجيلات على الهاتف",18,Color.rgb(20,55,43),true);
+        TextView downloadTitle = text("أصوات الأذان على الهاتف",18,Color.rgb(20,55,43),true);
         downloadTitle.setPadding(0,dp(20),0,dp(8)); root.addView(downloadTitle);
-        TextView note = text("بعد اكتمال التنزيل ستعمل التسجيلات من ذاكرة التطبيق دون الحاجة إلى الموقع أو الإنترنت.",13,Color.DKGRAY,false);
+        TextView note = text("نزّل الأصوات المختارة ليتمكن التطبيق من تشغيلها من ذاكرته دون الحاجة إلى الإنترنت.",13,Color.DKGRAY,false);
         addCard(root,note);
-        downloadButton = new Button(this); downloadButton.setText("تنزيل الأصوات المختارة");
-        downloadButton.setTextColor(Color.WHITE); downloadButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(17,91,68)));
-        root.addView(downloadButton, matchWrap());
+        downloadButton = new Button(this);
+        downloadButton.setText("تنزيل الأصوات المختارة");
+        downloadButton.setTextColor(Color.WHITE);
+        downloadButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(17,91,68)));
+        root.addView(downloadButton,matchWrap());
         downloadButton.setOnClickListener(v->downloadSelectedVoices());
         progress = new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
-        progress.setMax(100); progress.setProgress(0); root.addView(progress,matchWrap());
-        progressText = text("لم يبدأ التنزيل",12,Color.DKGRAY,false); root.addView(progressText);
-        status = text("",13,Color.rgb(30,70,50),false); status.setPadding(0,dp(12),0,0); root.addView(status);
-        Button audioCheck = new Button(this); audioCheck.setText("فحص حالة صوت الأذان");
-        root.addView(audioCheck, matchWrap());
-        TextView audioDiagnostics = text("اضغط هنا بعد تجربة الأذان لمعرفة حالة الملف وسبب أي تعذر في التشغيل.",12,Color.rgb(70,85,75),false);
-        root.addView(audioDiagnostics, matchWrap());
+        progress.setMax(100);progress.setProgress(0);root.addView(progress,matchWrap());
+        progressText = text("لم يبدأ التنزيل",12,Color.DKGRAY,false);root.addView(progressText);
+        status = text("",13,Color.rgb(30,70,50),false);status.setPadding(0,dp(12),0,0);root.addView(status);
+        Button audioCheck = new Button(this);audioCheck.setText("فحص ملفات صوت الأذان");
+        root.addView(audioCheck,matchWrap());
+        TextView audioDiagnostics = text("يعرض حالة ملفات الأذان المحفوظة على الهاتف.",12,Color.rgb(70,85,75),false);
+        root.addView(audioDiagnostics,matchWrap());
         audioCheck.setOnClickListener(v -> audioDiagnostics.setText(buildAudioDiagnostics()));
         setContentView(AppTabs.wrap(this,scroll,"more"));
     }
