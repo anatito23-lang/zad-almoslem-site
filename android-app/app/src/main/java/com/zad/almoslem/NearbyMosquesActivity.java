@@ -82,7 +82,7 @@ public class NearbyMosquesActivity extends Activity {
         worker.execute(()->{
             HttpURLConnection conn=null;
             try{
-                String q="[out:json][timeout:25];(node[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");way[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");relation[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+"););out center;";
+                String q="[out:json][timeout:25];(node[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");way[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");relation[\"amenity\"=\"place_of_worship\"][\"religion\"=\"muslim\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");node[\"amenity\"=\"mosque\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");way[\"amenity\"=\"mosque\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");node[\"building\"=\"mosque\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+");way[\"building\"=\"mosque\"](around:7000,"+loc.getLatitude()+","+loc.getLongitude()+"););out center;";
                 String[] endpoints={"https://overpass.kumi.systems/api/interpreter","https://overpass-api.de/api/interpreter","https://overpass.private.coffee/api/interpreter"};
                 Exception last=null;JSONObject data=null;
                 for(String endpoint:endpoints){
@@ -103,8 +103,9 @@ public class NearbyMosquesActivity extends Activity {
                 JSONArray els=data.optJSONArray("elements");java.util.ArrayList<JSONObject> found=new java.util.ArrayList<>();
                 if(els!=null)for(int i=0;i<els.length();i++){
                     JSONObject e=els.getJSONObject(i),tags=e.optJSONObject("tags");if(tags==null)continue;
-                    String religion=tags.optString("religion","");String amenity=tags.optString("amenity","");
-                    if(!"place_of_worship".equals(amenity)||(!religion.isEmpty()&&!"muslim".equalsIgnoreCase(religion)))continue;
+                    String religion=tags.optString("religion","");String amenity=tags.optString("amenity","");String building=tags.optString("building","");String taggedName=tags.optString("name",tags.optString("name:ar","")).toLowerCase(java.util.Locale.ROOT);
+                    boolean mosque="mosque".equals(amenity)||"mosque".equals(building)||("place_of_worship".equals(amenity)&&("muslim".equalsIgnoreCase(religion)||taggedName.contains("مسجد")||taggedName.contains("جامع")||taggedName.contains("mosque")));
+                    if(!mosque)continue;
                     double lat=e.has("lat")?e.optDouble("lat"):e.optJSONObject("center")!=null?e.getJSONObject("center").optDouble("lat"):Double.NaN;
                     double lon=e.has("lon")?e.optDouble("lon"):e.optJSONObject("center")!=null?e.getJSONObject("center").optDouble("lon"):Double.NaN;
                     if(!Double.isNaN(lat)&&!Double.isNaN(lon)){String name=tags.optString("name",tags.optString("name:ar","مسجد"));e.put("_displayName",name);e.put("_distance",distance(loc.getLatitude(),loc.getLongitude(),lat,lon));e.put("_lat",lat);e.put("_lon",lon);found.add(e);}
