@@ -109,22 +109,24 @@ public class MushafPageActivity extends Activity {
         correction.setOnClickListener(v -> {
             openInteractivePage();
         });
+        // Put the controls above the page and let the page consume all remaining
+        // available height. A fixed pixel-derived height left a large blank area
+        // on phones with different density and navigation-bar sizes.
+        root.addView(toolbar, new LinearLayout.LayoutParams(-1, dp(38)));
+
         LinearLayout pageFrame = new LinearLayout(this);
         pageFrame.setOrientation(LinearLayout.VERTICAL);
         pageFrame.setGravity(Gravity.CENTER);
-        pageFrame.setPadding(dp(1), dp(2), dp(1), dp(2));
+        pageFrame.setPadding(dp(1), dp(1), dp(1), dp(1));
         pageFrame.setBackground(shape(Color.rgb(255,253,244), 5, Color.rgb(177,157,112)));
         pageImage = new ImageView(this);
-        pageImage.setAdjustViewBounds(true);
+        pageImage.setAdjustViewBounds(false);
         pageImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
         pageFrame.addView(pageImage, new LinearLayout.LayoutParams(-1, -1));
-        LinearLayout.LayoutParams imageLp = new LinearLayout.LayoutParams(-1,
-                Math.max(dp(360), getResources().getDisplayMetrics().heightPixels - dp(360)));
+        LinearLayout.LayoutParams imageLp = new LinearLayout.LayoutParams(-1, 0, 1f);
         imageLp.topMargin = dp(2);
+        imageLp.bottomMargin = dp(2);
         root.addView(pageFrame, imageLp);
-
-        // Keep navigation controls below the scanned page so they never cover its header.
-        root.addView(toolbar);
 
         gesture = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override public boolean onDown(MotionEvent e) { return true; }
