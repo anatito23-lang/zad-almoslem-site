@@ -86,7 +86,7 @@ public class MushafPageActivity extends Activity {
     private void build() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(12), dp(10), dp(12), dp(12));
+        root.setPadding(dp(3), dp(3), dp(3), dp(4));
         root.setBackgroundColor(Color.rgb(242,240,230));
 
         LinearLayout toolbar = new LinearLayout(this);
@@ -96,24 +96,24 @@ public class MushafPageActivity extends Activity {
         Button index = new Button(this);
         index.setText("☰ فهرس السور");
         index.setTextSize(13);
-        toolbar.addView(index, new LinearLayout.LayoutParams(0, dp(46), 1));
+        toolbar.addView(index, new LinearLayout.LayoutParams(0, dp(38), 1));
         index.setOnClickListener(v -> showSurahIndex());
 
         pageLabel = label("", 15, green, true);
-        toolbar.addView(pageLabel, new LinearLayout.LayoutParams(0, dp(46), 1));
+        toolbar.addView(pageLabel, new LinearLayout.LayoutParams(0, dp(38), 1));
         root.addView(toolbar);
 
         LinearLayout pageFrame = new LinearLayout(this);
         pageFrame.setOrientation(LinearLayout.VERTICAL);
         pageFrame.setGravity(Gravity.CENTER);
-        pageFrame.setPadding(dp(5), dp(7), dp(5), dp(7));
+        pageFrame.setPadding(dp(1), dp(2), dp(1), dp(2));
         pageFrame.setBackground(shape(Color.rgb(255,253,244), 5, Color.rgb(177,157,112)));
         pageImage = new ImageView(this);
         pageImage.setAdjustViewBounds(true);
         pageImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
         pageFrame.addView(pageImage, new LinearLayout.LayoutParams(-1, -1));
         LinearLayout.LayoutParams imageLp = new LinearLayout.LayoutParams(-1, 0, 1);
-        imageLp.topMargin = dp(8);
+        imageLp.topMargin = dp(2);
         root.addView(pageFrame, imageLp);
 
         gesture = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -122,18 +122,18 @@ public class MushafPageActivity extends Activity {
                 if (e1 == null || e2 == null || busy) return false;
                 float dx = e2.getX() - e1.getX();
                 float dy = e2.getY() - e1.getY();
-                if (Math.abs(dx) < dp(45) || Math.abs(dx) < Math.abs(dy) || Math.abs(vx) < dp(120)) return false;
+                if (Math.abs(dx) < dp(28) || Math.abs(dx) < Math.abs(dy) * 1.15f || Math.abs(vx) < dp(65)) return false;
                 if (dx < 0 && page < 604) showPage(page + 1);
                 else if (dx > 0 && page > 1) showPage(page - 1);
                 return true;
             }
         });
-        pageImage.setOnTouchListener((v, event) -> gesture.onTouchEvent(event));
+        pageImage.setClickable(true);\n        pageImage.setOnTouchListener((v, event) -> gesture.onTouchEvent(event));\n        pageFrame.setOnTouchListener((v, event) -> gesture.onTouchEvent(event));
 
         status = label("صفحات المصحف تُحمّل وتُحفظ تلقائيًا على الهاتف", 12, Color.DKGRAY, false);
-        status.setPadding(0, dp(5), 0, dp(5));
+        status.setTextSize(10);\n        status.setPadding(0, dp(2), 0, dp(2));
         root.addView(status);
-        TextView attribution = label("صور صفحات المصحف: Quran-Images — ترخيص MIT", 10, Color.GRAY, false);
+        TextView attribution = label("صور صفحات المصحف: Quran-Images — ترخيص MIT", 9, Color.GRAY, false);
         root.addView(attribution);
 
         progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
@@ -146,8 +146,8 @@ public class MushafPageActivity extends Activity {
         previous.setText("السابق");
         next = new Button(this);
         next.setText("التالي");
-        nav.addView(previous, new LinearLayout.LayoutParams(0, dp(48), 1));
-        nav.addView(next, new LinearLayout.LayoutParams(0, dp(48), 1));
+        nav.addView(previous, new LinearLayout.LayoutParams(0, dp(40), 1));
+        nav.addView(next, new LinearLayout.LayoutParams(0, dp(40), 1));
         root.addView(nav);
         previous.setOnClickListener(v -> { if (page > 1) showPage(page - 1); });
         next.setOnClickListener(v -> { if (page < 604) showPage(page + 1); });
