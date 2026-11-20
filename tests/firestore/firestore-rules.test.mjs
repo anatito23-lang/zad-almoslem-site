@@ -41,7 +41,9 @@ before(async () => {
       "النشر": false
     });
     await setDoc(doc(db, "duas", "draft"), { text: "دعاء مسودة", published: false });
-    await setDoc(doc(db, "duas", "published"), { text: "دعاء منشور", "النشر": true });
+    await setDoc(doc(db, "duas", "published-en"), { text: "دعاء منشور", published: true });
+    await setDoc(doc(db, "duas", "published-ar"), { text: "دعاء منشور", "تم النشر": true });
+    await setDoc(doc(db, "duas", "published-alt"), { text: "دعاء منشور", "النشر": true });
   });
 });
 
@@ -56,15 +58,20 @@ test("public users can read documents published with any supported field", async
   }
   await assertFails(getDoc(doc(db, "azkar", "draft")));
   await assertFails(getDoc(doc(db, "duas", "draft")));
+  for (const id of ["published-en", "published-ar", "published-alt"]) {
+    await assertSucceeds(getDoc(doc(db, "duas", id)));
+  }
 });
 
 test("public publication queries used by Android sync are allowed", async () => {
   const db = env.unauthenticatedContext().firestore();
-  for (const field of ["published", "تم النشر", "النشر"]) {
-    const result = await assertSucceeds(
-      getDocs(query(collection(db, "azkar"), where(field, "==", true)))
-    );
-    assert.equal(result.empty, false);
+  for (const collectionName of ["azkar", "duas"]) {
+    for (const field of ["published", "تم النشر", "النشر"]) {
+      const result = await assertSucceeds(
+        getDocs(query(collection(db, collectionName), where(field, "==", true)))
+      );
+      assert.equal(result.empty, false, `${collectionName}.${field} should return published documents`);
+    }
   }
 });
 
