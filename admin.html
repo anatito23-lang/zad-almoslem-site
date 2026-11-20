@@ -59,6 +59,9 @@ const ADMIN_UID="5UkeBQyyGGZcICXULT9LUD0S4lt2";
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const $=id=>document.getElementById(id);
 const names={azkar:"الأذكار",duas:"الأدعية"};
+const schema={azkar:{text:"نص",source:"مصدر",category:"فئة",count:"عدد",published:"تم النشر"},duas:{text:"نص",source:"مصدر",category:"",count:"",published:"النشر"}};
+function field(item,key){const arabic=schema[$("collection").value][key];return item[key]??(arabic?item[arabic]:undefined);}
+function isPublished(item){return field(item,"published")===true;}
 let busy=false;
 function message(id,text,error=false){const el=$(id);el.textContent=text;el.classList.remove("hidden","error");if(error)el.classList.add("error");}
 function clearMessage(id){$(id).textContent="";$(id).classList.add("hidden");}
@@ -74,9 +77,9 @@ async function loadItems(){
   if(snap.empty){$("itemsList").innerHTML='<p class="small">لا توجد مستندات في هذا القسم حتى الآن.</p>';return;}
   const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
   $("itemsList").innerHTML=rows.map(item=>{
-   const title=escapeHtml(item.text||"بدون نص");
-   const meta=[item.source,item.category,item.count?("العدد: "+item.count):""].filter(Boolean).map(escapeHtml).join(" · ");
-   return '<article class="item"><div class="row"><strong>'+title+'</strong><span class="tag">'+(item.published===true?"منشور":"مسودة")+'</span></div><p class="small">'+meta+'</p><div class="actions"><button type="button" class="secondary" data-edit="'+escapeHtml(item.id)+'">تعديل</button><button type="button" class="gold" data-toggle="'+escapeHtml(item.id)+'" data-published="'+(item.published===true?'true':'false')+'">'+(item.published===true?"إلغاء النشر":"نشر")+'</button><button type="button" class="danger" data-delete="'+escapeHtml(item.id)+'">حذف</button></div></article>';
+   const title=escapeHtml(field(item,"text")||"بدون نص");
+   const meta=[field(item,"source"),field(item,"category"),field(item,"count")?("العدد: "+field(item,"count")):""].filter(Boolean).map(escapeHtml).join(" · ");
+   return '<article class="item"><div class="row"><strong>'+title+'</strong><span class="tag">'+(isPublished(item)?"منشور":"مسودة")+'</span></div><p class="small">'+meta+'</p><div class="actions"><button type="button" class="secondary" data-edit="'+escapeHtml(item.id)+'">تعديل</button><button type="button" class="gold" data-toggle="'+escapeHtml(item.id)+'" data-published="'+(item.published===true?'true':'false')+'">'+(item.published===true?"إلغاء النشر":"نشر")+'</button><button type="button" class="danger" data-delete="'+escapeHtml(item.id)+'">حذف</button></div></article>';
   }).join("");
   $("itemsList").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editItem(rows.find(x=>x.id===b.dataset.edit))));
   $("itemsList").querySelectorAll("[data-toggle]").forEach(b=>b.addEventListener("click",()=>togglePublished(b.dataset.toggle,b.dataset.published==="true")));
@@ -84,8 +87,8 @@ async function loadItems(){
  }catch(error){$("itemsList").textContent="تعذر تحميل المحتوى: "+error.message;}
  finally{setBusy(false);}
 }
-function editItem(item){if(!item)return;$("documentId").value=item.id;$("text").value=item.text||"";$("source").value=item.source||"";$("category").value=item.category||"";$("count").value=item.count||1;$("published").checked=item.published===true;$("saveButton").textContent="حفظ التعديلات";window.scrollTo({top:0,behavior:"smooth"});clearMessage("adminMessage");}
-async function togglePublished(id,wasPublished){if(!confirm(wasPublished?"هل تريد إلغاء نشر هذا المحتوى؟":"هل تريد نشر هذا المحتوى؟"))return;setBusy(true);try{await updateDoc(doc(db,$("collection").value,id),{published:!wasPublished,updatedAt:serverTimestamp()});message("adminMessage",wasPublished?"تم إلغاء النشر.":"تم نشر المحتوى.");await loadItems();}catch(e){message("adminMessage","تعذر تحديث حالة النشر: "+e.message,true);}finally{setBusy(false);}}
+function editItem(item){if(!item)return;$("documentId").value=item.id;$("text").value=field(item,"text")||"";$("source").value=field(item,"source")||"";$("category").value=field(item,"category")||"";$("count").value=field(item,"count")||1;$("published").checked=isPublished(item);$("saveButton").textContent="حفظ التعديلات";window.scrollTo({top:0,behavior:"smooth"});clearMessage("adminMessage");}
+async function togglePublished(id,wasPublished){if(!confirm(wasPublished?"هل تريد إلغاء نشر هذا المحتوى؟":"هل تريد نشر هذا المحتوى؟"))return;setBusy(true);try{const pubKey=schema[$("collection").value].published;await updateDoc(doc(db,$("collection").value,id),{published:!wasPublished,[pubKey]:!wasPublished,updatedAt:serverTimestamp()});message("adminMessage",wasPublished?"تم إلغاء النشر.":"تم نشر المحتوى.");await loadItems();}catch(e){message("adminMessage","تعذر تحديث حالة النشر: "+e.message,true);}finally{setBusy(false);}}
 async function removeItem(id){if(!confirm("تأكيد حذف هذا المحتوى نهائيًا؟"))return;setBusy(true);try{await deleteDoc(doc(db,$("collection").value,id));message("adminMessage","تم حذف المحتوى.");await loadItems();}catch(e){message("adminMessage","تعذر الحذف: "+e.message,true);}finally{setBusy(false);}}
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();if(busy)return;setBusy(true);clearMessage("loginMessage");try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);}catch(error){message("loginMessage","تعذر تسجيل الدخول. راجع البريد وكلمة المرور وإعدادات Firebase Authentication.",true);}finally{setBusy(false);}});
 $("logoutButton").addEventListener("click",()=>signOut(auth));
@@ -96,8 +99,8 @@ $("contentForm").addEventListener("submit",async e=>{
  e.preventDefault();if(busy||auth.currentUser?.uid!==ADMIN_UID)return;
  const collectionName=$("collection").value,text=$("text").value.trim(),source=$("source").value.trim();
  if(!text||!source){message("adminMessage","النص والمصدر مطلوبان.",true);return;}
- const data={text,source,published:$("published").checked,updatedAt:serverTimestamp()};
- if(collectionName==="azkar"){const category=$("category").value.trim(),count=Number($("count").value);if(!category||!Number.isInteger(count)||count<1){message("adminMessage","أدخل تصنيفًا وعددًا صحيحًا للذكر.",true);return;}data.category=category;data.count=count;}
+ const schemaForCollection=schema[collectionName],isPub=$("published").checked;const data={text,source,published:isPub,[schemaForCollection.text]:text,[schemaForCollection.source]:source,[schemaForCollection.published]:isPub,updatedAt:serverTimestamp()};
+ if(collectionName==="azkar"){const category=$("category").value.trim(),count=Number($("count").value);if(!category||!Number.isInteger(count)||count<1){message("adminMessage","أدخل تصنيفًا وعددًا صحيحًا للذكر.",true);return;}data.category=category;data.count=count;data[schemaForCollection.category]=category;data[schemaForCollection.count]=count;}
  else if($("category").value.trim())data.category=$("category").value.trim();
  setBusy(true);
  try{const id=$("documentId").value;if(id){await updateDoc(doc(db,collectionName,id),data);message("adminMessage","تم حفظ التعديلات.");}else{data.createdAt=serverTimestamp();await addDoc(collection(db,collectionName),data);message("adminMessage","تمت إضافة المحتوى.");}resetForm();await loadItems();}
