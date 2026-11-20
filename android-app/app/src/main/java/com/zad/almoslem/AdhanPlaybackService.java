@@ -33,6 +33,7 @@ public class AdhanPlaybackService extends Service {
     private static final int NOTIFICATION_ID = 7310;
     private ExoPlayer player;
     private boolean playDuaAfterCompletion;
+    private boolean deferBackgroundAudioResume;
     private String activePrayer;
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
@@ -176,6 +177,7 @@ public class AdhanPlaybackService extends Service {
                     if (state == Player.STATE_ENDED) {
                         boolean playDua = playDuaAfterCompletion;
                         playDuaAfterCompletion = false;
+                        deferBackgroundAudioResume = playDua;
                         stopPlayback();
                         if (playDua) ReminderAudioService.play(AdhanPlaybackService.this, "dua");
                     }
@@ -335,7 +337,7 @@ public class AdhanPlaybackService extends Service {
         getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_active", false).apply();
         stopPlayerOnly();
         stopForeground(true);
-        resumeBackgroundAudioAfterAdhan();
+        if (!deferBackgroundAudioResume) resumeBackgroundAudioAfterAdhan();
         stopSelf();
     }
 
