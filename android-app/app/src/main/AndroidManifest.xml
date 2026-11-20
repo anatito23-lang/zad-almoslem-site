@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -18,6 +20,7 @@
         <activity android:name=".LanguageSettingsActivity" android:exported="false" />
         <activity android:name=".KhutbahLibraryActivity" android:exported="false" />
         <activity android:name=".QiblaActivity" android:exported="false" />
+        <activity android:name=".NearbyMosquesActivity" android:exported="false" />
         <activity android:name=".QuranTextActivity" android:exported="false" />
         <activity android:name=".PrayerDashboardActivity" android:exported="false" />
         <activity android:name=".MushafPageActivity" android:exported="false" />
