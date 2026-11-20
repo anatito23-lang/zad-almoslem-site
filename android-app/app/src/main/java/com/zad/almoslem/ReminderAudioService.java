@@ -109,7 +109,11 @@ public class ReminderAudioService extends Service {
             player.setAudioAttributes(new AudioAttributes.Builder()
                     .setUsage(AudioAttributes.USAGE_ALARM)
                     .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
-            if ("dua".equals(kind)) {\n                int volume=getSharedPreferences("zad_reminders",MODE_PRIVATE).getInt("dua_after_adhan_volume",80);\n                player.setVolume(volume/100f,volume/100f);\n            }\n            player.setOnCompletionListener(mp -> finishPlayback());
+            if ("dua".equals(kind)) {
+                int volume=getSharedPreferences("zad_reminders",MODE_PRIVATE).getInt("dua_after_adhan_volume",80);
+                player.setVolume(volume/100f,volume/100f);
+            }
+            player.setOnCompletionListener(mp -> finishPlayback());
             player.setOnErrorListener((mp, what, extra) -> { finishPlayback(); return true; });
             player.setOnPreparedListener(MediaPlayer::start);
             player.setDataSource(file.getAbsolutePath());
