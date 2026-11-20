@@ -9,6 +9,9 @@
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
     <application android:allowBackup="true" android:label="قلبي اطمأن - زاد المسلم" android:icon="@drawable/ic_launcher_new" android:roundIcon="@drawable/ic_launcher_new" android:usesCleartextTraffic="false" android:networkSecurityConfig="@xml/network_security_config" android:theme="@style/AppTheme">
+        <activity android:name=".TasbeehActivity" android:exported="false" />
+        <activity android:name=".MoreActivity" android:exported="false" />
+        <activity android:name=".LanguageSettingsActivity" android:exported="false" />
         <activity android:name=".KhutbahLibraryActivity" android:exported="false" />
         <activity android:name=".QiblaActivity" android:exported="false" />
         <activity android:name=".QuranTextActivity" android:exported="false" />
