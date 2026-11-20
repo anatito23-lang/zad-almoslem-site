@@ -12,6 +12,7 @@ TextView title=label("المزيد من خدمات زاد المسلم",23,AppTh
 section(root,"🕌 الصلاة والأذان");
 add(root,"مواقيت الصلاة","عرض المواقيت وتحديثها واختيار المدينة",PrayerDashboardActivity.class);
 add(root,"إعدادات الأذان","اختيار صوت كل صلاة والتحكم في مستوى الصوت والتنزيل",MainActivity.class);
+add(root,"خلفيات شاشة الأذان","اختر صورة تظهر على الشاشة كاملة عند دخول وقت الصلاة",AdhanWallpaperSettingsActivity.class);
 add(root,"التنبيهات اليومية","إدارة التذكيرات والأذكار والتنبيهات",DailyReminderSettingsActivity.class);
 section(root,"📿 الرقية والابتهالات");
 add(root,"الرقية الشرعية","اختيار القارئ وتشغيل الرقية أو إيقافها",RuqyahActivity.class);
