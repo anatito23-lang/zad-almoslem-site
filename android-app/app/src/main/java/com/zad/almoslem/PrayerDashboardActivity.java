@@ -92,6 +92,7 @@ public class PrayerDashboardActivity extends Activity {
             remainingViews[i]=label("المتبقي: —",12,AppThemeColors.muted(this),false);remainingViews[i].setGravity(Gravity.CENTER);card.addView(remainingViews[i]);
             LinearLayout.LayoutParams cp=full();cp.bottomMargin=dp(9);root.addView(card,cp);
         }
+        LinearLayout sunriseCard=col();sunriseCard.setPadding(dp(14),dp(10),dp(14),dp(10));sunriseCard.setBackground(bg(AppThemeColors.surface(this),15));TextView sunriseName=label("🌄  الشروق — دون أذان",18,green,true);sunriseName.setGravity(Gravity.CENTER);sunriseCard.addView(sunriseName,new LinearLayout.LayoutParams(-1,dp(42)));TextView sunriseValue=label(savedSunrise(),20,green,true);sunriseValue.setGravity(Gravity.CENTER);sunriseCard.addView(sunriseValue);LinearLayout.LayoutParams sunriseLp=full();sunriseLp.bottomMargin=dp(9);root.addView(sunriseCard,sunriseLp);
         TextView trackerTitle=label("متتبع الصلوات اليومي",19,AppThemeColors.text(this),true);trackerTitle.setPadding(0,dp(16),0,dp(5));root.addView(trackerTitle);
         TextView trackerHint=label("علّم الصلاة بعد أدائها، وسيُحفظ إنجازك لهذا اليوم على الهاتف.",12,AppThemeColors.muted(this),false);root.addView(trackerHint);
         trackerCount=label("",14,green,true);trackerCount.setPadding(0,dp(7),0,dp(7));root.addView(trackerCount);
@@ -106,6 +107,7 @@ public class PrayerDashboardActivity extends Activity {
     }
     private String trackerKey(String p){return "prayer_tracker_"+new SimpleDateFormat("yyyyMMdd",Locale.US).format(new Date())+"_"+p;}
     private void refreshTracker(){int done=0;for(String p:PRAYERS)if(prefs.getBoolean(trackerKey(p),false))done++;if(trackerCount!=null)trackerCount.setText("أنجزت "+done+" من 5 صلوات اليوم");}
+    private String savedSunrise(){int h=prefs.getInt("native_sunrise_hour",-1),m=prefs.getInt("native_sunrise_minute",0);if(h<0)return "—";if(prefs.getBoolean("prayer_time_format_24",true))return String.format(Locale.getDefault(),"%02d:%02d",h,m);int dh=h%12;if(dh==0)dh=12;return String.format(Locale.getDefault(),"%d:%02d %s",dh,m,h<12?"ص":"م");}
     private String savedTime(String p){
         int h=prefs.getInt("native_time_hour_"+p,-1),m=prefs.getInt("native_time_minute_"+p,0);
         if(h<0)return "—";
@@ -139,6 +141,7 @@ public class PrayerDashboardActivity extends Activity {
             if(c.getResponseCode()!=200)throw new Exception("خدمة المواقيت لم تستجب");
             ByteArrayOutputStream out=new ByteArrayOutputStream();try(InputStream in=c.getInputStream()){byte[] b=new byte[4096];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}
             JSONObject data=new JSONObject(out.toString("UTF-8")).getJSONObject("data");JSONObject timings=data.getJSONObject("timings");String[] api={"Fajr","Dhuhr","Asr","Maghrib","Isha"};
+            String sunriseRaw=timings.getString("Sunrise").split(" ")[0];String[] sunriseHm=sunriseRaw.split(":");prefs.edit().putInt("native_sunrise_hour",Integer.parseInt(sunriseHm[0])).putInt("native_sunrise_minute",Integer.parseInt(sunriseHm[1])).apply();
             for(int i=0;i<5;i++){String raw=timings.getString(api[i]).split(" ")[0];String[] hm=raw.split(":");int h=Integer.parseInt(hm[0]),m=Integer.parseInt(hm[1]);prefs.edit().putInt("native_time_hour_"+PRAYERS[i],h).putInt("native_time_minute_"+PRAYERS[i],m).apply();Calendar next=Calendar.getInstance();next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,m);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);if(prefs.getBoolean("prayer_enabled_"+PRAYERS[i],true))ReminderReceiver.schedulePrayer(this,PRAYERS[i],next.getTimeInMillis());}
             prefs.edit().putString("native_times_date",new SimpleDateFormat("yyyyMMdd",Locale.US).format(new Date())).apply();
             runOnUiThread(()->{result.setText(pos==0?"تم تحديث المواقيت بطريقة الحساب المصرية رقم 5؛ وقد تختلف دقائق عن جدول الهيئة الرسمي المنشور.":"تم تحديث مواقيت "+COUNTRIES[pos]+" — "+city+" بطريقة الحساب المعتمدة لهذه الدولة.");refreshCountdowns();});
