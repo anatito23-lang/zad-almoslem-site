@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.view.Gravity;
+import android.view.View;
 import android.widget.*;
 import android.graphics.drawable.GradientDrawable;
 
