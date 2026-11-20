@@ -11,25 +11,25 @@ private LinearLayout column(){LinearLayout l=new LinearLayout(this);l.setOrienta
 private TextView text(String value,int size,int color,boolean bold){TextView v=new TextView(this);v.setText(value);v.setTextSize(size);v.setTextColor(color);v.setGravity(Gravity.RIGHT);if(bold)v.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return v;}
 private LinearLayout.LayoutParams matchWrap(){return new LinearLayout.LayoutParams(-1,-2);}
 private GradientDrawable shape(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
-private void addCard(LinearLayout root,View card){if(card instanceof LinearLayout){card.setBackground(shape(Color.WHITE,16));card.setPadding(dp(14),dp(12),dp(14),dp(12));}LinearLayout.LayoutParams lp=matchWrap();lp.bottomMargin=dp(10);root.addView(card,lp);}
+private void addCard(LinearLayout root,View card){if(card instanceof LinearLayout){card.setBackground(shape(AppThemeColors.surface(this),16));card.setPadding(dp(14),dp(12),dp(14),dp(12));}LinearLayout.LayoutParams lp=matchWrap();lp.bottomMargin=dp(10);root.addView(card,lp);}
 @Override public void onCreate(Bundle b){super.onCreate(b);AppThemeColors.apply(this);build();}
 private void build(){ScrollView scroll=new ScrollView(this);LinearLayout root=column();root.setPadding(dp(16),dp(16),dp(16),dp(24));root.setBackgroundColor(AppThemeColors.bg(this));scroll.addView(root);
 TextView title=text("استماع القرآن الكريم",24,AppThemeColors.text(this),true);title.setGravity(Gravity.CENTER);root.addView(title);
 TextView intro=text("اختر القارئ والسورة، واستمع مباشرة أو نزّلها للاستماع دون إنترنت. هذه الصفحة للتلاوات فقط وليست إذاعة مباشرة.",14,AppThemeColors.muted(this),false);intro.setPadding(0,dp(8),0,dp(16));root.addView(intro);
 buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
     private void buildPlayer(LinearLayout root) {
-        TextView section=text("استماع القرآن الكريم",18,Color.rgb(20,55,43),true);
+        TextView section=text("استماع القرآن الكريم",18,AppThemeColors.primary(this),true);
         section.setPadding(0,dp(18),0,dp(8));root.addView(section);
         LinearLayout card=column();card.setBackground(shape(Color.WHITE,16));card.setPadding(dp(14),dp(12),dp(14),dp(12));
-        card.addView(text("اختر القارئ والسورة، وسيعمل الصوت في مشغل Android بالخلفية دون فتح الموقع.",13,Color.DKGRAY,false));
+        card.addView(text("اختر القارئ والسورة، وسيعمل الصوت في مشغل Android بالخلفية دون فتح الموقع.",13,AppThemeColors.muted(this),false));
         Spinner categorySpinner=new Spinner(this),reciterSpinner=new Spinner(this),surahSpinner=new Spinner(this);
         categorySpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"القراء المصريون القدامى","القراء المصريون المعاصرون","التلاوات المجودة — القراء المصريون فقط"}));
-        card.addView(text("القسم",12,Color.DKGRAY,true));card.addView(categorySpinner,matchWrap());
+        card.addView(text("القسم",12,AppThemeColors.text(this),true));card.addView(categorySpinner,matchWrap());
         reciterSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"جارٍ تحميل القراء..."}));
         String[] surahs={"الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"};
         surahSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,surahs));
-        card.addView(text("القارئ",12,Color.DKGRAY,true));card.addView(reciterSpinner,matchWrap());
-        card.addView(text("السورة",12,Color.DKGRAY,true));card.addView(surahSpinner,matchWrap());
+        card.addView(text("القارئ",12,AppThemeColors.text(this),true));card.addView(reciterSpinner,matchWrap());
+        card.addView(text("السورة",12,AppThemeColors.text(this),true));card.addView(surahSpinner,matchWrap());
         Button play=new Button(this);play.setText("استمع الآن");card.addView(play,matchWrap());
         Button stop=new Button(this);stop.setText("■ إيقاف التلاوة");card.addView(stop,matchWrap());
         stop.setOnClickListener(v->{Intent stopIntent=new Intent(this,RadioPlaybackService.class);stopIntent.setAction(RadioPlaybackService.ACTION_STOP);try{startService(stopIntent);Toast.makeText(this,"تم إيقاف التلاوة",Toast.LENGTH_SHORT).show();}catch(Exception e){Toast.makeText(this,"تعذر إيقاف التلاوة",Toast.LENGTH_SHORT).show();}});
