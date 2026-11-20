@@ -41,8 +41,10 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         TextView extraNote=text("بعض القراء الذين طلبتهم غير موجودين في مكتبة MP3Quran الحالية؛ أضفنا مصادر موثقة بدرجة التوفر ونوع التسجيل. الروابط تفتح صفحة المصدر، ولا تُعد تشغيلًا مدمجًا داخل المشغل.",12,AppThemeColors.muted(this),false);
         extraNote.setPadding(0,0,0,dp(8));card.addView(extraNote);
         addExternalSourceButton(card,"السيد متولي عبد العال — 36 سورة مجوّدة بحفص","https://etilawa.com/reciters/seidmetwallyabdelaal/");
-        addExternalSourceButton(card,"محمد الليثي — حفلات وتلاوات مجوّدة","https://alkabbah.com/scholar/2462/mohmd-allythy/recitations");
-        addExternalSourceButton(card,"السيد سعيد — 49 سورة ومقاطع مختارة (حفص)","https://way2quran.com/ar/reciters/alsaid-saeed");
+        addExternalSourceButton(card,"محمد الليثي — الموقع الرسمي وتسجيلات صافور والاستوديو","https://www.sheikhleithy.com/");
+        addExternalSourceButton(card,"محمد الليثي — أرشيف التلاوات والحفلات","https://alkabbah.com/scholar/2462/mohmd-allythy/recitations");
+        addExternalSourceButton(card,"السيد سعيد — تسجيلات الشيخ","https://www.nourelquran.com/swars-168.html");
+        addExternalSourceButton(card,"السيد سعيد — مصحف حفص وتلاوات مختارة","https://way2quran.com/ar/reciters/alsaid-saeed");
         addExternalSourceButton(card,"الشحات محمد أنور — مصحف مرتّل (114 سورة)","https://etilawa.com/reciters/al-shahat-muhammad-anwar/");
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){} public void onItemSelected(AdapterView<?> p,View v,int pos,long id){reciterGroup=pos;mujawwadOnly=pos==3;applyReciterFilter(reciterSpinner,state);}});
         addCard(root,card);
