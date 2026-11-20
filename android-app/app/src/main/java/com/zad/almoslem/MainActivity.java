@@ -127,6 +127,43 @@ public class MainActivity extends Activity {
         master.setOnCheckedChangeListener((b,checked)->prefs.edit().putBoolean("adhan_enabled",checked).apply());
         addCard(root,master);
 
+        LinearLayout duaCard = column();
+        duaCard.setBackground(shape(Color.WHITE,16));
+        duaCard.setPadding(dp(14),dp(12),dp(14),dp(12));
+        TextView duaTitle = text("دعاء ما بعد الأذان — الشيخ محمد متولي الشعراوي",16,Color.rgb(8,48,40),true);
+        duaCard.addView(duaTitle);
+        TextView duaHint = text("يبدأ تلقائيًا بعد انتهاء الأذان، ويمكنك إيقافه أو التحكم في مستوى صوته.",12,Color.rgb(80,90,82),false);
+        duaHint.setPadding(0,dp(5),0,dp(8)); duaCard.addView(duaHint);
+        Switch duaEnabled = new Switch(this);
+        duaEnabled.setText("تشغيل دعاء الشعراوي بعد الأذان");
+        duaEnabled.setTextColor(Color.rgb(30,55,45));
+        duaEnabled.setChecked(prefs.getBoolean("dua_after_adhan_enabled",true));
+        duaEnabled.setOnCheckedChangeListener((button,checked)->prefs.edit().putBoolean("dua_after_adhan_enabled",checked).apply());
+        duaCard.addView(duaEnabled);
+        TextView duaVolumeLabel = text("مستوى صوت الدعاء: "+prefs.getInt("dua_after_adhan_volume",80)+"%",12,Color.rgb(65,80,70),false);
+        duaCard.addView(duaVolumeLabel);
+        SeekBar duaVolume = new SeekBar(this); duaVolume.setMax(100); duaVolume.setProgress(prefs.getInt("dua_after_adhan_volume",80));
+        duaCard.addView(duaVolume,matchWrap());
+        duaVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            public void onProgressChanged(SeekBar bar,int value,boolean fromUser){
+                duaVolumeLabel.setText("مستوى صوت الدعاء: "+value+"%");
+                if(fromUser){
+                    prefs.edit().putInt("dua_after_adhan_volume",value).apply();
+                    Intent volumeIntent=new Intent(MainActivity.this,ReminderAudioService.class);
+                    volumeIntent.setAction(ReminderAudioService.ACTION_SET_VOLUME); volumeIntent.putExtra("volume",value);
+                    try{startService(volumeIntent);}catch(Exception ignored){}
+                }
+            }
+            public void onStartTrackingTouch(SeekBar bar){}
+            public void onStopTrackingTouch(SeekBar bar){}
+        });
+        Button downloadDua = new Button(this); downloadDua.setText("تنزيل دعاء الشعراوي على الهاتف");
+        duaCard.addView(downloadDua,matchWrap());
+        TextView duaStatus = text("يُنزّل مرة واحدة ليعمل بعد الأذان دون إنترنت.",11,Color.rgb(80,90,82),false);
+        duaCard.addView(duaStatus);
+        downloadDua.setOnClickListener(v->{downloadDuaRecording(downloadDua,duaStatus);});
+        root.addView(duaCard,matchWrap());
+
         TextView silentInfo = text("يمكنك اختيار الصلوات التي تريد فيها تفعيل الوضع الصامت وقت الأذان، ثم يعود الهاتف لوضعه السابق تلقائيًا. يتطلب ذلك إذن عدم الإزعاج من إعدادات Android.",13,Color.rgb(70,85,75),false);
         addCard(root,silentInfo);
         Button silentPermission = new Button(this);
@@ -610,7 +647,7 @@ public class MainActivity extends Activity {
         Intent intent=new Intent(this,AdhanPlaybackService.class);
         intent.setAction(AdhanPlaybackService.ACTION_PLAY);
         intent.putExtra("prayer",prayer); intent.putExtra("voice",voice);
-        intent.putExtra("play_dua_after",false);
+        intent.putExtra("play_dua_after",prefs.getBoolean("dua_after_adhan_enabled",true));
         try {
             if(Build.VERSION.SDK_INT>=26) startForegroundService(intent); else startService(intent);
         } catch(Exception e) { status.setText("تعذر بدء التشغيل: "+e.getMessage()); }
@@ -680,6 +717,38 @@ public class MainActivity extends Activity {
         String url="https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/"+encoded;
         downloadFile(url,voice+".mp3");
     }
+ 
+    private void downloadDuaRecording(Button button,TextView label) {
+        button.setEnabled(false); label.setText("جارٍ تنزيل تسجيل دعاء الشعراوي...");
+        new Thread(()->{
+            HttpURLConnection connection=null; File dir=new File(getFilesDir(),"reminders");
+            File target=new File(dir,"dua.mp3"),temp=new File(dir,"dua.mp3.part");
+            try{
+                if(!dir.exists()&&!dir.mkdirs())throw new Exception("تعذر إنشاء مجلد التسجيلات");
+                URL url=new URL("https://archive.org/download/Islamic_Tape-258_uP_bY_mUSLEm/sharawy_doaa_24.mp3");
+                connection=(HttpURLConnection)url.openConnection(); connection.setConnectTimeout(25000); connection.setReadTimeout(90000);
+                connection.setInstanceFollowRedirects(true); connection.setRequestProperty("User-Agent","ZadAlmoslem Android Native");
+                int code=connection.getResponseCode(); if(code!=200)throw new Exception("مصدر التسجيل أعاد "+code);
+                long received=0;
+                try(InputStream in=connection.getInputStream();FileOutputStream out=new FileOutputStream(temp)){
+                    byte[] buffer=new byte[8192];int n;
+                    while((n=in.read(buffer))!=-1){received+=n;if(received>12L*1024*1024)throw new Exception("حجم التسجيل أكبر من المتوقع");out.write(buffer,0,n);}
+                    out.getFD().sync();
+                }
+                if(received<10000||!validAudio(temp))throw new Exception("التسجيل الصوتي غير مكتمل أو غير صالح");
+                if(target.exists()&&!target.delete())throw new Exception("تعذر استبدال التسجيل السابق");
+                if(!temp.renameTo(target))throw new Exception("تعذر حفظ التسجيل");
+                runOnUiThread(()->label.setText("تم حفظ دعاء الشعراوي. سيعمل بعد الأذان عند تفعيل الخيار."));
+            }catch(Exception error){
+                String message=error.getMessage()==null?"فشل التنزيل":error.getMessage();
+                runOnUiThread(()->label.setText("تعذر تنزيل الدعاء: "+message));
+            }finally{
+                if(connection!=null)connection.disconnect();if(temp.exists())temp.delete();
+                runOnUiThread(()->button.setEnabled(true));
+            }
+        },"dua-audio-download").start();
+    }
+
     private void downloadFile(String address,String filename) throws Exception {
         File dir=new File(getFilesDir(),"adhan"); if(!dir.exists()&&!dir.mkdirs())throw new Exception("تعذر إنشاء مجلد الصوت");
         File temp=new File(dir,filename+".part"), target=new File(dir,filename);
