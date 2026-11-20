@@ -16,7 +16,6 @@ public class ReminderReceiver extends BroadcastReceiver {
     private static final String PRAYER_CHANNEL_ID = "zad_prayer_alerts";
     private static final String PRAYER_TONE_CHANNEL_ID = "zad_prayer_tone";
     private static final String GENTLE_CHANNEL_ID = "zad_gentle_reminders";
-    private static final String GENTLE_FALLBACK_CHANNEL_ID = "zad_gentle_audio_fallback";
     private static final String AUDIO_FALLBACK_CHANNEL_ID = "zad_reminder_audio_fallback";
 
     public static void scheduleDaily(Context context, String key, int hour, int minute, String title) {
