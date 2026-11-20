@@ -61,8 +61,17 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
                 org.json.JSONObject reciter=reciters.get(ri);
                 String audioUrl=resolveQuranAudioUrl(reciter,si);
                 if(audioUrl==null){state.setText("السورة غير متاحة لهذا القارئ. اختر قارئًا آخر.");return;}
-                String label="سورة "+surahs[si-1]+" — "+reciter.optString("name","القارئ");
-                getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putString("last_quran_url",audioUrl).putString("last_quran_title",label).putBoolean("radio_playing",true).putString("active_kind","quran").apply();
+                String reciterName=reciter.optString("name","القارئ");
+                String label="سورة "+surahs[si-1]+" — "+reciterName;
+                org.json.JSONObject selectedMoshaf=findMoshaf(reciter,si);
+                if(selectedMoshaf==null){state.setText("تعذر تحديد مسار التلاوة لهذا القارئ.");return;}
+                getSharedPreferences("zad_audio",MODE_PRIVATE).edit()
+                    .putString("last_quran_url",audioUrl).putString("last_quran_title",label)
+                    .putString("last_quran_server",selectedMoshaf.optString("server",""))
+                    .putString("last_quran_surah_list",selectedMoshaf.optString("surah_list",""))
+                    .putString("last_quran_reciter",reciterName).putInt("last_quran_surah_id",si)
+                    .putBoolean("radio_playing",true).putString("active_kind","quran").apply();
+                QuranHomeWidget.refreshAll(this);
                 Intent intent=new Intent(this,RadioPlaybackService.class);intent.setAction(RadioPlaybackService.ACTION_PLAY);
                 intent.putExtra("url",audioUrl);intent.putExtra("kind","quran");intent.putExtra("label",label);
                 File offline=new File(new File(getFilesDir(),"quran"),"reciter_"+ri+"_surah_"+si+".mp3");
@@ -136,6 +145,20 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         }
         spinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,reciterNames));
         state.setText(reciterNames.isEmpty()?(mujawwadOnly?"لا توجد تلاوات مجودة مصرية متاحة في المصدر حاليًا.":"لا توجد تسجيلات متاحة لهذا القسم حاليًا."):"تم تحميل "+reciterNames.size()+" قارئًا مصريًا في هذا القسم. اختر القارئ والسورة.");
+    }
+
+    private org.json.JSONObject findMoshaf(org.json.JSONObject reciter,int surahId) throws Exception {
+        org.json.JSONArray moshafs=reciter.getJSONArray("moshaf");
+        for(int i=0;i<moshafs.length();i++){
+            org.json.JSONObject m=moshafs.getJSONObject(i);
+            if(mujawwadOnly&&!isMujawwadMoshaf(m))continue;
+            boolean includes=false;
+            for(String id:m.optString("surah_list","").split(",")){
+                try{if(Integer.parseInt(id.trim())==surahId){includes=true;break;}}catch(Exception ignored){}
+            }
+            if(includes&&!m.optString("server","").isEmpty())return m;
+        }
+        return null;
     }
 
     private String resolveQuranAudioUrl(org.json.JSONObject reciter,int surahId) throws Exception {
