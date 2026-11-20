@@ -7,6 +7,9 @@ on:
     paths:
       - 'android-app/**'
       - '.github/workflows/build-apk.yml'
+      - 'admin.html'
+      - 'content-admin.html'
+      - 'firestore.rules'
   push:
     paths:
       - 'android-app/**'
