@@ -6,6 +6,11 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.os.Build;
+import android.content.Intent;
+import android.net.Uri;
+import android.provider.Settings;
+import android.app.AlarmManager;
 import android.view.Gravity;
 import android.widget.*;
 import java.util.*;
@@ -36,7 +41,8 @@ public class DailyReminderSettingsActivity extends Activity {
   for(int i=0;i<keys.length;i++)addReminder(root,i);
   addGentleReminders(root);
   addPrayerApproachSettings(root);
-  TextView note=label("تحتاج التنبيهات إلى السماح بإشعارات التطبيق. وإذا لم يتوفر إذن المنبهات الدقيقة، يستخدم Android تنبيهًا بديلًا قد يتأخر قليلًا.",12,Color.GRAY,false);note.setPadding(0,dp(10),0,0);root.addView(note);
+  addExactAlarmAccess(root);
+  TextView note=label("تشغيل الأذان والتذكيرات الصوتية في مواعيدها يحتاج إذن المنبهات الدقيقة. من دونه ستصل الإشعارات وقد لا يعمل الصوت.",12,Color.GRAY,false);note.setPadding(0,dp(10),0,0);root.addView(note);
  }
 
 
@@ -45,10 +51,13 @@ public class DailyReminderSettingsActivity extends Activity {
   card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(card,lp);
   card.addView(label("تذكيرات إيمانية خفيفة",18,green,true));
-  TextView desc=label("رسائل قصيرة تظهر من وقت لآخر: الصلاة على النبي ﷺ، والاستغفار، وذكر الله. الإشعار بلا صوت أو اهتزاز.",12,Color.GRAY,false);
+  TextView desc=label("رسائل قصيرة تظهر من وقت لآخر: الصلاة على النبي ﷺ، والاستغفار، وذكر الله.",12,Color.GRAY,false);
   desc.setPadding(0,dp(5),0,dp(8));card.addView(desc);
   Switch enabled=new Switch(this);enabled.setText("تفعيل التذكيرات الدورية");
   enabled.setChecked(prefs.getBoolean("gentle_enabled",true));card.addView(enabled);
+  Switch audio=new Switch(this);audio.setText("تشغيل التذكير بصوت مسموع");
+  audio.setChecked(prefs.getBoolean("gentle_audio_enabled",true));card.addView(audio);
+  audio.setOnCheckedChangeListener((button,checked)->prefs.edit().putBoolean("gentle_audio_enabled",checked).apply());
   TextView value=label("التذكير كل "+prefs.getInt("gentle_interval_hours",3)+" ساعات",14,green,false);card.addView(value);
   SeekBar interval=new SeekBar(this);interval.setMax(5);interval.setProgress(Math.max(1,Math.min(6,prefs.getInt("gentle_interval_hours",3)))-1);card.addView(interval);
   enabled.setOnCheckedChangeListener((button,checked)->ReminderReceiver.setGentleRemindersEnabled(this,checked));
@@ -82,6 +91,41 @@ public class DailyReminderSettingsActivity extends Activity {
    public void onStartTrackingTouch(SeekBar bar){}
    public void onStopTrackingTouch(SeekBar bar){}
   });
+ }
+
+ private void addExactAlarmAccess(LinearLayout root){
+  if(Build.VERSION.SDK_INT<31)return;
+  AlarmManager manager=(AlarmManager)getSystemService(ALARM_SERVICE);
+  if(manager.canScheduleExactAlarms())return;
+  Button grant=new Button(this);grant.setText("السماح بالتنبيهات الدقيقة لتشغيل الصوت");
+  grant.setOnClickListener(v->{
+   try{
+    Intent intent=new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+      Uri.parse("package:"+getPackageName()));
+    startActivity(intent);
+   }catch(Exception error){
+    Toast.makeText(this,"افتح إعدادات التطبيق ثم فعّل المنبهات والتذكيرات",Toast.LENGTH_LONG).show();
+   }
+  });
+  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(grant,lp);
+ }
+ @Override protected void onResume(){
+  super.onResume();
+  if(Build.VERSION.SDK_INT>=31){
+   AlarmManager manager=(AlarmManager)getSystemService(ALARM_SERVICE);
+   if(manager.canScheduleExactAlarms()){
+    for(String key:new String[]{"morning","evening","qiyam"}){
+     if(prefs.getBoolean(key+"_enabled",false))
+      ReminderReceiver.scheduleDaily(this,key,prefs.getInt(key+"_hour",7),prefs.getInt(key+"_minute",0),prefs.getString(key+"_title","تذكير من زاد المسلم"));
+    }
+    ReminderReceiver.rescheduleApproachAlerts(this);
+    if(prefs.getBoolean("gentle_enabled",false))ReminderReceiver.scheduleGentleReminder(this);
+    for(String prayer:new String[]{"الفجر","الظهر","العصر","المغرب","العشاء"}){
+     long at=prefs.getLong("prayer_"+prayer,0L);
+     if(at>System.currentTimeMillis())ReminderReceiver.schedulePrayer(this,prayer,at);
+    }
+   }
+  }
  }
  private void addReminder(LinearLayout root,int i){
   String key=keys[i];LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
