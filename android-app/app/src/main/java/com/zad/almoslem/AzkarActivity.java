@@ -82,6 +82,7 @@ public class AzkarActivity extends Activity {
             boolean exists=false;
             for(Zikr item:items){
                 if(item.category.equals(category)&&item.text.equals(text)&&item.source.equals(source)){
+                    item.count=count;
                     exists=true;break;
                 }
             }
