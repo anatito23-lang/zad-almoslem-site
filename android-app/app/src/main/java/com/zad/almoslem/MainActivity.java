@@ -133,8 +133,8 @@ public class MainActivity extends Activity {
         modeLabel.setPadding(0,dp(8),0,dp(4));
         root.addView(modeLabel,matchWrap());
         Spinner adhanModeSpinner=new Spinner(this);
-        String[] adhanModeLabels={"أذان كامل بصوت المؤذن","نغمة صوتية قصيرة فقط","بدون صوت — إشعار صامت"};
-        String[] adhanModeValues={"adhan","tone","off"};
+        String[] adhanModeLabels={"أذان كامل بصوت المؤذن","تكبيرات بداية الأذان فقط","صوت تنبيه قصير فقط","بدون صوت — إشعار صامت"};
+        String[] adhanModeValues={"adhan","takbeer","tone","off"};
         adhanModeSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,adhanModeLabels));
         String savedAdhanMode=prefs.getString("adhan_mode","adhan");
         int modeIndex=Arrays.asList(adhanModeValues).indexOf(savedAdhanMode);
@@ -146,7 +146,7 @@ public class MainActivity extends Activity {
             }
         });
         root.addView(adhanModeSpinner,matchWrap());
-        TextView modeHint=text("يمكنك تغيير الاختيار في أي وقت. زر تجربة المؤذن يشغّل التسجيل المختار دون دعاء ما بعد الأذان.",11,Color.rgb(90,100,90),false);
+        TextView modeHint=text("يمكنك اختيار الأذان كاملًا أو تكبيرات بدايته أو نغمة تنبيه قصيرة أو التنبيه الصامت. أثناء تجربة المؤذن يمكنك إيقاف الصوت من الزر المخصص.",11,Color.rgb(90,100,90),false);
         modeHint.setPadding(0,dp(4),0,dp(10));
         root.addView(modeHint,matchWrap());
 
@@ -650,7 +650,14 @@ public class MainActivity extends Activity {
         enabled.setOnCheckedChangeListener((b,checked)->prefs.edit().putBoolean("prayer_enabled_"+prayer,checked).apply());
         actions.addView(enabled,new LinearLayout.LayoutParams(0,dp(48),1));
         Button test=new Button(this); test.setText("تجربة الأذان"); test.setTextSize(11); actions.addView(test);
+        Button stopTest=new Button(this); stopTest.setText("إيقاف التجربة"); stopTest.setTextSize(11); actions.addView(stopTest);
         test.setOnClickListener(v->playPrayer(prayer));
+        stopTest.setOnClickListener(v->{
+            Intent stop=new Intent(this,AdhanPlaybackService.class);
+            stop.setAction(AdhanPlaybackService.ACTION_STOP);
+            try{startService(stop);status.setText("تم إيقاف تجربة الأذان.");}
+            catch(Exception e){status.setText("تعذر إيقاف التجربة: "+e.getMessage());}
+        });
         card.addView(actions);
 
         Switch silent = new Switch(this);
