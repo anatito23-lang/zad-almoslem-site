@@ -31,10 +31,15 @@ public class ReminderAudioService extends Service {
     }
 
     public static void play(Context context, String kind, String message) {
+        play(context, kind, message, null);
+    }
+
+    public static void play(Context context, String kind, String message, String audioFile) {
         Intent i = new Intent(context, ReminderAudioService.class);
         i.setAction(ACTION_PLAY);
         i.putExtra("kind", kind);
         if (message != null) i.putExtra("message", message);
+        if (audioFile != null) i.putExtra("audio_file", audioFile);
         if (Build.VERSION.SDK_INT >= 26) context.startForegroundService(i);
         else context.startService(i);
     }
@@ -60,6 +65,7 @@ public class ReminderAudioService extends Service {
                 && !"approach".equals(kind) && !"gentle".equals(kind)) kind = "qiyam";
         activeKind = kind;
         String reminderMessage = intent == null ? null : intent.getStringExtra("message");
+        String requestedAudioFile = intent == null ? null : intent.getStringExtra("audio_file");
         createChannel();
         String title = "morning".equals(kind) ? "أذكار الصباح" :
                 "evening".equals(kind) ? "أذكار المساء" :
@@ -84,9 +90,8 @@ public class ReminderAudioService extends Service {
         if ("qiyam".equals(kind)) {
             speak("حان وقت قيام الليل، لا تنسَ نصيبك من صلاة الليل");
         } else if ("approach".equals(kind) || "gentle".equals(kind)) {
-            speak(reminderMessage == null || reminderMessage.trim().isEmpty()
-                    ? ("approach".equals(kind) ? "اقترب موعد الصلاة، استعد للقاء الله" : "اذكر الله")
-                    : reminderMessage);
+            // These reminders use real recorded Quran recitation, never Android TextToSpeech.
+            playFile(requestedAudioFile == null ? ("approach".equals(kind) ? "approach" : "gentle_0") : requestedAudioFile);
         } else {
             playFile(kind);
         }
