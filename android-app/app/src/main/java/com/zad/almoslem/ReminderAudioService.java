@@ -175,7 +175,8 @@ public class ReminderAudioService extends Service {
     private void finishPlayback() {
         boolean resumeRadio = "dua".equals(activeKind);
         stopCurrentPlayers();
-        stopForeground(true);
+        // Start/resume the radio while this playback service is still foreground.
+        // Dropping foreground first can make Android reject the subsequent service start.
         if (resumeRadio) {
             Intent resumeAudio = new Intent(this, RadioPlaybackService.class);
             resumeAudio.setAction(RadioPlaybackService.ACTION_RESUME_AFTER_ADHAN);
@@ -184,6 +185,7 @@ public class ReminderAudioService extends Service {
                 android.util.Log.w("ZadAlmoslem", "Could not resume background audio after post-adhan dua", error);
             }
         }
+        stopForeground(true);
         activeKind = null;
         stopSelf();
     }
