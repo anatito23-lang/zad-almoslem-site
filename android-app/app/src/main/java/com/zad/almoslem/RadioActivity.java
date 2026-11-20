@@ -61,9 +61,6 @@ public class RadioActivity extends Activity {
         addStation(root, "🇸🇦 إذاعة القرآن الكريم السعودية",
                 "هيئة الإذاعة والتلفزيون السعودية", "https://live.kwikmotion.com/sbrksaquranradiolive/srpksaquranradio/playlist.m3u8",
                 "إذاعة القرآن الكريم السعودية", "saudi", "https://radioplus.sba.sa/ar/live/4");
-        addStation(root, "🇵🇸 إذاعة القرآن الكريم من نابلس",
-                "إذاعة القرآن الكريم – فلسطين", "http://www.quran-radio.org:8002/",
-                "إذاعة القرآن الكريم من نابلس – فلسطين", "palestine", "https://quran-radio.com/");
 
         Button stop = new Button(this);
         stop.setText("■ إيقاف الإذاعة");
