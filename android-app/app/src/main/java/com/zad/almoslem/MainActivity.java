@@ -282,7 +282,14 @@ public class MainActivity extends Activity {
         tasbeehGoal.setSelection(goalIndex);
         TextView currentDhikr=text("",17,Color.WHITE,true);currentDhikr.setGravity(Gravity.CENTER);
         currentDhikr.setPadding(dp(4),dp(20),dp(4),dp(10));
-        TextView count=text("0",34,Color.rgb(232,203,137),true);count.setGravity(Gravity.CENTER);\n        android.graphics.drawable.GradientDrawable countRing=new android.graphics.drawable.GradientDrawable();\n        countRing.setShape(android.graphics.drawable.GradientDrawable.OVAL);\n        countRing.setColor(Color.rgb(10,49,40));countRing.setStroke(dp(3),Color.rgb(218,185,112));\n        android.widget.FrameLayout countCircle=new android.widget.FrameLayout(this);\n        countCircle.setBackground(countRing);\n        countCircle.addView(count,new android.widget.FrameLayout.LayoutParams(dp(104),dp(104),Gravity.CENTER));\n        LinearLayout circleHolder=row();circleHolder.setGravity(Gravity.CENTER);circleHolder.addView(countCircle,new LinearLayout.LayoutParams(dp(112),dp(112)));
+        TextView count=text("0",34,Color.rgb(232,203,137),true);count.setGravity(Gravity.CENTER);
+        android.graphics.drawable.GradientDrawable countRing=new android.graphics.drawable.GradientDrawable();
+        countRing.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        countRing.setColor(Color.rgb(10,49,40));countRing.setStroke(dp(3),Color.rgb(218,185,112));
+        android.widget.FrameLayout countCircle=new android.widget.FrameLayout(this);
+        countCircle.setBackground(countRing);
+        countCircle.addView(count,new android.widget.FrameLayout.LayoutParams(dp(104),dp(104),Gravity.CENTER));
+        LinearLayout circleHolder=row();circleHolder.setGravity(Gravity.CENTER);circleHolder.addView(countCircle,new LinearLayout.LayoutParams(dp(112),dp(112)));
         TextView target=text("",13,Color.rgb(225,225,215),false);target.setGravity(Gravity.CENTER);
         TextView tasProgress=text("",13,Color.rgb(225,225,215),false);tasProgress.setGravity(Gravity.CENTER);
         int[] dhikrIndex={prefs.getInt("native_tasbeeh_dhikr",0)};
