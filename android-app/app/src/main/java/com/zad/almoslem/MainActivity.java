@@ -129,6 +129,27 @@ public class MainActivity extends Activity {
         master.setOnCheckedChangeListener((b,checked)->prefs.edit().putBoolean("adhan_enabled",checked).apply());
         addCard(root,master);
 
+        TextView modeLabel=text("طريقة التنبيه عند دخول وقت الصلاة",14,Color.rgb(30,55,45),true);
+        modeLabel.setPadding(0,dp(8),0,dp(4));
+        root.addView(modeLabel,matchWrap());
+        Spinner adhanModeSpinner=new Spinner(this);
+        String[] adhanModeLabels={"أذان كامل بصوت المؤذن","نغمة صوتية قصيرة فقط","بدون صوت — إشعار صامت"};
+        String[] adhanModeValues={"adhan","tone","off"};
+        adhanModeSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,adhanModeLabels));
+        String savedAdhanMode=prefs.getString("adhan_mode","adhan");
+        int modeIndex=Arrays.asList(adhanModeValues).indexOf(savedAdhanMode);
+        adhanModeSpinner.setSelection(modeIndex<0?0:modeIndex);
+        adhanModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            public void onNothingSelected(AdapterView<?> parent){}
+            public void onItemSelected(AdapterView<?> parent,View view,int position,long id){
+                prefs.edit().putString("adhan_mode",adhanModeValues[position]).apply();
+            }
+        });
+        root.addView(adhanModeSpinner,matchWrap());
+        TextView modeHint=text("يمكنك تغيير الاختيار في أي وقت. زر تجربة المؤذن يشغّل التسجيل المختار دون دعاء ما بعد الأذان.",11,Color.rgb(90,100,90),false);
+        modeHint.setPadding(0,dp(4),0,dp(10));
+        root.addView(modeHint,matchWrap());
+
         LinearLayout duaCard = column();
         duaCard.setBackground(shape(Color.WHITE,16));
         duaCard.setPadding(dp(14),dp(12),dp(14),dp(12));
@@ -674,7 +695,9 @@ public class MainActivity extends Activity {
         Intent intent=new Intent(this,AdhanPlaybackService.class);
         intent.setAction(AdhanPlaybackService.ACTION_PLAY);
         intent.putExtra("prayer",prayer); intent.putExtra("voice",voice);
-        intent.putExtra("play_dua_after",prefs.getBoolean("dua_after_adhan_enabled",true));
+        // Test playback must not trigger the post-adhan dua.
+        intent.putExtra("play_dua_after",false);
+        intent.putExtra("test_playback",true);
         try {
             if(Build.VERSION.SDK_INT>=26) startForegroundService(intent); else startService(intent);
         } catch(Exception e) { status.setText("تعذر بدء التشغيل: "+e.getMessage()); }
