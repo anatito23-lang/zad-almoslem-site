@@ -216,7 +216,7 @@ public class MainActivity extends Activity {
         TextView audioDiagnostics = text("اضغط هنا بعد تجربة الأذان لمعرفة حالة الملف وسبب أي تعذر في التشغيل.",12,Color.rgb(70,85,75),false);
         root.addView(audioDiagnostics, matchWrap());
         audioCheck.setOnClickListener(v -> audioDiagnostics.setText(buildAudioDiagnostics()));
-        setContentView(AppTabs.wrap(this,scroll,"home"));
+        setContentView(AppTabs.wrap(this,scroll,"more"));
     }
 
     private void addStandaloneTools(LinearLayout root) {
