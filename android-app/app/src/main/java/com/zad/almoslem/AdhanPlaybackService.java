@@ -198,9 +198,19 @@ public class AdhanPlaybackService extends Service {
                     if (state == Player.STATE_ENDED) {
                         boolean playDua = playDuaAfterCompletion;
                         playDuaAfterCompletion = false;
-                        deferBackgroundAudioResume = playDua;
+                        boolean duaServiceRequested = false;
+                        if (playDua) {
+                            // Hand off to the dua foreground service before this adhan
+                            // service drops foreground status; otherwise Android may reject it.
+                            try {
+                                ReminderAudioService.play(AdhanPlaybackService.this, "dua");
+                                duaServiceRequested = true;
+                            } catch (Exception error) {
+                                android.util.Log.e("ZadAlmoslem", "Could not start post-adhan dua playback", error);
+                            }
+                        }
+                        deferBackgroundAudioResume = duaServiceRequested;
                         stopPlayback();
-                        if (playDua) ReminderAudioService.play(AdhanPlaybackService.this, "dua");
                     }
                 }
                 @Override public void onPlayerError(PlaybackException error) {
