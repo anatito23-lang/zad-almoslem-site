@@ -8,16 +8,26 @@ TextView label(String s,int z,int c,boolean bold){TextView t=new TextView(this);
 void open(Class<?> c){startActivity(new Intent(this,c));}
 @Override public void onCreate(Bundle b){super.onCreate(b);AppThemeColors.apply(this);ReminderReceiver.ensureDefaultDailyReminders(this);if(Build.VERSION.SDK_INT>=33&&checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},2401);build();}
 void build(){ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(14),dp(14),dp(14),dp(22));root.setBackgroundColor(AppThemeColors.bg(this));scroll.addView(root);
-TextView heading=label("زاد المسلم",24,Color.WHITE,true);TextView ayah=label("﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾",14,Color.rgb(232,211,158),true);TextView ref=label("سورة الرعد • الآية ٢٨",11,Color.rgb(222,239,229),false);TextClock clock=new TextClock(this);clock.setFormat12Hour("hh:mm a");clock.setFormat24Hour("HH:mm");clock.setTextSize(27);clock.setTextColor(Color.WHITE);clock.setGravity(Gravity.CENTER);clock.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
+TextView heading=label("زاد المسلم",25,Color.WHITE,true);TextView ayah=label("﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾",14,Color.rgb(232,211,158),true);TextView ref=label("سورة الرعد • الآية ٢٨",11,Color.rgb(222,239,229),false);TextClock clock=new TextClock(this);clock.setFormat12Hour("hh:mm a");clock.setFormat24Hour("HH:mm");clock.setTextSize(27);clock.setTextColor(Color.WHITE);clock.setGravity(Gravity.CENTER);clock.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
 LinearLayout hero=new LinearLayout(this);prayerHero=hero;hero.setOrientation(1);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(14),dp(14),dp(14),dp(14));hero.setBackground(shape(AppThemeColors.primary(this),20));hero.addView(heading);hero.addView(clock);hero.addView(ayah);hero.addView(ref);root.addView(hero,new LinearLayout.LayoutParams(-1,-2));
 TextView prayerTitle=label("مواقيت الصلاة",19,AppThemeColors.text(this),true);prayerTitle.setGravity(Gravity.RIGHT);prayerTitle.setPadding(0,dp(16),0,dp(8));root.addView(prayerTitle);
 LinearLayout prayerCard=new LinearLayout(this);prayerCard.setOrientation(0);prayerCard.setPadding(dp(7),dp(12),dp(7),dp(12));prayerCard.setBackground(shape(AppThemeColors.surface(this),16));
 for(int i=0;i<prayers.length;i++){LinearLayout cell=new LinearLayout(this);cell.setOrientation(1);cell.setGravity(Gravity.CENTER);cell.addView(label(new String[]{"🌅","☀️","🌤️","🌇","🌙"}[i],17,Color.rgb(25,90,70),false));cell.addView(label(prayers[i],11,AppThemeColors.muted(this),true));times[i]=label("--:--",13,AppThemeColors.text(this),true);cell.addView(times[i]);prayerCard.addView(cell,new LinearLayout.LayoutParams(0,-2,1));}root.addView(prayerCard);
 Button details=new Button(this);details.setText("عرض مواقيت الصلاة بالتفصيل");details.setOnClickListener(v->open(PrayerDashboardActivity.class));root.addView(details,new LinearLayout.LayoutParams(-1,-2));
-TextView quick=label("وصول سريع",18,Color.rgb(20,55,43),true);quick.setGravity(Gravity.RIGHT);quick.setPadding(0,dp(14),0,dp(5));root.addView(quick);
+TextView quick=label("تصفّح عبادتك",18,AppThemeColors.text(this),true);quick.setGravity(Gravity.RIGHT);quick.setPadding(0,dp(14),0,dp(5));root.addView(quick);
 addShortcut(root,"📖 المصحف الشريف",MushafPageActivity.class);addShortcut(root,"🎧 استماع القرآن الكريم",QuranListeningActivity.class);addShortcut(root,"📻 إذاعة القرآن الكريم",RadioActivity.class);addShortcut(root,"۞ السبحة الإلكترونية",TasbeehActivity.class);
 setContentView(AppTabs.wrap(this,scroll,"home"));refreshTimes();}
-void addShortcut(LinearLayout root,String title,Class<?> c){Button b=new Button(this);b.setText(title);b.setOnClickListener(v->open(c));root.addView(b,new LinearLayout.LayoutParams(-1,-2));}
+void addShortcut(LinearLayout root,String title,Class<?> c){
+LinearLayout card=new LinearLayout(this);card.setOrientation(0);card.setGravity(Gravity.CENTER_VERTICAL);card.setPadding(dp(15),dp(12),dp(15),dp(12));
+GradientDrawable bg=shape(AppThemeColors.surface(this),16);bg.setStroke(dp(1),Color.rgb(218,205,173));card.setBackground(bg);
+TextView icon=label(title.substring(0,2),20,Color.rgb(185,146,75),true);card.addView(icon,new LinearLayout.LayoutParams(dp(42),dp(42)));
+LinearLayout details=new LinearLayout(this);details.setOrientation(1);details.setGravity(Gravity.CENTER_VERTICAL);
+TextView name=label(title,15,AppThemeColors.text(this),true);name.setGravity(Gravity.RIGHT);details.addView(name);
+TextView hint=label("افتح القسم وتابع من حيث توقفت",11,AppThemeColors.muted(this),false);hint.setGravity(Gravity.RIGHT);details.addView(hint);
+LinearLayout.LayoutParams detailLp=new LinearLayout.LayoutParams(0,-2,1f);detailLp.setMargins(dp(10),0,dp(8),0);card.addView(details,detailLp);
+TextView arrow=label("‹",26,AppThemeColors.primary(this),true);card.addView(arrow,new LinearLayout.LayoutParams(dp(24),-2));
+card.setOnClickListener(v->open(c));LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(9);root.addView(card,lp);
+}
 void refreshTimes(){android.content.SharedPreferences p=getSharedPreferences("zad_reminders",MODE_PRIVATE);for(int i=0;i<prayers.length;i++){int h=p.getInt("native_time_hour_"+prayers[i],-1),m=p.getInt("native_time_minute_"+prayers[i],0);times[i].setText(h<0?"--:--":String.format(Locale.getDefault(),"%02d:%02d",h,m));}refreshAdhanVisual();}
 void refreshAdhanVisual(){
 if(prayerHero==null)return;
