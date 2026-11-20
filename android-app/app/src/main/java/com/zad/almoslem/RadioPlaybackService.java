@@ -169,11 +169,15 @@ public class RadioPlaybackService extends Service {
             player.play();
             if ("radio".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""))) {
                 startupTimeout = () -> {
+                    startupTimeout = null;
                     if (player != null && player.getPlaybackState() != Player.STATE_READY) {
+                        String timeoutMessage = "انتهت مهلة الاتصال بالمحطة المختارة";
                         getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
                                 .putBoolean("radio_ready", false).putBoolean("radio_playing", false)
-                                .putString("radio_last_error", "انتهت مهلة الاتصال بالمحطة المختارة").apply();
-                        showRadioFailure("انتهت مهلة الاتصال بالمحطة المختارة");
+                                .putString("radio_last_error", timeoutMessage).apply();
+                        try { player.stop(); } catch (Exception ignored) {}
+                        QuranHomeWidget.refreshAll(RadioPlaybackService.this);
+                        showRadioFailure(timeoutMessage);
                     }
                 };
                 playbackHandler.postDelayed(startupTimeout, 20000);
