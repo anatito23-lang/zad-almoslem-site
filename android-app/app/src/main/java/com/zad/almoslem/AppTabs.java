@@ -9,7 +9,7 @@ shell.setOnApplyWindowInsetsListener((v,insets)->{int bottom=0;if(Build.VERSION.
 private static LinearLayout createBar(Activity a,String active){
 String lang=a.getSharedPreferences("zad_settings",Activity.MODE_PRIVATE).getString("app_language","ar");
 String[] keys={"home","tasbeeh","mushaf","quran","more"};String[][] names={{"الرئيسية","Home","Accueil","مرکزی صفحہ","Ana Sayfa"},{"السبحة","Tasbeeh","Tasbih","تسبیح","Tesbih"},{"المصحف","Mushaf","Coran","قرآن","Mushaf"},{"القرآن","Quran","Coran","قرآن","Kur'an"},{"المزيد","More","Plus","مزید","Daha Fazla"}};
-String[] icons={"⌂","۞","▤","♫","•••"};Class<?>[] screens={MainActivity.class,TasbeehActivity.class,MushafPageActivity.class,RadioActivity.class,MoreActivity.class};
+String[] icons={"⌂","۞","▤","♫","•••"};Class<?>[] screens={HomeActivity.class,TasbeehActivity.class,MushafPageActivity.class,RadioActivity.class,MoreActivity.class};
 int li="en".equals(lang)?1:"fr".equals(lang)?2:"ur".equals(lang)?3:"tr".equals(lang)?4:0;if("prayer".equals(active)||"library".equals(active))active="more";if("radio".equals(active))active="quran";
 LinearLayout outer=new LinearLayout(a);outer.setOrientation(1);outer.setGravity(Gravity.CENTER);outer.setBackgroundColor(Color.rgb(16,34,54));outer.setPadding(dp(a,6),dp(a,5),dp(a,6),0);
 LinearLayout dock=new LinearLayout(a);dock.setOrientation(0);dock.setGravity(Gravity.CENTER);dock.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);GradientDrawable d=new GradientDrawable();d.setColor(Color.rgb(16,34,54));dock.setBackground(d);dock.setPadding(dp(a,1),dp(a,2),dp(a,1),dp(a,2));outer.addView(dock,new LinearLayout.LayoutParams(-1,dp(a,56)));
