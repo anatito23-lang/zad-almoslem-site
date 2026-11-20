@@ -36,14 +36,14 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         Button download=new Button(this);download.setText("تنزيل السورة للاستماع دون إنترنت");card.addView(download,matchWrap());
         ProgressBar quranProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);quranProgress.setMax(100);card.addView(quranProgress,matchWrap());
         TextView state=text("جارٍ تحميل قائمة القراء من مكتبة التسجيلات.",12,Color.rgb(80,100,90),false);card.addView(state);
-        TextView extraTitle=text("مصادر إضافية للتلاوات المجوّدة",16,AppThemeColors.primary(this),true);
+        TextView extraTitle=text("مصادر إضافية لتلاوات القرّاء",16,AppThemeColors.primary(this),true);
         extraTitle.setPadding(0,dp(18),0,dp(6));card.addView(extraTitle);
-        TextView extraNote=text("بعض القراء الذين طلبتهم غير موجودين في مكتبة MP3Quran الحالية؛ هذه روابط مباشرة لمصادرهم، وتفتح صفحة المصدر للاستماع. لن نعرضهم كأنهم مدمجون في المشغل قبل التحقق من ملفاتهم.",12,AppThemeColors.muted(this),false);
+        TextView extraNote=text("بعض القراء الذين طلبتهم غير موجودين في مكتبة MP3Quran الحالية؛ أضفنا مصادر موثقة بدرجة التوفر ونوع التسجيل. الروابط تفتح صفحة المصدر، ولا تُعد تشغيلًا مدمجًا داخل المشغل.",12,AppThemeColors.muted(this),false);
         extraNote.setPadding(0,0,0,dp(8));card.addView(extraNote);
-        addExternalSourceButton(card,"السيد متولي عبد العال — تلاوات مجوّدة","https://etilawa.com/reciters/seidmetwallyabdelaal/");
-        addExternalSourceButton(card,"محمد الليثي — الموقع الرسمي","https://www.sheikhleithy.com/");
-        addExternalSourceButton(card,"السيد سعيد — 15 تلاوة مجوّدة","https://www.daresouli.com/2023/01/quraan-reciting-by-sayed-saeed-mp3.html");
-        addExternalSourceButton(card,"محمود الشحات أنور — التلاوات","https://play.anghami.com/artist/3222944?lang=ar");
+        addExternalSourceButton(card,"السيد متولي عبد العال — 36 سورة مجوّدة بحفص","https://etilawa.com/reciters/seidmetwallyabdelaal/");
+        addExternalSourceButton(card,"محمد الليثي — حفلات وتلاوات مجوّدة","https://alkabbah.com/scholar/2462/mohmd-allythy/recitations");
+        addExternalSourceButton(card,"السيد سعيد — 49 سورة ومقاطع مختارة (حفص)","https://way2quran.com/ar/reciters/alsaid-saeed");
+        addExternalSourceButton(card,"الشحات محمد أنور — مصحف مرتّل (114 سورة)","https://etilawa.com/reciters/al-shahat-muhammad-anwar/");
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){} public void onItemSelected(AdapterView<?> p,View v,int pos,long id){reciterGroup=pos;mujawwadOnly=pos==3;applyReciterFilter(reciterSpinner,state);}});
         addCard(root,card);
         new Thread(()->{
@@ -144,7 +144,7 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
     private boolean isEgyptianReciter(String name,boolean old){
         String n=normalizeReciterName(name);
         String[] oldNames={"عبدالباسطعبدالصمد","محمدصديقالمنشاوي","محمودخليلالحصري","محمودعليالبنا","مصطفيإسماعيل","مصطفىاسماعيل","مصطفىاللاهونى","محمدالطبلاوي","محمودالطبلاوي","عليحجاجالسويسي","احمدنعينع","محمدرفعت","كاملوسيفالبهتيمي","طهالفشني","عبدالفتاحالشعشاعي","راغبمصطفىغلوش" ,"محمودالشيمي","حمديالزامل","محمدحصان","محمدعمران","محمدالطوخي","محمداحمدشبيب","محمدعبدالعزيزحصان"};
-        String[] modernNames={"محمدجبريل","حاتمفريدالواعر","ياسرسلامة","اسلامصبحي","احمدعامر","احمدعيسىالمعصراوي","محمودعبدالحكم","صابرعبدالحكم","حسنصالح","عبداللهكامل","محمودالرفاعي","احمدخليلشاهين","سيدرمضان","السيدسعيد","سيدسعد","السيدسعد","محمودالشحات","محمودالشحاتانور","الشحاتمحمدانور","السيدمتولي","السيدمتوليعبدالعال","سيدمتولي","محمدالليثي","محمدليثي","محمدالطبلاوي","محمودالطبلاوي","سعدالغامدي","احمدنعينع","محمودالشيمي","محمدعمران","محمدالطوخي"};
+        String[] modernNames={"محمدجبريل","حاتمفريدالواعر","ياسرسلامة","اسلامصبحي","احمدعامر","احمدعيسىالمعصراوي","محمودعبدالحكم","صابرعبدالحكم","حسنصالح","عبداللهكامل","محمودالرفاعي","احمدخليلشاهين","سيدرمضان","السيدسعيد","سيدسعد","السيدسعد","محمودالشحات","محمودالشحاتانور","الشحاتمحمدانور","السيدمتولي","السيدمتوليعبدالعال","سيدمتولي","محمدالليثي","محمدليثي","محمودالشحاتانور","الشحاتمحمدانور","السيدمتوليعبدالعال","السيدسعيد","محمدالليثي","محمدليثي","سيدسعد","السيدسعد","محمدجبريل","حاتمفريدالواعر","ياسرسلامة","اسلامصبحي","احمدعامر","احمدعيسىالمعصراوي","محمودعبدالحكم","صابرعبدالحكم","حسنصالح","عبداللهكامل","محمودالرفاعي","احمدخليلشاهين","سيدرمضان"};
         String[] names=old?oldNames:modernNames;
         for(String candidate:names)if(n.contains(normalizeReciterName(candidate)))return true;
         return false;
