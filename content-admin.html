@@ -61,7 +61,7 @@ const $=id=>document.getElementById(id);
 const names={azkar:"الأذكار",duas:"الأدعية"};
 const schema={azkar:{text:"نص",source:"مصدر",category:"فئة",count:"عدد",published:"تم النشر"},duas:{text:"نص",source:"مصدر",category:"",count:"",published:"النشر"}};
 function field(item,key){const arabic=schema[$("collection").value][key];return item[key]??(arabic?item[arabic]:undefined);}
-function isPublished(item){return field(item,"published")===true;}
+function isPublished(item){return item.published===true||item["تم النشر"]===true||item["النشر"]===true;}
 let busy=false;
 function message(id,text,error=false){const el=$(id);el.textContent=text;el.classList.remove("hidden","error");if(error)el.classList.add("error");}
 function clearMessage(id){$(id).textContent="";$(id).classList.add("hidden");}
@@ -88,7 +88,7 @@ async function loadItems(){
  finally{setBusy(false);}
 }
 function editItem(item){if(!item)return;$("documentId").value=item.id;$("text").value=field(item,"text")||"";$("source").value=field(item,"source")||"";$("category").value=field(item,"category")||"";$("count").value=field(item,"count")||1;$("published").checked=isPublished(item);$("saveButton").textContent="حفظ التعديلات";window.scrollTo({top:0,behavior:"smooth"});clearMessage("adminMessage");}
-async function togglePublished(id,wasPublished){if(!confirm(wasPublished?"هل تريد إلغاء نشر هذا المحتوى؟":"هل تريد نشر هذا المحتوى؟"))return;setBusy(true);try{const pubKey=schema[$("collection").value].published;await updateDoc(doc(db,$("collection").value,id),{published:!wasPublished,[pubKey]:!wasPublished,updatedAt:serverTimestamp()});message("adminMessage",wasPublished?"تم إلغاء النشر.":"تم نشر المحتوى.");await loadItems();}catch(e){message("adminMessage","تعذر تحديث حالة النشر: "+e.message,true);}finally{setBusy(false);}}
+async function togglePublished(id,wasPublished){if(!confirm(wasPublished?"هل تريد إلغاء نشر هذا المحتوى؟":"هل تريد نشر هذا المحتوى؟"))return;setBusy(true);try{const pubKey=schema[$("collection").value].published;await updateDoc(doc(db,$("collection").value,id),{published:!wasPublished,"تم النشر":!wasPublished,"النشر":!wasPublished,updatedAt:serverTimestamp()});message("adminMessage",wasPublished?"تم إلغاء النشر.":"تم نشر المحتوى.");await loadItems();}catch(e){message("adminMessage","تعذر تحديث حالة النشر: "+e.message,true);}finally{setBusy(false);}}
 async function removeItem(id){if(!confirm("تأكيد حذف هذا المحتوى نهائيًا؟"))return;setBusy(true);try{await deleteDoc(doc(db,$("collection").value,id));message("adminMessage","تم حذف المحتوى.");await loadItems();}catch(e){message("adminMessage","تعذر الحذف: "+e.message,true);}finally{setBusy(false);}}
 $("loginForm").addEventListener("submit",async e=>{e.preventDefault();if(busy)return;setBusy(true);clearMessage("loginMessage");try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);}catch(error){message("loginMessage","تعذر تسجيل الدخول. راجع البريد وكلمة المرور وإعدادات Firebase Authentication.",true);}finally{setBusy(false);}});
 $("logoutButton").addEventListener("click",()=>signOut(auth));
@@ -99,7 +99,7 @@ $("contentForm").addEventListener("submit",async e=>{
  e.preventDefault();if(busy||auth.currentUser?.uid!==ADMIN_UID)return;
  const collectionName=$("collection").value,text=$("text").value.trim(),source=$("source").value.trim();
  if(!text||(collectionName==="duas"&&!source)){message("adminMessage",collectionName==="azkar"?"نص الذكر مطلوب.":"نص الدعاء ومصدره مطلوبان.",true);return;}
- const schemaForCollection=schema[collectionName],isPub=$("published").checked;const data={text,published:isPub,[schemaForCollection.text]:text,[schemaForCollection.published]:isPub,updatedAt:serverTimestamp()};if(source){data.source=source;if(schemaForCollection.source)data[schemaForCollection.source]=source;}else if($("documentId").value){data.source=deleteField();if(schemaForCollection.source)data[schemaForCollection.source]=deleteField();}
+ const schemaForCollection=schema[collectionName],isPub=$("published").checked;const data={text,published:isPub,"تم النشر":isPub,"النشر":isPub,[schemaForCollection.text]:text,updatedAt:serverTimestamp()};if(source){data.source=source;if(schemaForCollection.source)data[schemaForCollection.source]=source;}else if($("documentId").value){data.source=deleteField();if(schemaForCollection.source)data[schemaForCollection.source]=deleteField();}
  if(collectionName==="azkar"){const category=$("category").value.trim(),count=Number($("count").value);if(!category||!Number.isInteger(count)||count<1){message("adminMessage","أدخل تصنيفًا وعددًا صحيحًا للذكر.",true);return;}data.category=category;data.count=count;data[schemaForCollection.category]=category;data[schemaForCollection.count]=count;}
  else if($("category").value.trim())data.category=$("category").value.trim();
  setBusy(true);
