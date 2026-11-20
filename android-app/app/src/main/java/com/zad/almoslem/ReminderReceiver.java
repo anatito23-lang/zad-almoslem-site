@@ -158,11 +158,10 @@ public class ReminderReceiver extends BroadcastReceiver {
         if ("gentle_reminder".equals(key)) {
             if(!prefs.getBoolean("gentle_enabled",false)) return;
             String[] messages={
-                "هل صليت على النبي ﷺ اليوم؟ أكثر من الصلاة والسلام عليه.",
-                "سبحان الله وبحمده، سبحان الله العظيم.",
-                "استغفر الله العظيم وأتوب إليه.",
-                "لا تنس نصيب قلبك من القرآن والذكر.",
-                "اذكر الله في سرّك، يطمئن قلبك بذكره."
+                "تذكير من القرآن: ألا بذكر الله تطمئن القلوب.",
+                "تذكير من القرآن: فاذكروني أذكركم.",
+                "تذكير من القرآن: يا أيها الذين آمنوا اذكروا الله ذكرا كثيرا.",
+                "تذكير من القرآن: الذين يذكرون الله قياما وقعودا وعلى جنوبهم."
             };
             int index=prefs.getInt("gentle_message_index",0)%messages.length;
             if(index<0) index+=messages.length;
@@ -180,13 +179,17 @@ public class ReminderReceiver extends BroadcastReceiver {
             }
         } else if (key.startsWith("approach_")) {
             if (exactAlarmAudioAllowed) {
-                try { ReminderAudioService.play(context, "approach", title); } catch (Exception error) {
+                try { ReminderAudioService.play(context, "approach", title, "approach"); } catch (Exception error) {
                     android.util.Log.e("ZadAlmoslem", "Unable to start prayer approach audio", error);
                 }
             }
         } else if ("gentle_reminder".equals(key)) {
             if (prefs.getBoolean("gentle_audio_enabled", true) && exactAlarmAudioAllowed) {
-                try { ReminderAudioService.play(context, "gentle", title); } catch (Exception error) {
+                try {
+                    int audioIndex=prefs.getInt("gentle_message_index",1)-1;
+                    if(audioIndex<0)audioIndex=3;
+                    ReminderAudioService.play(context, "gentle", title, "gentle_"+audioIndex);
+                } catch (Exception error) {
                     android.util.Log.e("ZadAlmoslem", "Unable to start gentle reminder audio", error);
                 }
             }
