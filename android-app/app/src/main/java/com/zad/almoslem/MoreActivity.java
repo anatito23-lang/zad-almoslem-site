@@ -16,7 +16,9 @@ add(root,"التنبيهات اليومية","إدارة التذكيرات وا
 section(root,"📿 الرقية والابتهالات");
 add(root,"الرقية الشرعية","اختيار القارئ وتشغيل الرقية أو إيقافها",RuqyahActivity.class);
 add(root,"الابتهالات والإنشاد","تسجيلات الابتهالات الدينية",AudioLibraryActivity.class);
-section(root,"🎞️ محتوى إيماني");\nadd(root,"ريلز إسلامي","بطاقات إيمانية رأسية: آيات وأحاديث صحيحة وأدعية، اسحب للتنقل بينها",IslamicReelsActivity.class);\nsection(root,"🧭 خدمات إسلامية");
+section(root,"🎞️ محتوى إيماني");
+add(root,"ريلز إسلامي","بطاقات إيمانية رأسية: آيات وأحاديث صحيحة وأدعية، اسحب للتنقل بينها",IslamicReelsActivity.class);
+section(root,"🧭 خدمات إسلامية");
 add(root,"بوصلة القبلة","تحديد اتجاه القبلة",QiblaActivity.class);
 add(root,"مكتبة خطب الجمعة","الخطب والموضوعات الدعوية",KhutbahLibraryActivity.class);
 add(root,"المكتبة الإسلامية","الكتب والسنة والأدعية",FaithLibraryActivity.class);
