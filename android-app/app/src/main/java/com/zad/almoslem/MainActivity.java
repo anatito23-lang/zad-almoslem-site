@@ -25,6 +25,8 @@ public class MainActivity extends Activity {
     private static final String[] KEYS = {"fajr","dhuhr","asr","maghrib","isha"};
     private static final String[] VOICES = {"doha","basit","mustafa","husary","banna","rifaat","haram"};
     private static final String[] VOICE_LABELS = {"أذان الدوحة","عبد الباسط عبد الصمد","مصطفى إسماعيل","محمود خليل الحصري","محمود علي البنا","الشيخ محمد رفعت","أذان الحرم المكي"};
+    private static final String[] FAJR_VOICES = {"doha","fajr_cairo","fajr_haram"};
+    private static final String[] FAJR_VOICE_LABELS = {"أذان الفجر — الدوحة","أذان الفجر — القاهرة","أذان الفجر — الحرم المكي"};
     private final Map<String, Spinner> voiceSpinners = new LinkedHashMap<>();
     private final Map<String, SeekBar> volumeBars = new LinkedHashMap<>();
     private final Map<String, TextView> timeLabels = new LinkedHashMap<>();
@@ -576,15 +578,19 @@ public class MainActivity extends Activity {
         card.addView(top);
         TextView voiceLabel=text("صوت المؤذن",13,Color.DKGRAY,true); voiceLabel.setPadding(0,dp(8),0,0); card.addView(voiceLabel);
         Spinner spinner=new Spinner(this);
-        ArrayAdapter<String> adapter=new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,VOICE_LABELS);
+        boolean fajr = index == 0;
+        String[] availableVoices = fajr ? FAJR_VOICES : VOICES;
+        String[] availableLabels = fajr ? FAJR_VOICE_LABELS : VOICE_LABELS;
+        ArrayAdapter<String> adapter=new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,availableLabels);
         spinner.setAdapter(adapter);
-        String saved=prefs.getString("adhan_voice_"+prayer,"doha");
-        spinner.setSelection(Math.max(0,Arrays.asList(VOICES).indexOf(saved)));
+        String voicePreferenceKey = fajr ? "adhan_fajr_voice" : "adhan_voice_"+prayer;
+        String saved=prefs.getString(voicePreferenceKey,"doha");
+        spinner.setSelection(Math.max(0,Arrays.asList(availableVoices).indexOf(saved)));
         card.addView(spinner,matchWrap()); voiceSpinners.put(prayer,spinner);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             public void onNothingSelected(AdapterView<?> p){}
             public void onItemSelected(AdapterView<?> p,View v,int position,long id){
-                prefs.edit().putString("adhan_voice_"+prayer,VOICES[position]).apply();
+                prefs.edit().putString(voicePreferenceKey,availableVoices[position]).apply();
             }
         });
         TextView volLabel=text("مستوى الصوت: "+prefs.getInt("adhan_volume_"+key,100)+"%",12,Color.DKGRAY,false);
@@ -643,7 +649,7 @@ public class MainActivity extends Activity {
     }
 
     private void playPrayer(String prayer) {
-        String voice=prefs.getString("adhan_voice_"+prayer,"doha");
+        String voice="الفجر".equals(prayer) ? prefs.getString("adhan_fajr_voice","doha") : prefs.getString("adhan_voice_"+prayer,"doha");
         Intent intent=new Intent(this,AdhanPlaybackService.class);
         intent.setAction(AdhanPlaybackService.ACTION_PLAY);
         intent.putExtra("prayer",prayer); intent.putExtra("voice",voice);
@@ -656,7 +662,7 @@ public class MainActivity extends Activity {
     private boolean hasAllSelectedAdhanFiles() {
         File dir = new File(getFilesDir(), "adhan");
         for (int i = 0; i < PRAYERS.length; i++) {
-            String voice = prefs.getString("adhan_voice_" + PRAYERS[i], "doha");
+            String voice = i == 0 ? prefs.getString("adhan_fajr_voice","doha") : prefs.getString("adhan_voice_" + PRAYERS[i], "doha");
             String fileVoice = "doha".equals(voice) ? "doha_" + KEYS[i] : voice;
             File mp3 = new File(dir, fileVoice + ".mp3");
             File ogg = new File(dir, fileVoice + ".ogg");
@@ -668,7 +674,7 @@ public class MainActivity extends Activity {
     private void downloadSelectedVoices() {
         if(downloading)return;
         LinkedHashSet<String> selected=new LinkedHashSet<>();
-        for(String prayer:PRAYERS) selected.add(prefs.getString("adhan_voice_"+prayer,"doha"));
+        for(int i=0;i<PRAYERS.length;i++) selected.add(i==0 ? prefs.getString("adhan_fajr_voice","doha") : prefs.getString("adhan_voice_"+PRAYERS[i],"doha"));
         downloading=true; downloadButton.setEnabled(false); progress.setProgress(0);
         progressText.setText("جارٍ تجهيز التنزيل...");
         new Thread(()->{
@@ -711,6 +717,8 @@ public class MainActivity extends Activity {
             case "banna": file="Mahmoud_Ali_Al_Banna_-_Cairo_(محمود_علي_البنا_-_القاهرة).mp3"; break;
             case "rifaat": file="Muhammad_Refaat_-_Cairo_(محمد_رفعت_-_القاهرة).mp3"; break;
             case "haram": file="Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(علي_بن_أحمد_ملا_-_الحرم_المكي).mp3"; break;
+            case "fajr_cairo": file="Adhan_Fajr_Cairo_Egypt_(أذان_الفجر_القاهرة_مصر).mp3"; break;
+            case "fajr_haram": file="Adhan_Fajr_Al_Haram_Al_Maki_(أذان_الفجر_الحرم_المكي).mp3"; break;
             default: throw new Exception("هذا الصوت غير متاح");
         }
         String encoded=java.net.URLEncoder.encode(file,"UTF-8").replace("+","%20").replace("%28","(").replace("%29",")");
@@ -793,7 +801,7 @@ public class MainActivity extends Activity {
         int valid = 0;
         for (int i = 0; i < PRAYERS.length; i++) {
             String prayer = PRAYERS[i];
-            String voice = prefs.getString("adhan_voice_" + prayer, "doha");
+            String voice = i == 0 ? prefs.getString("adhan_fajr_voice","doha") : prefs.getString("adhan_voice_" + prayer, "doha");
             String fileVoice = voice;
             if ("doha".equals(voice)) fileVoice = "doha_" + KEYS[i];
             File mp3 = new File(dir, fileVoice + ".mp3");
