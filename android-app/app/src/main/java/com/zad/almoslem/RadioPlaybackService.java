@@ -23,6 +23,7 @@ public class RadioPlaybackService extends Service {
     public static final String ACTION_PAUSE_FOR_ADHAN="com.zad.almoslem.PAUSE_FOR_ADHAN";
     public static final String ACTION_RESUME_AFTER_ADHAN="com.zad.almoslem.RESUME_AFTER_ADHAN";
     private boolean pausedForAdhan;
+    private boolean adhanPauseRequested;
     private boolean resumeAfterAdhan;
     private long positionBeforeAdhan;
     private static final String CHANNEL="zad_radio_playback";
@@ -32,6 +33,9 @@ public class RadioPlaybackService extends Service {
     private Runnable startupTimeout;
 
     @Override public int onStartCommand(Intent intent,int flags,int startId) {
+        // A newly selected stream must also remain paused if playback is started during adhan.
+        if (getSharedPreferences("zad_reminders", MODE_PRIVATE).getBoolean("adhan_active", false))
+            adhanPauseRequested = true;
         if(intent!=null && ACTION_STOP.equals(intent.getAction())) { stopRadio(); return START_NOT_STICKY; }
         if(intent!=null && ACTION_PAUSE_FOR_ADHAN.equals(intent.getAction())) {
             pauseForAdhan();
@@ -98,6 +102,7 @@ public class RadioPlaybackService extends Service {
         return START_NOT_STICKY;
     }
     private void pauseForAdhan() {
+        adhanPauseRequested = true;
         if (player == null || pausedForAdhan) return;
         resumeAfterAdhan = player.getPlayWhenReady() &&
                 player.getPlaybackState() != Player.STATE_IDLE &&
@@ -110,12 +115,12 @@ public class RadioPlaybackService extends Service {
     }
 
     private void resumeAfterAdhan() {
-        if (player == null || !pausedForAdhan) return;
+        adhanPauseRequested = false;
         boolean shouldResume = resumeAfterAdhan;
         long savedPosition = positionBeforeAdhan;
         pausedForAdhan = false;
         resumeAfterAdhan = false;
-        if (shouldResume) {
+        if (player != null && shouldResume) {
             player.seekTo(savedPosition);
             player.play();
             android.util.Log.i("ZadAlmoslem", "Audio resumed after adhan at " + savedPosition);
@@ -204,7 +209,14 @@ public class RadioPlaybackService extends Service {
                     : new MediaItem.Builder().setUri(source).setMimeType(androidx.media3.common.MimeTypes.AUDIO_MPEG).build());
             player.setMediaItem(item);
             player.prepare();
-            player.play();
+            if (adhanPauseRequested) {
+                positionBeforeAdhan = 0L;
+                resumeAfterAdhan = true;
+                pausedForAdhan = true;
+                player.pause();
+            } else {
+                player.play();
+            }
             if ("radio".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""))) {
                 startupTimeout = () -> {
                     startupTimeout = null;
@@ -281,7 +293,7 @@ public class RadioPlaybackService extends Service {
             player = null;
         }
     }
-    private void stopRadio() { getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").apply(); QuranHomeWidget.refreshAll(this); releasePlayer(); stopForeground(true); stopSelf(); }
+    private void stopRadio() { adhanPauseRequested=false; pausedForAdhan=false; resumeAfterAdhan=false; getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").apply(); QuranHomeWidget.refreshAll(this); releasePlayer(); stopForeground(true); stopSelf(); }
     @Override public void onDestroy(){releasePlayer();super.onDestroy();}
     @Override public IBinder onBind(Intent intent){return null;}
 }
