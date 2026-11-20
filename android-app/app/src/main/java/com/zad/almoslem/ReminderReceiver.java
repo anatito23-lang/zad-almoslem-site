@@ -124,7 +124,9 @@ public class ReminderReceiver extends BroadcastReceiver {
         boolean prayer=key.startsWith("prayer_");
         android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
         if (!prayer && ("morning".equals(key) || "evening".equals(key) || "qiyam".equals(key))) {
-            try { ReminderAudioService.play(context, key); } catch (Exception ignored) {}
+            if (prefs.getBoolean(key + "_audio_enabled", true)) {
+                try { ReminderAudioService.play(context, key); } catch (Exception ignored) {}
+            }
         } else if (key.startsWith("approach_")) {
             try { ReminderAudioService.play(context, "approach", title); } catch (Exception ignored) {}
         }
