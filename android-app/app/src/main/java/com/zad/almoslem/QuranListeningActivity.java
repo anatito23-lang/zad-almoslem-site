@@ -100,15 +100,17 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
             int ri=reciterSpinner.getSelectedItemPosition(),si=surahSpinner.getSelectedItemPosition()+1;
             if(ri<0||ri>=reciters.size()){state.setText("انتظر حتى تكتمل قائمة القراء.");return;}
             try{
-                String url=resolveQuranAudioUrl(reciters.get(ri),si);
+                org.json.JSONObject selectedReciter=reciters.get(ri);
+                String selectedReciterKey=reciterStorageKey(selectedReciter);
+                String url=resolveQuranAudioUrl(selectedReciter,si);
                 if(url==null){state.setText("السورة غير متاحة لهذا القارئ.");return;}
-                String label="سورة "+surahs[si-1]+" — "+reciterNames.get(ri);
+                String label="سورة "+surahs[si-1]+" — "+selectedReciter.optString("name","القارئ");
                 download.setEnabled(false);quranProgress.setProgress(0);state.setText("جارٍ تنزيل "+label+"...");
                 new Thread(()->{
                     HttpURLConnection connection=null;File temp=null;
                     try{
                         File dir=new File(getFilesDir(),"quran");if(!dir.exists()&&!dir.mkdirs())throw new Exception("تعذر إنشاء مجلد القرآن");
-                        File target=new File(dir,"reciter_"+reciterStorageKey(reciters.get(ri))+"_surah_"+si+".mp3");temp=new File(dir,target.getName()+".part");
+                        File target=new File(dir,"reciter_"+selectedReciterKey+"_surah_"+si+".mp3");temp=new File(dir,target.getName()+".part");
                         connection=(HttpURLConnection)new URL(url).openConnection();connection.setConnectTimeout(20000);connection.setReadTimeout(90000);connection.setInstanceFollowRedirects(true);
                         if(connection.getResponseCode()!=200)throw new Exception("مصدر التلاوة غير متاح");
                         long total=connection.getContentLength(),got=0;
