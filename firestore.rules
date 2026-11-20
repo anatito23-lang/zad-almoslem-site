@@ -1,11 +1,16 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Published content is readable by app users. Client-side writes are disabled.
-    // Admin publishing will be enabled only after authenticated admin identity is configured.
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid == '5UkeBQyyGGZcICXULT9LUD0S4lt2';
+    }
+
     match /{collection}/{document} {
-      allow read: if resource.data.published == true;
-      allow create, update, delete: if false;
+      allow read: if resource.data.published == true || isAdmin();
+      allow create, update, delete: if isAdmin();
     }
   }
 }
