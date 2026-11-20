@@ -257,9 +257,12 @@ public class MainActivity extends Activity {
         tasbeehGoal.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             public void onNothingSelected(AdapterView<?> parent){}
             public void onItemSelected(AdapterView<?> parent,View view,int position,long id){
-                goal[0]=tasbeehGoals[position];
-                currentCount[0]=0;
-                prefs.edit().putInt("native_tasbeeh_goal",goal[0]).putInt("native_tasbeeh_count",0).apply();
+                int selectedGoal=tasbeehGoals[position];
+                if(goal[0]!=selectedGoal){
+                    goal[0]=selectedGoal;
+                    currentCount[0]=0;
+                    prefs.edit().putInt("native_tasbeeh_goal",goal[0]).putInt("native_tasbeeh_count",0).apply();
+                }
                 drawTasbeeh.run();
             }
         });
