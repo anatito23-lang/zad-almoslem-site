@@ -210,7 +210,8 @@ public class ReminderReceiver extends BroadcastReceiver {
             scheduleApproachAlert(context,prayerName,next);
         }
         NotificationManager nm=(NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-        boolean gentle="gentle_reminder".equals(key);\n        String channelId=prayer?((adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode))?PRAYER_TONE_CHANNEL_ID:PRAYER_CHANNEL_ID):(gentle?GENTLE_CHANNEL_ID:CHANNEL_ID);
+        boolean gentle="gentle_reminder".equals(key);
+        String channelId=prayer?((adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode))?PRAYER_TONE_CHANNEL_ID:PRAYER_CHANNEL_ID):(gentle?GENTLE_CHANNEL_ID:CHANNEL_ID);
         if(Build.VERSION.SDK_INT>=26){
             NotificationChannel ch;
             if(prayer){
@@ -238,7 +239,8 @@ public class ReminderReceiver extends BroadcastReceiver {
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle(gentle?"تذكير لطيف من زاد المسلم":"قلبي اطمأن – زاد المسلم").setContentText(notificationText).setAutoCancel(true).setContentIntent(content);
         if(prayer && adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode)) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
         else if(prayer && adhanEnabled && thisPrayerEnabled && "off".equals(adhanMode)) { /* no alert */ }
-        else if(gentle) b.setDefaults(0);\n        else b.setDefaults(Notification.DEFAULT_VIBRATE);
+        else if(gentle) b.setDefaults(0);
+        else b.setDefaults(Notification.DEFAULT_VIBRATE);
         if(!prayer || (adhanEnabled && thisPrayerEnabled && !"off".equals(adhanMode))) nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
             String k=key.replace("daily_","");
