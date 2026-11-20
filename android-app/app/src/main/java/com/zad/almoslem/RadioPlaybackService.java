@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 
@@ -91,11 +93,25 @@ public class RadioPlaybackService extends Service {
     private void play(String url,File localFile) {
         releasePlayer();
         try {
+            String activeKind = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", "");
+            String station = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("radio_station", "");
+            Map<String, String> requestHeaders = new HashMap<>();
+            requestHeaders.put("Accept", "*/*");
+            if ("radio".equals(activeKind) && "saudi".equals(station)) {
+                requestHeaders.put("Referer", "https://radioplus.sba.sa/");
+                requestHeaders.put("Origin", "https://radioplus.sba.sa");
+            } else if ("radio".equals(activeKind) && "palestine".equals(station)) {
+                requestHeaders.put("Icy-MetaData", "1");
+                requestHeaders.put("Referer", "https://quran-radio.com/");
+            } else if ("ruqyah".equals(activeKind)) {
+                requestHeaders.put("Referer", "https://archive.org/");
+            }
             DefaultHttpDataSource.Factory httpFactory = new DefaultHttpDataSource.Factory()
                     .setUserAgent("Mozilla/5.0 (Linux; Android) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36 ZadAlmoslem")
+                    .setDefaultRequestProperties(requestHeaders)
                     .setAllowCrossProtocolRedirects(true)
-                    .setConnectTimeoutMs(15000)
-                    .setReadTimeoutMs(30000);
+                    .setConnectTimeoutMs(20000)
+                    .setReadTimeoutMs(45000);
             player = new ExoPlayer.Builder(this)
                     .setMediaSourceFactory(new DefaultMediaSourceFactory(httpFactory))
                     .build();
