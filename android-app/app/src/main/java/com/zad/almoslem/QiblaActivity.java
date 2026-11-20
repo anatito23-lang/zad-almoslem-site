@@ -20,7 +20,7 @@ public class QiblaActivity extends Activity implements SensorEventListener {
     private final double[][] coords={{30.0444,31.2357},{30.5877,31.5020},{31.2001,29.9187},{30.0131,31.2089},{31.0409,31.3785},{30.7865,31.0004},{30.5965,32.2715},{27.1809,31.1837},{25.6872,32.6396},{24.0889,32.8998}};
     private SensorManager manager;
     private Sensor rotation;
-    private TextView arrow, degree, status, cityLabel;
+    private GlobeCompassView globe; private TextView degree, status, cityLabel;
     private double qiblaBearing=0;
     private float heading=0;
     private int green=Color.rgb(8,48,40);
@@ -44,8 +44,8 @@ public class QiblaActivity extends Activity implements SensorEventListener {
         TextView choose=text("اختر مدينتك",15,green,true);choose.setPadding(0,dp(18),0,dp(5));root.addView(choose);
         Spinner spinner=new Spinner(this);spinner.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,cities));spinner.setSelection(1);root.addView(spinner,new LinearLayout.LayoutParams(-1,-2));
         cityLabel=text("الزقازيق",13,Color.DKGRAY,false);root.addView(cityLabel);
-        LinearLayout compass=new LinearLayout(this);compass.setGravity(Gravity.CENTER);compass.setBackground(shape(Color.WHITE,120));LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(dp(250),dp(250));cp.topMargin=dp(20);cp.bottomMargin=dp(16);root.addView(compass,cp);
-        arrow=text("▲",100,Color.rgb(177,135,54),true);compass.addView(arrow);
+        LinearLayout compass=new LinearLayout(this);compass.setGravity(Gravity.CENTER);compass.setBackground(shape(Color.WHITE,140));LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(dp(290),dp(290));cp.topMargin=dp(20);cp.bottomMargin=dp(16);root.addView(compass,cp);
+        globe=new GlobeCompassView(this);compass.addView(globe,new LinearLayout.LayoutParams(-1,-1));
         degree=text("جارٍ حساب اتجاه القبلة",20,green,true);root.addView(degree);
         status=text(rotation==null?"مستشعر اتجاه الهاتف غير متاح؛ الزاوية محسوبة من الشمال فقط.":"حرّك الهاتف ببطء حتى يستقر المؤشر على اتجاه القبلة.",13,Color.DKGRAY,false);status.setPadding(dp(8),dp(12),dp(8),dp(12));root.addView(status);
         TextView north=text("الشمال ↑     الشرق →     الجنوب ↓     الغرب ←",12,Color.GRAY,false);root.addView(north);
@@ -60,7 +60,7 @@ public class QiblaActivity extends Activity implements SensorEventListener {
         degree.setText(String.format(Locale.getDefault(),"اتجاه القبلة %.0f° من الشمال",qiblaBearing));
         rotateArrow();
     }
-    private void rotateArrow(){if(arrow!=null)arrow.setRotation((float)(qiblaBearing-heading));}
+    private void rotateArrow(){if(globe!=null)globe.setDirections(heading,(float)qiblaBearing);}
     @Override protected void onResume(){super.onResume();if(rotation!=null)manager.registerListener(this,rotation,SensorManager.SENSOR_DELAY_UI);}
     @Override protected void onPause(){super.onPause();if(manager!=null)manager.unregisterListener(this);}
     @Override public void onSensorChanged(SensorEvent e){
