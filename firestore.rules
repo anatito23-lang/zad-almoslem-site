@@ -2,15 +2,19 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
     function isAdmin() {
       return request.auth != null
         && request.auth.uid == '5UkeBQyyGGZcICXULT9LUD0S4lt2';
     }
 
+    function isManagedCollection(collection) {
+      return collection in ['azkar', 'hadiths', 'duas'];
+    }
+
     match /{collection}/{document} {
-      allow read: if resource.data.published == true || isAdmin();
-      allow create, update, delete: if isAdmin();
+      allow read: if isManagedCollection(collection)
+        && (resource.data.published == true || isAdmin());
+      allow create, update, delete: if isManagedCollection(collection) && isAdmin();
     }
   }
 }
