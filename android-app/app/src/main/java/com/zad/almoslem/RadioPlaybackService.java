@@ -27,7 +27,7 @@ public class RadioPlaybackService extends Service {
     @Override public int onStartCommand(Intent intent,int flags,int startId) {
         if(intent!=null && ACTION_STOP.equals(intent.getAction())) { stopRadio(); return START_NOT_STICKY; }
         createChannel();
-        Intent open=new Intent(this,MainActivity.class);
+        Intent open=new Intent(this,HomeActivity.class);
         PendingIntent content=PendingIntent.getActivity(this,7411,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
         Intent stop=new Intent(this,RadioPlaybackService.class); stop.setAction(ACTION_STOP);
         PendingIntent stopAction=PendingIntent.getService(this,7412,stop,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
