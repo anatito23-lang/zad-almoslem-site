@@ -357,8 +357,10 @@ public class AdhanPlaybackService extends Service {
     private void stopPlayback() {
         getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_active", false).apply();
         stopPlayerOnly();
-        stopForeground(true);
+        // Request radio/Quran resumption while this service is still foreground.
+        // This avoids starting another background service after dropping foreground status.
         if (!deferBackgroundAudioResume) resumeBackgroundAudioAfterAdhan();
+        stopForeground(true);
         stopSelf();
     }
 
