@@ -9,6 +9,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
 import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class AzkarActivity extends Activity {
     private final int green=Color.rgb(8,48,40), ink=Color.rgb(40,58,48);
@@ -23,7 +25,7 @@ public class AzkarActivity extends Activity {
     private int index=0, remaining=0;
     private String currentCategory="أذكار الصباح";
 
-    @Override public void onCreate(Bundle state){super.onCreate(state);AppThemeColors.apply(this);load();build();}
+    @Override public void onCreate(Bundle state){super.onCreate(state);AppThemeColors.apply(this);load();build();RemoteContentRepository.sync(this, "azkar", this::applyRemoteAzkar);}
     private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
     private TextView label(String s,int size,int color,boolean bold){
         TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);
@@ -60,6 +62,31 @@ public class AzkarActivity extends Activity {
         add(prayer,"سبحان الله، والحمد لله، والله أكبر؛ ثلاثًا وثلاثين، ثم تمام المائة: لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.","رواه مسلم",1);
         add(prayer,"اللهم أعني على ذكرك وشكرك وحسن عبادتك.","رواه أبو داود والنسائي، وصححه أهل العلم",1);
         add(prayer,"قراءة آية الكرسي: ﴿اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ...﴾ إلى آخر الآية.","ورد في فضلها حديث صحيح رواه النسائي في عمل اليوم والليلة وغيره",1);
+    }
+    private void applyRemoteAzkar(){
+        JSONArray remote=RemoteContentRepository.cached(this,"azkar");
+        if(remote.length()==0)return;
+        ArrayList<Zikr> updated=new ArrayList<>();
+        for(int i=0;i<remote.length();i++){
+            JSONObject row=remote.optJSONObject(i);if(row==null)continue;
+            String category=row.optString("category","").trim();
+            String text=row.optString("text","").trim();
+            String source=row.optString("source","").trim();
+            int count=row.optInt("count",1);
+            if(category.isEmpty()||text.isEmpty()||source.isEmpty()||count<1)continue;
+            updated.add(new Zikr(category,text,source,count));
+        }
+        if(updated.isEmpty())return;
+        items.clear();items.addAll(updated);
+        String previous=currentCategory;
+        ArrayList<String> categories=new ArrayList<>();
+        for(Zikr z:items)if(!categories.contains(z.category))categories.add(z.category);
+        ArrayAdapter<String> adapter=new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,categories);
+        categorySpinner.setAdapter(adapter);
+        int selected=categories.indexOf(previous);
+        categorySpinner.setSelection(selected>=0?selected:0);
+        currentCategory=categories.get(selected>=0?selected:0);
+        filter();
     }
     private void build(){
         ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(1);
