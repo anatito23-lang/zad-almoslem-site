@@ -98,6 +98,9 @@ public class RamadanActivity extends Activity {
         LinearLayout audio=card("أصوات رمضان — المسحراتي");
         audioStatus=text("أذان بشري حقيقي مضمّن داخل التطبيق بترخيص CC0. ويمكنك إضافة تسجيلك البشري للمسحراتي أو تنبيه الإفطار ليعمل دون إنترنت. تسجيلات سيد مكاوي وحمزة نمرة تظل عبر مصادرها الرسمية احترامًا لحقوق النشر.",12,AppThemeColors.muted(this),false);
         audio.addView(audioStatus,full());
+        addAudioTestButton(audio,"تجربة الأذان البشري المسجّل","ramadan_adhan_test");
+        addAudioPicker(audio,"إضافة تسجيل مسحراتي بشري من جهازك","mesaharaty.mp3",PICK_SUHOOR);
+        addAudioPicker(audio,"إضافة تسجيل صوت بشري لتنبيه الإفطار","iftar_voice.mp3",PICK_IFTAR);
         addExternalAudioButton(audio,"استماع إلى المسحراتي — سيد مكاوي","https://www.youtube.com/watch?v=w3ff3_5uJUU");
         addExternalAudioButton(audio,"استماع إلى ألبوم مسحراتي — حمزة نمرة","https://play.anghami.com/album/942038?lang=ar");
         addAudioTestButton(audio,"تجربة صوت مدفع الإفطار","ramadan_iftar_cannon");
