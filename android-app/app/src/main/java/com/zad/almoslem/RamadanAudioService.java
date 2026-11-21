@@ -14,7 +14,6 @@ public class RamadanAudioService extends Service {
     private static final int ID=7630;
     private MediaPlayer player;
     private AudioTrack cannonTrack;
-    private TextToSpeech tts;
     private PowerManager.WakeLock wakeLock;
     @Override public int onStartCommand(Intent intent,int flags,int startId){
         String key=intent==null?"":intent.getStringExtra("key");
@@ -132,7 +131,6 @@ public class RamadanAudioService extends Service {
     private void stopCurrent(){
         if(player!=null){try{player.stop();}catch(Exception ignored){}try{player.release();}catch(Exception ignored){}player=null;}
         if(cannonTrack!=null){try{cannonTrack.stop();}catch(Exception ignored){}try{cannonTrack.release();}catch(Exception ignored){}cannonTrack=null;}
-        if(tts!=null){try{tts.stop();tts.shutdown();}catch(Exception ignored){}tts=null;}
     }
     private void finish(){stopCurrent();if(wakeLock!=null&&wakeLock.isHeld()){try{wakeLock.release();}catch(Exception ignored){}wakeLock=null;}stopForeground(true);stopSelf();}
     @Override public void onDestroy(){stopCurrent();if(wakeLock!=null&&wakeLock.isHeld())wakeLock.release();super.onDestroy();}
