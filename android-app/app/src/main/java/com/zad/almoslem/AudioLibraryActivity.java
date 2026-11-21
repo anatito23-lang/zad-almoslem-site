@@ -51,10 +51,10 @@ public class AudioLibraryActivity extends Activity {
     }
     private GradientDrawable bg(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));return d;}
     private void build(){
-        ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(15),dp(15),dp(15),dp(25));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);setContentView(AppTabs.wrap(this,scroll,"more"));
+        ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(15),dp(15),dp(15),dp(25));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);setContentView(AppTabs.wrap(this,scroll,"more","recordings"));
         TextView title=label("الابتهالات والإنشاد الديني",24,Color.WHITE,true);title.setGravity(Gravity.CENTER);
         TextView sub=label("استماع من مشغّل Android في الخلفية",13,Color.rgb(222,239,229),false);sub.setGravity(Gravity.CENTER);
-        LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(14),dp(18),dp(14),dp(18));hero.setBackground(bg(green,18));hero.addView(title);hero.addView(sub);root.addView(hero);
+        LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(14),dp(18),dp(14),dp(18));hero.setBackground(new IslamicWallpaperDrawable(this,"recordings"));hero.addView(title);hero.addView(sub);root.addView(hero);
         TextView section=label("الابتهالات الدينية",18,green,true);section.setPadding(0,dp(16),0,dp(6));root.addView(section);
         artistPicker=new Spinner(this);artistPicker.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,artists));root.addView(artistPicker);
         trackPicker=new Spinner(this);root.addView(trackPicker);
