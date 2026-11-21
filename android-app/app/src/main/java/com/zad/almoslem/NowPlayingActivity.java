@@ -110,9 +110,10 @@ public class NowPlayingActivity extends Activity {
         subtitle.setText("quran".equals(kind)?"تلاوة من كتاب الله":
                 "ruqyah".equals(kind)?"رقية شرعية مسموعة":
                 "radio".equals(kind)?"بث إذاعة القرآن الكريم":"استماع إيماني");
+        boolean waiting=p.getBoolean("waiting_for_audio_focus",false);
         boolean playing=p.getBoolean("radio_playing",false)&&!p.getBoolean("radio_paused",false);
-        state.setText(playing?"● الصوت يعمل الآن":"◌ الصوت متوقف مؤقتًا");
-        toggle.setText(playing?"Ⅱ   إيقاف مؤقت":"▶   استئناف الاستماع");
+        state.setText(waiting?"الصوت الآخر يعمل — سيعود الاستماع تلقائيًا":(playing?"● الصوت يعمل الآن":"◌ الصوت متوقف مؤقتًا"));
+        toggle.setText(waiting?"إلغاء الاستئناف التلقائي":(playing?"Ⅱ   إيقاف مؤقت":"▶   استئناف الاستماع"));
     }
 
     @Override protected void onResume(){super.onResume();handler.removeCallbacks(ticker);ticker.run();}
