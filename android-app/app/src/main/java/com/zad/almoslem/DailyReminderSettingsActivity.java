@@ -24,6 +24,7 @@ public class DailyReminderSettingsActivity extends Activity {
  private final String[] names={"أذكار الصباح","أذكار المساء","قيام الليل"};
  private final int[] defaultHours={7,17,4};
  private TextView[] timeLabels=new TextView[3];
+ private Switch notificationSwitch;
  @Override public void onCreate(Bundle state){
   super.onCreate(state);prefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);
   getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);
@@ -132,19 +133,54 @@ public class DailyReminderSettingsActivity extends Activity {
  }
 
 
+ private boolean notificationsAllowed(){
+  if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)return false;
+  if(Build.VERSION.SDK_INT>=24){
+   android.app.NotificationManager manager=(android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+   return manager!=null && manager.areNotificationsEnabled();
+  }
+  return true;
+ }
  private void addNotificationAccess(LinearLayout root){
-  if(Build.VERSION.SDK_INT<33 || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED)return;
-  Button grant=new Button(this);
-  grant.setText("السماح بإظهار التنبيهات");
-  grant.setOnClickListener(v->requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},701));
-  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(grant,lp);
+  LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
+  card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
+  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(card,lp);
+  card.addView(label("السماح بإشعارات الهاتف",18,green,true));
+  TextView desc=label("تحكم في وصول تنبيهات زاد المسلم إلى هاتفك. عند التشغيل سيطلب أندرويد الإذن، وعند الإيقاف نفتح إعدادات التطبيق لتتمكن من منع الإشعارات.",12,Color.GRAY,false);
+  desc.setPadding(0,dp(5),0,dp(8));card.addView(desc);
+  notificationSwitch=new Switch(this);notificationSwitch.setText("تشغيل إشعارات الهاتف");
+  notificationSwitch.setChecked(notificationsAllowed());card.addView(notificationSwitch);
+  notificationSwitch.setOnCheckedChangeListener((button,enabled)->{
+   if(enabled){
+    if(Build.VERSION.SDK_INT>=33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED){
+     requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},701);
+    }else if(!notificationsAllowed()){
+     openNotificationSettings();
+    }else{
+     Toast.makeText(this,"إشعارات زاد المسلم مفعّلة",Toast.LENGTH_SHORT).show();
+    }
+   }else{
+    Toast.makeText(this,"لإيقاف الإشعارات استخدم مفتاح السماح في إعدادات الهاتف",Toast.LENGTH_LONG).show();
+    openNotificationSettings();
+   }
+  });
+ }
+ private void openNotificationSettings(){
+  try{
+   Intent intent=new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
+   intent.putExtra(Settings.EXTRA_APP_PACKAGE,getPackageName());
+   startActivity(intent);
+  }catch(Exception error){
+   Intent intent=new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,Uri.parse("package:"+getPackageName()));
+   startActivity(intent);
+  }
  }
  @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
   super.onRequestPermissionsResult(requestCode,permissions,grantResults);
   if(requestCode==701){
-   if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED)
-    Toast.makeText(this,"تم تفعيل إذن التنبيهات",Toast.LENGTH_SHORT).show();
-   else Toast.makeText(this,"لن تظهر التنبيهات حتى تسمح بها من إعدادات التطبيق",Toast.LENGTH_LONG).show();
+   boolean granted=grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED;
+   if(!granted)Toast.makeText(this,"لم تسمح بالإشعارات؛ يمكنك تفعيلها من إعدادات التطبيق",Toast.LENGTH_LONG).show();
+   if(notificationSwitch!=null)notificationSwitch.setChecked(notificationsAllowed());
   }
  }
  private void addExactAlarmAccess(LinearLayout root){
@@ -165,6 +201,7 @@ public class DailyReminderSettingsActivity extends Activity {
  }
  @Override protected void onResume(){
   super.onResume();
+  if(notificationSwitch!=null)notificationSwitch.setChecked(notificationsAllowed());
   if(Build.VERSION.SDK_INT>=31){
    AlarmManager manager=(AlarmManager)getSystemService(ALARM_SERVICE);
    if(manager.canScheduleExactAlarms()){
