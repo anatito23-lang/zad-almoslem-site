@@ -101,17 +101,8 @@ public class RadioPlaybackService extends Service {
         } catch(Exception ignored) {}
         if(!allowedRadio && !allowedQuran && !allowedLocal && !allowedAudio) { stopRadio(); return START_NOT_STICKY; }
         String label=intent==null?null:intent.getStringExtra("label");
-        if(label!=null) {
-            Notification.Builder updated=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
-            updated.setSmallIcon(android.R.drawable.ic_media_play)
-              .setContentTitle("quran".equals(kind)?"استماع القرآن الكريم":("nasheed".equals(kind)?"الإنشاد والابتهالات":("ruqyah".equals(kind)?"الرقية الشرعية":"إذاعة القرآن الكريم")))
-              .setContentText(label+" — يعمل في الخلفية").setContentIntent(content).setOngoing(true)
-              .addAction(android.R.drawable.ic_media_pause,"إيقاف الصوت",stopAction);
-            Notification n2=updated.build();
-            if(Build.VERSION.SDK_INT>=29) startForeground(NOTIFICATION,n2,android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
-            else startForeground(NOTIFICATION,n2);
-        }
-        getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",true).putBoolean("radio_ready",false).remove("radio_last_error").putString("active_kind",kind==null?"radio":kind).putString("radio_station",intent==null?"":intent.getStringExtra("station"))\n          .putString("radio_title",label==null?defaultTitle(kind):label).putBoolean("radio_paused",false).apply();
+        getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",true).putBoolean("radio_ready",false).remove("radio_last_error").putString("active_kind",kind==null?"radio":kind).putString("radio_station",intent==null?"":intent.getStringExtra("station"))
+          .putString("radio_title",label==null?defaultTitle(kind):label).putBoolean("radio_paused",false).apply();
         QuranHomeWidget.refreshAll(this);
         play(url,allowedLocal?localFile:null);
         return START_NOT_STICKY;
@@ -190,7 +181,7 @@ public class RadioPlaybackService extends Service {
                                     .putBoolean("radio_ready", true).putBoolean("radio_playing", true)
                                     .remove("radio_last_error").apply();
                             QuranHomeWidget.refreshAll(RadioPlaybackService.this);
-                            updateRadioNotification("إذاعة القرآن الكريم", "البث يعمل الآن");
+                            updateRadioNotification(playbackTitle(), "البث يعمل الآن");
                         } else {
                             String title = "quran".equals(active) ? "استماع القرآن الكريم" :
                                     ("nasheed".equals(active) ? "الإنشاد والابتهالات" : "الرقية الشرعية");
@@ -198,7 +189,11 @@ public class RadioPlaybackService extends Service {
                         }
                     }
                 }
-                @Override public void onIsPlayingChanged(boolean isPlaying) {\n                    getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_paused", !isPlaying).apply();\n                    updateRadioNotification(playbackTitle(), isPlaying ? "يعمل الآن" : "متوقف مؤقتًا");\n                }\n                @Override public void onPlayerError(PlaybackException error) {
+                @Override public void onIsPlayingChanged(boolean isPlaying) {
+                    getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_paused", !isPlaying).apply();
+                    updateRadioNotification(playbackTitle(), isPlaying ? "يعمل الآن" : "متوقف مؤقتًا");
+                }
+                @Override public void onPlayerError(PlaybackException error) {
                     // Cancel the startup timeout so it cannot overwrite the real playback error.
                     if (startupTimeout != null) {
                         playbackHandler.removeCallbacks(startupTimeout);
