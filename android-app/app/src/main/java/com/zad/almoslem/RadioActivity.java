@@ -59,28 +59,26 @@ public class RadioActivity extends Activity {
         desc.setPadding(0, dp(14), 0, dp(14));
         root.addView(desc, match());
 
-        // Branded radio deck: animated only while the actual stream is ready.
+        // Minimal audio player; the equalizer moves only while the live stream is ready.
         LinearLayout deck = new LinearLayout(this);
         deck.setOrientation(LinearLayout.VERTICAL);
         deck.setGravity(Gravity.CENTER);
         deck.setPadding(dp(18), dp(20), dp(18), dp(20));
-        GradientDrawable deckBg = new GradientDrawable(
-                GradientDrawable.Orientation.TL_BR,
-                new int[]{Color.rgb(8,48,40), Color.rgb(17,91,68), Color.rgb(6,37,32)});
-        deckBg.setCornerRadius(dp(24));
+        GradientDrawable deckBg = new GradientDrawable();
+        deckBg.setColor(AppThemeColors.surface(this));
+        deckBg.setCornerRadius(dp(18));
         deck.setBackground(deckBg);
-        deck.addView(new SectionArtworkView(this,"radio"), new LinearLayout.LayoutParams(-1, dp(164)));
         TextView deckTitle = new TextView(this);
         deckTitle.setText("راديو زاد المسلم");
         deckTitle.setTextSize(21);
         deckTitle.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        deckTitle.setTextColor(Color.WHITE);
+        deckTitle.setTextColor(AppThemeColors.text(this));
         deckTitle.setGravity(Gravity.CENTER);
         deck.addView(deckTitle, match());
         TextView deckSub = new TextView(this);
         deckSub.setText("أنصت بقلبك… واطمئن بذكر الله");
         deckSub.setTextSize(13);
-        deckSub.setTextColor(Color.rgb(231,220,190));
+        deckSub.setTextColor(AppThemeColors.muted(this));
         deckSub.setGravity(Gravity.CENTER);
         deckSub.setPadding(0, dp(5), 0, dp(12));
         deck.addView(deckSub, match());
@@ -110,7 +108,7 @@ public class RadioActivity extends Activity {
         TextView liveHint = new TextView(this);
         liveHint.setText("اختر محطة لبدء البث المباشر");
         liveHint.setTextSize(11);
-        liveHint.setTextColor(Color.rgb(220,232,220));
+        liveHint.setTextColor(AppThemeColors.muted(this));
         liveHint.setGravity(Gravity.CENTER);
         liveHint.setPadding(0, dp(8), 0, 0);
         deck.addView(liveHint, match());
