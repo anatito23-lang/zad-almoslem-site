@@ -515,9 +515,25 @@ public class RadioPlaybackService extends Service {
     private void stopRadio() { adhanPauseRequested=false; pausedForAdhan=false; resumeAfterAdhan=false; getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").putString("radio_title","").remove("stream_url").remove("stream_local_path")
         .putBoolean("radio_paused",false).putBoolean("waiting_for_audio_focus",false).apply(); QuranHomeWidget.refreshAll(this); releasePlayer(); stopForeground(true); stopSelf(); }
     @Override public void onTaskRemoved(Intent rootIntent) {
-        // Playback is a media foreground service: removing the app task must not stop it.
-        android.util.Log.i("ZadAlmoslem", "App task removed; continuing foreground audio playback");
-        super.onTaskRemoved(rootIntent);
+        // Keep the user-started media session visible when the app is swiped from Recents.
+        android.content.SharedPreferences saved = getSharedPreferences("zad_audio", MODE_PRIVATE);
+        if (player != null && saved.getBoolean("radio_playing", false)) {
+            try {
+                Notification notification = buildPlaybackNotification(
+                        playbackTitle(), player.isPlaying() ? "يعمل في الخلفية" : "متوقف مؤقتًا");
+                if (Build.VERSION.SDK_INT >= 29) {
+                    startForeground(NOTIFICATION, notification,
+                            android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+                } else {
+                    startForeground(NOTIFICATION, notification);
+                }
+                android.util.Log.i("ZadAlmoslem", "Foreground media playback retained after task removal");
+            } catch (Exception e) {
+                android.util.Log.e("ZadAlmoslem", "Could not reaffirm foreground playback", e);
+            }
+        }
+        // Do not stop the service here. A user force-stop from Android Settings is
+        // intentionally respected by the operating system and cannot be bypassed.
     }
     @Override public void onDestroy(){releasePlayer();super.onDestroy();}
     @Override public IBinder onBind(Intent intent){return null;}
