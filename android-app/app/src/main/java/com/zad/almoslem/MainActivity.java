@@ -2,670 +2,952 @@ package com.zad.almoslem;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.TimePickerDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
-import android.view.KeyEvent;
-import android.content.pm.PackageManager;
-import android.content.Intent;
-import android.content.ContentValues;
-import android.provider.MediaStore;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import android.util.Base64;
-import android.net.Uri;
-import android.webkit.ValueCallback;
+import android.view.Gravity;
+import android.view.View;
+import android.widget.*;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.*;
 
 public class MainActivity extends Activity {
-    private WebView webView;
-    private ValueCallback<Uri[]> fileChooserCallback;
-    private static final int AUDIO_FILE_REQUEST = 2402;
-    private static final int NOTIFICATION_PERMISSION_REQUEST = 2401;
-    @Override public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getWindow().setStatusBarColor(0xFF071522);
-        getWindow().setNavigationBarColor(0xFF071522);
-        webView = new WebView(this);
-        webView.setBackgroundColor(0xFF071522);
-        WebSettings s = webView.getSettings();
-        s.setJavaScriptEnabled(true);
-        s.setDomStorageEnabled(true);
-        s.setDatabaseEnabled(true);
-        s.setMediaPlaybackRequiresUserGesture(false);
-        s.setLoadsImagesAutomatically(true);
-        s.setAllowFileAccess(false);
-        s.setGeolocationEnabled(true);
-        webView.addJavascriptInterface(new ReminderBridge(), "ZadAndroid");
-        // Keep WebView and service-worker caches so downloaded Quran pages remain available offline.
-        s.setCacheMode(WebSettings.LOAD_DEFAULT);
-        webView.setWebViewClient(new WebViewClient());
-        webView.setWebChromeClient(new WebChromeClient() {
-            @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
-                if (fileChooserCallback != null) fileChooserCallback.onReceiveValue(null);
-                fileChooserCallback = callback;
-                Intent pick = new Intent(Intent.ACTION_GET_CONTENT);
-                pick.setType("audio/*");
-                pick.addCategory(Intent.CATEGORY_OPENABLE);
-                try { startActivityForResult(Intent.createChooser(pick, "اختر تسجيل الأذان"), AUDIO_FILE_REQUEST); }
-                catch (Exception e) { fileChooserCallback = null; callback.onReceiveValue(null); return false; }
-                return true;
-            }
-            @Override public void onGeolocationPermissionsShowPrompt(String origin, android.webkit.GeolocationPermissions.Callback callback) {
-                callback.invoke(origin, true, false);
+    private static final String PREFS = "zad_reminders";
+    private static final String[] PRAYERS = {"الفجر","الظهر","العصر","المغرب","العشاء"};
+    private static final String[] KEYS = {"fajr","dhuhr","asr","maghrib","isha"};
+    private static final String[] VOICES = {"doha","basit","mustafa","husary","banna","rifaat","haram"};
+    private static final String[] VOICE_LABELS = {"أذان الدوحة","عبد الباسط عبد الصمد","مصطفى إسماعيل","محمود خليل الحصري","محمود علي البنا","الشيخ محمد رفعت","أذان الحرم المكي"};
+    private static final String[] FAJR_VOICES = {"doha","fajr_cairo","fajr_haram"};
+    private static final String[] FAJR_VOICE_LABELS = {"أذان الفجر — الدوحة","أذان الفجر — القاهرة","أذان الفجر — الحرم المكي"};
+    private final Map<String, Spinner> voiceSpinners = new LinkedHashMap<>();
+    private final Map<String, SeekBar> volumeBars = new LinkedHashMap<>();
+    private final Map<String, TextView> timeLabels = new LinkedHashMap<>();
+    private TextView status;
+    private ProgressBar progress;
+    private TextView progressText;
+    private Button downloadButton;
+    private boolean downloading = false;
+    private SharedPreferences prefs;
+    private final TextView[] homePrayerTimeViews = new TextView[5];
+
+    @Override public void onCreate(Bundle state) {
+        super.onCreate(state);
+        prefs = getSharedPreferences(PREFS, MODE_PRIVATE);
+        ReminderReceiver.ensureDefaultDailyReminders(this);
+        getWindow().setStatusBarColor(Color.rgb(8,48,40));
+        getWindow().setNavigationBarColor(Color.rgb(8,48,40));
+        requestNotificationPermission();
+        buildScreen();
+        refreshStorageStatus();
+        if (!hasAllSelectedAdhanFiles()) {
+            downloadButton.postDelayed(() -> downloadSelectedVoices(), 1200);
+        }
+    }
+
+    private int dp(float value) { return (int)(value * getResources().getDisplayMetrics().density + 0.5f); }
+    private GradientDrawable shape(int color, int radius) {
+        GradientDrawable d = new GradientDrawable();
+        d.setColor(color); d.setCornerRadius(dp(radius)); return d;
+    }
+    private TextView text(String value, int size, int color, boolean bold) {
+        TextView v = new TextView(this);
+        v.setText(value); v.setTextSize(size); v.setTextColor(color);
+        if (bold) v.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        v.setGravity(Gravity.RIGHT);
+        return v;
+    }
+    private LinearLayout column() {
+        LinearLayout l = new LinearLayout(this); l.setOrientation(LinearLayout.VERTICAL); return l;
+    }
+    private LinearLayout row() {
+        LinearLayout l = new LinearLayout(this); l.setOrientation(LinearLayout.HORIZONTAL);
+        l.setGravity(Gravity.CENTER_VERTICAL); return l;
+    }
+    private void pad(View v, int all) { v.setPadding(dp(all),dp(all),dp(all),dp(all)); }
+    private void addHomePrayerSummary(LinearLayout root) {
+        TextView title=text("مواقيت الصلاة",19,Color.rgb(20,55,43),true);
+        title.setPadding(0,0,0,dp(7));
+        root.addView(title);
+        LinearLayout card=column();
+        card.setBackground(shape(Color.WHITE,16));
+        card.setPadding(dp(8),dp(10),dp(8),dp(10));
+        LinearLayout times=row();
+        String[] icons={"🌅","☀️","🌤️","🌇","🌙"};
+        for(int i=0;i<PRAYERS.length;i++){
+            LinearLayout cell=column();
+            cell.setGravity(Gravity.CENTER);
+            TextView icon=text(icons[i],17,Color.rgb(25,90,70),false);
+            icon.setGravity(Gravity.CENTER);
+            TextView name=text(PRAYERS[i],11,Color.rgb(70,85,75),true);
+            name.setGravity(Gravity.CENTER);
+            int h=prefs.getInt("native_time_hour_"+PRAYERS[i],-1);
+            int minute=prefs.getInt("native_time_minute_"+PRAYERS[i],0);
+            String time=h<0?"--:--":String.format(Locale.getDefault(),"%02d:%02d",h,minute);
+            TextView value=text(time,13,Color.rgb(8,48,40),true);
+            value.setGravity(Gravity.CENTER);
+            homePrayerTimeViews[i]=value;
+            cell.addView(icon);cell.addView(name);cell.addView(value);
+            times.addView(cell,new LinearLayout.LayoutParams(0,-2,1f));
+        }
+        card.addView(times);
+        TextView note=text("المواقيت المحفوظة على هاتفك",10,Color.rgb(115,125,115),false);
+        note.setGravity(Gravity.CENTER);
+        note.setPadding(0,dp(6),0,0);
+        card.addView(note);
+        LinearLayout.LayoutParams lp=matchWrap();lp.bottomMargin=dp(10);
+        root.addView(card,lp);
+    }
+
+    private void buildScreen() {
+        ScrollView scroll = new ScrollView(this);
+        scroll.setFillViewport(true);
+        LinearLayout root = column();
+        root.setPadding(dp(16),dp(16),dp(16),dp(28));
+        root.setBackgroundColor(Color.rgb(244,247,243));
+        scroll.addView(root);
+
+        TextView heading = text("إعدادات الأذان",24,Color.rgb(8,48,40),true);
+        heading.setGravity(Gravity.CENTER);
+        heading.setPadding(0,dp(8),0,dp(16));
+        root.addView(heading);
+
+        TextView intro = text("تحكم في تشغيل الأذان وأصواته ومستوى الصوت لكل صلاة بصورة مستقلة.",14,Color.rgb(65,80,70),false);
+        addCard(root,intro);
+
+        Switch master = new Switch(this);
+        master.setText("تشغيل الأذان بصوت المؤذن عند مواقيت الصلاة");
+        master.setTextColor(Color.rgb(30,55,45));
+        master.setChecked(prefs.getBoolean("adhan_enabled",true));
+        master.setOnCheckedChangeListener((b,checked)->prefs.edit().putBoolean("adhan_enabled",checked).apply());
+        addCard(root,master);
+
+        TextView modeLabel=text("طريقة التنبيه عند دخول وقت الصلاة",14,Color.rgb(30,55,45),true);
+        modeLabel.setPadding(0,dp(8),0,dp(4));
+        root.addView(modeLabel,matchWrap());
+        Spinner adhanModeSpinner=new Spinner(this);
+        String[] adhanModeLabels={"أذان كامل بصوت المؤذن","تكبيرات بداية الأذان فقط","صوت تنبيه قصير فقط","بدون صوت — إشعار صامت"};
+        String[] adhanModeValues={"adhan","takbeer","tone","off"};
+        adhanModeSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,adhanModeLabels));
+        String savedAdhanMode=prefs.getString("adhan_mode","adhan");
+        int modeIndex=Arrays.asList(adhanModeValues).indexOf(savedAdhanMode);
+        adhanModeSpinner.setSelection(modeIndex<0?0:modeIndex);
+        adhanModeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            public void onNothingSelected(AdapterView<?> parent){}
+            public void onItemSelected(AdapterView<?> parent,View view,int position,long id){
+                prefs.edit().putString("adhan_mode",adhanModeValues[position]).apply();
             }
         });
-        setContentView(webView);
-        webView.loadUrl("https://anatito23-lang.github.io/zad-almoslem-site/?appbuild=20261119app-media3-native1&native=1");
-        requestNotificationPermission();
+        root.addView(adhanModeSpinner,matchWrap());
+        TextView modeHint=text("يمكنك اختيار الأذان كاملًا أو تكبيرات بدايته أو نغمة تنبيه قصيرة أو التنبيه الصامت. أثناء تجربة المؤذن يمكنك إيقاف الصوت من الزر المخصص.",11,Color.rgb(90,100,90),false);
+        modeHint.setPadding(0,dp(4),0,dp(10));
+        root.addView(modeHint,matchWrap());
+
+        LinearLayout duaCard = column();
+        duaCard.setBackground(shape(Color.WHITE,16));
+        duaCard.setPadding(dp(14),dp(12),dp(14),dp(12));
+        TextView duaTitle = text("دعاء ما بعد الأذان — الشيخ محمد متولي الشعراوي",16,Color.rgb(8,48,40),true);
+        duaCard.addView(duaTitle);
+        TextView duaHint = text("يبدأ تلقائيًا بعد انتهاء الأذان، ويمكنك إيقافه أو التحكم في مستوى صوته.",12,Color.rgb(80,90,82),false);
+        duaHint.setPadding(0,dp(5),0,dp(8)); duaCard.addView(duaHint);
+        Switch duaEnabled = new Switch(this);
+        duaEnabled.setText("تشغيل دعاء الشعراوي بعد الأذان");
+        duaEnabled.setTextColor(Color.rgb(30,55,45));
+        duaEnabled.setChecked(prefs.getBoolean("dua_after_adhan_enabled",true));
+        duaEnabled.setOnCheckedChangeListener((button,checked)->prefs.edit().putBoolean("dua_after_adhan_enabled",checked).apply());
+        duaCard.addView(duaEnabled);
+        TextView duaVolumeLabel = text("مستوى صوت الدعاء: "+prefs.getInt("dua_after_adhan_volume",80)+"%",12,Color.rgb(65,80,70),false);
+        duaCard.addView(duaVolumeLabel);
+        SeekBar duaVolume = new SeekBar(this); duaVolume.setMax(100); duaVolume.setProgress(prefs.getInt("dua_after_adhan_volume",80));
+        duaCard.addView(duaVolume,matchWrap());
+        duaVolume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            public void onProgressChanged(SeekBar bar,int value,boolean fromUser){
+                duaVolumeLabel.setText("مستوى صوت الدعاء: "+value+"%");
+                if(fromUser){
+                    prefs.edit().putInt("dua_after_adhan_volume",value).apply();
+                    Intent volumeIntent=new Intent(MainActivity.this,ReminderAudioService.class);
+                    volumeIntent.setAction(ReminderAudioService.ACTION_SET_VOLUME); volumeIntent.putExtra("volume",value);
+                    try{startService(volumeIntent);}catch(Exception ignored){}
+                }
+            }
+            public void onStartTrackingTouch(SeekBar bar){}
+            public void onStopTrackingTouch(SeekBar bar){}
+        });
+        Button downloadDua = new Button(this); downloadDua.setText("تنزيل دعاء الشعراوي على الهاتف");
+        duaCard.addView(downloadDua,matchWrap());
+        TextView duaStatus = text("يُنزّل مرة واحدة ليعمل بعد الأذان دون إنترنت.",11,Color.rgb(80,90,82),false);
+        File savedDua = new File(new File(getFilesDir(), "reminders"), "dua.mp3");
+        if (isAudioFileValid(savedDua)) {
+            duaStatus.setText("دعاء الشعراوي محفوظ داخل التطبيق وجاهز للتشغيل بعد الأذان.");
+        }
+        duaCard.addView(duaStatus);
+        downloadDua.setOnClickListener(v->{downloadDuaRecording(downloadDua,duaStatus);});
+        root.addView(duaCard,matchWrap());
+
+        LinearLayout reminderAudioCard=column();
+        reminderAudioCard.setBackground(shape(Color.WHITE,16));
+        reminderAudioCard.setPadding(dp(14),dp(12),dp(14),dp(12));
+        TextView reminderAudioTitle=text("التذكيرات الصوتية — تسجيلات الشيخ عبدالباسط",16,Color.rgb(8,48,40),true);
+        reminderAudioCard.addView(reminderAudioTitle);
+        TextView reminderAudioInfo=text("آيات قرآنية بصوت الشيخ عبدالباسط عبدالصمد. تُنزّل مرة واحدة وتحفظ داخل التطبيق لتعمل دون إنترنت. لن نستخدم الصوت الآلي في تذكير اقتراب الصلاة أو تذكير الذكر.",12,Color.rgb(80,90,82),false);
+        reminderAudioInfo.setPadding(0,dp(5),0,dp(8));
+        reminderAudioCard.addView(reminderAudioInfo);
+        Button downloadReminderAudio=new Button(this);
+        downloadReminderAudio.setText("تنزيل تسجيلات التذكير");
+        reminderAudioCard.addView(downloadReminderAudio,matchWrap());
+        TextView reminderAudioStatus=text("",11,Color.rgb(80,90,82),false);
+        reminderAudioCard.addView(reminderAudioStatus);
+        refreshReminderAudioStatus(reminderAudioStatus);
+        downloadReminderAudio.setOnClickListener(v->downloadReminderRecitations(downloadReminderAudio,reminderAudioStatus));
+        root.addView(reminderAudioCard,matchWrap());
+
+        TextView silentInfo = text("يمكنك اختيار الصلوات التي تريد فيها تفعيل الوضع الصامت وقت الأذان، ثم يعود الهاتف لوضعه السابق تلقائيًا. يتطلب ذلك إذن عدم الإزعاج من إعدادات Android.",13,Color.rgb(70,85,75),false);
+        addCard(root,silentInfo);
+        Button silentPermission = new Button(this);
+        silentPermission.setText("إعداد إذن الوضع الصامت");
+        silentPermission.setOnClickListener(v -> {
+            android.app.NotificationManager nm = (android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+            if (Build.VERSION.SDK_INT >= 23 && nm != null && nm.isNotificationPolicyAccessGranted()) {
+                Toast.makeText(this,"إذن الوضع الصامت مفعّل بالفعل",Toast.LENGTH_SHORT).show();
+                return;
+            }
+            try { startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)); }
+            catch (Exception e) { Toast.makeText(this,"تعذر فتح إعداد الإذن في الهاتف",Toast.LENGTH_LONG).show(); }
+        });
+        root.addView(silentPermission,matchWrap());
+
+        TextView prayerSettingsTitle=text("إعدادات كل صلاة",19,Color.rgb(20,55,43),true);
+        prayerSettingsTitle.setPadding(0,dp(18),0,dp(8));root.addView(prayerSettingsTitle);
+        for (int i=0;i<PRAYERS.length;i++) addPrayerCard(root,i);
+
+        TextView downloadTitle = text("أصوات الأذان على الهاتف",18,Color.rgb(20,55,43),true);
+        downloadTitle.setPadding(0,dp(20),0,dp(8)); root.addView(downloadTitle);
+        TextView note = text("نزّل الأصوات المختارة ليتمكن التطبيق من تشغيلها من ذاكرته دون الحاجة إلى الإنترنت.",13,Color.DKGRAY,false);
+        addCard(root,note);
+        downloadButton = new Button(this);
+        downloadButton.setText("تنزيل الأصوات المختارة");
+        downloadButton.setTextColor(Color.WHITE);
+        downloadButton.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.rgb(17,91,68)));
+        root.addView(downloadButton,matchWrap());
+        downloadButton.setOnClickListener(v->downloadSelectedVoices());
+        progress = new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
+        progress.setMax(100);progress.setProgress(0);root.addView(progress,matchWrap());
+        progressText = text("لم يبدأ التنزيل",12,Color.DKGRAY,false);root.addView(progressText);
+        status = text("",13,Color.rgb(30,70,50),false);status.setPadding(0,dp(12),0,0);root.addView(status);
+        Button audioCheck = new Button(this);audioCheck.setText("فحص ملفات صوت الأذان");
+        root.addView(audioCheck,matchWrap());
+        TextView audioDiagnostics = text("يعرض حالة ملفات الأذان المحفوظة على الهاتف.",12,Color.rgb(70,85,75),false);
+        root.addView(audioDiagnostics,matchWrap());
+        audioCheck.setOnClickListener(v -> audioDiagnostics.setText(buildAudioDiagnostics()));
+        setContentView(AppTabs.wrap(this,scroll,"more"));
+    }
+
+    private void addStandaloneTools(LinearLayout root) {
+        TextView toolsTitle=text("خدمات التطبيق المستقلة",19,Color.rgb(20,55,43),true);
+        toolsTitle.setPadding(0,dp(18),0,dp(8)); root.addView(toolsTitle);
+
+        LinearLayout radioCard=column();
+        radioCard.setBackground(shape(Color.WHITE,16)); radioCard.setPadding(dp(14),dp(12),dp(14),dp(12));
+        TextView radioTitle=text("إذاعة القرآن الكريم",17,Color.rgb(20,55,43),true);
+        TextView radioDesc=text("تشغيل البث الصوتي مباشرة من مشغل Android، دون فتح أي صفحة ويب.",13,Color.DKGRAY,false);
+        radioCard.addView(radioTitle); radioCard.addView(radioDesc);
+        Button radioButton=new Button(this);
+        radioCard.addView(radioButton,matchWrap());
+        Button cairoRadioButton=new Button(this);cairoRadioButton.setText("إذاعة القرآن الكريم من القاهرة");
+        radioCard.addView(cairoRadioButton,matchWrap());
+        cairoRadioButton.setOnClickListener(v->{
+            String stream="https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8";
+            Intent intent=new Intent(this,RadioPlaybackService.class);intent.setAction(RadioPlaybackService.ACTION_PLAY);
+            intent.putExtra("url",stream);intent.putExtra("kind","radio");intent.putExtra("label","إذاعة القرآن الكريم من القاهرة");intent.putExtra("station","egypt");
+            try{if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);}
+            catch(Exception e){status.setText("تعذر تشغيل إذاعة القاهرة: "+e.getMessage());}
+        });
+        Button stopRadioButton=new Button(this);stopRadioButton.setText("إيقاف الإذاعة");
+        radioCard.addView(stopRadioButton,matchWrap());
+        stopRadioButton.setOnClickListener(v->{
+            Intent stop=new Intent(this,RadioPlaybackService.class);stop.setAction(RadioPlaybackService.ACTION_STOP);
+            try{startService(stop);}catch(Exception e){status.setText("تعذر إيقاف الإذاعة: "+e.getMessage());}
+        });
+        Runnable refreshRadio=()->{
+            boolean playing=getSharedPreferences("zad_audio",MODE_PRIVATE).getBoolean("radio_playing",false)
+                    && "radio".equals(getSharedPreferences("zad_audio",MODE_PRIVATE).getString("active_kind",""));
+            radioButton.setText(playing?"إيقاف إذاعة القرآن":"تشغيل إذاعة القرآن");
+        };
+        refreshRadio.run();
+        radioButton.setOnClickListener(v->{
+            android.content.SharedPreferences audio=getSharedPreferences("zad_audio",MODE_PRIVATE);
+            boolean playing=audio.getBoolean("radio_playing",false)&&"radio".equals(audio.getString("active_kind",""));
+            Intent intent=new Intent(this,RadioPlaybackService.class);
+            if(playing){intent.setAction(RadioPlaybackService.ACTION_STOP);audio.edit().putBoolean("radio_playing",false).putString("active_kind","").apply();}
+            else{
+                String stream="https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8";
+                intent.setAction(RadioPlaybackService.ACTION_PLAY);
+                intent.putExtra("url",stream);intent.putExtra("kind","radio");intent.putExtra("label","إذاعة القرآن الكريم من القاهرة");intent.putExtra("station","egypt");
+                audio.edit().putBoolean("radio_playing",true).putString("active_kind","radio").apply();
+            }
+            try{if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);radioButton.postDelayed(refreshRadio,500);}
+            catch(Exception e){status.setText("تعذر تشغيل الإذاعة: "+e.getMessage());}
+        });
+        addCard(root,radioCard);
+        addNativeQuranPlayer(root);
+
+        LinearLayout tasbeeh=column();
+        tasbeeh.setBackground(shape(Color.rgb(17,65,51),20));
+        tasbeeh.setPadding(dp(12),dp(12),dp(12),dp(12));
+        TextView tasTitle=text("السبحة الإلكترونية",18,Color.WHITE,true);
+        tasTitle.setGravity(Gravity.CENTER);
+        TextView tasDesc=text("وَاذْكُرُوا اللَّهَ كَثِيرًا",14,Color.rgb(224,199,133),true);
+        tasDesc.setGravity(Gravity.CENTER);
+        String[] tasbeehDhikr={"سبحان الله","الحمد لله","الله أكبر","لا إله إلا الله","أستغفر الله وأتوب إليه","اللهم صلِّ وسلم على نبينا محمد"};
+        int[] tasbeehGoals={33,66,99};
+        Spinner tasbeehGoal=new Spinner(this);
+        tasbeehGoal.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"٣٣ مرة","٦٦ مرة","٩٩ مرة"}));
+        int savedGoal=prefs.getInt("native_tasbeeh_goal",33);
+        int goalIndex=savedGoal==66?1:(savedGoal==99?2:0);
+        tasbeehGoal.setSelection(goalIndex);
+        TextView currentDhikr=text("",17,Color.WHITE,true);currentDhikr.setGravity(Gravity.CENTER);
+        currentDhikr.setPadding(dp(4),dp(20),dp(4),dp(10));
+        TextView count=text("0",34,Color.rgb(232,203,137),true);count.setGravity(Gravity.CENTER);
+        android.graphics.drawable.GradientDrawable countRing=new android.graphics.drawable.GradientDrawable();
+        countRing.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        countRing.setColor(Color.rgb(10,49,40));countRing.setStroke(dp(3),Color.rgb(218,185,112));
+        android.widget.FrameLayout countCircle=new android.widget.FrameLayout(this);
+        countCircle.setBackground(countRing);
+        countCircle.addView(count,new android.widget.FrameLayout.LayoutParams(dp(104),dp(104),Gravity.CENTER));
+        LinearLayout circleHolder=row();circleHolder.setGravity(Gravity.CENTER);circleHolder.addView(countCircle,new LinearLayout.LayoutParams(dp(112),dp(112)));
+        TextView target=text("",13,Color.rgb(225,225,215),false);target.setGravity(Gravity.CENTER);
+        TextView tasProgress=text("",13,Color.rgb(225,225,215),false);tasProgress.setGravity(Gravity.CENTER);
+        int[] dhikrIndex={prefs.getInt("native_tasbeeh_dhikr",0)};
+        int[] currentCount={prefs.getInt("native_tasbeeh_count",0)};
+        int[] goal={savedGoal};
+        Runnable drawTasbeeh=()->{
+            dhikrIndex[0]=Math.floorMod(dhikrIndex[0],tasbeehDhikr.length);
+            currentCount[0]=Math.max(0,Math.min(currentCount[0],goal[0]));
+            currentDhikr.setText(tasbeehDhikr[dhikrIndex[0]]);
+            count.setText(String.valueOf(currentCount[0]));
+            target.setText("الهدف: "+goal[0]+" مرة");
+            tasProgress.setText("الذكر "+(dhikrIndex[0]+1)+" من "+tasbeehDhikr.length+"  •  "+currentCount[0]+" / "+goal[0]);
+        };
+        LinearLayout actions=row();
+        Button add=new Button(this);add.setText("سَبِّح");add.setTextSize(17);
+        Button reset=new Button(this);reset.setText("إعادة");
+        actions.addView(add,new LinearLayout.LayoutParams(0,dp(54),2));
+        actions.addView(reset,new LinearLayout.LayoutParams(0,dp(54),1));
+        tasbeehGoal.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            public void onNothingSelected(AdapterView<?> parent){}
+            public void onItemSelected(AdapterView<?> parent,View view,int position,long id){
+                int selectedGoal=tasbeehGoals[position];
+                if(goal[0]!=selectedGoal){
+                    goal[0]=selectedGoal;
+                    currentCount[0]=0;
+                    prefs.edit().putInt("native_tasbeeh_goal",goal[0]).putInt("native_tasbeeh_count",0).apply();
+                }
+                drawTasbeeh.run();
+            }
+        });
+        add.setOnClickListener(v->{
+            if(currentCount[0]<goal[0]) currentCount[0]++;
+            if(currentCount[0]>=goal[0]){
+                prefs.edit().putInt("native_tasbeeh_count",0)
+                    .putInt("native_tasbeeh_dhikr",(dhikrIndex[0]+1)%tasbeehDhikr.length).apply();
+                dhikrIndex[0]=(dhikrIndex[0]+1)%tasbeehDhikr.length;
+                currentCount[0]=0;
+                drawTasbeeh.run();
+                android.widget.Toast.makeText(this,"أحسنت، اكتمل الذكر. انتقلنا إلى الذكر التالي",android.widget.Toast.LENGTH_SHORT).show();
+            }else{
+                prefs.edit().putInt("native_tasbeeh_count",currentCount[0])
+                    .putInt("native_tasbeeh_dhikr",dhikrIndex[0]).apply();
+                drawTasbeeh.run();
+            }
+        });
+        reset.setOnClickListener(v->{
+            currentCount[0]=0;
+            prefs.edit().putInt("native_tasbeeh_count",0).apply();
+            drawTasbeeh.run();
+        });
+        tasbeeh.addView(tasTitle);tasbeeh.addView(tasDesc);
+        tasbeeh.addView(text("اختر عدد التسبيحات",13,Color.WHITE,true));
+        tasbeeh.addView(tasbeehGoal,matchWrap());
+        tasbeeh.addView(currentDhikr);tasbeeh.addView(circleHolder);
+        tasbeeh.addView(target);tasbeeh.addView(tasProgress);
+        tasbeeh.addView(actions);
+        drawTasbeeh.run();
+        addCard(root,tasbeeh);
+
+        LinearLayout dhikr=column();
+        dhikr.setBackground(shape(Color.WHITE,16));dhikr.setPadding(dp(14),dp(12),dp(14),dp(12));
+        dhikr.addView(text("ذكر اليوم",17,Color.rgb(20,55,43),true));
+        dhikr.addView(text("قال رسول الله ﷺ: «من قال سبحان الله وبحمده في يوم مائة مرة، حُطَّت خطاياه وإن كانت مثل زبد البحر».",15,Color.rgb(55,75,65),false));
+        dhikr.addView(text("رواه البخاري ومسلم.",12,Color.rgb(120,120,120),false));
+        addCard(root,dhikr);
+    }
+
+    private void addNativeQuranPlayer(LinearLayout root) {
+        TextView section=text("استماع القرآن الكريم",18,Color.rgb(20,55,43),true);
+        section.setPadding(0,dp(18),0,dp(8));root.addView(section);
+        LinearLayout card=column();card.setBackground(shape(Color.WHITE,16));card.setPadding(dp(14),dp(12),dp(14),dp(12));
+        card.addView(text("اختر القارئ والسورة، وسيعمل الصوت في مشغل Android بالخلفية دون فتح الموقع.",13,Color.DKGRAY,false));
+        Spinner reciterSpinner=new Spinner(this),surahSpinner=new Spinner(this);
+        reciterSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"جارٍ تحميل القراء..."}));
+        String[] surahs={"الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس","هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه","الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم","لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر","فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق","الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة","الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج","نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس","التكوير","الانفطار","المطففين","الانشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد","الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات","القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر","المسد","الإخلاص","الفلق","الناس"};
+        surahSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,surahs));
+        card.addView(text("القارئ",12,Color.DKGRAY,true));card.addView(reciterSpinner,matchWrap());
+        card.addView(text("السورة",12,Color.DKGRAY,true));card.addView(surahSpinner,matchWrap());
+        Button play=new Button(this);play.setText("استمع الآن");card.addView(play,matchWrap());
+        Button download=new Button(this);download.setText("تنزيل السورة للاستماع دون إنترنت");card.addView(download,matchWrap());
+        ProgressBar quranProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);quranProgress.setMax(100);card.addView(quranProgress,matchWrap());
+        TextView state=text("جارٍ تحميل قائمة القراء من مكتبة التسجيلات.",12,Color.rgb(80,100,90),false);card.addView(state);
+        addCard(root,card);
+        final ArrayList<org.json.JSONObject> reciters=new ArrayList<>();
+        final ArrayList<String> reciterNames=new ArrayList<>();
+        new Thread(()->{
+            HttpURLConnection connection=null;
+            try{
+                connection=(HttpURLConnection)new URL("https://mp3quran.net/api/v3/reciters?language=ar").openConnection();
+                connection.setConnectTimeout(15000);connection.setReadTimeout(20000);
+                if(connection.getResponseCode()!=200)throw new Exception("تعذر تحميل قائمة القراء");
+                ByteArrayOutputStream out=new ByteArrayOutputStream();
+                try(InputStream in=connection.getInputStream()){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}
+                org.json.JSONArray array=new org.json.JSONObject(out.toString("UTF-8")).getJSONArray("reciters");
+                for(int i=0;i<array.length();i++){org.json.JSONObject item=array.getJSONObject(i);if(item.has("moshaf")&&item.getJSONArray("moshaf").length()>0){reciters.add(item);reciterNames.add(item.optString("name","قارئ"));}}
+                runOnUiThread(()->{
+                    if(reciterNames.isEmpty()){state.setText("لا توجد قائمة قراء متاحة حاليًا.");return;}
+                    reciterSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,reciterNames));
+                    state.setText("تم تحميل "+reciterNames.size()+" قارئًا. اختر القارئ والسورة.");
+                });
+            }catch(Exception e){runOnUiThread(()->state.setText("تعذر تحميل القراء. تحقق من الإنترنت ثم أعد فتح التطبيق."));}
+            finally{if(connection!=null)connection.disconnect();}
+        }).start();
+        play.setOnClickListener(v->{
+            int ri=reciterSpinner.getSelectedItemPosition(),si=surahSpinner.getSelectedItemPosition()+1;
+            if(ri<0||ri>=reciters.size()){state.setText("انتظر حتى تكتمل قائمة القراء.");return;}
+            try{
+                org.json.JSONObject reciter=reciters.get(ri);
+                String audioUrl=resolveQuranAudioUrl(reciter,si);
+                if(audioUrl==null){state.setText("السورة غير متاحة لهذا القارئ. اختر قارئًا آخر.");return;}
+                String label="سورة "+surahs[si-1]+" — "+reciter.optString("name","القارئ");
+                getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putString("last_quran_url",audioUrl).putString("last_quran_title",label).putBoolean("radio_playing",true).putString("active_kind","quran").apply();
+                Intent intent=new Intent(this,RadioPlaybackService.class);intent.setAction(RadioPlaybackService.ACTION_PLAY);
+                intent.putExtra("url",audioUrl);intent.putExtra("kind","quran");intent.putExtra("label",label);
+                File offline=new File(new File(getFilesDir(),"quran"),"reciter_"+ri+"_surah_"+si+".mp3");
+                if(offline.isFile()&&offline.length()>10000)intent.putExtra("local_path",offline.getAbsolutePath());
+                if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);
+                state.setText("يتم تشغيل "+label+" في الخلفية.");
+            }catch(Exception e){state.setText("تعذر بدء التلاوة: "+e.getMessage());}
+        });
+        download.setOnClickListener(v->{
+            int ri=reciterSpinner.getSelectedItemPosition(),si=surahSpinner.getSelectedItemPosition()+1;
+            if(ri<0||ri>=reciters.size()){state.setText("انتظر حتى تكتمل قائمة القراء.");return;}
+            try{
+                String url=resolveQuranAudioUrl(reciters.get(ri),si);
+                if(url==null){state.setText("السورة غير متاحة لهذا القارئ.");return;}
+                String label="سورة "+surahs[si-1]+" — "+reciterNames.get(ri);
+                download.setEnabled(false);quranProgress.setProgress(0);state.setText("جارٍ تنزيل "+label+"...");
+                new Thread(()->{
+                    HttpURLConnection connection=null;File temp=null;
+                    try{
+                        File dir=new File(getFilesDir(),"quran");if(!dir.exists()&&!dir.mkdirs())throw new Exception("تعذر إنشاء مجلد القرآن");
+                        File target=new File(dir,"reciter_"+ri+"_surah_"+si+".mp3");temp=new File(dir,target.getName()+".part");
+                        connection=(HttpURLConnection)new URL(url).openConnection();connection.setConnectTimeout(20000);connection.setReadTimeout(90000);connection.setInstanceFollowRedirects(true);
+                        if(connection.getResponseCode()!=200)throw new Exception("مصدر التلاوة غير متاح");
+                        long total=connection.getContentLength(),got=0;
+                        try(InputStream in=connection.getInputStream();FileOutputStream out=new FileOutputStream(temp)){
+                            byte[] buffer=new byte[16384];int n;
+                            while((n=in.read(buffer))!=-1){got+=n;if(got>100L*1024*1024)throw new Exception("حجم الملف تجاوز الحد المسموح");out.write(buffer,0,n);
+                                final long current=got,expected=total;
+                                runOnUiThread(()->quranProgress.setProgress(expected>0?(int)Math.min(99,current*100/expected):0));
+                            }out.getFD().sync();
+                        }
+                        if(temp.length()<10000)throw new Exception("ملف التلاوة غير مكتمل");
+                        try(FileInputStream in=new FileInputStream(temp)){byte[] h=new byte[3];int n=in.read(h);if(!(n>=3&&h[0]=='I'&&h[1]=='D'&&h[2]=='3')&&!(n>=2&&(h[0]&255)==255&&(h[1]&224)==224))throw new Exception("الملف الذي وصل ليس MP3 صالحًا");}
+                        if(target.exists()&&!target.delete())throw new Exception("تعذر استبدال الملف السابق");
+                        if(!temp.renameTo(target))throw new Exception("تعذر حفظ الملف داخل التطبيق");
+                        runOnUiThread(()->{quranProgress.setProgress(100);state.setText("تم تنزيل "+label+" وحفظه داخل التطبيق. سيعمل دون إنترنت.");});
+                    }catch(Exception e){runOnUiThread(()->state.setText("فشل التنزيل: "+(e.getMessage()==null?"خطأ غير معروف":e.getMessage())));}
+                    finally{if(connection!=null)connection.disconnect();if(temp!=null&&temp.exists())temp.delete();runOnUiThread(()->download.setEnabled(true));}
+                }).start();
+            }catch(Exception e){state.setText("تعذر تجهيز التنزيل: "+e.getMessage());}
+        });
+    }
+
+    private String resolveQuranAudioUrl(org.json.JSONObject reciter,int surahId) throws Exception {
+        org.json.JSONArray moshafs=reciter.getJSONArray("moshaf");
+        for(int i=0;i<moshafs.length();i++){
+            org.json.JSONObject m=moshafs.getJSONObject(i);String list=m.optString("surah_list","");
+            boolean includes=false;
+            for(String id:list.split(",")){try{if(Integer.parseInt(id.trim())==surahId){includes=true;break;}}catch(Exception ignored){}}
+            String server=m.optString("server","");
+            if(includes&&!server.isEmpty()){if(!server.endsWith("/"))server+="/";return server+String.format(Locale.US,"%03d.mp3",surahId);}
+        }
+        return null;
+    }
+
+    private void addNativeAzkar(LinearLayout root) {
+        TextView title=text("الأذكار اليومية",18,Color.rgb(20,55,43),true);
+        title.setPadding(0,dp(18),0,dp(8));root.addView(title);
+        LinearLayout card=column();card.setBackground(shape(Color.WHITE,16));card.setPadding(dp(14),dp(12),dp(14),dp(12));
+        String[] categories={"أذكار الصباح","أذكار المساء","أذكار بعد الصلاة"};
+        String[][][] items={
+          {
+            {"أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.", "1"},
+            {"اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت وإليك النشور.", "1"},
+            {"رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا.", "3"},
+            {"سبحان الله وبحمده.", "100"},
+            {"أستغفر الله وأتوب إليه.", "100"}
+          },
+          {
+            {"أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.", "1"},
+            {"اللهم بك أمسينا وبك أصبحنا وبك نحيا وبك نموت وإليك المصير.", "1"},
+            {"رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا.", "3"},
+            {"سبحان الله وبحمده.", "100"},
+            {"أستغفر الله وأتوب إليه.", "100"}
+          },
+          {
+            {"أستغفر الله.", "3"},
+            {"اللهم أنت السلام ومنك السلام، تباركت يا ذا الجلال والإكرام.", "1"},
+            {"سبحان الله.", "33"},
+            {"الحمد لله.", "33"},
+            {"الله أكبر.", "33"},
+            {"لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.", "1"}
+          }
+        };
+        Spinner category=new Spinner(this);
+        category.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,categories));
+        card.addView(category,matchWrap());
+        TextView dhikr=text("",19,Color.rgb(35,70,55),true);dhikr.setGravity(Gravity.CENTER);dhikr.setPadding(dp(4),dp(18),dp(4),dp(18));card.addView(dhikr);
+        TextView progressText=text("",14,Color.rgb(100,110,100),false);progressText.setGravity(Gravity.CENTER);card.addView(progressText);
+        Button countButton=new Button(this);countButton.setText("تسبيح");card.addView(countButton,matchWrap());
+        Button resetButton=new Button(this);resetButton.setText("إعادة الذكر الحالي");card.addView(resetButton,matchWrap());
+        final int[] current={0},count={0},active={0};
+        Runnable render=()->{
+            int cat=active[0];current[0]=Math.max(0,Math.min(current[0],items[cat].length-1));
+            int goal=Integer.parseInt(items[cat][current[0]][1]);
+            count[0]=prefs.getInt("native_azkar_"+cat+"_"+current[0],0);
+            dhikr.setText(items[cat][current[0]][0]);
+            progressText.setText("الذكر "+(current[0]+1)+" من "+items[cat].length+" — "+Math.min(count[0],goal)+" / "+goal);
+            countButton.setText(count[0]>=goal?"اكتمل الذكر — التالي":"اضغط للتكرار");
+        };
+        category.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            public void onNothingSelected(AdapterView<?> parent){}
+            public void onItemSelected(AdapterView<?> parent,View view,int position,long id){active[0]=position;current[0]=0;render.run();}
+        });
+        countButton.setOnClickListener(v->{
+            int cat=active[0],goal=Integer.parseInt(items[cat][current[0]][1]);
+            if(count[0]>=goal){current[0]=(current[0]+1)%items[cat].length;render.run();return;}
+            count[0]++;prefs.edit().putInt("native_azkar_"+cat+"_"+current[0],count[0]).apply();
+            if(count[0]>=goal){progressText.setText("أحسنت، اكتمل الذكر. اضغط للانتقال إلى الذكر التالي.");countButton.setText("التالي");}
+            else progressText.setText("الذكر "+(current[0]+1)+" من "+items[cat].length+" — "+count[0]+" / "+goal);
+        });
+        resetButton.setOnClickListener(v->{prefs.edit().putInt("native_azkar_"+active[0]+"_"+current[0],0).apply();count[0]=0;render.run();});
+        addCard(root,card);
+    }
+
+    private void addPrayerTimesUpdater(LinearLayout root) {
+        TextView title=text("مواقيت الصلاة حسب مدينتك",18,Color.rgb(20,55,43),true);
+        title.setPadding(0,dp(18),0,dp(8));root.addView(title);
+        LinearLayout card=column();card.setBackground(shape(Color.WHITE,16));card.setPadding(dp(14),dp(12),dp(14),dp(12));
+        TextView hint=text("اختر المدينة لتحديث المواقيت وحفظ تنبيهات الصلوات على الهاتف. آخر مواقيت محفوظة تظل متاحة دون إنترنت.",13,Color.DKGRAY,false);
+        card.addView(hint);
+        String[] cities={"القاهرة","الجيزة","الزقازيق","الإسكندرية","المنصورة","طنطا","بنها","الإسماعيلية","بورسعيد","السويس","أسيوط","الأقصر","أسوان"};
+        String[] english={"Cairo","Giza","Zagazig","Alexandria","Mansoura","Tanta","Banha","Ismailia","Port Said","Suez","Asyut","Luxor","Aswan"};
+        Spinner city=new Spinner(this);
+        city.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,cities));
+        city.setSelection(Math.max(0,Arrays.asList(english).indexOf(prefs.getString("native_prayer_city","Cairo"))));
+        card.addView(city,matchWrap());
+        Button update=new Button(this);update.setText("تحديث مواقيت الصلاة");card.addView(update,matchWrap());
+        TextView result=text("لم يتم تحديث المواقيت بعد.",12,Color.rgb(80,100,90),false);card.addView(result);
+        update.setOnClickListener(v->{
+            int selected=city.getSelectedItemPosition();String cityEn=english[selected],cityAr=cities[selected];
+            prefs.edit().putString("native_prayer_city",cityEn).apply();
+            update.setEnabled(false);result.setText("جارٍ جلب المواقيت...");
+            new Thread(()->{
+                HttpURLConnection connection=null;
+                try{
+                    String url="https://api.aladhan.com/v1/timingsByCity?city="+java.net.URLEncoder.encode(cityEn,"UTF-8")+"&country=Egypt&method=5&school=0";
+                    connection=(HttpURLConnection)new URL(url).openConnection();connection.setConnectTimeout(15000);connection.setReadTimeout(20000);
+                    connection.setRequestMethod("GET");
+                    if(connection.getResponseCode()!=200)throw new Exception("تعذر الاتصال بخدمة المواقيت");
+                    ByteArrayOutputStream output=new ByteArrayOutputStream();
+                    try(InputStream in=connection.getInputStream()){byte[] buffer=new byte[4096];int n;while((n=in.read(buffer))!=-1)output.write(buffer,0,n);}
+                    org.json.JSONObject rootJson=new org.json.JSONObject(output.toString("UTF-8"));
+                    org.json.JSONObject timings=rootJson.getJSONObject("data").getJSONObject("timings");
+                    String[] apiKeys={"Fajr","Dhuhr","Asr","Maghrib","Isha"};
+                    long now=System.currentTimeMillis();
+                    for(int i=0;i<PRAYERS.length;i++){
+                        String raw=timings.getString(apiKeys[i]).split(" ")[0];
+                        String[] hm=raw.split(":");int hour=Integer.parseInt(hm[0]),minute=Integer.parseInt(hm[1]);
+                        prefs.edit().putInt("native_time_hour_"+PRAYERS[i],hour).putInt("native_time_minute_"+PRAYERS[i],minute).apply();
+                        Calendar next=Calendar.getInstance();next.set(Calendar.HOUR_OF_DAY,hour);next.set(Calendar.MINUTE,minute);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);
+                        if(next.getTimeInMillis()<=now)next.add(Calendar.DAY_OF_YEAR,1);
+                        if(prefs.getBoolean("prayer_enabled_"+PRAYERS[i],true))ReminderReceiver.schedulePrayer(this,PRAYERS[i],next.getTimeInMillis());
+                        final String label=String.format(Locale.getDefault(),"%02d:%02d",hour,minute);
+                        final String prayer=PRAYERS[i];
+                        runOnUiThread(()->{TextView tv=timeLabels.get(prayer);if(tv!=null)tv.setText(label);});
+                    }
+                    runOnUiThread(()->result.setText("تم تحديث مواقيت "+cityAr+" وحفظ التنبيهات بنجاح."));
+                }catch(Exception e){runOnUiThread(()->result.setText("تعذر تحديث المواقيت: "+(e.getMessage()==null?"تحقق من الإنترنت":e.getMessage())));}
+                finally{if(connection!=null)connection.disconnect();runOnUiThread(()->update.setEnabled(true));}
+            }).start();
+        });
+        addCard(root,card);
+    }
+
+    private LinearLayout.LayoutParams matchWrap() {
+        return new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+    }
+    private void addCard(LinearLayout root, View content) {
+        LinearLayout card=column(); card.setBackground(shape(Color.WHITE,16)); card.setPadding(dp(14),dp(12),dp(14),dp(12));
+        card.addView(content,matchWrap());
+        LinearLayout.LayoutParams lp=matchWrap(); lp.bottomMargin=dp(10); root.addView(card,lp);
+    }
+    private void addPrayerCard(LinearLayout root,int index) {
+        String prayer=PRAYERS[index], key=KEYS[index];
+        LinearLayout card=column(); card.setBackground(shape(Color.WHITE,16)); card.setPadding(dp(14),dp(12),dp(14),dp(12));
+        LinearLayout.LayoutParams outer=matchWrap(); outer.bottomMargin=dp(12); root.addView(card,outer);
+        LinearLayout top=row();
+        TextView name=text(prayer,18,Color.rgb(20,55,43),true);
+        top.addView(name,new LinearLayout.LayoutParams(0,dp(44),1));
+        TextView time=text(savedTimeLabel(prayer),14,Color.rgb(80,100,90),false);
+        timeLabels.put(prayer,time); top.addView(time);
+        // أوقات الصلاة تُحدّث آليًا من طريقة الحساب المختارة، ولا يوجد تعديل يدوي للوقت.
+        card.addView(top);
+        TextView voiceLabel=text("صوت المؤذن",13,Color.DKGRAY,true); voiceLabel.setPadding(0,dp(8),0,0); card.addView(voiceLabel);
+        Spinner spinner=new Spinner(this);
+        boolean fajr = index == 0;
+        String[] availableVoices = fajr ? FAJR_VOICES : VOICES;
+        String[] availableLabels = fajr ? FAJR_VOICE_LABELS : VOICE_LABELS;
+        ArrayAdapter<String> adapter=new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,availableLabels);
+        spinner.setAdapter(adapter);
+        String voicePreferenceKey = fajr ? "adhan_fajr_voice" : "adhan_voice_"+prayer;
+        String saved=prefs.getString(voicePreferenceKey,"doha");
+        spinner.setSelection(Math.max(0,Arrays.asList(availableVoices).indexOf(saved)));
+        card.addView(spinner,matchWrap()); voiceSpinners.put(prayer,spinner);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            public void onNothingSelected(AdapterView<?> p){}
+            public void onItemSelected(AdapterView<?> p,View v,int position,long id){
+                prefs.edit().putString(voicePreferenceKey,availableVoices[position]).apply();
+            }
+        });
+        TextView volLabel=text("مستوى الصوت: "+prefs.getInt("adhan_volume_"+key,100)+"%",12,Color.DKGRAY,false);
+        card.addView(volLabel);
+        SeekBar seek=new SeekBar(this); seek.setMax(100); seek.setProgress(prefs.getInt("adhan_volume_"+key,100));
+        card.addView(seek,matchWrap()); volumeBars.put(prayer,seek);
+        seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            public void onProgressChanged(SeekBar b,int value,boolean user){volLabel.setText("مستوى الصوت: "+value+"%"); if(user){prefs.edit().putInt("adhan_volume_"+key,value).apply();Intent volumeIntent=new Intent(MainActivity.this,AdhanPlaybackService.class);volumeIntent.setAction(AdhanPlaybackService.ACTION_SET_PRAYER_VOLUME);volumeIntent.putExtra("prayer",prayer);volumeIntent.putExtra("volume",value);try{startService(volumeIntent);}catch(Exception ignored){}}}
+            public void onStartTrackingTouch(SeekBar b){}
+            public void onStopTrackingTouch(SeekBar b){}
+        });
+        LinearLayout actions=row();
+        Switch enabled=new Switch(this); enabled.setText("تفعيل الصلاة"); enabled.setTextSize(12);
+        enabled.setChecked(prefs.getBoolean("prayer_enabled_"+prayer,true));
+        enabled.setOnCheckedChangeListener((b,checked)->prefs.edit().putBoolean("prayer_enabled_"+prayer,checked).apply());
+        actions.addView(enabled,new LinearLayout.LayoutParams(0,dp(48),1));
+        Button test=new Button(this); test.setText("تجربة الأذان"); test.setTextSize(11); actions.addView(test);
+        Button stopTest=new Button(this); stopTest.setText("إيقاف التجربة"); stopTest.setTextSize(11); actions.addView(stopTest);
+        test.setOnClickListener(v->playPrayer(prayer));
+        stopTest.setOnClickListener(v->{
+            Intent stop=new Intent(this,AdhanPlaybackService.class);
+            stop.setAction(AdhanPlaybackService.ACTION_STOP);
+            try{startService(stop);status.setText("تم إيقاف تجربة الأذان.");}
+            catch(Exception e){status.setText("تعذر إيقاف التجربة: "+e.getMessage());}
+        });
+        card.addView(actions);
+
+        Switch silent = new Switch(this);
+        silent.setText("اجعل الهاتف صامتًا عند أذان " + prayer);
+        silent.setTextSize(12);
+        silent.setTextColor(Color.rgb(35,65,50));
+        silent.setChecked(prefs.getBoolean("prayer_silent_" + prayer,false));
+        silent.setOnCheckedChangeListener((button,checked) -> {
+            prefs.edit().putBoolean("prayer_silent_" + prayer,checked).apply();
+            if (checked) {
+                android.app.NotificationManager nm = (android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+                if (Build.VERSION.SDK_INT >= 23 && (nm == null || !nm.isNotificationPolicyAccessGranted())) {
+                    Toast.makeText(this,"فعّل إذن عدم الإزعاج من زر إعداد إذن الوضع الصامت أعلى الصفحة",Toast.LENGTH_LONG).show();
+                    try {
+                        startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS));
+                    } catch (Exception ignored) {}
+                }
+            }
+        });
+        card.addView(silent);
+    }
+
+    private String savedTimeLabel(String prayer) {
+        int h=prefs.getInt("native_time_hour_"+prayer,-1), m=prefs.getInt("native_time_minute_"+prayer,0);
+        return h<0 ? "لم يحدد" : String.format(Locale.getDefault(),"%02d:%02d",h,m);
+    }
+    private void choosePrayerTime(String prayer,TextView label) {
+        int h=prefs.getInt("native_time_hour_"+prayer,Calendar.getInstance().get(Calendar.HOUR_OF_DAY));
+        int m=prefs.getInt("native_time_minute_"+prayer,0);
+        new TimePickerDialog(this,(view,hour,minute)->{
+            prefs.edit().putInt("native_time_hour_"+prayer,hour).putInt("native_time_minute_"+prayer,minute).apply();
+            label.setText(String.format(Locale.getDefault(),"%02d:%02d",hour,minute));
+            Calendar next=Calendar.getInstance(); next.set(Calendar.HOUR_OF_DAY,hour); next.set(Calendar.MINUTE,minute); next.set(Calendar.SECOND,0); next.set(Calendar.MILLISECOND,0);
+            if(next.getTimeInMillis()<=System.currentTimeMillis()) next.add(Calendar.DAY_OF_YEAR,1);
+            ReminderReceiver.schedulePrayer(this,prayer,next.getTimeInMillis());
+            status.setText("تم حفظ تنبيه "+prayer+" على "+label.getText());
+        },h,m,true).show();
+    }
+
+    private void playPrayer(String prayer) {
+        String voice="الفجر".equals(prayer) ? prefs.getString("adhan_fajr_voice","doha") : prefs.getString("adhan_voice_"+prayer,"doha");
+        Intent intent=new Intent(this,AdhanPlaybackService.class);
+        intent.setAction(AdhanPlaybackService.ACTION_PLAY);
+        intent.putExtra("prayer",prayer); intent.putExtra("voice",voice);
+        // Test playback must not trigger the post-adhan dua.
+        intent.putExtra("play_dua_after",false);
+        intent.putExtra("test_playback",true);
+        try {
+            if(Build.VERSION.SDK_INT>=26) startForegroundService(intent); else startService(intent);
+        } catch(Exception e) { status.setText("تعذر بدء التشغيل: "+e.getMessage()); }
+    }
+
+    private boolean hasAllSelectedAdhanFiles() {
+        File dir = new File(getFilesDir(), "adhan");
+        for (int i = 0; i < PRAYERS.length; i++) {
+            String voice = i == 0 ? prefs.getString("adhan_fajr_voice","doha") : prefs.getString("adhan_voice_" + PRAYERS[i], "doha");
+            String fileVoice = "doha".equals(voice) ? "doha_" + KEYS[i] : voice;
+            File mp3 = new File(dir, fileVoice + ".mp3");
+            File ogg = new File(dir, fileVoice + ".ogg");
+            if (!isAudioFileValid(mp3) && !isAudioFileValid(ogg)) return false;
+        }
+        return true;
+    }
+
+    private void downloadSelectedVoices() {
+        if(downloading)return;
+        LinkedHashSet<String> selected=new LinkedHashSet<>();
+        for(int i=0;i<PRAYERS.length;i++) selected.add(i==0 ? prefs.getString("adhan_fajr_voice","doha") : prefs.getString("adhan_voice_"+PRAYERS[i],"doha"));
+        downloading=true; downloadButton.setEnabled(false); progress.setProgress(0);
+        progressText.setText("جارٍ تجهيز التنزيل...");
+        new Thread(()->{
+            List<String> failed=new ArrayList<>(); int done=0;
+            for(String voice:selected) {
+                try {
+                    if("doha".equals(voice)) downloadDoha();
+                    else downloadVoice(voice);
+                } catch(Exception e) { failed.add(voice+": "+(e.getMessage()==null?"فشل التنزيل":e.getMessage())); }
+                done++;
+                final int p=(int)(done*100f/selected.size());
+                final int finished=done;
+                runOnUiThread(()->{progress.setProgress(p);progressText.setText("اكتمل تنزيل "+finished+" من "+selected.size()+" ("+p+"%)");});
+            }
+            final boolean ok=failed.isEmpty();
+            runOnUiThread(()->{
+                downloading=false; downloadButton.setEnabled(true); refreshStorageStatus();
+                status.setText(ok?"اكتمل حفظ كل الأصوات المختارة داخل التطبيق.": "لم يكتمل تنزيل بعض الأصوات: "+android.text.TextUtils.join("، ",failed));
+            });
+        }).start();
+    }
+
+    private void downloadDoha() throws Exception {
+        String[] keys={"fajr","dhuhr","asr","maghrib","isha"};
+        String[] urls={
+          "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_01_Fajr_Adhan.mp3",
+          "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_02_Dhuhr_Adhan.mp3",
+          "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_03_Asr_Adhan.mp3",
+          "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_04_Maghrib_Adhan.mp3",
+          "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_05_Isha_Adhan.mp3"
+        };
+        for(int i=0;i<keys.length;i++) downloadFile(urls[i],"doha_"+keys[i]+".mp3");
+    }
+    private void downloadVoice(String voice) throws Exception {
+        String file;
+        switch(voice) {
+            case "basit": file="Abdulbasit_Abdusamad_1_-_Egypt_(عبد_الباسط_عبد_الصمد_-_مصر).mp3"; break;
+            case "mustafa": file="Mustafa_Ismail_-_Egypt_(مصطفى_إسماعيل_-_مصر).mp3"; break;
+            case "husary": file="Mahmoud_Khalil_Al_Hussary_-_Cairo_(محمود_خليل_الحصري_-_القاهرة).mp3"; break;
+            case "banna": file="Mahmoud_Ali_Al_Banna_-_Cairo_(محمود_علي_البنا_-_القاهرة).mp3"; break;
+            case "rifaat": file="Muhammad_Refaat_-_Cairo_(محمد_رفعت_-_القاهرة).mp3"; break;
+            case "haram": file="Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(علي_بن_أحمد_ملا_-_الحرم_المكي).mp3"; break;
+            case "fajr_cairo": file="Adhan_Fajr_Cairo_Egypt_(أذان_الفجر_القاهرة_مصر).mp3"; break;
+            case "fajr_haram": file="Adhan_Fajr_Al_Haram_Al_Maki_(أذان_الفجر_الحرم_المكي).mp3"; break;
+            default: throw new Exception("هذا الصوت غير متاح");
+        }
+        String encoded=java.net.URLEncoder.encode(file,"UTF-8").replace("+","%20").replace("%28","(").replace("%29",")");
+        String url="https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/"+encoded;
+        downloadFile(url,voice+".mp3");
+    }
+ 
+    private static final String[] REMINDER_AUDIO_FILES={"approach","gentle_0","gentle_1","gentle_2","gentle_3"};
+    private static final String[] REMINDER_AUDIO_AYAT={"002238","013028","002152","033041","003191"};
+
+    private void refreshReminderAudioStatus(TextView label) {
+        File dir=new File(getFilesDir(),"reminders"); int ready=0;
+        for(String name:REMINDER_AUDIO_FILES) if(isAudioFileValid(new File(dir,name+".mp3"))) ready++;
+        label.setText("التسجيلات المحفوظة: "+ready+" من "+REMINDER_AUDIO_FILES.length);
+    }
+
+    private void downloadReminderRecitations(Button button,TextView label) {
+        button.setEnabled(false); label.setText("جارٍ تنزيل آيات الشيخ عبدالباسط...");
+        new Thread(()->{
+            List<String> failed=new ArrayList<>(); File dir=new File(getFilesDir(),"reminders");
+            if(!dir.exists())dir.mkdirs();
+            for(int i=0;i<REMINDER_AUDIO_FILES.length;i++){
+                String filename=REMINDER_AUDIO_FILES[i]+".mp3";
+                String url="https://everyayah.com/data/Abdul_Basit_Murattal_192kbps/"+REMINDER_AUDIO_AYAT[i]+".mp3";
+                HttpURLConnection connection=null; File temp=new File(dir,filename+".part"), target=new File(dir,filename);
+                try{
+                    connection=(HttpURLConnection)new URL(url).openConnection();
+                    connection.setConnectTimeout(20000); connection.setReadTimeout(60000);
+                    connection.setInstanceFollowRedirects(true);
+                    int code=connection.getResponseCode(); if(code!=200)throw new Exception("HTTP "+code);
+                    long received=0;
+                    try(InputStream in=connection.getInputStream();FileOutputStream out=new FileOutputStream(temp)){
+                        byte[] buffer=new byte[8192]; int n;
+                        while((n=in.read(buffer))!=-1){received+=n;if(received>8L*1024*1024)throw new Exception("حجم التسجيل غير متوقع");out.write(buffer,0,n);}
+                        out.getFD().sync();
+                    }
+                    if(received<10000||!validAudio(temp))throw new Exception("ملف صوت غير صالح");
+                    if(target.exists()&&!target.delete())throw new Exception("تعذر استبدال الملف");
+                    if(!temp.renameTo(target))throw new Exception("تعذر حفظ الملف");
+                }catch(Exception error){failed.add(filename+": "+(error.getMessage()==null?"فشل":error.getMessage()));}
+                finally{if(connection!=null)connection.disconnect();if(temp.exists())temp.delete();}
+                final int completed=i+1;
+                runOnUiThread(()->label.setText("تم تجهيز "+completed+" من "+REMINDER_AUDIO_FILES.length+" تسجيلات..."));
+            }
+            runOnUiThread(()->{
+                button.setEnabled(true); refreshReminderAudioStatus(label);
+                if(!failed.isEmpty())label.append(" — تعذر تنزيل: "+android.text.TextUtils.join("، ",failed));
+                else label.append(" — جاهزة للتشغيل دون إنترنت.");
+            });
+        },"reminder-recitation-download").start();
+    }
+
+    private void downloadDuaRecording(Button button,TextView label) {
+        button.setEnabled(false); label.setText("جارٍ تنزيل تسجيل دعاء الشعراوي...");
+        new Thread(()->{
+            HttpURLConnection connection=null; File dir=new File(getFilesDir(),"reminders");
+            File target=new File(dir,"dua.mp3"),temp=new File(dir,"dua.mp3.part");
+            try{
+                if(!dir.exists()&&!dir.mkdirs())throw new Exception("تعذر إنشاء مجلد التسجيلات");
+                URL url=new URL("https://archive.org/download/Islamic_Tape-258_uP_bY_mUSLEm/sharawy_doaa_24.mp3");
+                connection=(HttpURLConnection)url.openConnection(); connection.setConnectTimeout(25000); connection.setReadTimeout(90000);
+                connection.setInstanceFollowRedirects(true); connection.setRequestProperty("User-Agent","ZadAlmoslem Android Native");
+                int code=connection.getResponseCode(); if(code!=200)throw new Exception("مصدر التسجيل أعاد "+code);
+                long received=0;
+                try(InputStream in=connection.getInputStream();FileOutputStream out=new FileOutputStream(temp)){
+                    byte[] buffer=new byte[8192];int n;
+                    while((n=in.read(buffer))!=-1){received+=n;if(received>12L*1024*1024)throw new Exception("حجم التسجيل أكبر من المتوقع");out.write(buffer,0,n);}
+                    out.getFD().sync();
+                }
+                if(received<10000||!validAudio(temp))throw new Exception("التسجيل الصوتي غير مكتمل أو غير صالح");
+                if(target.exists()&&!target.delete())throw new Exception("تعذر استبدال التسجيل السابق");
+                if(!temp.renameTo(target))throw new Exception("تعذر حفظ التسجيل");
+                runOnUiThread(()->label.setText("تم حفظ دعاء الشعراوي. سيعمل بعد الأذان عند تفعيل الخيار."));
+            }catch(Exception error){
+                String message=error.getMessage()==null?"فشل التنزيل":error.getMessage();
+                runOnUiThread(()->label.setText("تعذر تنزيل الدعاء: "+message));
+            }finally{
+                if(connection!=null)connection.disconnect();if(temp.exists())temp.delete();
+                runOnUiThread(()->button.setEnabled(true));
+            }
+        },"dua-audio-download").start();
+    }
+
+    private void downloadFile(String address,String filename) throws Exception {
+        File dir=new File(getFilesDir(),"adhan"); if(!dir.exists()&&!dir.mkdirs())throw new Exception("تعذر إنشاء مجلد الصوت");
+        File temp=new File(dir,filename+".part"), target=new File(dir,filename);
+        HttpURLConnection c=null;
+        try {
+            c=(HttpURLConnection)new URL(address).openConnection(); c.setConnectTimeout(25000); c.setReadTimeout(90000);
+            c.setInstanceFollowRedirects(true); c.setRequestProperty("User-Agent","ZadAlmoslem Android Native");
+            int code=c.getResponseCode(); if(code!=200)throw new Exception("مصدر الصوت أعاد "+code);
+            long expected=c.getContentLength(),received=0;
+            try(InputStream in=c.getInputStream();FileOutputStream out=new FileOutputStream(temp)){
+                byte[] buffer=new byte[8192];int n;
+                while((n=in.read(buffer))!=-1){received+=n;if(received>20L*1024*1024)throw new Exception("حجم الملف أكبر من المسموح");out.write(buffer,0,n);
+                    final long got=received,total=expected;
+                    runOnUiThread(()->{if(total>0){int pct=(int)Math.min(99,got*100/total);progress.setProgress(pct);progressText.setText("تنزيل "+filename+" — "+pct+"%");}});
+                } out.getFD().sync();
+            }
+            if(received<10000||!validAudio(temp))throw new Exception("الملف الصوتي غير مكتمل أو غير صالح");
+            if(target.exists()&&!target.delete())throw new Exception("تعذر استبدال الملف القديم");
+            if(!temp.renameTo(target))throw new Exception("تعذر حفظ الملف");
+        } finally {if(c!=null)c.disconnect();if(temp.exists())temp.delete();}
+    }
+    private boolean validAudio(File f) {
+        if(!f.isFile()||f.length()<10000)return false;
+        try(FileInputStream in=new FileInputStream(f)){byte[] h=new byte[4];int n=in.read(h);
+            return (n>=3&&h[0]=='I'&&h[1]=='D'&&h[2]=='3')||(n>=2&&(h[0]&255)==255&&(h[1]&224)==224)||(n>=4&&h[0]=='O'&&h[1]=='g'&&h[2]=='g'&&h[3]=='S');
+        }catch(Exception e){return false;}
+    }
+    private void refreshStorageStatus() {
+        File dir=new File(getFilesDir(),"adhan");File[] files=dir.listFiles();int count=0;long bytes=0;
+        if(files!=null)for(File f:files)if(f.isFile()&&(f.getName().endsWith(".mp3")||f.getName().endsWith(".ogg"))){count++;bytes+=f.length();}
+        if(status!=null)status.setText("التسجيلات المحفوظة داخل التطبيق: "+count+" ملف — "+android.text.format.Formatter.formatShortFileSize(this,bytes));
+    }
+    private String buildAudioDiagnostics() {
+        StringBuilder report = new StringBuilder();
+        android.content.SharedPreferences audioPrefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
+        report.append("نتيجة آخر تجربة: ").append(audioPrefs.getBoolean("adhan_playback_started", false) ? "وصل المشغل إلى حالة الجاهزية" : "لم يؤكد المشغل بدء الصوت").append("\\n");
+        String lastError = audioPrefs.getString("adhan_last_playback_error", "");
+        if (!lastError.isEmpty()) report.append("سبب التعذر: ").append(lastError).append("\\n");
+        String startError = audioPrefs.getString("adhan_last_start_error", "");
+        if (!startError.isEmpty()) report.append("خطأ بدء الخدمة: ").append(startError).append("\\n");
+        File dir = new File(getFilesDir(), "adhan");
+        int valid = 0;
+        for (int i = 0; i < PRAYERS.length; i++) {
+            String prayer = PRAYERS[i];
+            String voice = i == 0 ? prefs.getString("adhan_fajr_voice","doha") : prefs.getString("adhan_voice_" + prayer, "doha");
+            String fileVoice = voice;
+            if ("doha".equals(voice)) fileVoice = "doha_" + KEYS[i];
+            File mp3 = new File(dir, fileVoice + ".mp3");
+            File ogg = new File(dir, fileVoice + ".ogg");
+            File chosen = isAudioFileValid(mp3) ? mp3 : (isAudioFileValid(ogg) ? ogg : null);
+            if (chosen != null) valid++;
+            report.append(prayer).append(": ").append(chosen == null ? "ملف غير موجود/غير صالح" : "ملف سليم — " + android.text.format.Formatter.formatShortFileSize(this, chosen.length())).append("\\n");
+        }
+        report.append("ملفات الأذان الصالحة للصلاة المختارة: ").append(valid).append(" من 5").append("\\n");
+        File duaFile = new File(new File(getFilesDir(), "reminders"), "dua.mp3");
+        report.append("دعاء الشعراوي بعد الأذان: ")
+                .append(isAudioFileValid(duaFile)
+                        ? "محفوظ — " + android.text.format.Formatter.formatShortFileSize(this, duaFile.length())
+                        : "غير موجود أو غير صالح");
+        return report.toString();
+    }
+
+    private boolean isAudioFileValid(File file) {
+        if (file == null || !file.isFile() || file.length() < 10000) return false;
+        try (FileInputStream in = new FileInputStream(file)) {
+            byte[] h = new byte[4]; int n = in.read(h);
+            return (n >= 3 && h[0] == 'I' && h[1] == 'D' && h[2] == '3')
+                    || (n >= 2 && (h[0] & 255) == 255 && (h[1] & 224) == 224)
+                    || (n >= 4 && h[0] == 'O' && h[1] == 'g' && h[2] == 'g' && h[3] == 'S');
+        } catch (Exception e) { return false; }
+    }
+
+    private void requestNotificationPermission() {
+        if(Build.VERSION.SDK_INT>=33&&checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)
+            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},2401);
     }
     @Override protected void onResume() {
         super.onResume();
-        if (Build.VERSION.SDK_INT >= 31) {
-            android.app.AlarmManager alarms = (android.app.AlarmManager)getSystemService(ALARM_SERVICE);
-            if (alarms != null && alarms.canScheduleExactAlarms()) {
-                android.content.SharedPreferences prefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
-                for (String key : new String[]{"morning", "evening", "qiyam"}) {
-                    if (prefs.getBoolean(key + "_enabled", false)) {
-                        ReminderReceiver.scheduleDaily(this, key,
-                            prefs.getInt(key + "_hour", 7), prefs.getInt(key + "_minute", 0),
-                            prefs.getString(key + "_title", "تذكير من زاد المسلم"));
+        for(int i=0;i<PRAYERS.length;i++){
+            int h=prefs.getInt("native_time_hour_"+PRAYERS[i],-1);
+            int minute=prefs.getInt("native_time_minute_"+PRAYERS[i],0);
+            if(homePrayerTimeViews[i]!=null)homePrayerTimeViews[i].setText(h<0?"--:--":String.format(Locale.getDefault(),"%02d:%02d",h,minute));
+        }
+        {
+            android.app.AlarmManager alarms=(android.app.AlarmManager)getSystemService(ALARM_SERVICE);
+            if(alarms!=null){
+                for(String prayer:PRAYERS){
+                    int h=prefs.getInt("native_time_hour_"+prayer,-1);
+                    if(h>=0&&prefs.getBoolean("prayer_enabled_"+prayer,true)){
+                        Calendar next=Calendar.getInstance();next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,prefs.getInt("native_time_minute_"+prayer,0));next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);
+                        if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);
+                        ReminderReceiver.schedulePrayer(this,prayer,next.getTimeInMillis());
                     }
                 }
             }
         }
-    }
-    private void requestNotificationPermission() {
-        if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
-            requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION_REQUEST);
-    }
-    private String prayerVolumeKey(String prayer) {
-        if ("الفجر".equals(prayer)) return "fajr";
-        if ("الظهر".equals(prayer)) return "dhuhr";
-        if ("العصر".equals(prayer)) return "asr";
-        if ("المغرب".equals(prayer)) return "maghrib";
-        if ("العشاء".equals(prayer)) return "isha";
-        return "dhuhr";
-    }
-    private class ReminderBridge {
-        @JavascriptInterface public boolean isNativeApp() { return true; }
-        @JavascriptInterface public String getAdhanStorageDiagnostics() {
-            try {
-                File dir = new File(getFilesDir(), "adhan");
-                if (!dir.exists()) dir.mkdirs();
-                org.json.JSONObject result = new org.json.JSONObject();
-                result.put("nativeBridge", true);
-                result.put("filesDir", getFilesDir().getAbsolutePath());
-                result.put("adhanDir", dir.getAbsolutePath());
-                result.put("directoryExists", dir.isDirectory());
-                org.json.JSONArray files = new org.json.JSONArray();
-                File[] saved = dir.listFiles();
-                long totalBytes = 0L;
-                if (saved != null) {
-                    for (File file : saved) {
-                        if (file.isFile() && (file.getName().endsWith(".mp3") || file.getName().endsWith(".ogg"))) {
-                            org.json.JSONObject item = new org.json.JSONObject();
-                            item.put("name", file.getName());
-                            item.put("bytes", file.length());
-                            files.put(item);
-                            totalBytes += file.length();
-                        }
-                    }
-                }
-                result.put("audioFiles", files);
-                result.put("audioFileCount", files.length());
-                result.put("audioBytes", totalBytes);
-                android.content.SharedPreferences prefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
-                result.put("lastDownloadError", prefs.getString("adhan_download_last_error", ""));
-                result.put("lastPlaybackError", prefs.getString("adhan_last_start_error", ""));
-                return result.toString();
-            } catch (Exception error) {
-                return "{\"nativeBridge\":true}";
-            }
-        }
-        @JavascriptInterface public void scheduleDailyReminder(String key,int hour,int minute,String title) {
-            ReminderReceiver.scheduleDaily(MainActivity.this,key,hour,minute,title);
-        }
-        @JavascriptInterface public void cancelDailyReminder(String key) {
-            ReminderReceiver.cancelDaily(MainActivity.this,key);
-        }
-        @JavascriptInterface public boolean isReminderAudioDownloaded() {
-            File dir = new File(getFilesDir(), "reminders");
-            for (String name : new String[]{"morning", "evening", "qiyam", "dua"}) {
-                if (!isValidReminderAudio(new File(dir, name + ".mp3"))) return false;
-            }
-            return true;
-        }
-        private boolean isValidReminderAudio(File file) {
-            if (!file.isFile() || file.length() < 10000) return false;
-            try (java.io.FileInputStream in = new java.io.FileInputStream(file)) {
-                int a = in.read(), b = in.read();
-                int c = in.read();
-                return (a == 'I' && b == 'D' && c == '3') || (a == 0xFF && (b & 0xE0) == 0xE0);
-            } catch (Exception ignored) { return false; }
-        }
-        @JavascriptInterface public void downloadReminderAudio() {
-            new Thread(() -> {
-                String[][] sources = {
-                    // Sheikh Mahmoud Khalil Al-Husary — complete, unedited ayah recordings.
-                    // Morning: Ar-Ra'd 13:28; Evening: Al-Ahzab 33:41; Night prayer: Al-Isra 17:79.
-                    {"morning", "https://everyayah.com/data/Husary_128kbps/013028.mp3"},
-                    {"evening", "https://everyayah.com/data/Husary_128kbps/033041.mp3"},
-                    {"qiyam", "https://everyayah.com/data/Husary_128kbps/017079.mp3"},
-                    {"dua", "https://archive.org/download/Islamic_Tape-258_uP_bY_mUSLEm/sharawy_doaa_24.mp3"}
-                };
-                File dir = new File(getFilesDir(), "reminders");
-                StringBuilder report = new StringBuilder();
-                boolean allOk = true;
-                if (!dir.exists() && !dir.mkdirs()) {
-                    allOk = false;
-                    report.append("تعذر إنشاء مجلد الملفات الصوتية.");
-                } else {
-                    for (String[] item : sources) {
-                        HttpURLConnection connection = null;
-                        File temp = new File(dir, item[0] + ".download");
-                        File target = new File(dir, item[0] + ".mp3");
-                        try {
-                            if (isValidReminderAudio(target)) {
-                                report.append(item[0]).append(": محفوظ بالفعل. ");
-                                continue;
-                            }
-                            connection = (HttpURLConnection) new URL(item[1]).openConnection();
-                            connection.setConnectTimeout(25000);
-                            connection.setReadTimeout(90000);
-                            connection.setInstanceFollowRedirects(true);
-                            connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
-                            int status = connection.getResponseCode();
-                            if (status != HttpURLConnection.HTTP_OK) throw new Exception("استجابة المصدر " + status);
-                            String type = connection.getContentType();
-                            String mime = type == null ? "" : type.toLowerCase(java.util.Locale.ROOT);
-                            if (!(mime.contains("audio") || mime.contains("mpeg") || mime.contains("octet-stream"))) {
-                                throw new Exception("المصدر لم يُرجع ملفًا صوتيًا (" + (type == null ? "نوع غير معروف" : type) + ")");
-                            }
-                            long total = 0;
-                            try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
-                                byte[] buffer = new byte[8192];
-                                int count;
-                                while ((count = in.read(buffer)) != -1) {
-                                    total += count;
-                                    if (total > 30L * 1024L * 1024L) throw new Exception("حجم الملف أكبر من 30 ميجابايت");
-                                    out.write(buffer, 0, count);
-                                }
-                                out.getFD().sync();
-                            }
-                            if (total < 10000 || !isValidReminderAudio(temp)) throw new Exception("الملف الذي وصل ليس تسجيل MP3 مكتملًا");
-                            if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال النسخة القديمة");
-                            if (!temp.renameTo(target)) throw new Exception("تعذر حفظ الملف على الجهاز");
-                            report.append(item[0]).append(": تم التنزيل. ");
-                        } catch (Exception e) {
-                            allOk = false;
-                            if (temp.exists()) temp.delete();
-                            report.append(item[0]).append(": ").append(e.getMessage() == null ? "فشل التنزيل" : e.getMessage()).append(". ");
-                        } finally {
-                            if (connection != null) connection.disconnect();
-                        }
-                    }
-                }
-                final boolean result = allOk && isReminderAudioDownloaded();
-                final String details = report.toString();
-                runOnUiThread(() -> {
-                    if (webView != null) webView.evaluateJavascript(
-                        "window.onReminderAudioDownload && window.onReminderAudioDownload(" + result + "," + org.json.JSONObject.quote(details) + ")", null);
-                });
-            }).start();
-        }
-        @JavascriptInterface public void schedulePrayer(String name,long timestamp) {
-            ReminderReceiver.schedulePrayer(MainActivity.this,name,timestamp);
-        }
-        @JavascriptInterface public void setPrayerAdhanVoice(String prayer, String voice) {
-            String[] prayers = {"الفجر","الظهر","العصر","المغرب","العشاء"};
-            boolean validPrayer = false;
-            for (String item : prayers) if (item.equals(prayer)) validPrayer = true;
-            String safe = safeVoice(voice);
-            if (validPrayer) getSharedPreferences("zad_reminders", MODE_PRIVATE)
-                    .edit().putString("adhan_voice_" + prayer, safe).apply();
-        }
-        @JavascriptInterface public void setAdhanVoice(String voice) {
-            String safe = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"haram".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)) ? voice : "basit";
-            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_voice", safe).apply();
-        }
-        @JavascriptInterface public void setAdhanVolume(int volume) {
-            int safeVolume = Math.max(0, Math.min(100, volume));
-            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putInt("adhan_volume", safeVolume).apply();
-            Intent volumeIntent = new Intent(MainActivity.this, AdhanPlaybackService.class);
-            volumeIntent.setAction(AdhanPlaybackService.ACTION_SET_VOLUME);
-            volumeIntent.putExtra("volume", safeVolume);
-            try { startService(volumeIntent); } catch (Exception ignored) {}
-        }
-        @JavascriptInterface public void setPrayerAdhanVolume(String prayer, int volume) {
-            String[] prayers = {"الفجر","الظهر","العصر","المغرب","العشاء"};
-            boolean valid = false;
-            for (String item : prayers) if (item.equals(prayer)) valid = true;
-            if (!valid) return;
-            int safeVolume = Math.max(0, Math.min(100, volume));
-            String key = prayerVolumeKey(prayer);
-            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putInt("adhan_volume_" + key, safeVolume).apply();
-            Intent intent = new Intent(MainActivity.this, AdhanPlaybackService.class);
-            intent.setAction(AdhanPlaybackService.ACTION_SET_PRAYER_VOLUME);
-            intent.putExtra("prayer", prayer);
-            intent.putExtra("volume", safeVolume);
-            try { startService(intent); } catch (Exception ignored) {}
-        }
-        @JavascriptInterface public void setPrayerAdhanEnabled(String prayer, boolean enabled) {
-            String key = "prayer_enabled_" + prayer;
-            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean(key, enabled).apply();
-        }
-        @JavascriptInterface public void setAdhanEnabled(boolean enabled) {
-            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_enabled", enabled).apply();
-        }
-        @JavascriptInterface public void setDuaAfterAdhanEnabled(boolean enabled) {
-            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("dua_after_adhan_enabled", enabled).apply();
-        }
-        @JavascriptInterface public void setAdhanMode(String mode) {
-            String safe = ("tone".equals(mode) || "vibrate".equals(mode) || "off".equals(mode)) ? mode : "adhan";
-            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_mode", safe).apply();
-        }
-        @JavascriptInterface public void setApproachAlertEnabled(boolean enabled) {
-            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("approach_alert_enabled", enabled).apply();
-            ReminderReceiver.rescheduleApproachAlerts(MainActivity.this);
-        }
-        @JavascriptInterface public void setApproachAlertMinutes(int minutes) {
-            int safe = Math.max(1, Math.min(60, minutes));
-            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putInt("approach_alert_minutes", safe).apply();
-            ReminderReceiver.rescheduleApproachAlerts(MainActivity.this);
-        }
-        @JavascriptInterface public void setPrayerSilentEnabled(String prayer, boolean enabled) {
-            getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("prayer_silent_" + prayer, enabled).apply();
-        }
-        @JavascriptInterface public boolean hasSilentPermission() {
-            if (Build.VERSION.SDK_INT < 23) return false;
-            android.app.NotificationManager nm=(android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-            return nm != null && nm.isNotificationPolicyAccessGranted();
-        }
-        @JavascriptInterface public void requestSilentPermission() {
-            if (Build.VERSION.SDK_INT >= 23 && !hasSilentPermission()) {
-                try { startActivity(new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)); }
-                catch (Exception ignored) {}
-            }
-        }
-        @JavascriptInterface public boolean canScheduleExactAlarms() {
-            if (Build.VERSION.SDK_INT < 31) return true;
-            android.app.AlarmManager alarms = (android.app.AlarmManager)getSystemService(ALARM_SERVICE);
-            return alarms != null && alarms.canScheduleExactAlarms();
-        }
-        @JavascriptInterface public void requestExactAlarmPermission() {
-            if (Build.VERSION.SDK_INT >= 31 && !canScheduleExactAlarms()) {
-                try {
-                    Intent settings = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
-                        Uri.parse("package:" + getPackageName()));
-                    settings.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(settings);
-                } catch (Exception ignored) {}
-            }
-        }
-        @JavascriptInterface public void requestNotificationPermission() {
-            runOnUiThread(() -> MainActivity.this.requestNotificationPermission());
-        }
-        private boolean isValidAdhanBytes(byte[] header, int length) {
-            boolean id3 = length >= 3 && header[0] == 0x49 && header[1] == 0x44 && header[2] == 0x33;
-            boolean mpegFrame = length >= 2 && (header[0] & 0xFF) == 0xFF && (header[1] & 0xE0) == 0xE0;
-            boolean ogg = length >= 4 && header[0] == 0x4F && header[1] == 0x67 && header[2] == 0x67 && header[3] == 0x53;
-            return id3 || mpegFrame || ogg;
-        }
-        private boolean isValidAdhanFile(File file) {
-            if (file == null || !file.isFile() || file.length() < 10000) return false;
-            try (FileInputStream in = new FileInputStream(file)) {
-                byte[] header = new byte[4];
-                return isValidAdhanBytes(header, in.read(header));
-            } catch (Exception e) {
-                return false;
-            }
-        }
-        @JavascriptInterface public boolean isAdhanDownloaded(String voice) {
-            File dir = new File(getFilesDir(), "adhan");
-            String safe = safeVoice(voice);
-            if ("doha".equals(safe)) {
-                String[] prayers = {"fajr","dhuhr","asr","maghrib","isha"};
-                for (String prayer : prayers) if (!isValidAdhanFile(new File(dir, "doha_" + prayer + ".mp3"))) return false;
-                return true;
-            }
-            return isValidAdhanFile(new File(dir, safe + ".mp3"))
-                    || isValidAdhanFile(new File(dir, safe + ".ogg"));
-        }
-        @JavascriptInterface public boolean saveAdhanAudio(String voice,String encoded) {
-            File temp = null;
-            try {
-                String safe=safeVoice(voice);
-                byte[] bytes=Base64.decode(encoded,Base64.DEFAULT);
-                if(bytes.length<10000 || bytes.length>20*1024*1024
-                        || !isValidAdhanBytes(bytes, bytes.length)) return false;
-                File dir=new File(getFilesDir(),"adhan");
-                if(!dir.exists()&&!dir.mkdirs()) return false;
-                temp=new File(dir,safe+".import");
-                File target=new File(dir,safe+".mp3");
-                try(FileOutputStream out=new FileOutputStream(temp)){out.write(bytes);out.getFD().sync();}
-                if(!isValidAdhanFile(temp)){temp.delete();return false;}
-                if(target.exists()&&!target.delete()){temp.delete();return false;}
-                return temp.renameTo(target);
-            } catch(Exception e) {
-                if(temp!=null&&temp.exists()) temp.delete();
-                return false;
-            }
-        }
-        private String safeVoice(String voice) {
-            return ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"naqshbandi".equals(voice)||"tobar".equals(voice)||"haram".equals(voice)||"rifaat".equals(voice)||"fajr".equals(voice)||"beautiful".equals(voice)||"doha".equals(voice))?voice:"doha";
-        }
-        private void reportAdhanProgress(int index, String prayer, long received, long total, String directory) {
-            final int fileIndex = index;
-            final String prayerName = prayer;
-            final long bytesReceived = received;
-            final long bytesTotal = total;
-            final String savedDirectory = directory;
-            runOnUiThread(() -> {
-                if (webView != null) webView.evaluateJavascript(
-                    "window.onAdhanDownloadProgress && window.onAdhanDownloadProgress(" +
-                    fileIndex + "," + org.json.JSONObject.quote(prayerName) + "," +
-                    bytesReceived + "," + bytesTotal + "," +
-                    org.json.JSONObject.quote(savedDirectory) + ")", null);
-            });
-        }
-        private void downloadDohaAdhan() {
-            new Thread(() -> {
-                String[] prayers = {"fajr","dhuhr","asr","maghrib","isha"};
-                String[] urls = {
-                    "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_01_Fajr_Adhan.mp3",
-                    "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_02_Dhuhr_Adhan.mp3",
-                    "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_03_Asr_Adhan.mp3",
-                    "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_04_Maghrib_Adhan.mp3",
-                    "https://archive.org/download/adhan.recordings.from.doha.qatar/Adhan_Doha_Qatar_05_Isha_Adhan.mp3"
-                };
-                boolean ok = false;
-                String reason = "تعذر تنزيل تسجيلات الأذان";
-                HttpURLConnection connection = null;
-                File dir = new File(getFilesDir(), "adhan");
-                try {
-                    if (!dir.exists() && !dir.mkdirs()) throw new Exception("تعذر إنشاء مجلد الصوت");
-                    for (int i = 0; i < urls.length; i++) {
-                        File temp = new File(dir, "doha_" + prayers[i] + ".download");
-                        File target = new File(dir, "doha_" + prayers[i] + ".mp3");
-                        try {
-                            connection = (HttpURLConnection) new URL(urls[i]).openConnection();
-                            connection.setConnectTimeout(25000);
-                            connection.setReadTimeout(60000);
-                            connection.setInstanceFollowRedirects(true);
-                            connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
-                            int status = connection.getResponseCode();
-                            if (status != HttpURLConnection.HTTP_OK) throw new Exception("مصدر تسجيل " + prayers[i] + " أعاد " + status);
-                            long expectedBytes = connection.getContentLength();
-                            long total = 0;
-                            reportAdhanProgress(i + 1, prayers[i], 0, expectedBytes, dir.getAbsolutePath());
-                            long lastProgressUpdate = 0;
-                            try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
-                                byte[] buffer = new byte[8192]; int count;
-                                while ((count = in.read(buffer)) != -1) {
-                                    total += count;
-                                    if (total > 15L * 1024L * 1024L) throw new Exception("حجم تسجيل الأذان أكبر من المسموح");
-                                    out.write(buffer, 0, count);
-                                    long now = System.currentTimeMillis();
-                                    if (now - lastProgressUpdate >= 250) {
-                                        reportAdhanProgress(i + 1, prayers[i], total, expectedBytes, dir.getAbsolutePath());
-                                        lastProgressUpdate = now;
-                                    }
-                                }
-                                out.getFD().sync();
-                            }
-                            reportAdhanProgress(i + 1, prayers[i], total, expectedBytes > 0 ? expectedBytes : total, dir.getAbsolutePath());
-                            if (!isValidAdhanFile(temp)) throw new Exception("تسجيل " + prayers[i] + " غير صالح أو غير مكتمل");
-                            if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال تسجيل " + prayers[i]);
-                            if (!temp.renameTo(target)) throw new Exception("تعذر حفظ تسجيل " + prayers[i]);
-                        } finally {
-                            if (connection != null) { connection.disconnect(); connection = null; }
-                            if (temp.exists()) temp.delete();
-                        }
-                    }
-                    ok = true;
-                    reason = "تم تنزيل تسجيلات الصلوات الخمس وحفظها للعمل دون إنترنت. المسار الداخلي: " + dir.getAbsolutePath();
-                    getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().remove("adhan_download_last_error").apply();
-                } catch (Exception e) {
-                    reason = e.getMessage() == null ? "تعذر تنزيل تسجيلات الأذان" : e.getMessage();
-                    getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_download_last_error", reason).apply();
-                } finally {
-                    if (connection != null) connection.disconnect();
-                }
-                final boolean result = ok;
-                final String message = reason;
-                runOnUiThread(() -> {
-                    if (webView != null) webView.evaluateJavascript(
-                        "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('doha'," + result + "," + org.json.JSONObject.quote(message) + ")", null);
-                });
-            }).start();
-        }
-        @JavascriptInterface public void downloadAdhan(String voice) {
-            final String safe = safeVoice(voice);
-            if ("doha".equals(safe)) { downloadDohaAdhan(); return; }
-            final String source;
-            switch (safe) {
-                case "basit": source = "https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Abdulbasit_Abdusamad_1_-_Egypt_(%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%A8%D8%A7%D8%B3%D8%B7_%D8%B9%D8%A8%D8%AF_%D8%A7%D9%84%D8%B5%D9%85%D8%AF_-_%D9%85%D8%B5%D8%B1).mp3"; break;
-                case "mustafa": source = "https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mustafa_Ismail_-_Egypt_(%D9%85%D8%B5%D8%B7%D9%81%D9%89_%D8%A5%D8%B3%D9%85%D8%A7%D8%B9%D9%8A%D9%84_-_%D9%85%D8%B5%D8%B1).mp3"; break;
-                case "husary": source = "https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mahmoud_Khalil_Al_Hussary_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%AE%D9%84%D9%8A%D9%84_%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%8A_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3"; break;
-                case "banna": source = "https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Mahmoud_Ali_Al_Banna_-_Cairo_(%D9%85%D8%AD%D9%85%D9%88%D8%AF_%D8%B9%D9%84%D9%8A_%D8%A7%D9%84%D8%A8%D9%86%D8%A7_-_%D8%A7%D9%84%D9%82%D8%A7%D9%87%D8%B1%D8%A9).mp3"; break;
-                case "haram": source = "https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(%D8%B9%D9%84%D9%8A_%D8%A8%D9%86_%D8%A3%D8%AD%D9%85%D8%AF_%D9%85%D9%84%D8%A7_-_%D8%A7%D9%84%D8%AD%D8%B1%D9%85_%D8%A7%D9%84%D9%85%D9%83%D9%8A).mp3"; break;
-                default:
-                    runOnUiThread(() -> {
-                        if (webView != null) webView.evaluateJavascript(
-                            "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "',false,'ملف هذا المؤذن غير متاح حاليًا؛ اختر صوتًا آخر')", null);
-                    });
-                    return;
-            }
-            new Thread(() -> {
-                boolean ok = false;
-                String error = "تعذر الاتصال بمصدر الصوت";
-                HttpURLConnection connection = null;
-                File dir = new File(getFilesDir(), "adhan");
-                File temp = new File(dir, safe + ".download");
-                File target = new File(dir, safe + ".mp3");
-                try {
-                    if (!dir.exists() && !dir.mkdirs()) throw new Exception("تعذر إنشاء مجلد الصوت");
-                    String[] sourceUrls = new String[] {
-                        source.replace("https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/", "https://cdn.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/"),
-                        source.replace("https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/", "https://fastly.jsdelivr.net/gh/Kiwifu/adhan-mp3@main/"),
-                        source.replace("https://raw.githubusercontent.com/Kiwifu/adhan-mp3/main/", "https://raw.githack.com/Kiwifu/adhan-mp3/main/"),
-                        source
-                    };
-                    Exception lastFailure = null;
-                    boolean downloaded = false;
-                    for (String sourceUrl : sourceUrls) {
-                        try {
-                            connection = (HttpURLConnection) new URL(sourceUrl).openConnection();
-                            connection.setConnectTimeout(20000);
-                            connection.setReadTimeout(45000);
-                            connection.setInstanceFollowRedirects(true);
-                            connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
-                            int status = connection.getResponseCode();
-                            if (status != HttpURLConnection.HTTP_OK) throw new Exception("استجابة مصدر الصوت: " + status);
-                            // Do not trust CDN Content-Type; validate the downloaded MP3 signature instead.
-                            long total = 0;
-                            long expectedBytes = connection.getContentLength();
-                            try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
-                                byte[] buffer = new byte[8192];
-                                int count;
-                                while ((count = in.read(buffer)) != -1) {
-                                    total += count;
-                                    if (total > 12L * 1024L * 1024L) throw new Exception("حجم الملف أكبر من المسموح");
-                                    out.write(buffer, 0, count);
-                                    reportAdhanProgress(1, safe, total, expectedBytes, dir.getAbsolutePath());
-                                }
-                                out.getFD().sync();
-                            }
-                            if (total < 10000) throw new Exception("ملف الصوت غير مكتمل");
-                            try (FileInputStream check = new FileInputStream(temp)) {
-                                byte[] header = new byte[3];
-                                int headerLength = check.read(header);
-                                boolean id3 = headerLength >= 3 && header[0] == 0x49 && header[1] == 0x44 && header[2] == 0x33;
-                                boolean mpegFrame = headerLength >= 2 && (header[0] & 0xFF) == 0xFF && (header[1] & 0xE0) == 0xE0;
-                                if (!id3 && !mpegFrame) throw new Exception("الملف الذي وصل ليس تسجيل MP3 صالحًا");
-                            }
-                            downloaded = true;
-                            break;
-                        } catch (Exception attemptError) {
-                            lastFailure = attemptError;
-                            if (temp.exists()) temp.delete();
-                        } finally {
-                            if (connection != null) { connection.disconnect(); connection = null; }
-                        }
-                    }
-                    if (!downloaded) throw (lastFailure == null ? new Exception("تعذر الاتصال بمصادر الصوت") : lastFailure);
-                    if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال التسجيل القديم");
-                    if (!temp.renameTo(target)) throw new Exception("تعذر حفظ التسجيل على الجهاز");
-                    String publicPath = copyAdhanToMusicFolder(target, safe);
-                    error = publicPath == null
-                            ? "تم تنزيل الصوت وحفظه داخل التطبيق للعمل دون إنترنت."
-                            : "تم الحفظ في: " + publicPath;
-                    getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().remove("adhan_download_last_error").apply();
-                    ok = true;
-                } catch (Exception e) {
-                    error = e.getMessage() == null ? "فشل تنزيل التسجيل" : e.getMessage();
-                    getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putString("adhan_download_last_error", error).apply();
-                    if (temp.exists()) temp.delete();
-                } finally {
-                    if (connection != null) connection.disconnect();
-                }
-                final boolean result = ok;
-                final String reason = error;
-                runOnUiThread(() -> {
-                    if (webView != null) webView.evaluateJavascript(
-                        "window.onAdhanDownloadComplete && window.onAdhanDownloadComplete('" + safe + "'," + result + "," + org.json.JSONObject.quote(reason) + ")", null);
-                });
-            }).start();
-        }
-        private String copyAdhanToMusicFolder(File source, String voice) {
-            if (Build.VERSION.SDK_INT < 29) return null;
-            String folder = "Music/Zad Almoslem";
-            String displayName = voice + ".mp3";
-            android.content.ContentResolver resolver = getContentResolver();
-            android.net.Uri collection = MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
-            try {
-                String selection = MediaStore.MediaColumns.DISPLAY_NAME + "=? AND " +
-                        MediaStore.MediaColumns.RELATIVE_PATH + "=?";
-                String[] args = new String[]{displayName, folder + "/"};
-                try (android.database.Cursor cursor = resolver.query(collection,
-                        new String[]{MediaStore.MediaColumns._ID}, selection, args, null)) {
-                    if (cursor != null && cursor.moveToFirst()) {
-                        long id = cursor.getLong(0);
-                        resolver.delete(android.content.ContentUris.withAppendedId(collection, id), null, null);
-                    }
-                }
-                ContentValues values = new ContentValues();
-                values.put(MediaStore.MediaColumns.DISPLAY_NAME, displayName);
-                values.put(MediaStore.MediaColumns.MIME_TYPE, "audio/mpeg");
-                values.put(MediaStore.MediaColumns.RELATIVE_PATH, folder);
-                values.put(MediaStore.MediaColumns.IS_PENDING, 1);
-                android.net.Uri item = resolver.insert(collection, values);
-                if (item == null) return null;
-                try (InputStream in = new java.io.FileInputStream(source);
-                     java.io.OutputStream out = resolver.openOutputStream(item, "w")) {
-                    if (out == null) throw new Exception("تعذر فتح ملف الوجهة");
-                    byte[] buffer = new byte[8192];
-                    int count;
-                    while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
-                    out.flush();
-                } catch (Exception e) {
-                    resolver.delete(item, null, null);
-                    throw e;
-                }
-                ContentValues ready = new ContentValues();
-                ready.put(MediaStore.MediaColumns.IS_PENDING, 0);
-                resolver.update(item, ready, null, null);
-                return "التخزين الداخلي/" + folder + "/" + displayName;
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        private File adhanFile(String voice) {
-            String safe = safeVoice(voice);
-            return new File(new File(getFilesDir(), "adhan"), safe + ".ogg");
-        }
-        @JavascriptInterface public void playRadio(String stream, String label) {
-            String url = "backup".equals(stream) ? "https://qurango.net/radio/tarateel" :
-                "https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8";
-            getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putString("radio_stream", stream == null ? "main" : stream).putString("radio_label", label == null ? "إذاعة القرآن الكريم" : label).apply();
-            Intent radio = new Intent(MainActivity.this, RadioPlaybackService.class);
-            radio.setAction(RadioPlaybackService.ACTION_PLAY);
-            radio.putExtra("url", url);
-            radio.putExtra("label", label == null ? "إذاعة القرآن الكريم" : label);
-            if (Build.VERSION.SDK_INT >= 26) startForegroundService(radio); else startService(radio);
-        }
-        @JavascriptInterface public void playQuranAudio(String audioUrl, String trackTitle) {
-            try {
-                android.net.Uri uri = android.net.Uri.parse(audioUrl);
-                String host = uri.getHost();
-                if (!"https".equalsIgnoreCase(uri.getScheme()) || host == null ||
-                    !(host.toLowerCase().endsWith("mp3quran.net") || host.toLowerCase().endsWith("mp3quran.com"))) return;
-                getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putString("last_quran_url", uri.toString()).putString("last_quran_title", trackTitle == null ? "تلاوة القرآن الكريم" : trackTitle).apply();
-                Intent audio = new Intent(MainActivity.this, RadioPlaybackService.class);
-                audio.setAction(RadioPlaybackService.ACTION_PLAY);
-                audio.putExtra("url", uri.toString());
-                audio.putExtra("label", trackTitle == null ? "تلاوة القرآن الكريم" : trackTitle);
-                audio.putExtra("kind", "quran");
-                if (Build.VERSION.SDK_INT >= 26) startForegroundService(audio); else startService(audio);
-            } catch (Exception ignored) {}
-        }
-        @JavascriptInterface public void stopRadio() {
-            Intent radio = new Intent(MainActivity.this, RadioPlaybackService.class);
-            radio.setAction(RadioPlaybackService.ACTION_STOP);
-            startService(radio);
-        }
-        @JavascriptInterface public void previewAdhan(String voice) {
-            previewPrayerAdhan(voice, "الظهر");
-        }
-        @JavascriptInterface public void previewPrayerAdhan(String voice, String prayer) {
-            String safe = safeVoice(voice);
-            String[] prayers = {"الفجر","الظهر","العصر","المغرب","العشاء"};
-            boolean validPrayer = false;
-            for (String item : prayers) if (item.equals(prayer)) validPrayer = true;
-            if (!validPrayer) prayer = "الظهر";
-            File adhanDir = new File(getFilesDir(), "adhan");
-            String prayerKey = prayerVolumeKey(prayer);
-            boolean downloaded = "doha".equals(safe)
-                    ? isValidAdhanFile(new File(adhanDir, "doha_" + prayerKey + ".mp3"))
-                    : isValidAdhanFile(new File(adhanDir, safe + ".mp3")) || isValidAdhanFile(new File(adhanDir, safe + ".ogg"));
-            if (!downloaded) {
-                if (webView != null) webView.evaluateJavascript(
-                    "window.onAdhanPreviewError && window.onAdhanPreviewError('ملف أذان هذه الصلاة غير محفوظ على الجهاز. اضغط تنزيل أصوات الصلوات المختارة أولًا.')", null);
-                return;
-            }
-            Intent audio = new Intent(MainActivity.this, AdhanPlaybackService.class);
-            audio.setAction(AdhanPlaybackService.ACTION_PLAY);
-            audio.putExtra("prayer", validPrayer ? prayer : "الظهر");
-            audio.putExtra("voice", safe);
-            try {
-                if (Build.VERSION.SDK_INT >= 26) startForegroundService(audio); else startService(audio);
-            } catch (Exception error) {
-                if (webView != null) webView.evaluateJavascript(
-                    "window.onAdhanPreviewError && window.onAdhanPreviewError(" +
-                    org.json.JSONObject.quote("تعذر تشغيل خدمة الأذان: " + (error.getMessage() == null ? "خطأ غير معروف" : error.getMessage())) + ")", null);
-            }
-        }
-
-    }
-    @Override protected void onActivityResult(int requestCode,int resultCode,Intent data) {
-        super.onActivityResult(requestCode,resultCode,data);
-        if(requestCode==AUDIO_FILE_REQUEST && fileChooserCallback!=null){
-            Uri[] result=null;
-            if(resultCode==RESULT_OK && data!=null && data.getData()!=null) result=new Uri[]{data.getData()};
-            fileChooserCallback.onReceiveValue(result);
-            fileChooserCallback=null;
-        }
-    }
-    @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && webView != null && webView.canGoBack()) { webView.goBack(); return true; }
-        return super.onKeyDown(keyCode, event);
     }
 }
