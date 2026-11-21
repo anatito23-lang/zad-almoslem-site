@@ -15,12 +15,12 @@ service cloud.firestore {
     }
 
     // Full configuration (including hidden tabs) is private.
-    match /waqafat/__custom_tabs__ {
+    match /waqafat/custom_tabs_config {
       allow read, write: if isAdmin();
     }
 
     // Only the deliberately public navigation projection is readable by visitors.
-    match /waqafat/__custom_tabs_public__ {
+    match /waqafat/custom_tabs_public {
       allow get: if true;
       allow list: if isAdmin();
       allow create, update, delete: if isAdmin();
