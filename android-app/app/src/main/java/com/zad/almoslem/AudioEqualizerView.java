@@ -15,7 +15,7 @@ public final class AudioEqualizerView extends View {
     public AudioEqualizerView(Context context, String... activeKinds) {
         super(context);
         kinds = activeKinds == null ? new String[0] : activeKinds.clone();
-        paint.setColor(AppThemeColors.accent(context));
+        paint.setColor(android.graphics.Color.rgb(50,199,181));
         setMinimumHeight(dp(34));
     }
 
