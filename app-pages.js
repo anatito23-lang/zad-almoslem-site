@@ -35,6 +35,8 @@ if(!nativeApp){
 // Keep the website and Android app section lists identical: the Kids section is disabled in both.
 document.getElementById('kids')?.remove();
 document.querySelectorAll('a[href="#kids"]').forEach(link=>link.remove());
+// The public website is a continuous, scrollable web page. Keep tab navigation only in the native Android app.
+if(!nativeApp)return;
 if(!main||!header||$('zadAppPages'))return;
 
 const meta=[['calendar','التقويم الشهري','🗓️'],['prayer','مواقيت الصلاة','🕰️'],['quran','استماع القرآن','📖'],['mushaf','المصحف الشريف','۞'],['ruqyah','الرقية الشرعية','🤲'],['radio-egypt','إذاعة القرآن الكريم','📻'],['azkar','الأذكار اليومية','☀️'],['books-library','مكتبة الكتب الإسلامية','📚'],...(!nativeApp?[['kids','ركن الأطفال','🧒']]:[]),['reminders',nativeApp?'تنبيهات الصلاة والأذان':'التنبيهات اليومية',nativeApp?'🕌':'🔔'],['hadith-dua','السنة والدعاء','🌿'],['daily-wird','وردي اليومي','📿'],['friday-wird','ورد الجمعة','🌙'],['qalbi-itmaann','قلبي اطمأن','💚'],['library','نفحات إيمانية','✨'],['khutbahs','خطب الجمعة','🎙️'],['nasheed','الإنشاد والابتهالات','🎵']];
