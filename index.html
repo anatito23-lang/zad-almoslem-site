@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0c3b32">
+<meta name="theme-color" content="#f3f5f1">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -286,6 +286,48 @@ footer{background:#071522;color:#c9d6e2}
 .shaaraawi-archive summary{cursor:pointer;color:var(--green);font-weight:800}
 .shaaraawi-empty{margin:10px 0 0;color:var(--muted);font-size:13px}
 @media(max-width:520px){.shaaraawi-latest{padding:17px}.shaaraawi-latest h3{font-size:19px}}
+</style>
+
+
+<style id="zad-calm-contrast-theme">
+/* هوية الموقع الهادئة: تباين واضح وثابت بين الخلفيات والنصوص */
+body.zad-public-website{--bg:#f3f5f1;--paper:#ffffff;--ink:#263a32;--muted:#65766e;--green:#285747;--green2:#376b56;--gold:#b89a60;--line:#e2e8e0;--soft:#edf2ec;background:#f3f5f1!important;color:#263a32!important;padding-bottom:24px!important}
+body.zad-public-website main,body.zad-public-website .wrap{color:#263a32}
+body.zad-public-website .hero{background:linear-gradient(135deg,#294d40 0%,#37634f 58%,#55745d 100%)!important;color:#fff!important}
+body.zad-public-website .hero h1,body.zad-public-website .hero .brand,body.zad-public-website .hero .brand-mark{color:#fff!important}
+body.zad-public-website .hero p{color:#edf3ed!important}
+body.zad-public-website .hero .eyebrow{color:#f0dfb7!important}
+body.zad-public-website .top nav a{color:#f5f7f2!important;background:#ffffff12;border-color:#ffffff30}
+body.zad-public-website .wrap{background:transparent}
+body.zad-public-website .date-strip,body.zad-public-website .prayer,body.zad-public-website .card,body.zad-public-website .surah-item,body.zad-public-website .zikr-item{background:#fff!important;color:#263a32!important;border-color:#e2e8e0!important}
+body.zad-public-website .section h2,body.zad-public-website .card h3,body.zad-public-website .prayer .ptime,body.zad-public-website .surah-item,body.zad-public-website .compass-label{color:#285747!important}
+body.zad-public-website .section-head p,body.zad-public-website .card p,body.zad-public-website .date-strip span,body.zad-public-website .small,body.zad-public-website .muted,body.zad-public-website .prayer .pname{color:#65766e!important}
+body.zad-public-website input,body.zad-public-website select,body.zad-public-website textarea{background:#fff!important;color:#263a32!important;border-color:#dce4dc!important}
+body.zad-public-website input::placeholder,body.zad-public-website textarea::placeholder{color:#78877f!important;opacity:1}
+body.zad-public-website .btn,body.zad-public-website button{color:#fff}
+body.zad-public-website .btn{background:#376b56;color:#fff!important}
+body.zad-public-website .btn.light,body.zad-public-website .surah-item button{background:#edf2ec!important;color:#285747!important;border:1px solid #dce6dc}
+body.zad-public-website .btn.ghost{background:#ffffff18!important;color:#fff!important;border-color:#ffffff65}
+body.zad-public-website .next-prayer-card{background:linear-gradient(120deg,#315846,#426b55)!important;color:#fff!important;border-color:#d5e0d4}
+body.zad-public-website .next-prayer-card *{color:#fff}
+body.zad-public-website .next-prayer-clock strong{color:#f5e4b8!important}
+body.zad-public-website .ramadan-hero{background:linear-gradient(125deg,#315846,#426b55)!important;color:#fff!important}
+body.zad-public-website .ramadan-hero h3,body.zad-public-website .ramadan-hero strong{color:#fff8e9!important}
+body.zad-public-website .ramadan-hero p,body.zad-public-website .ramadan-hero small{color:#f0f4ed!important}
+body.zad-public-website .ramadan-steps span{background:#edf2ec!important;color:#40594b!important}
+body.zad-public-website .ramadan-steps b{color:#285747!important}
+body.zad-public-website .ayah,body.zad-public-website .mushaf-text,body.zad-public-website .hadith-feature{background:#fffdf8!important;color:#30483d!important;border-color:#e8e1d2!important}
+body.zad-public-website .ayah-text,body.zad-public-website .mushaf-text,body.zad-public-website .hadith-text{color:#30483d!important}
+body.zad-public-website .ayah-ref,body.zad-public-website .hadith-source{color:#806b43!important}
+body.zad-public-website footer{background:#294d40!important;color:#f1f5ef!important}
+body.zad-public-website footer p,body.zad-public-website footer a{color:#f1f5ef!important}
+body.zad-public-website .zad-web-shortcuts a{background:#fff!important;color:#285747!important;border-color:#e2e8e0!important}
+body.zad-public-website .zad-web-shortcuts a b{color:#285747!important}
+body.zad-public-website .zad-web-shortcuts a span{color:#9a7c48!important}
+body.zad-public-website .notice{background:#f7f1e4!important;color:#6d5832!important;border:1px solid #eadfc8}
+body.zad-public-website .article p{color:#65766e!important}
+body.zad-public-website .section h2:before{background:#b89a60!important}
+@media(max-width:700px){body.zad-public-website .hero{padding-bottom:54px!important}body.zad-public-website .wrap{margin-top:-24px}}
 </style>
 
 </head>
@@ -2217,7 +2259,7 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
 })();
 </script>
 <script>
-if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261121-ramadan-prayer-only", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261121-calm-contrast", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
 </script>
 
 <style id="hide-floating-shortcuts">
@@ -2228,7 +2270,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261121-ramadan-prayer-only"></script>
+<script src="./app-pages.js?v=20261121-calm-contrast"></script>
 
 <style id="website-cleanup-20261121">
 /* إخفاء البوصلة والسبحة من واجهة الموقع فقط */
