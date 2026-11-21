@@ -28,6 +28,7 @@ public class DailyReminderSettingsActivity extends Activity {
   super.onCreate(state);prefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);
   getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);
   if(!prefs.contains("gentle_start_hour"))prefs.edit().putInt("gentle_start_hour",9).putInt("gentle_start_minute",0).apply();
+  if(!prefs.contains("reminder_audio_master_enabled"))prefs.edit().putBoolean("reminder_audio_master_enabled",true).apply();
   ReminderReceiver.ensureDefaultDailyReminders(this);
   build();
  }
@@ -53,6 +54,22 @@ public class DailyReminderSettingsActivity extends Activity {
   TextView note=label("تشغيل الأذان والتذكيرات الصوتية في مواعيدها يحتاج إذن المنبهات الدقيقة. من دونه ستصل الإشعارات وقد لا يعمل الصوت.",12,Color.GRAY,false);note.setPadding(0,dp(10),0,0);root.addView(note);
  }
 
+
+ private void addReminderAudioMasterSwitch(LinearLayout root){
+  LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
+  card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
+  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(card,lp);
+  card.addView(label("التحكم في أصوات التذكيرات",18,green,true));
+  TextView desc=label("يمكنك تشغيل أو إيقاف جميع التلاوات المسجلة للتذكيرات من هنا، مع بقاء إشعارات التذكير العادية مفعّلة.",12,Color.GRAY,false);
+  desc.setPadding(0,dp(5),0,dp(8));card.addView(desc);
+  Switch audio=new Switch(this);audio.setText("تشغيل التلاوات الصوتية المسجلة");
+  audio.setChecked(prefs.getBoolean("reminder_audio_master_enabled",true));card.addView(audio);
+  audio.setOnCheckedChangeListener((button,checked)->{
+   prefs.edit().putBoolean("reminder_audio_master_enabled",checked).apply();
+   if(!checked)ReminderAudioService.stop(this);
+   Toast.makeText(this,checked?"تم تشغيل أصوات التذكيرات":"تم إيقاف أصوات التذكيرات",Toast.LENGTH_SHORT).show();
+  });
+ }
 
  private void addGentleReminders(LinearLayout root){
   LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
