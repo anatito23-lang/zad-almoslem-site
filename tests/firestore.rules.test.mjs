@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { initializeTestEnvironment, assertSucceeds, assertFails } from "@firebase/rules-unit-testing";
 import {
-  collection, doc, getDoc, getDocs, query, where, setDoc
+  collection, doc, getDoc, getDocs, query, where, setDoc, updateDoc, deleteDoc
 } from "firebase/firestore";
 
 const PROJECT_ID = "demo-zad-almoslem";
@@ -61,12 +61,16 @@ test("public list queries must explicitly filter to a publication flag", async (
 test("anonymous users cannot create, edit, or delete content", async () => {
   const db = env.unauthenticatedContext().firestore();
   await assertFails(setDoc(doc(db, "azkar", "attacker"), { published: true, text: "no" }));
+  await assertFails(updateDoc(doc(db, "azkar", "published-new"), { text: "tampered" }));
+  await assertFails(deleteDoc(doc(db, "azkar", "published-new")));
 });
 
 test("only the configured admin can read drafts and write content", async () => {
   const adminDb = env.authenticatedContext(ADMIN_UID).firestore();
   await assertSucceeds(getDoc(doc(adminDb, "azkar", "draft")));
   await assertSucceeds(setDoc(doc(adminDb, "azkar", "admin-created"), { published: false }));
+  await assertSucceeds(updateDoc(doc(adminDb, "azkar", "draft"), { text: "admin-edited" }));
+  await assertSucceeds(deleteDoc(doc(adminDb, "azkar", "admin-created")));
   await assertSucceeds(getDocs(collection(adminDb, "waqafat")));
   const otherDb = env.authenticatedContext("not-the-admin").firestore();
   await assertFails(getDoc(doc(otherDb, "azkar", "draft")));
