@@ -16,9 +16,6 @@ import android.graphics.drawable.GradientDrawable;
 public class RadioActivity extends Activity {
     private static final String GREEN = "#083028";
     private TextView status;
-    private LinearLayout equalizer;
-    private final int[] equalizerHeights = {8, 15, 23, 13, 20, 10, 17};
-    private int equalizerFrame = 0;
     private final Handler handler = new Handler();
     private final Runnable statusTicker = new Runnable() {
         @Override public void run() { refreshStatus(); handler.postDelayed(this, 1000); }
@@ -68,20 +65,9 @@ public class RadioActivity extends Activity {
         deckSub.setGravity(Gravity.CENTER);
         deckSub.setPadding(0, dp(5), 0, dp(12));
         deck.addView(deckSub, match());
-        equalizer = new LinearLayout(this);
-        equalizer.setGravity(Gravity.CENTER);
-        equalizer.setOrientation(LinearLayout.HORIZONTAL);
-        for (int i = 0; i < 7; i++) {
-            View bar = new View(this);
-            GradientDrawable barBg = new GradientDrawable();
-            barBg.setColor(Color.rgb(83,190,207));
-            barBg.setCornerRadius(dp(4));
-            bar.setBackground(barBg);
-            LinearLayout.LayoutParams barLp = new LinearLayout.LayoutParams(dp(5), dp(8));
-            barLp.setMargins(dp(4), 0, dp(4), 0);
-            equalizer.addView(bar, barLp);
-        }
-        deck.addView(equalizer, new LinearLayout.LayoutParams(-1, dp(30)));
+        AudioEqualizerView equalizer = new AudioEqualizerView(this,"radio");
+        equalizer.setContentDescription("مؤشر متحرك للبث المباشر");
+        deck.addView(equalizer, new LinearLayout.LayoutParams(-1, dp(42)));
         Button toggleAudio = new Button(this);
         toggleAudio.setText("Ⅱ  إيقاف مؤقت / ▶  استئناف");
         styleAction(toggleAudio,0xFF244D61);
@@ -210,18 +196,7 @@ public class RadioActivity extends Activity {
         else if (playing) status.setText("◌ جارٍ الاتصال بـ " + stationName + "...");
         else if (error != null && !error.isEmpty()) status.setText("تعذر تشغيل " + stationName + ": " + error);
         else status.setText("اختر محطة ثم اضغط تشغيل لبدء البث.");
-        // A genuine playback indicator: bars stay still while connecting or stopped.
-        if (equalizer != null) {
-            boolean live = ready && playing;
-            for (int i = 0; i < equalizer.getChildCount(); i++) {
-                View bar = equalizer.getChildAt(i);
-                int h = live ? equalizerHeights[(i + equalizerFrame) % equalizerHeights.length] : 6;
-                LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) bar.getLayoutParams();
-                lp.height = dp(h);
-                bar.setLayoutParams(lp);
-            }
-            if (live) equalizerFrame = (equalizerFrame + 1) % equalizerHeights.length;
-        }
+
     }
 
     @Override protected void onDestroy() {
