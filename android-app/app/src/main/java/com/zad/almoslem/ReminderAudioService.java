@@ -61,6 +61,10 @@ public class ReminderAudioService extends Service {
         if (!"morning".equals(kind) && !"evening".equals(kind) && !"dua".equals(kind)
                 && !"approach".equals(kind) && !"gentle".equals(kind)) kind = "qiyam";
         activeKind = kind;
+        if (!"dua".equals(kind) && !getSharedPreferences("zad_reminders", MODE_PRIVATE).getBoolean("reminder_audio_master_enabled", true)) {
+            finishPlayback();
+            return START_NOT_STICKY;
+        }
         String reminderMessage = intent == null ? null : intent.getStringExtra("message");
         String requestedAudioFile = intent == null ? null : intent.getStringExtra("audio_file");
         createChannel();
