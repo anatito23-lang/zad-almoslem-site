@@ -98,12 +98,12 @@ public class RadioPlaybackService extends Service {
         if(intent!=null && ACTION_PAUSE_FOR_ADHAN.equals(intent.getAction())) {
             pauseForAdhan();
             // No active stream to preserve: do not leave an idle background service running.
-            if (player == null) stopSelf();
-            return START_NOT_STICKY;
+            if (player == null) { stopSelf(); return START_NOT_STICKY; }
+            return START_STICKY;
         }
         if(intent!=null && ACTION_RESUME_AFTER_ADHAN.equals(intent.getAction())) {
             resumeAfterAdhan();
-            return START_NOT_STICKY;
+            return player == null ? START_NOT_STICKY : START_STICKY;
         }
         createChannel();
         Notification n=buildPlaybackNotification("زاد وطمأنينة","جارٍ تجهيز الصوت");
