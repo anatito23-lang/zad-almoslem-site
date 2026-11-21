@@ -22,25 +22,14 @@ public class RamadanAudioService extends Service {
         startForeground(ID,b.build());
         stopCurrent();
         SharedPreferences prefs=getSharedPreferences("zad_ramadan",MODE_PRIVATE);
-        boolean iftarVoice="voice".equals(prefs.getString("iftar_mode","music"));
-        boolean suhoorVoice="voice".equals(prefs.getString("suhoor_mode","music"));
         String fileName=null;
 
-        if ("ramadan_music_test".equals(key)) {
-            playFile(generateRamadanMusicFile());
-            return START_NOT_STICKY;
-        }
         if ("ramadan_iftar_cannon".equals(key) || "ramadan_cannon_test".equals(key)) {
             fileName="iftar_cannon.mp3";
-        } else if ("ramadan_iftar_voice_test".equals(key) ||
-                ("ramadan_iftar_voice".equals(key) && iftarVoice)) {
+        } else if ("ramadan_iftar_voice_test".equals(key) || "ramadan_iftar_voice".equals(key)) {
             fileName="iftar_announcement.mp3";
-        } else if ("ramadan_suhoor_voice_test".equals(key) ||
-                ("ramadan_suhoor".equals(key) && suhoorVoice)) {
+        } else if ("ramadan_suhoor_voice_test".equals(key) || "ramadan_suhoor".equals(key)) {
             fileName="suhoor_voice.mp3";
-        } else if ("ramadan_iftar_voice".equals(key) || "ramadan_suhoor".equals(key)) {
-            playFile(generateRamadanMusicFile());
-            return START_NOT_STICKY;
         }
 
         if (fileName != null) {
@@ -64,34 +53,6 @@ public class RamadanAudioService extends Service {
             NotificationChannel c=new NotificationChannel(CHANNEL,"تنبيهات رمضان الصوتية",NotificationManager.IMPORTANCE_HIGH);
             c.setDescription("الموسيقى الرمضانية والأذان");nm.createNotificationChannel(c);}
     }
-    // Original, locally synthesized gentle bell-like Ramadan melody. No download or external track.
-    private File generateRamadanMusicFile(){
-        final int rate=22050; final double[] notes={392.00,440.00,523.25,493.88,440.00,392.00,329.63,392.00,440.00,523.25,587.33,523.25,440.00,392.00};
-        try{
-            File out=new File(getCacheDir(),"zad_ramadan_melody.wav");
-            int samples=(int)(rate*0.72*notes.length);
-            try(java.io.DataOutputStream d=new java.io.DataOutputStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(out)))){
-                writeWavHeader(d,samples,rate);
-                for(int i=0;i<samples;i++){
-                    double t=i/(double)rate, beat=t/0.72;int n=Math.min(notes.length-1,(int)beat);
-                    double local=(beat-n)*0.72, env=Math.min(1,local/0.035)*Math.min(1,(0.72-local)/0.18);
-                    double f=notes[n];double bell=Math.sin(2*Math.PI*f*t)+0.22*Math.sin(2*Math.PI*f*2.01*t)+0.08*Math.sin(2*Math.PI*f*3.98*t);
-                    double pad=0.12*Math.sin(2*Math.PI*130.81*t)+0.08*Math.sin(2*Math.PI*196*t);
-                    short v=(short)(Math.max(-1,Math.min(1,(bell*0.19*env+pad*0.22))*0.72)*32767);
-                    d.writeShort(Short.reverseBytes(v));
-                }
-            }
-            return out;
-        }catch(Exception e){throw new RuntimeException("Could not create Ramadan melody",e);}
-    }
-    private void writeWavHeader(java.io.DataOutputStream d,int samples,int rate)throws java.io.IOException{
-        int dataBytes=samples*2;
-        d.writeBytes("RIFF");writeIntLE(d,36+dataBytes);d.writeBytes("WAVEfmt ");writeIntLE(d,16);
-        writeShortLE(d,1);writeShortLE(d,1);writeIntLE(d,rate);writeIntLE(d,rate*2);writeShortLE(d,2);writeShortLE(d,16);
-        d.writeBytes("data");writeIntLE(d,dataBytes);
-    }
-    private void writeIntLE(java.io.DataOutputStream d,int v)throws java.io.IOException{d.writeInt(Integer.reverseBytes(v));}
-    private void writeShortLE(java.io.DataOutputStream d,int v)throws java.io.IOException{d.writeShort(Short.reverseBytes((short)v));}
     private void playFile(File file){
         try{
             PowerManager pm=(PowerManager)getSystemService(POWER_SERVICE);
