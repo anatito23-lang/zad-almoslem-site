@@ -21,7 +21,7 @@ import java.net.URL;
 public final class PhotoHeaderView extends FrameLayout {
     private static String photoUrl(String kind) {
         if ("radio".equals(kind))
-            return "https://www.gub.uy/intendencia-florida/sites/intendencia-florida/files/imagenes/noticias/estudio%20de%20radio.opt_.png";
+            return "https://images.unsplash.com/photo-1734383172782-d57707506342?auto=format&fit=crop&fm=jpg&q=82&w=1400";
         if ("ruqyah".equals(kind))
             return "https://images.unsplash.com/photo-1721058677807-34a4fcde1952?auto=format&fit=crop&w=1400&q=82";
         return "https://images.unsplash.com/photo-1650083731680-9658df904125?auto=format&fit=crop&w=1400&q=82";
