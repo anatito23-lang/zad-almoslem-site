@@ -103,7 +103,8 @@ public class RamadanActivity extends Activity {
         addAudioPicker(audio,"إضافة تسجيل صوت بشري لتنبيه الإفطار","iftar_voice.mp3",PICK_IFTAR);
         addExternalAudioButton(audio,"استماع إلى المسحراتي — سيد مكاوي","https://www.youtube.com/watch?v=w3ff3_5uJUU");
         addExternalAudioButton(audio,"استماع إلى ألبوم مسحراتي — حمزة نمرة","https://play.anghami.com/album/942038?lang=ar");
-        addAudioTestButton(audio,"تجربة صوت مدفع الإفطار","ramadan_iftar_cannon");
+        addAudioPicker(audio,"إضافة تسجيل بشري لمدفع الإفطار من جهازك","iftar_cannon.mp3",PICK_CANNON);
+        addAudioTestButton(audio,"تجربة تسجيل مدفع الإفطار البشري","ramadan_iftar_cannon");
         setContentView(AppTabs.wrap(this,scroll,"ramadan"));
     }
     private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("لم يتم تحديد بداية الشهر بعد؛ اختر أول يوم حتى تتوقف التنبيهات تلقائيًا بعد 30 يومًا.");return;}Calendar c=Calendar.getInstance();c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
