@@ -7,6 +7,7 @@ import android.widget.ImageView;
  * Loads photographs packaged inside the APK.
  * The build workflow downloads and validates the licensed Wikimedia Commons
  * photographs before Gradle runs, so no network request is needed on-device.
+ * Keep resource names synchronized with the CI download step in build-apk.yml.
  */
 public final class AdhanWallpaperImages {
     private AdhanWallpaperImages() {}
