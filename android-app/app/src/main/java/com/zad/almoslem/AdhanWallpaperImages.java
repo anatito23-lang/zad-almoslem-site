@@ -31,7 +31,7 @@ public final class AdhanWallpaperImages {
         "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/AlAzhar_Mosque.jpg/960px-AlAzhar_Mosque.jpg",
         "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5a/Holy_Kaaba.jpg/960px-Holy_Kaaba.jpg",
         "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/96/Al_Masjid_an_Nabawi.jpg/960px-Al_Masjid_an_Nabawi.jpg",
-        "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/ba/Al_Aqsa_mosque.jpg/960px-Al_Aqsa_mosque.jpg",
+        "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f2/%D8%A7%D9%84%D9%85%D8%B3%D8%AC%D8%AF_%D8%A7%D9%84%D8%A3%D9%82%D8%B5%D9%89_%D8%A7%D9%84%D9%85%D8%A8%D8%A7%D8%B1%D9%83%D9%A1.jpg/960px-%D8%A7%D9%84%D9%85%D8%B3%D8%AC%D8%AF_%D8%A7%D9%84%D8%A3%D9%82%D8%B5%D9%89_%D8%A7%D9%84%D9%85%D8%A8%D8%A7%D8%B1%D9%83%D9%A1.jpg",
         "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/A_photo_of_a_Quran.jpg/500px-A_photo_of_a_Quran.jpg"
     };
 
