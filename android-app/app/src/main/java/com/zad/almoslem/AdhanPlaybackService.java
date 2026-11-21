@@ -56,6 +56,11 @@ public class AdhanPlaybackService extends Service {
         String prayer = intent == null ? "الصلاة" : intent.getStringExtra("prayer");
         activePrayer = prayer;
         createChannel();
+        Intent screen = new Intent(this, AdhanFullScreenActivity.class);
+        screen.putExtra("prayer", prayer);
+        screen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent fullScreen = PendingIntent.getActivity(this, 7313, screen,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         // Promote the service immediately with a lightweight notification. Do not perform
         // other service starts or bitmap rendering before startForeground().
         Notification.Builder initialBuilder = Build.VERSION.SDK_INT >= 26
@@ -63,7 +68,10 @@ public class AdhanPlaybackService extends Service {
         initialBuilder.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle("حان الآن وقت الصلاة")
                 .setContentText("يتم تجهيز أذان " + prayer)
-                .setOngoing(true);
+                .setOngoing(true)
+                .setCategory(Notification.CATEGORY_ALARM)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setFullScreenIntent(fullScreen, true);
         try {
             if (Build.VERSION.SDK_INT >= 29) {
                 startForeground(NOTIFICATION_ID, initialBuilder.build(),
@@ -98,11 +106,6 @@ public class AdhanPlaybackService extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification.Builder builder = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this);
-        Intent screen = new Intent(this, AdhanFullScreenActivity.class);
-        screen.putExtra("prayer", prayer);
-        screen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent fullScreen = PendingIntent.getActivity(this, 7313, screen,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Bitmap mosqueImage = createAzharMosqueBitmap();
         builder.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle("حان الآن وقت الصلاة")
