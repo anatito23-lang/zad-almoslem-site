@@ -7,18 +7,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class RamadanReminderReceiver extends BroadcastReceiver {
     public static void scheduleAll(Context context) {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_ramadan",Context.MODE_PRIVATE);
         long startAt=p.getLong("start_at",0L);
-        Calendar monthEnd=Calendar.getInstance();
-        if(startAt>0){monthEnd.setTimeInMillis(startAt);monthEnd.add(Calendar.DAY_OF_YEAR,30);}
+        android.content.SharedPreferences times=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
+        TimeZone cityZone=TimeZone.getTimeZone(times.getString("native_city_timezone",TimeZone.getDefault().getID()));
+        Calendar monthEnd=calendarForStoredDate(startAt,cityZone);
+        if(startAt>0){monthEnd.add(Calendar.DAY_OF_YEAR,30);}
         long now=System.currentTimeMillis();
         if(!p.getBoolean("enabled",false)||startAt<=0||now>=monthEnd.getTimeInMillis()){
             cancel(context,"ramadan_iftar_voice");cancel(context,"ramadan_iftar_cannon");cancel(context,"ramadan_suhoor");return;
         }
-        android.content.SharedPreferences times=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
         int maghrib=times.getInt("native_time_hour_المغرب",-1), maghribMinute=times.getInt("native_time_minute_المغرب",0);
         int fajr=times.getInt("native_time_hour_الفجر",-1), fajrMinute=times.getInt("native_time_minute_الفجر",0);
         if(maghrib>=0&&maghrib<=23){
@@ -32,8 +34,10 @@ public class RamadanReminderReceiver extends BroadcastReceiver {
         else cancel(context,"ramadan_suhoor");
     }
     private static void scheduleDaily(Context context,String key,int hour,int minute,int lead,long startAt){
-        Calendar start=Calendar.getInstance();start.setTimeInMillis(startAt);start.set(Calendar.HOUR_OF_DAY,0);start.set(Calendar.MINUTE,0);start.set(Calendar.SECOND,0);start.set(Calendar.MILLISECOND,0);
-        Calendar today=Calendar.getInstance();today.set(Calendar.HOUR_OF_DAY,0);today.set(Calendar.MINUTE,0);today.set(Calendar.SECOND,0);today.set(Calendar.MILLISECOND,0);
+        android.content.SharedPreferences times=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
+        TimeZone cityZone=TimeZone.getTimeZone(times.getString("native_city_timezone",TimeZone.getDefault().getID()));
+        Calendar start=calendarForStoredDate(startAt,cityZone);
+        Calendar today=Calendar.getInstance(cityZone);today.set(Calendar.HOUR_OF_DAY,0);today.set(Calendar.MINUTE,0);today.set(Calendar.SECOND,0);today.set(Calendar.MILLISECOND,0);
         Calendar c=(Calendar)(today.after(start)?today.clone():start.clone());
         c.set(Calendar.HOUR_OF_DAY,hour);c.set(Calendar.MINUTE,minute);c.set(Calendar.SECOND,0);c.set(Calendar.MILLISECOND,0);c.add(Calendar.MINUTE,-Math.max(0,lead));
         if(c.getTimeInMillis()<=System.currentTimeMillis())c.add(Calendar.DAY_OF_YEAR,1);
@@ -45,6 +49,12 @@ public class RamadanReminderReceiver extends BroadcastReceiver {
         if(Build.VERSION.SDK_INT>=31&&!am.canScheduleExactAlarms())am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,c.getTimeInMillis(),pi);
         else if(Build.VERSION.SDK_INT>=23)am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,c.getTimeInMillis(),pi);
         else am.setExact(AlarmManager.RTC_WAKEUP,c.getTimeInMillis(),pi);
+    }
+    private static Calendar calendarForStoredDate(long millis,TimeZone zone){
+        Calendar device=Calendar.getInstance();device.setTimeInMillis(millis);
+        Calendar local=Calendar.getInstance(zone);local.clear();
+        local.set(device.get(Calendar.YEAR),device.get(Calendar.MONTH),device.get(Calendar.DAY_OF_MONTH),0,0,0);
+        local.set(Calendar.MILLISECOND,0);return local;
     }
     private static void cancel(Context context,String key){
         Intent i=new Intent(context,RamadanReminderReceiver.class);
