@@ -246,7 +246,8 @@ public class RadioActivity extends Activity {
         try {
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(i);
             else startService(i);
-            status.setText("تم إرسال طلب تشغيل البث. انتظر حالة الاتصال.");\n            startActivity(new Intent(this, NowPlayingActivity.class));
+            status.setText("تم إرسال طلب تشغيل البث. انتظر حالة الاتصال.");
+            startActivity(new Intent(this, NowPlayingActivity.class));
         } catch (Exception e) {
             status.setText("تعذر بدء البث: " + e.getMessage());
         }
