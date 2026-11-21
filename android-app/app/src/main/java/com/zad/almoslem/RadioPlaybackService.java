@@ -67,7 +67,7 @@ public class RadioPlaybackService extends Service {
                     resumeOnAudioFocusGain = false;
                     player.pause();
                 }
-                getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_paused", !shouldPlay).apply();
+                getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_paused", !shouldPlay).putBoolean("waiting_for_audio_focus", shouldPlay && !player.getPlayWhenReady() && !adhanPauseRequested).apply();
                 updateRadioNotification(playbackTitle(), shouldPlay ? "يعمل الآن" : "متوقف مؤقتًا");
             }
             return START_NOT_STICKY;
@@ -146,9 +146,11 @@ public class RadioPlaybackService extends Service {
             resumeOnAudioFocusGain = true;
             if (requestAudioFocus()) {
                 resumeOnAudioFocusGain = false;
+                getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("waiting_for_audio_focus", false).apply();
                 player.play();
                 android.util.Log.i("ZadAlmoslem", "Audio resumed after adhan at " + savedPosition);
             } else {
+                getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("waiting_for_audio_focus", true).apply();
                 player.pause();
                 android.util.Log.i("ZadAlmoslem", "Audio waiting for focus after adhan");
             }
@@ -251,8 +253,10 @@ public class RadioPlaybackService extends Service {
                 resumeOnAudioFocusGain = true;
                 if (requestAudioFocus()) {
                     resumeOnAudioFocusGain = false;
+                    getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("waiting_for_audio_focus", false).apply();
                     player.play();
                 } else {
+                    getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("waiting_for_audio_focus", true).apply();
                     player.pause();
                 }
             }
@@ -282,6 +286,7 @@ public class RadioPlaybackService extends Service {
         if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
             if (player != null && resumeOnAudioFocusGain && !adhanPauseRequested) {
                 resumeOnAudioFocusGain = false;
+                getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("waiting_for_audio_focus", false).apply();
                 player.play();
                 android.util.Log.i("ZadAlmoslem", "Audio resumed after external audio focus returned");
             }
@@ -292,6 +297,7 @@ public class RadioPlaybackService extends Service {
                 focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
             if (player != null && player.getPlayWhenReady()) {
                 if (!adhanPauseRequested) resumeOnAudioFocusGain = true;
+                getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("waiting_for_audio_focus", !adhanPauseRequested && resumeOnAudioFocusGain).apply();
                 player.pause();
                 android.util.Log.i("ZadAlmoslem", "Audio paused after external audio focus loss: " + focusChange);
             }
@@ -419,7 +425,7 @@ public class RadioPlaybackService extends Service {
             player = null;
         }
     }
-    private void stopRadio() { adhanPauseRequested=false; pausedForAdhan=false; resumeAfterAdhan=false; getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").putString("radio_title","").putBoolean("radio_paused",false).apply(); QuranHomeWidget.refreshAll(this); releasePlayer(); stopForeground(true); stopSelf(); }
+    private void stopRadio() { adhanPauseRequested=false; pausedForAdhan=false; resumeAfterAdhan=false; getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").putString("radio_title","").putBoolean("radio_paused",false).putBoolean("waiting_for_audio_focus",false).apply(); QuranHomeWidget.refreshAll(this); releasePlayer(); stopForeground(true); stopSelf(); }
     @Override public void onDestroy(){releasePlayer();super.onDestroy();}
     @Override public IBinder onBind(Intent intent){return null;}
 }
