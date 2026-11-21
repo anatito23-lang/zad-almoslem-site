@@ -194,4 +194,46 @@ $('zadFontFamily')?.addEventListener('change',e=>{localStorage.setItem('zad_font
 $('zadFontSize')?.addEventListener('input',e=>{localStorage.setItem('zad_font_size',e.target.value);applySettings();});
 applySettings();
 document.head.append(css);
+
+/* Custom content tabs managed from the admin panel. */
+(async function loadManagedTabs(){
+ try{
+  const {initializeApp,getApps}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+  const {getFirestore,doc,getDoc,collection,getDocs}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+  const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
+  const app=getApps().length?getApps()[0]:initializeApp(cfg),db=getFirestore(app);
+  const tabsSnap=await getDoc(doc(db,"waqafat","__custom_tabs__"));
+  if(!tabsSnap.exists())return;
+  const tabs=Array.isArray(tabsSnap.data().tabs)?tabsSnap.data().tabs.filter(t=>t&&t.id&&t.title&&t.visible!==false):[];
+  if(!tabs.length)return;
+  const contentSnap=await getDocs(collection(db,"waqafat"));
+  const all=contentSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const safe=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const kindNames={articles:"خواطر ومقالات",stories:"قصص",biographies:"سير وتراجم",general:""};
+  tabs.sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)).forEach(tab=>{
+   if($(tab.id)||items.some(x=>x.id===tab.id))return;
+   const section=document.createElement("section");section.className="section";section.id=tab.id;
+   const heading=document.createElement("div");heading.className="section-head";
+   heading.innerHTML='<div><h2>'+safe(tab.icon||"✨")+' '+safe(tab.title)+'</h2><p>'+safe(kindNames[tab.kind]||"")+'</p></div>';
+   section.append(heading);
+   const records=all.filter(x=>x.tabId===tab.id&&(x.published===true||x["تم النشر"]===true||x["النشر"]===true)).sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+   if(!records.length){const empty=document.createElement("p");empty.className="small muted";empty.textContent="لا يوجد محتوى منشور في هذا القسم حاليًا.";section.append(empty);}
+   records.forEach(item=>{
+    const article=document.createElement("article");article.className="card";article.style.margin="12px 0";
+    const h=document.createElement("h3");h.textContent=item.title||tab.title;
+    const body=document.createElement("p");body.style.whiteSpace="pre-wrap";body.style.lineHeight="2";body.textContent=item.body||"";
+    article.append(h,body);
+    if(item.source){const source=document.createElement("p");source.className="small";source.style.marginTop="10px";source.textContent="المصدر: "+item.source;article.append(source);}
+    section.append(article);
+   });
+   main.append(section);items.push({id:tab.id,title:tab.title,icon:tab.icon||"✨"});
+   const addTile=(container,cls)=>{const b=document.createElement("button");b.type="button";b.className=cls;b.dataset.target=tab.id;b.innerHTML='<span class="'+(cls==="zad-home-item"?"zad-home-icon":"")+'">'+safe(tab.icon||"✨")+'</span><strong>'+safe(tab.title)+'</strong>';b.addEventListener("click",()=>showPage(tab.id));container.append(b);};
+   addTile(homeGrid,"zad-home-item");
+   const moreGrid=$("zadMoreGrid");if(moreGrid)addTile(moreGrid,"zad-more-item");
+   valid.push(tab.id);
+  });
+  const hash=location.hash.slice(1);if(tabs.some(t=>t.id===hash))showPage(hash,true);
+ }catch(error){console.warn("تعذر تحميل التبويبات الإضافية",error);}
+})();
+
 })();
