@@ -43,8 +43,16 @@ public class RadioPlaybackService extends Service {
         if(intent!=null && (ACTION_TOGGLE.equals(intent.getAction()) || ACTION_PAUSE.equals(intent.getAction()) || ACTION_RESUME.equals(intent.getAction()))) {
             if (player != null) {
                 boolean shouldPlay = ACTION_TOGGLE.equals(intent.getAction()) ? !player.isPlaying() : ACTION_RESUME.equals(intent.getAction());
-                if (shouldPlay && !adhanPauseRequested) player.play();
-                else if (!shouldPlay) player.pause();
+                if (adhanPauseRequested) {
+                    // A deliberate pause during adhan cancels the automatic return.
+                    // A deliberate resume keeps the user's request queued until dua ends.
+                    if (shouldPlay) resumeAfterAdhan = true;
+                    else resumeAfterAdhan = false;
+                } else if (shouldPlay) {
+                    player.play();
+                } else {
+                    player.pause();
+                }
                 getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_paused", !shouldPlay).apply();
                 updateRadioNotification(playbackTitle(), shouldPlay ? "يعمل الآن" : "متوقف مؤقتًا");
             }
@@ -173,7 +181,7 @@ public class RadioPlaybackService extends Service {
             player.addListener(new Player.Listener() {
                 @Override public void onPlaybackStateChanged(int state) {
                     if (state == Player.STATE_BUFFERING) {
-                        updateRadioNotification("إذاعة القرآن الكريم", "جارٍ الاتصال بالبث...");
+                        updateRadioNotification(playbackTitle(), "جارٍ الاتصال بالبث...");
                     } else if (state == Player.STATE_READY) {
                         String active = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", "");
                         if ("radio".equals(active)) {
