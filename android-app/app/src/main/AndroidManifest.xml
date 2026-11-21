@@ -27,7 +27,8 @@
         <activity android:name=".QuranTextActivity" android:exported="false" />
         <activity android:name=".PrayerDashboardActivity" android:exported="false" />
         <activity android:name=".MushafPageActivity" android:exported="false" />
-        <activity android:name=".RadioActivity" android:exported="false" />\n        <activity android:name=".NowPlayingActivity" android:exported="false" />
+        <activity android:name=".RadioActivity" android:exported="false" />
+        <activity android:name=".NowPlayingActivity" android:exported="false" />
         <activity android:name=".BookLibraryActivity" android:exported="false" />
         <activity android:name=".CalendarActivity" android:exported="false" />
         <activity android:name=".AudioLibraryActivity" android:exported="false" />
