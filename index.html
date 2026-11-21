@@ -1594,7 +1594,8 @@ async function loadOldEgyptianReciters(){
    const found=all.find(rec=>{const n=normalizeReciterName(rec.name);return tokens.some(token=>n.includes(normalizeReciterName(token)));});
    if(found){window.zadReciterData[key]=found;known.add(String(found.id));}
   });
-  all.forEach(rec=>{
+  const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp());
+  if(!nativeApp)all.forEach(rec=>{
    if(!rec||!rec.id||!Array.isArray(rec.moshaf)||!rec.moshaf.length)return;
    window.zadReciterData['api_'+rec.id]=rec;if(known.has(String(rec.id)))return;
    const option=document.createElement('option');option.value='api_'+rec.id;option.textContent=rec.name+(rec.moshaf.length>1?' — '+rec.moshaf.length+' روايات':'');select.append(option);
@@ -1722,7 +1723,13 @@ $('closeTasbeeh').addEventListener('click',closeTasbeeh);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeTasbeeh();});
 
 
-const hadithData=[
+const hadithData=(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp())?[
+ ['«إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى»','متفق عليه'],
+ ['«من كان يؤمن بالله واليوم الآخر فليقل خيرًا أو ليصمت»','متفق عليه'],
+ ['«لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه»','متفق عليه'],
+ ['«الكلمة الطيبة صدقة»','متفق عليه'],
+ ['«اتق الله حيثما كنت، وأتبع السيئة الحسنة تمحها، وخالق الناس بخلق حسن»','رواه الترمذي وقال: حديث حسن']
+]:
  ['«إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى»','رواه البخاري (1) ومسلم (1907)'],
  ['«من كان يؤمن بالله واليوم الآخر فليقل خيرًا أو ليصمت»','رواه البخاري (6018) ومسلم (47)'],
  ['«لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه»','رواه البخاري (13) ومسلم (45)'],
@@ -1743,7 +1750,7 @@ const hadithData=[
  ['«يسروا ولا تعسروا، وبشروا ولا تنفروا»','رواه البخاري (69) ومسلم (1734)'],
  ['«الراحمون يرحمهم الرحمن، ارحموا من في الأرض يرحمكم من في السماء»','رواه أبو داود (4941) والترمذي (1924)، وصححه الترمذي'],
  ['«من كان في حاجة أخيه كان الله في حاجته»','رواه البخاري (2442) ومسلم (2580)']
-];
+;
 const duaData=[
  ['﴿رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ﴾','سورة البقرة: 201'],
  ['﴿رَبِّ اشْرَحْ لِي صَدْرِي ۝ وَيَسِّرْ لِي أَمْرِي﴾','سورة طه: 25–26'],
