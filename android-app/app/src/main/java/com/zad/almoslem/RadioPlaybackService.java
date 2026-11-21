@@ -354,8 +354,11 @@ public class RadioPlaybackService extends Service {
     }
 
     private Notification buildPlaybackNotification(String title, String message) {
-        Intent open = new Intent(this, NowPlayingActivity.class);
-        open.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        String kind = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", "radio");
+        Class<?> destination = "quran".equals(kind) ? QuranListeningActivity.class :
+                "ruqyah".equals(kind) ? RuqyahActivity.class : RadioActivity.class;
+        Intent open = new Intent(this, destination);
+        open.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent content = PendingIntent.getActivity(this, 7411, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         boolean playing = player != null && (player.getPlayWhenReady() || resumeOnAudioFocusGain || (adhanPauseRequested && resumeAfterAdhan));
