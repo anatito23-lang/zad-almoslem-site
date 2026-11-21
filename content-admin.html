@@ -102,7 +102,7 @@ function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;",
 updateFields();
 
 function customMessage(value,error=false){const el=$("customTabsMessage");el.textContent=value;el.classList.remove("hidden","error");if(error)el.classList.add("error")}
-async function readCustomTabs(){const snap=await getDoc(doc(db,"waqafat",CUSTOM_TABS_DOC));customTabs=snap.exists()&&Array.isArray(snap.data().tabs)?snap.data().tabs:[];renderCustomTabs();await loadCustomContent()}
+async function readCustomTabs(){const snap=await getDoc(doc(db,"waqafat",CUSTOM_TABS_DOC));customTabs=snap.exists()&&Array.isArray(snap.data().tabs)?snap.data().tabs:[];await saveCustomTabs();await loadCustomContent()}
 async function saveCustomTabs(){
  const batch=writeBatch(db),updatedAt=serverTimestamp();
  batch.set(doc(db,"waqafat",CUSTOM_TABS_DOC),{tabs:customTabs,updatedAt},{merge:true});
