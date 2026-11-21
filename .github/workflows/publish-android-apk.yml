@@ -98,3 +98,5 @@ jobs:
             zad-almoslem.apk
             zad-almoslem.aab
           overwrite_files: true
+
+# Rebuild release to verify the current signing secrets.
