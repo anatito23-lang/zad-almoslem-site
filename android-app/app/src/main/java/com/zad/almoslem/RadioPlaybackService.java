@@ -20,6 +20,9 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 public class RadioPlaybackService extends Service {
     public static final String ACTION_PLAY="com.zad.almoslem.PLAY_RADIO";
     public static final String ACTION_STOP="com.zad.almoslem.STOP_RADIO";
+    public static final String ACTION_TOGGLE="com.zad.almoslem.TOGGLE_RADIO";
+    public static final String ACTION_PAUSE="com.zad.almoslem.PAUSE_RADIO";
+    public static final String ACTION_RESUME="com.zad.almoslem.RESUME_RADIO";
     public static final String ACTION_PAUSE_FOR_ADHAN="com.zad.almoslem.PAUSE_FOR_ADHAN";
     public static final String ACTION_RESUME_AFTER_ADHAN="com.zad.almoslem.RESUME_AFTER_ADHAN";
     private boolean pausedForAdhan;
@@ -37,6 +40,16 @@ public class RadioPlaybackService extends Service {
         if (getSharedPreferences("zad_reminders", MODE_PRIVATE).getBoolean("adhan_active", false))
             adhanPauseRequested = true;
         if(intent!=null && ACTION_STOP.equals(intent.getAction())) { stopRadio(); return START_NOT_STICKY; }
+        if(intent!=null && (ACTION_TOGGLE.equals(intent.getAction()) || ACTION_PAUSE.equals(intent.getAction()) || ACTION_RESUME.equals(intent.getAction()))) {
+            if (player != null) {
+                boolean shouldPlay = ACTION_TOGGLE.equals(intent.getAction()) ? !player.isPlaying() : ACTION_RESUME.equals(intent.getAction());
+                if (shouldPlay && !adhanPauseRequested) player.play();
+                else if (!shouldPlay) player.pause();
+                getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_paused", !shouldPlay).apply();
+                updateRadioNotification(playbackTitle(), shouldPlay ? "يعمل الآن" : "متوقف مؤقتًا");
+            }
+            return START_NOT_STICKY;
+        }
         if(intent!=null && ACTION_PAUSE_FOR_ADHAN.equals(intent.getAction())) {
             pauseForAdhan();
             // No active stream to preserve: do not leave an idle background service running.
@@ -48,15 +61,7 @@ public class RadioPlaybackService extends Service {
             return START_NOT_STICKY;
         }
         createChannel();
-        Intent open=new Intent(this,HomeActivity.class);
-        PendingIntent content=PendingIntent.getActivity(this,7411,open,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-        Intent stop=new Intent(this,RadioPlaybackService.class); stop.setAction(ACTION_STOP);
-        PendingIntent stopAction=PendingIntent.getService(this,7412,stop,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
-        Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
-        b.setSmallIcon(android.R.drawable.ic_media_play).setContentTitle("إذاعة القرآن الكريم")
-          .setContentText("البث مستمر في الخلفية").setContentIntent(content).setOngoing(true)
-          .addAction(android.R.drawable.ic_media_pause,"إيقاف الإذاعة",stopAction);
-        Notification n=b.build();
+        Notification n=buildPlaybackNotification("زاد وطمأنينة","جارٍ تجهيز الصوت");
         if(Build.VERSION.SDK_INT>=29) startForeground(NOTIFICATION,n,android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
         else startForeground(NOTIFICATION,n);
         String url=intent==null?null:intent.getStringExtra("url");
@@ -98,7 +103,7 @@ public class RadioPlaybackService extends Service {
             if(Build.VERSION.SDK_INT>=29) startForeground(NOTIFICATION,n2,android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
             else startForeground(NOTIFICATION,n2);
         }
-        getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",true).putBoolean("radio_ready",false).remove("radio_last_error").putString("active_kind",kind==null?"radio":kind).putString("radio_station",intent==null?"":intent.getStringExtra("station")).apply();
+        getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",true).putBoolean("radio_ready",false).remove("radio_last_error").putString("active_kind",kind==null?"radio":kind).putString("radio_station",intent==null?"":intent.getStringExtra("station"))\n          .putString("radio_title",label==null?defaultTitle(kind):label).putBoolean("radio_paused",false).apply();
         QuranHomeWidget.refreshAll(this);
         play(url,allowedLocal?localFile:null);
         return START_NOT_STICKY;
@@ -185,7 +190,7 @@ public class RadioPlaybackService extends Service {
                         }
                     }
                 }
-                @Override public void onPlayerError(PlaybackException error) {
+                @Override public void onIsPlayingChanged(boolean isPlaying) {\n                    getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_paused", !isPlaying).apply();\n                    updateRadioNotification(playbackTitle(), isPlaying ? "يعمل الآن" : "متوقف مؤقتًا");\n                }\n                @Override public void onPlayerError(PlaybackException error) {
                     // Cancel the startup timeout so it cannot overwrite the real playback error.
                     if (startupTimeout != null) {
                         playbackHandler.removeCallbacks(startupTimeout);
@@ -242,20 +247,51 @@ public class RadioPlaybackService extends Service {
             stopRadio();
         }
     }
+    private String defaultTitle(String kind) {
+        if ("quran".equals(kind)) return "استماع القرآن الكريم";
+        if ("ruqyah".equals(kind)) return "الرقية الشرعية";
+        if ("nasheed".equals(kind)) return "الإنشاد والابتهالات";
+        return "إذاعة القرآن الكريم";
+    }
+
+    private String playbackTitle() {
+        android.content.SharedPreferences p=getSharedPreferences("zad_audio",MODE_PRIVATE);
+        String title=p.getString("radio_title","");
+        return title.isEmpty()?defaultTitle(p.getString("active_kind","radio")):title;
+    }
+
+    private Notification buildPlaybackNotification(String title, String message) {
+        Intent open = new Intent(this, NowPlayingActivity.class);
+        open.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent content = PendingIntent.getActivity(this, 7411, open,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        boolean playing = player != null && player.isPlaying();
+        Intent toggle = new Intent(this, RadioPlaybackService.class);
+        toggle.setAction(ACTION_TOGGLE);
+        PendingIntent toggleAction = PendingIntent.getService(this, 7413, toggle,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        Intent stop = new Intent(this, RadioPlaybackService.class);
+        stop.setAction(ACTION_STOP);
+        PendingIntent stopAction = PendingIntent.getService(this, 7412, stop,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        Notification.Builder b = Build.VERSION.SDK_INT >= 26
+                ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
+        b.setSmallIcon(android.R.drawable.ic_media_play)
+                .setContentTitle(title == null ? "زاد وطمأنينة" : title)
+                .setContentText(message == null ? "تشغيل صوتي في الخلفية" : message)
+                .setContentIntent(content).setOngoing(true).setOnlyAlertOnce(true)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .addAction(playing ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play,
+                        playing ? "إيقاف مؤقت" : "استئناف", toggleAction)
+                .addAction(android.R.drawable.ic_menu_close_clear_cancel, "إيقاف", stopAction);
+        return b.build();
+    }
+
     private void updateRadioNotification(String title, String message) {
         try {
-            Intent open = new Intent(this, MainActivity.class);
-            PendingIntent content = PendingIntent.getActivity(this, 7411, open,
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-            Notification.Builder b = Build.VERSION.SDK_INT >= 26
-                    ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
-            b.setSmallIcon(android.R.drawable.ic_media_play)
-                    .setContentTitle(title).setContentText(message)
-                    .setContentIntent(content).setOngoing(true);
-            Notification n = b.build();
-            if (Build.VERSION.SDK_INT >= 29)
-                startForeground(NOTIFICATION, n, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
-            else startForeground(NOTIFICATION, n);
+            Notification n = buildPlaybackNotification(title, message);
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) manager.notify(NOTIFICATION, n);
         } catch (Exception e) {
             android.util.Log.e("ZadAlmoslem", "Could not update radio notification", e);
         }
@@ -296,7 +332,7 @@ public class RadioPlaybackService extends Service {
             player = null;
         }
     }
-    private void stopRadio() { adhanPauseRequested=false; pausedForAdhan=false; resumeAfterAdhan=false; getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").apply(); QuranHomeWidget.refreshAll(this); releasePlayer(); stopForeground(true); stopSelf(); }
+    private void stopRadio() { adhanPauseRequested=false; pausedForAdhan=false; resumeAfterAdhan=false; getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").putString("radio_title","").putBoolean("radio_paused",false).apply(); QuranHomeWidget.refreshAll(this); releasePlayer(); stopForeground(true); stopSelf(); }
     @Override public void onDestroy(){releasePlayer();super.onDestroy();}
     @Override public IBinder onBind(Intent intent){return null;}
 }
