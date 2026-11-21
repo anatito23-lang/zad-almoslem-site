@@ -119,6 +119,7 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
                 else if(legacyOffline.isFile()&&legacyOffline.length()>10000)intent.putExtra("local_path",legacyOffline.getAbsolutePath());
                 if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);
                 state.setText("يتم تشغيل "+label+" في الخلفية.");
+                startActivity(new Intent(this, NowPlayingActivity.class));
             }catch(Exception e){state.setText("تعذر بدء التلاوة: "+e.getMessage());}
         });
         download.setOnClickListener(v->{

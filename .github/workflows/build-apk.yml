@@ -3,7 +3,7 @@ name: Build Zad Almoslem Android
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main, native-android-app, feature/firebase-content-sync, feature/firebase-admin-panel]
+    branches: [main, native-android-app, feature/firebase-content-sync, feature/firebase-admin-panel, feature/audio-controls-now-playing]
     paths:
       - 'android-app/**'
       - '.github/workflows/build-apk.yml'
