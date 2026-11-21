@@ -96,7 +96,7 @@ public class RamadanActivity extends Activity {
         suhoor.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("suhoor_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
 
         LinearLayout audio=card("أصوات رمضان — المسحراتي");
-        audioStatus=text("استمع إلى تسجيلات بشرية أصلية من مصادرها. يلزم اتصال بالإنترنت، والتشغيل يتم عبر التطبيق أو الموقع الرسمي؛ لم نضمّن التسجيلات داخل APK لعدم توفر إذن إعادة توزيعها دون اتصال.",12,AppThemeColors.muted(this),false);
+        audioStatus=text("أذان بشري حقيقي مضمّن داخل التطبيق بترخيص CC0. ويمكنك إضافة تسجيلك البشري للمسحراتي أو تنبيه الإفطار ليعمل دون إنترنت. تسجيلات سيد مكاوي وحمزة نمرة تظل عبر مصادرها الرسمية احترامًا لحقوق النشر.",12,AppThemeColors.muted(this),false);
         audio.addView(audioStatus,full());
         addExternalAudioButton(audio,"استماع إلى المسحراتي — سيد مكاوي","https://www.youtube.com/watch?v=w3ff3_5uJUU");
         addExternalAudioButton(audio,"استماع إلى ألبوم مسحراتي — حمزة نمرة","https://play.anghami.com/album/942038?lang=ar");
