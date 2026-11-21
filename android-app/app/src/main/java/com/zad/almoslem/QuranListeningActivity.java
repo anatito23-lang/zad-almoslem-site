@@ -22,8 +22,10 @@ TextView intro=text("اختر القارئ والسورة، واستمع مبا�
         GradientDrawable heroBg=new GradientDrawable(GradientDrawable.Orientation.TL_BR,
                 new int[]{Color.rgb(8,48,40),Color.rgb(24,105,78),Color.rgb(7,42,35)});
         heroBg.setCornerRadius(dp(24));listeningHero.setBackground(heroBg);
-        TextView ornament=text("۞",44,Color.rgb(226,197,130),true);ornament.setGravity(Gravity.CENTER);
-        listeningHero.addView(ornament,matchWrap());
+        ImageView readerImage=new ImageView(this);
+        readerImage.setImageResource(R.drawable.quran_reader_wallpaper);
+        readerImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        listeningHero.addView(readerImage,new LinearLayout.LayoutParams(-1,dp(142)));
         TextView heroTitle=text("مجالس القرآن",21,Color.WHITE,true);heroTitle.setGravity(Gravity.CENTER);
         listeningHero.addView(heroTitle,matchWrap());
         TextView heroCaption=text("تلاوات خاشعة… تصحب يومك بالسكينة",13,Color.rgb(235,224,195),false);heroCaption.setGravity(Gravity.CENTER);
@@ -44,7 +46,9 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         card.addView(text("القارئ",12,AppThemeColors.text(this),true));card.addView(reciterSpinner,matchWrap());
         card.addView(text("السورة",12,AppThemeColors.text(this),true));card.addView(surahSpinner,matchWrap());
         Button play=new Button(this);play.setText("استمع الآن");card.addView(play,matchWrap());
-        Button stop=new Button(this);stop.setText("■ إيقاف التلاوة");card.addView(stop,matchWrap());
+        Button toggle=new Button(this);toggle.setText("Ⅱ إيقاف مؤقت / ▶ استئناف");card.addView(toggle,matchWrap());
+         toggle.setOnClickListener(v->{Intent control=new Intent(this,RadioPlaybackService.class);control.setAction(RadioPlaybackService.ACTION_TOGGLE);try{startService(control);Toast.makeText(this,"تم تحديث حالة التلاوة.",Toast.LENGTH_SHORT).show();}catch(Exception e){Toast.makeText(this,"تعذر التحكم في التلاوة: "+e.getMessage(),Toast.LENGTH_LONG).show();}});
+         Button stop=new Button(this);stop.setText("■ إيقاف التلاوة");card.addView(stop,matchWrap());
         stop.setOnClickListener(v->{Intent stopIntent=new Intent(this,RadioPlaybackService.class);stopIntent.setAction(RadioPlaybackService.ACTION_STOP);try{startService(stopIntent);Toast.makeText(this,"تم إيقاف التلاوة",Toast.LENGTH_SHORT).show();}catch(Exception e){Toast.makeText(this,"تعذر إيقاف التلاوة",Toast.LENGTH_SHORT).show();}});
         Button download=new Button(this);download.setText("تنزيل السورة للاستماع دون إنترنت");card.addView(download,matchWrap());
         ProgressBar quranProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);quranProgress.setMax(100);card.addView(quranProgress,matchWrap());
@@ -118,8 +122,8 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
                 if(offline.isFile()&&offline.length()>10000)intent.putExtra("local_path",offline.getAbsolutePath());
                 else if(legacyOffline.isFile()&&legacyOffline.length()>10000)intent.putExtra("local_path",legacyOffline.getAbsolutePath());
                 if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);
-                state.setText("يتم تشغيل "+label+" في الخلفية.");
-                startActivity(new Intent(this, NowPlayingActivity.class));
+                state.setText("يتم تشغيل "+label+" داخل تبويب الاستماع. يمكنك متابعة الاختيار والتحكم من الصفحة نفسها.");
+                
             }catch(Exception e){state.setText("تعذر بدء التلاوة: "+e.getMessage());}
         });
         download.setOnClickListener(v->{

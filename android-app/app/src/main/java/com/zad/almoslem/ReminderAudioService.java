@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.os.IBinder;
 import java.io.File;
+import java.util.Locale;
 
 public class ReminderAudioService extends Service {
     public static final String ACTION_PLAY = "com.zad.almoslem.PLAY_REMINDER_AUDIO";
@@ -116,8 +117,9 @@ public class ReminderAudioService extends Service {
     private void playFile(String kind, String unusedMessage) {
         try {
             File file = new File(new File(getFilesDir(), "reminders"), kind + ".mp3");
-            if (!file.isFile() || file.length() < 10000) {
-                android.util.Log.w("ZadAlmoslem", "Human recorded reminder audio is missing; playback skipped: " + kind);
+            String remoteUrl = recordedRecitationUrl(kind);
+            if ((!file.isFile() || file.length() < 10000) && remoteUrl == null) {
+                android.util.Log.w("ZadAlmoslem", "Reminder audio is unavailable: " + kind);
                 finishPlayback();
                 return;
             }
@@ -131,11 +133,27 @@ public class ReminderAudioService extends Service {
                 player.setVolume(volume/100f,volume/100f);
             }
             player.setOnCompletionListener(mp -> finishPlayback());
-            player.setOnErrorListener((mp, what, extra) -> { finishPlayback(); return true; });
+            player.setOnErrorListener((mp, what, extra) -> {
+                android.util.Log.e("ZadAlmoslem", "Reminder recitation playback failed: " + kind + " (" + what + "/" + extra + ")");
+                finishPlayback();
+                return true;
+            });
             player.setOnPreparedListener(MediaPlayer::start);
-            player.setDataSource(file.getAbsolutePath());
+            if (file.isFile() && file.length() >= 10000) player.setDataSource(file.getAbsolutePath());
+            else player.setDataSource(remoteUrl);
             player.prepareAsync();
         } catch (Exception e) { finishPlayback(); }
+    }
+
+    private String recordedRecitationUrl(String kind) {
+        int surah;
+        if ("gentle_0".equals(kind)) surah = 112;
+        else if ("gentle_1".equals(kind)) surah = 113;
+        else if ("gentle_2".equals(kind)) surah = 114;
+        else if ("gentle_3".equals(kind)) surah = 1;
+        else if ("approach".equals(kind)) surah = 93;
+        else return null;
+        return "https://server13.mp3quran.net/husr/" + String.format(Locale.US, "%03d.mp3", surah);
     }
 
     private void stopCurrentPlayers() {

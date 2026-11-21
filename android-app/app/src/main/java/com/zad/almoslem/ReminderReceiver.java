@@ -45,15 +45,19 @@ public class ReminderReceiver extends BroadcastReceiver {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
         if(!p.getBoolean("gentle_enabled",false)){cancel(context,"gentle_reminder");return;}
         int hours=Math.max(1,Math.min(6,p.getInt("gentle_interval_hours",3)));
+        int startHour=Math.max(0,Math.min(23,p.getInt("gentle_start_hour",9)));
+        int startMinute=Math.max(0,Math.min(59,p.getInt("gentle_start_minute",0)));
         Calendar next=Calendar.getInstance();
-        next.add(Calendar.HOUR_OF_DAY,hours);
-        if(next.get(Calendar.HOUR_OF_DAY)>=21){
-            next.add(Calendar.DAY_OF_YEAR,1);
-            next.set(Calendar.HOUR_OF_DAY,9); next.set(Calendar.MINUTE,0);
-        } else if(next.get(Calendar.HOUR_OF_DAY)<9) {
-            next.set(Calendar.HOUR_OF_DAY,9); next.set(Calendar.MINUTE,0);
+        next.set(Calendar.HOUR_OF_DAY,startHour);
+        next.set(Calendar.MINUTE,startMinute);
+        next.set(Calendar.SECOND,0);
+        next.set(Calendar.MILLISECOND,0);
+        long intervalMillis=hours*60L*60L*1000L;
+        if(next.getTimeInMillis()<=System.currentTimeMillis()){
+            long elapsed=System.currentTimeMillis()-next.getTimeInMillis();
+            long steps=(elapsed/intervalMillis)+1L;
+            next.setTimeInMillis(next.getTimeInMillis()+steps*intervalMillis);
         }
-        next.set(Calendar.SECOND,0); next.set(Calendar.MILLISECOND,0);
         long at=next.getTimeInMillis();
         p.edit().putLong("gentle_next_at",at).apply();
         schedule(context,"gentle_reminder",at,"تذكير لطيف من زاد المسلم",false);
@@ -65,7 +69,9 @@ public class ReminderReceiver extends BroadcastReceiver {
             scheduleDaily(context,"morning",7,0,"حان وقت أذكار الصباح، لا تنس وردك من ذكر الله.");
         if(!p.contains("evening_enabled"))
             scheduleDaily(context,"evening",17,0,"حان وقت أذكار المساء، لا تنس وردك من ذكر الله.");
-        if(!p.contains("gentle_enabled")) p.edit().putBoolean("gentle_enabled",true).putInt("gentle_interval_hours",3).apply();
+        if(!p.contains("qiyam_enabled"))
+            scheduleDaily(context,"qiyam",4,0,"حان وقت قيام الليل، قم إلى الصلاة والذكر.");
+        if(!p.contains("gentle_enabled")) p.edit().putBoolean("gentle_enabled",true).putInt("gentle_interval_hours",3).putInt("gentle_start_hour",9).putInt("gentle_start_minute",0).apply();
         if(p.getBoolean("gentle_enabled",false) && p.getLong("gentle_next_at",0L)<=System.currentTimeMillis()) scheduleGentleReminder(context);
     }
     private static void scheduleApproachAlert(Context context,String name,long prayerAt) {

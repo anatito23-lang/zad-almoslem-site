@@ -69,12 +69,10 @@ public class RadioActivity extends Activity {
                 new int[]{Color.rgb(8,48,40), Color.rgb(17,91,68), Color.rgb(6,37,32)});
         deckBg.setCornerRadius(dp(24));
         deck.setBackground(deckBg);
-        TextView emblem = new TextView(this);
-        emblem.setText("۞");
-        emblem.setTextSize(48);
-        emblem.setTextColor(Color.rgb(226,197,130));
-        emblem.setGravity(Gravity.CENTER);
-        deck.addView(emblem, new LinearLayout.LayoutParams(-1, dp(62)));
+        ImageView studio = new ImageView(this);
+        studio.setImageResource(R.drawable.radio_studio_wallpaper);
+        studio.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        deck.addView(studio, new LinearLayout.LayoutParams(-1, dp(142)));
         TextView deckTitle = new TextView(this);
         deckTitle.setText("راديو زاد المسلم");
         deckTitle.setTextSize(21);
@@ -103,6 +101,15 @@ public class RadioActivity extends Activity {
             equalizer.addView(bar, barLp);
         }
         deck.addView(equalizer, new LinearLayout.LayoutParams(-1, dp(30)));
+        Button toggleAudio = new Button(this);
+        toggleAudio.setText("Ⅱ إيقاف مؤقت / ▶ استئناف");
+        deck.addView(toggleAudio, match());
+        toggleAudio.setOnClickListener(v -> {
+            Intent control = new Intent(this, RadioPlaybackService.class);
+            control.setAction(RadioPlaybackService.ACTION_TOGGLE);
+            try { startService(control); status.setText("تم تحديث حالة الاستماع."); }
+            catch (Exception e) { status.setText("تعذر التحكم في الصوت: " + e.getMessage()); }
+        });
         TextView liveHint = new TextView(this);
         liveHint.setText("اختر محطة لبدء البث المباشر");
         liveHint.setTextSize(11);
@@ -246,8 +253,7 @@ public class RadioActivity extends Activity {
         try {
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(i);
             else startService(i);
-            status.setText("تم إرسال طلب تشغيل البث. انتظر حالة الاتصال.");
-            startActivity(new Intent(this, NowPlayingActivity.class));
+            status.setText("تم إرسال طلب تشغيل البث. ستبقى داخل تبويب الإذاعة، وحالة البث ستظهر هنا.");
         } catch (Exception e) {
             status.setText("تعذر بدء البث: " + e.getMessage());
         }

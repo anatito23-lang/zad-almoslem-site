@@ -29,7 +29,7 @@ public class AdhanPlaybackService extends Service {
     public static final String ACTION_STOP = "com.zad.almoslem.STOP_ADHAN";
     public static final String ACTION_SET_VOLUME = "com.zad.almoslem.SET_ADHAN_VOLUME";
     public static final String ACTION_SET_PRAYER_VOLUME = "com.zad.almoslem.SET_PRAYER_ADHAN_VOLUME";
-    private static final String CHANNEL_ID = "zad_adhan_playback";
+    private static final String CHANNEL_ID = "zad_adhan_playback_v2";
     private static final int NOTIFICATION_ID = 7310;
     private ExoPlayer player;
     private boolean playDuaAfterCompletion;
@@ -56,6 +56,11 @@ public class AdhanPlaybackService extends Service {
         String prayer = intent == null ? "الصلاة" : intent.getStringExtra("prayer");
         activePrayer = prayer;
         createChannel();
+        Intent screen = new Intent(this, AdhanFullScreenActivity.class);
+        screen.putExtra("prayer", prayer);
+        screen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent fullScreen = PendingIntent.getActivity(this, 7313, screen,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         // Promote the service immediately with a lightweight notification. Do not perform
         // other service starts or bitmap rendering before startForeground().
         Notification.Builder initialBuilder = Build.VERSION.SDK_INT >= 26
@@ -63,7 +68,10 @@ public class AdhanPlaybackService extends Service {
         initialBuilder.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle("حان الآن وقت الصلاة")
                 .setContentText("يتم تجهيز أذان " + prayer)
-                .setOngoing(true);
+                .setOngoing(true)
+                .setCategory(Notification.CATEGORY_ALARM)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setFullScreenIntent(fullScreen, true);
         try {
             if (Build.VERSION.SDK_INT >= 29) {
                 startForeground(NOTIFICATION_ID, initialBuilder.build(),
@@ -104,6 +112,9 @@ public class AdhanPlaybackService extends Service {
                 .setContentText("يرفع الآن أذان " + prayer)
                 .setContentIntent(content)
                 .setOngoing(true)
+                .setCategory(Notification.CATEGORY_ALARM)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setFullScreenIntent(fullScreen, true)
                 .addAction(android.R.drawable.ic_media_pause, "إيقاف الأذان", stopAction);
         if (mosqueImage != null) {
             builder.setLargeIcon(mosqueImage);
@@ -146,8 +157,10 @@ public class AdhanPlaybackService extends Service {
         if (Build.VERSION.SDK_INT >= 26) {
             NotificationManager nm = getSystemService(NotificationManager.class);
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                    "تشغيل الأذان", NotificationManager.IMPORTANCE_LOW);
-            channel.setDescription("إشعار مستمر أثناء تشغيل الأذان");
+                    "تشغيل الأذان", NotificationManager.IMPORTANCE_HIGH);
+            channel.setDescription("إظهار شاشة الأذان على شاشة الهاتف عند دخول وقت الصلاة");
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            channel.setBypassDnd(false);
             nm.createNotificationChannel(channel);
         }
     }
