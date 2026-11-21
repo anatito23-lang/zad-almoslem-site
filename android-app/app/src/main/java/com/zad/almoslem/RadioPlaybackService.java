@@ -266,7 +266,7 @@ public class RadioPlaybackService extends Service {
                     .setReadTimeoutMs(45000);
             player = new ExoPlayer.Builder(this)
                     .setMediaSourceFactory(new DefaultMediaSourceFactory(httpFactory))
-                    .setWakeMode(C.WAKE_MODE_NETWORK)
+                    .setWakeMode(C.WAKE_MODE_NETWORK_AND_LOCAL)
                     .build();
             player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
                     .setUsage(androidx.media3.common.C.USAGE_MEDIA)
