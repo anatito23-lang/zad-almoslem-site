@@ -18,10 +18,10 @@ import org.json.JSONObject;
 
 public final class AppTabs {
     private static final String PREFS = "zad_app_navigation";
-    private static final String[] KEYS = {"more","tasbeeh","calendar","radio","quran","mushaf","home"};
-    private static final String[] LABELS = {"المزيد","السبحة","التقويم","الإذاعة","استماع","المصحف","الرئيسية"};
-    private static final String[] ICONS = {"☰","۞","▦","◉","♫","▤","⌂"};
-    private static final Class<?>[] SCREENS = {MoreActivity.class,TasbeehActivity.class,CalendarActivity.class,RadioActivity.class,QuranListeningActivity.class,MushafPageActivity.class,HomeActivity.class};
+    private static final String[] KEYS = {"more","ramadan","tasbeeh","calendar","radio","quran","mushaf","home"};
+    private static final String[] LABELS = {"المزيد","رمضان","السبحة","التقويم","الإذاعة","استماع","المصحف","الرئيسية"};
+    private static final String[] ICONS = {"☰","🌙","۞","▦","◉","♫","▤","⌂"};
+    private static final Class<?>[] SCREENS = {MoreActivity.class,RamadanActivity.class,TasbeehActivity.class,CalendarActivity.class,RadioActivity.class,QuranListeningActivity.class,MushafPageActivity.class,HomeActivity.class};
     private AppTabs() {}
 
     public static View wrap(Activity a, View content, String active) {
@@ -106,6 +106,15 @@ public final class AppTabs {
         }
         if(rows.isEmpty())for(int i=0;i<KEYS.length;i++){
             JSONObject row=new JSONObject();try{row.put("key",KEYS[i]);row.put("label",LABELS[i]);row.put("icon",ICONS[i]);row.put("visible",true);}catch(Exception ignored){}rows.add(row);
+        } else {
+            boolean hasRamadan=false;
+            for(JSONObject row:rows) if("ramadan".equals(row.optString("key",""))) hasRamadan=true;
+            if(!hasRamadan) {
+                JSONObject ramadan=new JSONObject();
+                try { ramadan.put("key","ramadan");ramadan.put("label","رمضان");ramadan.put("icon","🌙");ramadan.put("visible",true); }
+                catch(Exception ignored) {}
+                rows.add(Math.min(1,rows.size()),ramadan);
+            }
         }
         for(JSONObject row:rows){
             String key=row.optString("key","");int index=indexOf(key);if(index<0)continue;
@@ -128,7 +137,7 @@ public final class AppTabs {
     }
 
     private static String localizedLabel(int index,int lang,String fallback) {
-        String[][] names={{"المزيد","More","Plus","مزید","Daha Fazla"},{"السبحة","Tasbeeh","Tasbih","تسبیح","Tesbih"},{"النتيجة","Calendar","Calendrier","کیلنڈر","Takvim"},{"الإذاعة","Radio","Radio","ریڈیو","Radyo"},{"استماع","Listen","Écoute","تلاوت","Dinle"},{"المصحف","Mushaf","Coran","قرآن","Mushaf"},{"الرئيسية","Home","Accueil","مرکزی","Ana Sayfa"}};
+        String[][] names={{"المزيد","More","Plus","مزید","Daha Fazla"},{"رمضان","Ramadan","Ramadan","رمضان","Ramazan"},{"السبحة","Tasbeeh","Tasbih","تسبیح","Tesbih"},{"النتيجة","Calendar","Calendrier","کیلنڈر","Takvim"},{"الإذاعة","Radio","Radio","ریڈیو","Radyo"},{"استماع","Listen","Écoute","تلاوت","Dinle"},{"المصحف","Mushaf","Coran","قرآن","Mushaf"},{"الرئيسية","Home","Accueil","مرکزی","Ana Sayfa"}};
         return index>=0&&index<names.length?names[index][lang]:fallback;
     }
     private static int indexOf(String key){for(int i=0;i<KEYS.length;i++)if(KEYS[i].equals(key))return i;return -1;}
