@@ -36,7 +36,7 @@ public class RadioActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(16), dp(16), dp(16), dp(24));
-        root.setBackground(new IslamicWallpaperDrawable(this, "radio"));
+        root.setBackgroundColor(AppThemeColors.bg(this));
         setContentView(AppTabs.wrap(this, root, "radio"));
 
         TextView title = new TextView(this);
@@ -69,10 +69,7 @@ public class RadioActivity extends Activity {
                 new int[]{Color.rgb(8,48,40), Color.rgb(17,91,68), Color.rgb(6,37,32)});
         deckBg.setCornerRadius(dp(24));
         deck.setBackground(deckBg);
-        ImageView studio = new ImageView(this);
-        studio.setImageDrawable(new IslamicWallpaperDrawable(this,"radio"));
-        studio.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        deck.addView(studio, new LinearLayout.LayoutParams(-1, dp(142)));
+        deck.addView(new SectionArtworkView(this,"radio"), new LinearLayout.LayoutParams(-1, dp(164)));
         TextView deckTitle = new TextView(this);
         deckTitle.setText("راديو زاد المسلم");
         deckTitle.setTextSize(21);
