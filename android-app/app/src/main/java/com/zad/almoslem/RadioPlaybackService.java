@@ -2,6 +2,9 @@ package com.zad.almoslem;
 
 import android.app.*;
 import android.content.*;
+import android.media.AudioManager;
+import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
@@ -32,6 +35,10 @@ public class RadioPlaybackService extends Service {
     private static final String CHANNEL="zad_radio_playback";
     private static final int NOTIFICATION=7410;
     private ExoPlayer player;
+    private AudioManager audioManager;
+    private AudioFocusRequest audioFocusRequest;
+    private boolean resumeOnAudioFocusGain;
+    private final AudioManager.OnAudioFocusChangeListener audioFocusListener = this::handleAudioFocusChange;
     private final Handler playbackHandler = new Handler(Looper.getMainLooper());
     private Runnable startupTimeout;
 
@@ -49,8 +56,15 @@ public class RadioPlaybackService extends Service {
                     if (shouldPlay) resumeAfterAdhan = true;
                     else resumeAfterAdhan = false;
                 } else if (shouldPlay) {
-                    player.play();
+                    resumeOnAudioFocusGain = true;
+                    if (requestAudioFocus()) {
+                        resumeOnAudioFocusGain = false;
+                        player.play();
+                    } else {
+                        player.pause();
+                    }
                 } else {
+                    resumeOnAudioFocusGain = false;
                     player.pause();
                 }
                 getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_paused", !shouldPlay).apply();
@@ -109,6 +123,7 @@ public class RadioPlaybackService extends Service {
     }
     private void pauseForAdhan() {
         adhanPauseRequested = true;
+        resumeOnAudioFocusGain = false;
         if (player == null || pausedForAdhan) return;
         resumeAfterAdhan = player.getPlayWhenReady() &&
                 player.getPlaybackState() != Player.STATE_IDLE &&
@@ -128,8 +143,15 @@ public class RadioPlaybackService extends Service {
         resumeAfterAdhan = false;
         if (player != null && shouldResume) {
             player.seekTo(savedPosition);
-            player.play();
-            android.util.Log.i("ZadAlmoslem", "Audio resumed after adhan at " + savedPosition);
+            resumeOnAudioFocusGain = true;
+            if (requestAudioFocus()) {
+                resumeOnAudioFocusGain = false;
+                player.play();
+                android.util.Log.i("ZadAlmoslem", "Audio resumed after adhan at " + savedPosition);
+            } else {
+                player.pause();
+                android.util.Log.i("ZadAlmoslem", "Audio waiting for focus after adhan");
+            }
         }
     }
 
@@ -168,7 +190,7 @@ public class RadioPlaybackService extends Service {
             player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
                     .setUsage(androidx.media3.common.C.USAGE_MEDIA)
                     .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC)
-                    .build(), true);
+                    .build(), false);
             player.addListener(new Player.Listener() {
                 @Override public void onPlaybackStateChanged(int state) {
                     if (state == Player.STATE_BUFFERING) {
@@ -226,7 +248,13 @@ public class RadioPlaybackService extends Service {
                 pausedForAdhan = true;
                 player.pause();
             } else {
-                player.play();
+                resumeOnAudioFocusGain = true;
+                if (requestAudioFocus()) {
+                    resumeOnAudioFocusGain = false;
+                    player.play();
+                } else {
+                    player.pause();
+                }
             }
             if ("radio".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""))) {
                 startupTimeout = () -> {
@@ -250,6 +278,61 @@ public class RadioPlaybackService extends Service {
             stopRadio();
         }
     }
+    private void handleAudioFocusChange(int focusChange) {
+        if (focusChange == AudioManager.AUDIOFOCUS_GAIN) {
+            if (player != null && resumeOnAudioFocusGain && !adhanPauseRequested) {
+                resumeOnAudioFocusGain = false;
+                player.play();
+                android.util.Log.i("ZadAlmoslem", "Audio resumed after external audio focus returned");
+            }
+            return;
+        }
+        if (focusChange == AudioManager.AUDIOFOCUS_LOSS ||
+                focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT ||
+                focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK) {
+            if (player != null && player.getPlayWhenReady()) {
+                if (!adhanPauseRequested) resumeOnAudioFocusGain = true;
+                player.pause();
+                android.util.Log.i("ZadAlmoslem", "Audio paused after external audio focus loss: " + focusChange);
+            }
+        }
+    }
+
+    private boolean requestAudioFocus() {
+        if (audioManager == null) audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        if (audioManager == null) return false;
+        if (Build.VERSION.SDK_INT >= 26) {
+            if (audioFocusRequest == null) {
+                android.media.AudioAttributes attributes = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build();
+                audioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                        .setAudioAttributes(attributes)
+                        .setOnAudioFocusChangeListener(audioFocusListener, playbackHandler)
+                        .setAcceptsDelayedFocusGain(true)
+                        .setWillPauseWhenDucked(true)
+                        .build();
+            }
+            int result = audioManager.requestAudioFocus(audioFocusRequest);
+            return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+        }
+        int result = audioManager.requestAudioFocus(audioFocusListener,
+                AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        return result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+    }
+
+    private void abandonAudioFocus() {
+        if (audioManager == null) return;
+        try {
+            if (Build.VERSION.SDK_INT >= 26 && audioFocusRequest != null)
+                audioManager.abandonAudioFocusRequest(audioFocusRequest);
+            else
+                audioManager.abandonAudioFocus(audioFocusListener);
+        } catch (Exception ignored) {}
+        resumeOnAudioFocusGain = false;
+    }
+
     private String defaultTitle(String kind) {
         if ("quran".equals(kind)) return "استماع القرآن الكريم";
         if ("ruqyah".equals(kind)) return "الرقية الشرعية";
@@ -325,6 +408,7 @@ public class RadioPlaybackService extends Service {
         }
     }
     private void releasePlayer() {
+        abandonAudioFocus();
         if (startupTimeout != null) {
             playbackHandler.removeCallbacks(startupTimeout);
             startupTimeout = null;
