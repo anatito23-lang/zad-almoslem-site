@@ -46,7 +46,7 @@ public class RamadanAudioService extends Service {
             speakArabic("اصحى يا نايم، وحد الله");
             return START_NOT_STICKY;
         }
-        if ("ramadan_music_test".equals(key) || (("ramadan_iftar_voice".equals(key)||"ramadan_suhoor".equals(key))&&!iftarVoiceMode&&!suhoorVoiceMode)) {
+        if ("ramadan_music_test".equals(key) || ("ramadan_iftar_voice".equals(key)&&!iftarVoiceMode) || ("ramadan_suhoor".equals(key)&&!suhoorVoiceMode)) {
             playFile(generateRamadanMusicFile());
             return START_NOT_STICKY;
         }
