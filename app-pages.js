@@ -30,6 +30,24 @@ if(!nativeApp){
  });
  const qiyamDescription=document.querySelector('#daily-reminder-settings .grid .card:nth-child(3) p');
  if(qiyamDescription)qiyamDescription.textContent='تذكير قبل الفجر بنصف ساعة، ويمكنك تغيير الموعد.';
+ // Website-only cleanup: remove app utilities and keep the public site focused on its content.
+ ['#azkar','#daily-reminder-settings','.azkar-ticker','.prayer-tracker','.tasbeeh-float','#tasbeehPanel','.bottom-nav','#qibla'].forEach(selector=>{
+  document.querySelectorAll(selector).forEach(node=>node.remove());
+ });
+ ['#azkar','#reminders','#daily-reminder-settings','#tasbeehFab','#qibla'].forEach(hash=>{
+  document.querySelectorAll('a[href="'+hash+'"]').forEach(link=>link.remove());
+ });
+ const webNav=document.querySelector('.top nav');
+ if(webNav){
+  webNav.querySelectorAll('a').forEach(link=>{
+   const href=link.getAttribute('href')||'';
+   if(['#kids','#azkar','#reminders','#daily-reminder-settings','#qibla','#tasbeehFab'].includes(href))link.remove();
+  });
+ }
+ document.body.classList.add('zad-public-website');
+ const webStyle=document.createElement('style');
+ webStyle.textContent='body.zad-public-website{padding-top:0!important}.zad-public-website .top{position:relative;z-index:5;max-width:1240px;margin:0 auto;padding:16px 24px}.zad-public-website .top nav{justify-content:center;gap:8px}.zad-public-website .top nav a{padding:9px 12px;border:1px solid #ffffff20;border-radius:999px;white-space:nowrap;transition:background .2s,border-color .2s}.zad-public-website .top nav a:hover{background:#ffffff20;border-color:#d7bd80}.zad-public-website .hero-content{max-width:1160px;margin:34px auto 0}.zad-public-website main.wrap{max-width:1160px;margin:0 auto;padding:28px 22px 70px}.zad-public-website main.wrap>.section{scroll-margin-top:22px;margin-bottom:34px}.zad-public-website .section-divider{margin:30px 0}.zad-public-website footer{margin-top:36px}@media(max-width:700px){.zad-public-website .top{padding:12px 15px}.zad-public-website .top nav{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;padding-bottom:7px}.zad-public-website main.wrap{padding:20px 14px 48px}.zad-public-website .hero-content{margin-top:24px}}';
+ document.head.append(webStyle);
 }
 
 // Keep the website and Android app section lists identical: the Kids section is disabled in both.
