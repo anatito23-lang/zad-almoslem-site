@@ -21,7 +21,7 @@ public class RamadanActivity extends Activity {
     private SharedPreferences prefs;
     private LinearLayout root;
     private TextView fastCount, khatmaProgress, audioStatus;
-    private static final int PICK_IFTAR=4101, PICK_CANNON=4102, PICK_SUHOOR=4103;
+    private static final int PICK_IFTAR=4101, PICK_CANNON=4102, PICK_SUHOOR=4103, PICK_MUSIC=4104;
 
     private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
     private GradientDrawable shape(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
@@ -85,23 +85,43 @@ public class RamadanActivity extends Activity {
         updateStartLabel(startLabel);
         chooseStart.setOnClickListener(v->{Calendar now=Calendar.getInstance();long saved=prefs.getLong("start_at",0L);if(saved>0)now.setTimeInMillis(saved);
             new DatePickerDialog(this,(picker,y,m,d)->{Calendar first=Calendar.getInstance();first.set(y,m,d,0,0,0);first.set(Calendar.MILLISECOND,0);prefs.edit().putLong("start_at",first.getTimeInMillis()).apply();updateStartLabel(startLabel);RamadanReminderReceiver.scheduleAll(this);},now.get(Calendar.YEAR),now.get(Calendar.MONTH),now.get(Calendar.DAY_OF_MONTH)).show();});
-        Switch iftarVoice=new Switch(this);iftarVoice.setText("تنبيه صوتي قبل المغرب");iftarVoice.setTextColor(AppThemeColors.text(this));iftarVoice.setChecked(prefs.getBoolean("iftar_voice_enabled",true));settings.addView(iftarVoice,full());
-        Switch cannon=new Switch(this);cannon.setText("تشغيل الموسيقى الرمضانية مع المغرب");cannon.setTextColor(AppThemeColors.text(this));cannon.setChecked(prefs.getBoolean("cannon_enabled",true));settings.addView(cannon,full());
-        Switch suhoor=new Switch(this);suhoor.setText("تشغيل الموسيقى الرمضانية قبل الفجر");suhoor.setTextColor(AppThemeColors.text(this));suhoor.setChecked(prefs.getBoolean("suhoor_enabled",true));settings.addView(suhoor,full());
+        settings.addView(text("اختيار تنبيه المغرب",15,AppThemeColors.accent(this),true),full());
+        RadioGroup iftarMode=new RadioGroup(this);iftarMode.setOrientation(RadioGroup.HORIZONTAL);
+        RadioButton iftarMusic=new RadioButton(this);iftarMusic.setText("موسيقى إسلامية");iftarMusic.setId(1);
+        RadioButton iftarVoiceMode=new RadioButton(this);iftarVoiceMode.setText("صوت رجالي ومدفع");iftarVoiceMode.setId(2);
+        iftarMode.addView(iftarMusic);iftarMode.addView(iftarVoiceMode);
+        iftarMode.check("voice".equals(prefs.getString("iftar_mode","music"))?2:1);settings.addView(iftarMode,full());
+        Switch iftarVoice=new Switch(this);iftarVoice.setText("إعلان صوتي قبل المغرب في وضع الصوت الرجالي");iftarVoice.setTextColor(AppThemeColors.text(this));iftarVoice.setChecked(prefs.getBoolean("iftar_voice_enabled",true));settings.addView(iftarVoice,full());
+        Switch cannon=new Switch(this);cannon.setText("تشغيل تنبيه المغرب");cannon.setTextColor(AppThemeColors.text(this));cannon.setChecked(prefs.getBoolean("cannon_enabled",true));settings.addView(cannon,full());
+        settings.addView(text("اختيار تنبيه السحور",15,AppThemeColors.accent(this),true),full());
+        RadioGroup suhoorMode=new RadioGroup(this);suhoorMode.setOrientation(RadioGroup.HORIZONTAL);
+        RadioButton suhoorMusic=new RadioButton(this);suhoorMusic.setText("موسيقى إسلامية");suhoorMusic.setId(3);
+        RadioButton suhoorVoiceMode=new RadioButton(this);suhoorVoiceMode.setText("صوت المسحراتي");suhoorVoiceMode.setId(4);
+        suhoorMode.addView(suhoorMusic);suhoorMode.addView(suhoorVoiceMode);
+        suhoorMode.check("voice".equals(prefs.getString("suhoor_mode","music"))?4:3);settings.addView(suhoorMode,full());
+        Switch suhoor=new Switch(this);suhoor.setText("تشغيل تنبيه السحور");suhoor.setTextColor(AppThemeColors.text(this));suhoor.setChecked(prefs.getBoolean("suhoor_enabled",true));settings.addView(suhoor,full());
         addMinutesControl(settings,"التنبيه قبل المغرب بدقائق","iftar_lead_minutes",5,1,30);
         addMinutesControl(settings,"تنبيه السحور قبل الفجر بدقائق","suhoor_lead_minutes",45,10,120);
         TextView note=text("تُحسب المواعيد من مواقيت المغرب والفجر المحفوظة في التطبيق. يلزم ضبط مواقيت الصلاة والسماح بالتنبيهات الدقيقة.",12,AppThemeColors.muted(this),false);note.setPadding(0,dp(7),0,dp(7));settings.addView(note,full());
         enabled.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
+        iftarMode.setOnCheckedChangeListener((g,id)->{prefs.edit().putString("iftar_mode",id==2?"voice":"music").apply();RamadanReminderReceiver.scheduleAll(this);});
+        suhoorMode.setOnCheckedChangeListener((g,id)->{prefs.edit().putString("suhoor_mode",id==4?"voice":"music").apply();RamadanReminderReceiver.scheduleAll(this);});
         iftarVoice.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("iftar_voice_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
         cannon.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("cannon_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
         suhoor.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("suhoor_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
 
-        LinearLayout audio=card("موسيقى رمضان — أجواء إسلامية هادئة");
-        audioStatus=text("استبدلنا صوت المسحراتي ومدفع الإفطار بمقطوعة إسلامية هادئة تختارها مرة واحدة من جهازك. تُحفظ داخل التطبيق وتعمل دون إنترنت، ويمكن تشغيلها وقت المغرب وقبل الفجر. الأذان البشري يظل منفصلًا كما هو.",12,AppThemeColors.muted(this),false);
+        LinearLayout audio=card("أصوات رمضان — اختر الموسيقى أو الصوت الرجالي");
+        audioStatus=text("يمكنك اختيار موسيقى إسلامية أو تسجيلات صوتية رجالية لكل من المغرب والسحور. اختر الملفات مرة واحدة لتحفظ داخل التطبيق وتعمل دون إنترنت. الأذان البشري يظل منفصلًا.",12,AppThemeColors.muted(this),false);
         audio.addView(audioStatus,full());
+        addAudioPicker(audio,"اختيار الموسيقى الإسلامية","ramadan_music.mp3",PICK_MUSIC);
+        addAudioTestButton(audio,"تجربة الموسيقى الإسلامية","ramadan_music_test");
+        addAudioPicker(audio,"تسجيل رجالي: اقترب موعد أذان المغرب","iftar_announcement.mp3",PICK_IFTAR);
+        addAudioTestButton(audio,"تجربة إعلان اقتراب المغرب","ramadan_iftar_voice_test");
+        addAudioPicker(audio,"تسجيل صوت مدفع الإفطار","iftar_cannon.mp3",PICK_CANNON);
+        addAudioTestButton(audio,"تجربة صوت المدفع","ramadan_cannon_test");
+        addAudioPicker(audio,"تسجيل رجالي للسحور: اصحى يا نايم وحد الدايم","suhoor_voice.mp3",PICK_SUHOOR);
+        addAudioTestButton(audio,"تجربة نداء السحور","ramadan_suhoor_voice_test");
         addAudioTestButton(audio,"تجربة الأذان البشري","ramadan_adhan_test");
-        addAudioPicker(audio,"اختيار المقطوعة الإسلامية الرمضانية","ramadan_music.mp3",PICK_CANNON);
-        addAudioTestButton(audio,"تجربة الموسيقى الرمضانية","ramadan_music_test");
         setContentView(AppTabs.wrap(this,scroll,"ramadan"));
     }
     private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("لم يتم تحديد بداية الشهر بعد؛ اختر أول يوم حتى تتوقف التنبيهات تلقائيًا بعد 30 يومًا.");return;}Calendar c=Calendar.getInstance();c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
@@ -131,7 +151,7 @@ public class RamadanActivity extends Activity {
     }
     @Override protected void onActivityResult(int request,int result,Intent data){
         super.onActivityResult(request,result,data);if(result!=RESULT_OK||data==null||data.getData()==null)return;
-        String name=request==PICK_IFTAR?"iftar_voice.mp3":request==PICK_CANNON?"ramadan_music.mp3":"mesaharaty.mp3";
+        String name=request==PICK_IFTAR?"iftar_announcement.mp3":request==PICK_CANNON?"iftar_cannon.mp3":request==PICK_SUHOOR?"suhoor_voice.mp3":"ramadan_music.mp3";
         try{
             File dir=new File(getFilesDir(),"ramadan_audio");if(!dir.exists()&&!dir.mkdirs())throw new Exception("تعذر إنشاء مجلد الأصوات");
             Uri uri=data.getData();try(InputStream in=getContentResolver().openInputStream(uri);FileOutputStream out=new FileOutputStream(new File(dir,name))){
