@@ -2259,7 +2259,7 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
 })();
 </script>
 <script>
-if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261121-website-clean-v3", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261121-website-clean-v4", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
 </script>
 
 <style id="hide-floating-shortcuts">
@@ -2270,7 +2270,42 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261121-website-clean-v3"></script>
+<script src="./app-pages.js?v=20261121-website-clean-v4"></script>
+<script id="zad-public-site-final-guard">
+(function(){
+ if(location.hostname!=='anatito23-lang.github.io')return;
+ document.documentElement.classList.add('zad-public-website');
+ document.body.classList.add('zad-public-website');
+ const removeSelectors=[
+  '.adhan-settings','.prayer-tracker','.tasbeeh-float','#tasbeehPanel','#tasbeehFab',
+  '#zad-page-tasbeeh','#azkar','.azkar-ticker','#daily-reminder-settings',
+  '.bottom-nav','#qibla','#adhan-settings','#adhan'
+ ];
+ function clean(){
+  removeSelectors.forEach(selector=>document.querySelectorAll(selector).forEach(node=>node.remove()));
+  document.querySelectorAll('a[href="#azkar"],a[href="#reminders"],a[href="#qibla"],a[href="#tasbeeh"],a[href="#tasbeehFab"],a[href="#adhan"],a[href="#adhan-settings"],a[href="#prayer-tracker"]').forEach(node=>node.remove());
+  const label=document.querySelector('#nextPrayerCountdown .next-prayer-clock .next-prayer-kicker');
+  if(label)label.textContent='متبقي على الصلاة';
+ }
+ clean();
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',clean,{once:true});
+})();
+</script>
+<style id="zad-public-site-final-guard-style">
+body.zad-public-website .adhan-settings,
+body.zad-public-website .prayer-tracker,
+body.zad-public-website .tasbeeh-float,
+body.zad-public-website #tasbeehPanel,
+body.zad-public-website #tasbeehFab,
+body.zad-public-website #zad-page-tasbeeh,
+body.zad-public-website #azkar,
+body.zad-public-website .azkar-ticker,
+body.zad-public-website #daily-reminder-settings,
+body.zad-public-website .bottom-nav,
+body.zad-public-website #qibla,
+body.zad-public-website #adhan,
+body.zad-public-website #adhan-settings {display:none!important;visibility:hidden!important;pointer-events:none!important}
+</style>
 
 <style id="website-cleanup-20261121">
 /* إخفاء البوصلة والسبحة من واجهة الموقع فقط */
