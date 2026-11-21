@@ -63,6 +63,9 @@ public class RuqyahActivity extends Activity {
         TextView description = label("اختر القارئ، وسيعمل الصوت داخل هذا التبويب دون فتح شاشة منبثقة.", 14, AppThemeColors.muted(this), false);
         description.setPadding(0, dp(12), 0, dp(12));
         root.addView(description, match());
+        AudioEqualizerView equalizer = new AudioEqualizerView(this,"ruqyah");
+        equalizer.setContentDescription("مؤشر متحرك أثناء تشغيل الرقية");
+        root.addView(equalizer, new LinearLayout.LayoutParams(-1, dp(42)));
 
         addCard(root, "الشيخ محمود خليل الحصري",
                 "https://archive.org/download/20240228_20240228_1849/041%20%2011%20%20%20%D8%A7%D9%84%D8%B1%D9%82%D9%8A%D8%A9%20%D8%A7%D9%84%D8%B4%D8%B1%D8%B9%D9%8A%D8%A9%20%D9%84%D8%B9%D9%84%D8%A7%D8%AC%20%D8%A7%D9%84%D8%B3%D8%AD%D8%B1%20%D8%A7%D9%84%D9%85%D8%B3%20%D8%A7%D9%84%D8%AD%D8%B3%D8%AF%20%D8%A8%D8%B5%D9%88%D8%AA%20%D8%A7%D9%84%D8%B4%D9%8A%D8%AE%20%D9%85%D8%AD%D9%85%D9%88%D8%AF%20%D8%AE%D9%84%D9%8A%D9%84%20%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%89%20%D8%B1%D8%AD%D9%85%D9%87%20%D8%A7%D9%84%D9%84%D9%87%20%D8%AC%D9%88%D8%AF%D8%A9%20%D8%B9%D8%A7%D9%84%D9%8A%D8%A9.mp3");
