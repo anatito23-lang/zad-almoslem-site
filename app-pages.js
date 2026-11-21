@@ -30,10 +30,28 @@ if(!nativeApp){
  });
  const qiyamDescription=document.querySelector('#daily-reminder-settings .grid .card:nth-child(3) p');
  if(qiyamDescription)qiyamDescription.textContent='تذكير قبل الفجر بنصف ساعة، ويمكنك تغيير الموعد.';
- // Website-only cleanup: remove app utilities and keep the public site focused on its content.
- ['#azkar','#daily-reminder-settings','.azkar-ticker','.prayer-tracker','.tasbeeh-float','#tasbeehPanel','.bottom-nav','#qibla'].forEach(selector=>{
-  document.querySelectorAll(selector).forEach(node=>node.remove());
- });
+ // Website-only cleanup: retain prayer times only, and remove app-specific controls.
+ ['#azkar','#daily-reminder-settings','.azkar-ticker','.prayer-tracker','.adhan-settings','.tasbeeh-float','#tasbeehPanel','.bottom-nav','#qibla'].forEach(selector=>document.querySelectorAll(selector).forEach(node=>node.remove()));
+ const prayerSettings=document.querySelector('.prayer-location-settings');
+ if(prayerSettings){
+  prayerSettings.style.cssText='display:grid;grid-template-columns:minmax(180px,260px) auto;gap:10px;align-items:end;width:100%;margin-top:12px';
+  ['#prayerCountry','#otherCountryWrap','#otherCityWrap','#prayerMethod','#prayerSchool'].forEach(sel=>{const el=prayerSettings.querySelector(sel);if(el)(el.closest('label')||el).style.display='none';});
+  const gov=prayerSettings.querySelector('#egyptGovernorateWrap');if(gov){gov.style.display='grid';gov.firstChild.textContent='اختر المحافظة';}
+  const actions=prayerSettings.querySelector('.row');if(actions){actions.style.cssText='display:flex;gap:8px;align-items:end';actions.querySelector('#useMyLocation')?.remove();}
+ }
+ const prayerTitle=document.querySelector('#prayer .section-head p');if(prayerTitle)prayerTitle.textContent='مواقيت الصلوات الخمس والوقت المتبقي للصلاة القادمة';
+ const quick=document.createElement('nav');quick.className='zad-web-shortcuts';quick.setAttribute('aria-label','اختصارات الموقع');
+ quick.innerHTML=[['#prayer','🕌','مواقيت الصلاة'],['#quran','📖','استماع القرآن'],['#hadith','ﷺ','الحديث الشريف'],['#mushaf','۞','المصحف'],['#radio-egypt','📻','الإذاعة'],['#ruqyah','🤲','الرقية'],['#books-library','📚','المكتبة'],['#khutbahs','🎙️','الخطب']].map(([href,ico,label])=>'<a href="'+href+'"><span>'+ico+'</span><b>'+label+'</b></a>').join('');
+ if(header&&!document.querySelector('.zad-web-shortcuts'))header.insertAdjacentElement('afterend',quick);
+ const topNav=document.querySelector('.top nav');
+ if(topNav){topNav.querySelectorAll('a').forEach(link=>{if(['#kids','#azkar','#reminders','#daily-reminder-settings','#qibla','#tasbeehFab'].includes(link.getAttribute('href')))link.remove();});if(!topNav.querySelector('a[href="#hadith"]')){const l=document.createElement('a');l.href='#hadith';l.textContent='الحديث الشريف';topNav.append(l);}}
+ document.body.classList.add('zad-public-website');
+ const webStyle=document.createElement('style');
+ webStyle.textContent='.zad-web-shortcuts{max-width:1160px;margin:-26px auto 26px;padding:0 22px;position:relative;z-index:4;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:9px}.zad-web-shortcuts a{min-height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;text-decoration:none;color:#174638;background:#fff;border:1px solid #e5e9df;border-radius:15px;box-shadow:0 7px 22px #163c2c0b;transition:transform .2s,border-color .2s}.zad-web-shortcuts a:hover{transform:translateY(-3px);border-color:#c9a45c}.zad-web-shortcuts a span{font-size:22px;color:#b18a49}.zad-web-shortcuts a b{font-size:12px;font-weight:700}.zad-public-website .date-strip{margin-top:0}.zad-public-website .prayer-tracker,.zad-public-website .adhan-settings{display:none!important}.zad-public-website #prayerMethod,.zad-public-website #prayerSchool{display:none!important}.zad-public-website .hadith-feature{max-width:850px;margin:auto;text-align:center;padding:30px 24px;background:linear-gradient(145deg,#fff,#f7f5ec);border-color:#e9dfc8}.hadith-mark{font-size:28px;color:#b18a49}.hadith-kicker{display:block;margin:7px 0;color:#9a7b40;font-size:13px;font-weight:700}.hadith-text{font-family:Georgia,Tahoma,serif;font-size:clamp(22px,3vw,30px)!important;line-height:2.1;color:#183e32}.hadith-source{margin:10px 0;color:#8a7144}.hadith-actions{display:flex;justify-content:center;margin:14px 0}.hadith-note{border-top:1px solid #e9e2d2;padding-top:12px}.zad-public-website .section#hadith-dua{margin-top:42px}.zad-public-website .quran-tools{grid-template-columns:minmax(170px,.8fr) minmax(220px,1.2fr) minmax(170px,1fr) auto}.zad-public-website #reciterSearch{width:100%}@media(max-width:850px){.zad-web-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr));padding:0 15px;gap:8px}.zad-web-shortcuts a{min-height:72px}.zad-public-website .quran-tools{grid-template-columns:1fr}}@media(max-width:480px){.zad-web-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr))}.zad-web-shortcuts a b{font-size:11px}}';
+ document.head.append(webStyle);
+ const reciterSearch=document.getElementById('reciterSearch');
+ if(reciterSearch)reciterSearch.addEventListener('input',()=>{const term=reciterSearch.value.trim().toLocaleLowerCase('ar'),select=document.getElementById('reciter');if(!select)return;Array.from(select.options).forEach(o=>o.hidden=!!term&&!o.textContent.toLocaleLowerCase('ar').includes(term));const cur=select.selectedOptions[0];if(term&&cur&&cur.hidden){const first=Array.from(select.options).find(o=>!o.hidden);if(first)select.value=first.value;}});
+
  ['#azkar','#reminders','#daily-reminder-settings','#tasbeehFab','#qibla'].forEach(hash=>{
   document.querySelectorAll('a[href="'+hash+'"]').forEach(link=>link.remove());
  });
