@@ -11,6 +11,7 @@ private LinearLayout column(){LinearLayout l=new LinearLayout(this);l.setOrienta
 private TextView text(String value,int size,int color,boolean bold){TextView v=new TextView(this);v.setText(value);v.setTextSize(size);v.setTextColor(color);v.setGravity(Gravity.RIGHT);if(bold)v.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return v;}
 private LinearLayout.LayoutParams matchWrap(){return new LinearLayout.LayoutParams(-1,-2);}
 private GradientDrawable shape(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
+private void styleAction(Button b,int color){b.setBackground(shape(color,14));b.setTextColor(Color.WHITE);b.setAllCaps(false);}
 private void addCard(LinearLayout root,View card){if(card instanceof LinearLayout){card.setBackground(shape(AppThemeColors.surface(this),16));card.setPadding(dp(14),dp(12),dp(14),dp(12));}LinearLayout.LayoutParams lp=matchWrap();lp.bottomMargin=dp(10);root.addView(card,lp);}
 @Override public void onCreate(Bundle b){super.onCreate(b);AppThemeColors.apply(this);build();}
 private void build(){ScrollView scroll=new ScrollView(this);LinearLayout root=column();root.setPadding(dp(16),dp(16),dp(16),dp(24));root.setBackgroundColor(AppThemeColors.bg(this));scroll.addView(root);
@@ -34,12 +35,12 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         surahSpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,surahs));
         card.addView(text("القارئ",12,AppThemeColors.text(this),true));card.addView(reciterSpinner,matchWrap());
         card.addView(text("السورة",12,AppThemeColors.text(this),true));card.addView(surahSpinner,matchWrap());
-        Button play=new Button(this);play.setText("استمع الآن");card.addView(play,matchWrap());
-        Button toggle=new Button(this);toggle.setText("Ⅱ إيقاف مؤقت / ▶ استئناف");card.addView(toggle,matchWrap());
+        Button play=new Button(this);play.setText("▶  استمع الآن");styleAction(play,0xFF9A773F);card.addView(play,matchWrap());
+        Button toggle=new Button(this);toggle.setText("Ⅱ  إيقاف مؤقت / ▶  استئناف");styleAction(toggle,0xFF315F51);card.addView(toggle,matchWrap());
          toggle.setOnClickListener(v->{Intent control=new Intent(this,RadioPlaybackService.class);control.setAction(RadioPlaybackService.ACTION_TOGGLE);try{startService(control);Toast.makeText(this,"تم تحديث حالة التلاوة.",Toast.LENGTH_SHORT).show();}catch(Exception e){Toast.makeText(this,"تعذر التحكم في التلاوة: "+e.getMessage(),Toast.LENGTH_LONG).show();}});
-         Button stop=new Button(this);stop.setText("■ إيقاف التلاوة");card.addView(stop,matchWrap());
+         Button stop=new Button(this);stop.setText("■  إيقاف التلاوة");styleAction(stop,0xFF76514B);card.addView(stop,matchWrap());
         stop.setOnClickListener(v->{Intent stopIntent=new Intent(this,RadioPlaybackService.class);stopIntent.setAction(RadioPlaybackService.ACTION_STOP);try{startService(stopIntent);Toast.makeText(this,"تم إيقاف التلاوة",Toast.LENGTH_SHORT).show();}catch(Exception e){Toast.makeText(this,"تعذر إيقاف التلاوة",Toast.LENGTH_SHORT).show();}});
-        Button download=new Button(this);download.setText("تنزيل السورة للاستماع دون إنترنت");card.addView(download,matchWrap());
+        Button download=new Button(this);download.setText("تنزيل السورة للاستماع دون إنترنت");styleAction(download,0xFF496B62);card.addView(download,matchWrap());
         ProgressBar quranProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);quranProgress.setMax(100);card.addView(quranProgress,matchWrap());
         TextView state=text("جارٍ تحميل قائمة القراء من مكتبة التسجيلات.",12,Color.rgb(80,100,90),false);card.addView(state);
         TextView libraryNote=text("المكتبة الداخلية تعرض القراء والتسجيلات المتاحة في مصدر القرآن. اختر القارئ والسورة ثم استمع أو نزّل الملف ليُحفظ داخل التطبيق. لا توجد روابط لمواقع خارجية في هذه الصفحة.",12,AppThemeColors.muted(this),false);
