@@ -88,7 +88,7 @@ public class RamadanActivity extends Activity {
         settings.addView(text("اختيار تنبيه المغرب",15,AppThemeColors.accent(this),true),full());
         RadioGroup iftarMode=new RadioGroup(this);iftarMode.setOrientation(RadioGroup.HORIZONTAL);
         RadioButton iftarMusic=new RadioButton(this);iftarMusic.setText("موسيقى إسلامية");iftarMusic.setId(1);
-        RadioButton iftarVoiceMode=new RadioButton(this);iftarVoiceMode.setText("صوت رجالي ومدفع");iftarVoiceMode.setId(2);
+        RadioButton iftarVoiceMode=new RadioButton(this);iftarVoiceMode.setText("تسجيل صوتي ومدفع");iftarVoiceMode.setId(2);
         iftarMode.addView(iftarMusic);iftarMode.addView(iftarVoiceMode);
         iftarMode.check("voice".equals(prefs.getString("iftar_mode","music"))?2:1);settings.addView(iftarMode,full());
         Switch iftarVoice=new Switch(this);iftarVoice.setText("إعلان صوتي قبل المغرب في وضع الصوت الرجالي");iftarVoice.setTextColor(AppThemeColors.text(this));iftarVoice.setChecked(prefs.getBoolean("iftar_voice_enabled",true));settings.addView(iftarVoice,full());
@@ -96,7 +96,7 @@ public class RamadanActivity extends Activity {
         settings.addView(text("اختيار تنبيه السحور",15,AppThemeColors.accent(this),true),full());
         RadioGroup suhoorMode=new RadioGroup(this);suhoorMode.setOrientation(RadioGroup.HORIZONTAL);
         RadioButton suhoorMusic=new RadioButton(this);suhoorMusic.setText("موسيقى إسلامية");suhoorMusic.setId(3);
-        RadioButton suhoorVoiceMode=new RadioButton(this);suhoorVoiceMode.setText("صوت المسحراتي");suhoorVoiceMode.setId(4);
+        RadioButton suhoorVoiceMode=new RadioButton(this);suhoorVoiceMode.setText("تسجيل المسحراتي");suhoorVoiceMode.setId(4);
         suhoorMode.addView(suhoorMusic);suhoorMode.addView(suhoorVoiceMode);
         suhoorMode.check("voice".equals(prefs.getString("suhoor_mode","music"))?4:3);settings.addView(suhoorMode,full());
         Switch suhoor=new Switch(this);suhoor.setText("تشغيل تنبيه السحور");suhoor.setTextColor(AppThemeColors.text(this));suhoor.setChecked(prefs.getBoolean("suhoor_enabled",true));settings.addView(suhoor,full());
@@ -110,13 +110,16 @@ public class RamadanActivity extends Activity {
         cannon.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("cannon_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
         suhoor.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("suhoor_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
 
-        LinearLayout audio=card("أصوات رمضان — اختر الموسيقى أو الصوت الرجالي");
-        audioStatus=text("الأصوات الرمضانية مدمجة وتُنشأ داخل التطبيق دون تنزيل ملفات أو فتح روابط. اختر بشكل مستقل بين اللحن الرمضاني الهادئ والصوت العربي في المغرب والسحور. يعمل الصوت الرجالي عبر محرك النطق العربي المثبت على الجهاز، وقد تختلف طبيعة الصوت حسب المحرك المتاح. الأذان البشري مستقل عن إعلان المغرب والمدفع.",12,AppThemeColors.muted(this),false);
+        LinearLayout audio=card("أصوات رمضان — تسجيلاتك والموسيقى");
+        audioStatus=text("اختر تسجيلاتك مرة واحدة ليتم حفظها داخل التطبيق وتشغيلها دون إنترنت. لا يوجد صوت آلي للمسحراتي أو المدفع.",12,AppThemeColors.muted(this),false);
         audio.addView(audioStatus,full());
+        addAudioPicker(audio,"اختيار تسجيل إعلان المغرب","iftar_announcement.mp3",PICK_IFTAR);
+        addAudioPicker(audio,"اختيار تسجيل مدفع الإفطار","iftar_cannon.mp3",PICK_CANNON);
+        addAudioPicker(audio,"اختيار تسجيل المسحراتي","suhoor_voice.mp3",PICK_SUHOOR);
         addAudioTestButton(audio,"تجربة اللحن الرمضاني الهادئ","ramadan_music_test");
-        addAudioTestButton(audio,"تجربة الصوت الرجالي: اقترب موعد أذان المغرب","ramadan_iftar_voice_test");
+        addAudioTestButton(audio,"تجربة تسجيل إعلان المغرب","ramadan_iftar_voice_test");
         addAudioTestButton(audio,"تجربة صوت مدفع الإفطار","ramadan_cannon_test");
-        addAudioTestButton(audio,"تجربة نداء السحور: اصحى يا نايم، وحد الله","ramadan_suhoor_voice_test");
+        addAudioTestButton(audio,"تجربة تسجيل المسحراتي","ramadan_suhoor_voice_test");
         addAudioTestButton(audio,"تجربة الأذان البشري","ramadan_adhan_test");
         setContentView(AppTabs.wrap(this,scroll,"ramadan"));
     }
