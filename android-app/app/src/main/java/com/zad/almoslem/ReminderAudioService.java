@@ -120,7 +120,12 @@ public class ReminderAudioService extends Service {
 
     private void playFile(String kind, String unusedMessage) {
         try {
-            File file = new File(new File(getFilesDir(), "reminders"), kind + ".mp3");
+            android.content.SharedPreferences reminderPrefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);
+            String reciter=reminderPrefs.getString("reminder_reciter","basit");
+            if(!"husary".equals(reciter))reciter="basit";
+            File reminderDir=new File(getFilesDir(),"reminders");
+            File file=new File(reminderDir,reciter+"_"+kind+".mp3");
+            if(!file.isFile()||file.length()<5000) file=new File(reminderDir,kind+".mp3");
             String remoteUrl = recordedRecitationUrl(kind);
             if ((!file.isFile() || file.length() < 10000) && remoteUrl == null) {
                 android.util.Log.w("ZadAlmoslem", "Reminder audio is unavailable: " + kind);
