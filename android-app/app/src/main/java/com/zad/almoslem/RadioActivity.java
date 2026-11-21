@@ -74,7 +74,7 @@ public class RadioActivity extends Activity {
         for (int i = 0; i < 7; i++) {
             View bar = new View(this);
             GradientDrawable barBg = new GradientDrawable();
-            barBg.setColor(Color.rgb(232,198,126));
+            barBg.setColor(Color.rgb(83,190,207));
             barBg.setCornerRadius(dp(4));
             bar.setBackground(barBg);
             LinearLayout.LayoutParams barLp = new LinearLayout.LayoutParams(dp(5), dp(8));
