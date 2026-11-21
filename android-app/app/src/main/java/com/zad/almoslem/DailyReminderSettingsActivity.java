@@ -51,7 +51,7 @@ public class DailyReminderSettingsActivity extends Activity {
   card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(card,lp);
   card.addView(label("تذكيرات إيمانية خفيفة",18,green,true));
-  TextView desc=label("آيات قصيرة من القرآن الكريم بصوت الشيخ عبدالباسط عبدالصمد، تتغير في كل تذكير.",12,Color.GRAY,false);
+  TextView desc=label("تلاوات قصيرة بصوت الشيخ محمود خليل الحصري، تتجدد في كل تذكير.",12,Color.GRAY,false);
   desc.setPadding(0,dp(5),0,dp(8));card.addView(desc);
   Switch enabled=new Switch(this);enabled.setText("تفعيل التذكيرات الدورية");
   enabled.setChecked(prefs.getBoolean("gentle_enabled",true));card.addView(enabled);
@@ -63,7 +63,7 @@ public class DailyReminderSettingsActivity extends Activity {
   enabled.setOnCheckedChangeListener((button,checked)->ReminderReceiver.setGentleRemindersEnabled(this,checked));
   interval.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
    public void onProgressChanged(SeekBar bar,int progress,boolean fromUser){
-    int hours=progress+1;value.setText("التذكير كل "+hours+" "+(hours==1?"ساعة":"ساعات"));
+    int hours=progress+1;value.setText("التكرار كل "+hours+" "+(hours==1?"ساعة":"ساعات"));
     if(fromUser)ReminderReceiver.setGentleReminderInterval(DailyReminderSettingsActivity.this,hours);
    }
    public void onStartTrackingTouch(SeekBar bar){}
