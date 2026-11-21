@@ -24,6 +24,8 @@ before(async () => {
     await setDoc(doc(db, "waqafat", "custom_tabs_public"), { tabs: [{ id: "visible", visible: true }] });
     await setDoc(doc(db, "waqafat", "custom-published"), { tabId: "visible", published: true, title: "public" });
     await setDoc(doc(db, "waqafat", "custom-draft"), { tabId: "visible", published: false, title: "draft" });
+    await setDoc(doc(db, "future-content", "published"), { published: true, title: "compatible" });
+    await setDoc(doc(db, "future-content", "draft"), { published: false, title: "private" });
   });
 });
 
@@ -77,7 +79,13 @@ test("only the configured admin can read drafts and write content", async () => 
   await assertFails(setDoc(doc(otherDb, "azkar", "blocked"), { published: true }));
 });
 
-test("all unlisted collections are denied", async () => {
-  const db = env.unauthenticatedContext().firestore();
-  await assertFails(getDoc(doc(db, "private-settings", "secret")));
+test("unlisted collections retain the existing published-read and admin-write behavior", async () => {
+  const publicDb = env.unauthenticatedContext().firestore();
+  await assertSucceeds(getDoc(doc(publicDb, "future-content", "published")));
+  await assertFails(getDoc(doc(publicDb, "future-content", "draft")));
+  await assertFails(setDoc(doc(publicDb, "future-content", "attacker"), { published: true }));
+
+  const adminDb = env.authenticatedContext(ADMIN_UID).firestore();
+  await assertSucceeds(getDoc(doc(adminDb, "future-content", "draft")));
+  await assertSucceeds(setDoc(doc(adminDb, "future-content", "admin-created"), { published: false }));
 });
