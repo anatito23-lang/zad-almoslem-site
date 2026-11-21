@@ -1,4 +1,5 @@
 name: Build Zad Almoslem Android
+# Rebuild trigger: harmless comment update to validate release signing secrets.
 
 on:
   workflow_dispatch:
