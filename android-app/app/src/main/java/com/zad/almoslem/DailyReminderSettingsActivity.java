@@ -147,7 +147,7 @@ public class DailyReminderSettingsActivity extends Activity {
    else Toast.makeText(this,"لن تظهر التنبيهات حتى تسمح بها من إعدادات التطبيق",Toast.LENGTH_LONG).show();
   }
  }
-\n private void addExactAlarmAccess(LinearLayout root){
+ private void addExactAlarmAccess(LinearLayout root){
   if(Build.VERSION.SDK_INT<31)return;
   AlarmManager manager=(AlarmManager)getSystemService(ALARM_SERVICE);
   if(manager.canScheduleExactAlarms())return;
