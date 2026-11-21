@@ -50,6 +50,47 @@ jobs:
         with:
           gradle-version: '8.11.1'
 
+      # Download the licensed source photographs during CI and package them as
+      # Android drawable resources. They are therefore present in every APK/AAB.
+      - name: Download and validate bundled adhan photographs
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="android-app/app/src/main/res/drawable-nodpi"
+          mkdir -p "$DEST"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
+            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/AlAzhar_Mosque.jpg/960px-AlAzhar_Mosque.jpg" \
+            -o "$DEST/azhar_mosque_bg.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
+            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Holy_Kaaba.jpg/960px-Holy_Kaaba.jpg" \
+            -o "$DEST/kaaba_wallpaper.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
+            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/b/00/Al_Masjid_an_Nabawi.jpg/960px-Al_Masjid_an_Nabawi.jpg" \
+            -o "$DEST/madinah_wallpaper.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
+            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/%D8%A7%D9%84%D9%85%D8%B3%D8%AC%D8%AF_%D8%A7%D9%84%D8%A3%D9%82%D8%B5%D9%89_%D8%A7%D9%84%D9%85%D8%A8%D8%A7%D8%B1%D9%83%D9%A1.jpg/960px-%D8%A7%D9%84%D9%85%D8%B3%D8%AC%D8%AF_%D8%A7%D9%84%D8%A3%D9%82%D8%B5%D9%89_%D8%A7%D9%84%D9%85%D8%A8%D8%A7%D8%B1%D9%83%D9%A1.jpg" \
+            -o "$DEST/aqsa_wallpaper.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
+            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/f/7c/A_photo_of_a_Quran.jpg/500px-A_photo_of_a_Quran.jpg" \
+            -o "$DEST/quran_wallpaper.jpg"
+          python3 - "$DEST" <<'PY'
+          import pathlib, sys
+          folder = pathlib.Path(sys.argv[1])
+          names = ["azhar_mosque_bg.jpg", "kaaba_wallpaper.jpg", "madinah_wallpaper.jpg",
+                   "aqsa_wallpaper.jpg", "quran_wallpaper.jpg"]
+          for name in names:
+              path = folder / name
+              data = path.read_bytes()
+              if len(data) < 2048 or not data.startswith(b"\\xff\\xd8") or not data.endswith(b"\\xff\\xd9"):
+                  raise SystemExit(f"Invalid or incomplete JPEG wallpaper: {name}")
+              print(f"Validated {name}: {len(data)} bytes")
+          PY
+
       - name: Build debug APK
         working-directory: android-app
         run: gradle assembleDebug
