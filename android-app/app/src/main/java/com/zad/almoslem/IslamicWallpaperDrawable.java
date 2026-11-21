@@ -26,7 +26,7 @@ public final class IslamicWallpaperDrawable extends Drawable {
         if ("radio".equals(this.style)) asset = "madinah_wallpaper";
         else if ("ruqyah".equals(this.style)) asset = "quran_wallpaper";
         else if ("recordings".equals(this.style)) asset = "azhar_mosque_bg";
-        else if ("ramadan".equals(this.style)) asset = "kaaba_wallpaper";
+        else if ("ramadan".equals(this.style)) asset = "azhar_mosque_bg";
         else if ("quran".equals(this.style) || "mushaf".equals(this.style)) asset = "quran_wallpaper";
         else if ("home".equals(this.style)) asset = "aqsa_wallpaper";
 
@@ -100,6 +100,65 @@ public final class IslamicWallpaperDrawable extends Drawable {
         paint.setColor(0x2DEBD5A0);
         float radius = Math.max(2f, w * .004f);
         canvas.drawCircle(mid, h * .075f, radius, paint);
+
+        if ("ramadan".equals(style)) drawRamadanDecor(canvas, w, h);
+    }
+
+    private void drawRamadanDecor(Canvas canvas, float w, float h) {
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(0xA8F0D18B);
+        float cx = w * .80f, cy = h * .105f, r = Math.max(13f, w * .045f);
+        canvas.drawCircle(cx, cy, r, paint);
+        paint.setColor(0xB9001820);
+        canvas.drawCircle(cx + r * .38f, cy - r * .20f, r * .88f, paint);
+        paint.setColor(0xB8F2D99F);
+        drawStar(canvas, w * .70f, h * .105f, Math.max(3f, w * .009f));
+        drawStar(canvas, w * .89f, h * .17f, Math.max(2.5f, w * .007f));
+
+        drawLantern(canvas, w * .16f, h * .04f, Math.max(25f, w * .075f), h * .17f);
+        drawLantern(canvas, w * .50f, h * .015f, Math.max(19f, w * .055f), h * .13f);
+        drawLantern(canvas, w * .84f, h * .035f, Math.max(23f, w * .068f), h * .16f);
+    }
+
+    private void drawLantern(Canvas canvas, float x, float top, float width, float height) {
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(Math.max(1.5f, width * .055f));
+        paint.setColor(0xB8F0D18B);
+        canvas.drawLine(x, 0, x, top + height * .12f, paint);
+        Path body = new Path();
+        body.moveTo(x - width * .22f, top + height * .20f);
+        body.lineTo(x + width * .22f, top + height * .20f);
+        body.lineTo(x + width * .34f, top + height * .40f);
+        body.lineTo(x + width * .25f, top + height * .82f);
+        body.lineTo(x, top + height);
+        body.lineTo(x - width * .25f, top + height * .82f);
+        body.lineTo(x - width * .34f, top + height * .40f);
+        body.close();
+        canvas.drawPath(body, paint);
+        canvas.drawLine(x - width * .22f, top + height * .20f, x + width * .22f, top + height * .20f, paint);
+        canvas.drawLine(x - width * .25f, top + height * .82f, x + width * .25f, top + height * .82f, paint);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(0x36FFD98A);
+        canvas.drawOval(x - width * .19f, top + height * .31f,
+                x + width * .19f, top + height * .77f, paint);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(Math.max(1f, width * .035f));
+        paint.setColor(0x8CF5D89A);
+        canvas.drawCircle(x, top + height * .52f, width * .12f, paint);
+        paint.setStyle(Paint.Style.FILL);
+    }
+
+    private void drawStar(Canvas canvas, float x, float y, float r) {
+        Path star = new Path();
+        for (int i = 0; i < 10; i++) {
+            double a = Math.PI * i / 5d - Math.PI / 2d;
+            float rr = (i % 2 == 0) ? r : r * .42f;
+            float px = x + (float)Math.cos(a) * rr;
+            float py = y + (float)Math.sin(a) * rr;
+            if (i == 0) star.moveTo(px, py); else star.lineTo(px, py);
+        }
+        star.close();
+        canvas.drawPath(star, paint);
     }
 
     @Override public void setAlpha(int alpha) { paint.setAlpha(alpha); invalidateSelf(); }
