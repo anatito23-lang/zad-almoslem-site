@@ -43,7 +43,7 @@ public class RuqyahActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(15), dp(16), dp(15), dp(24));
-        root.setBackgroundColor(AppThemeColors.bg(this));
+        root.setBackground(new IslamicWallpaperDrawable(this, "ruqyah"));
         scroll.addView(root);
 
         LinearLayout hero = new LinearLayout(this);
