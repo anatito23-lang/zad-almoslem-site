@@ -39,22 +39,19 @@ public class RuqyahActivity extends Activity {
     private void build() {
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
-        scroll.setBackground(new IslamicWallpaperDrawable(this, "ruqyah"));
+        scroll.setBackgroundColor(AppThemeColors.bg(this));
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(15), dp(16), dp(15), dp(24));
-        root.setBackground(new IslamicWallpaperDrawable(this, "ruqyah"));
+        root.setBackgroundColor(AppThemeColors.bg(this));
         scroll.addView(root);
 
         LinearLayout hero = new LinearLayout(this);
         hero.setOrientation(LinearLayout.VERTICAL);
         hero.setGravity(Gravity.CENTER);
         hero.setPadding(dp(12), dp(12), dp(12), dp(14));
-        hero.setBackground(new IslamicWallpaperDrawable(this,"ruqyah"));
-        ImageView artwork = new ImageView(this);
-        artwork.setImageDrawable(new IslamicWallpaperDrawable(this,"ruqyah"));
-        artwork.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        hero.addView(artwork, new LinearLayout.LayoutParams(-1, dp(150)));
+        hero.setBackground(bg(AppThemeColors.primary(this),22));
+        hero.addView(new SectionArtworkView(this,"ruqyah"), new LinearLayout.LayoutParams(-1, dp(164)));
         TextView title = label("الرقية الشرعية", 23, Color.WHITE, true);
         title.setGravity(Gravity.CENTER);
         hero.addView(title, match());
