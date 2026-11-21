@@ -20,9 +20,10 @@ public class RamadanAudioService extends Service {
           .setContentText("تذكير رمضاني").setOngoing(true);
         startForeground(ID,b.build());
         stopCurrent();
-        if ("ramadan_iftar_cannon".equals(key)) {
-            File cannon=new File(new File(getFilesDir(),"ramadan_audio"),"iftar_cannon.mp3");
-            if(cannon.isFile()&&cannon.length()>1000)playFile(cannon);
+        if ("ramadan_iftar_cannon".equals(key) || "ramadan_suhoor".equals(key)
+                || "ramadan_music_test".equals(key)) {
+            File music=new File(new File(getFilesDir(),"ramadan_audio"),"ramadan_music.mp3");
+            if(music.isFile()&&music.length()>1000)playFile(music);
             else showMissingRecording();
             return START_NOT_STICKY;
         }
@@ -30,7 +31,7 @@ public class RamadanAudioService extends Service {
             playBundledAdhan();
             return START_NOT_STICKY;
         }
-        String fileName="ramadan_iftar_voice".equals(key)?"iftar_voice.mp3":"mesaharaty.mp3";
+        String fileName="ramadan_iftar_voice".equals(key)?"iftar_voice.mp3":"ramadan_music.mp3";
         File file=new File(new File(getFilesDir(),"ramadan_audio"),fileName);
         if(file.isFile()&&file.length()>1000){playFile(file);return START_NOT_STICKY;}
         if ("ramadan_iftar_voice".equals(key)) playBundledAdhan();
@@ -40,7 +41,7 @@ public class RamadanAudioService extends Service {
     private void createChannel(){
         if(Build.VERSION.SDK_INT>=26){NotificationManager nm=getSystemService(NotificationManager.class);
             NotificationChannel c=new NotificationChannel(CHANNEL,"تنبيهات رمضان الصوتية",NotificationManager.IMPORTANCE_HIGH);
-            c.setDescription("مدفع الإفطار وتنبيه السحور");nm.createNotificationChannel(c);}
+            c.setDescription("الموسيقى الرمضانية والأذان");nm.createNotificationChannel(c);}
     }
     private void playFile(File file){
         try{
@@ -79,7 +80,7 @@ public class RamadanAudioService extends Service {
             Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
             b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                     .setContentTitle("زاد وطمأنينة — تسجيل صوتي")
-                    .setContentText("أضف تسجيلًا بشريًا من إعدادات أصوات رمضان لتشغيله هنا.")
+                    .setContentText("أضف المقطوعة الإسلامية من قسم موسيقى رمضان لتشغيلها هنا.")
                     .setOngoing(false).setAutoCancel(true);
             getSystemService(NotificationManager.class).notify(ID,b.build());
         }catch(Exception e){android.util.Log.e("ZadRamadan","Could not show missing recording notice",e);}
