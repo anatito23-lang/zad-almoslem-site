@@ -10,24 +10,31 @@ dependencies {
     implementation 'androidx.media3:media3-exoplayer-hls:1.5.1'
 }
 
+def releaseSigningReady = file("release-key.jks").exists() &&
+        ["ANDROID_KEYSTORE_PASSWORD", "ANDROID_KEY_ALIAS", "ANDROID_KEY_PASSWORD"].every {
+            System.getenv(it)?.trim()
+        }
+
 android {
     namespace 'com.zad.almoslem'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId 'com.zad.almoslem'
         minSdk 23
-        targetSdk 35
-        versionCode 9
-        versionName '3.0'
+        targetSdk 36
+        versionCode 10
+        versionName '3.1'
     }
 
     signingConfigs {
-        release {
-            storeFile file("release-key.jks")
-            storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
-            keyAlias System.getenv("ANDROID_KEY_ALIAS")
-            keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+        if (releaseSigningReady) {
+            release {
+                storeFile file("release-key.jks")
+                storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+            }
         }
     }
 
@@ -36,7 +43,9 @@ android {
             versionNameSuffix '-debug'
         }
         release {
-            signingConfig signingConfigs.release
+            if (releaseSigningReady) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
         }
     }
