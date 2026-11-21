@@ -68,6 +68,7 @@ public final class AppTabs {
     }
 
     private static void syncNavigation(Activity a,String active,LinearLayout bar) {
+        try {
         FirebaseFirestore.getInstance().collection("waqafat").document("__app_navigation__").get()
             .addOnSuccessListener(snapshot->{
                 if(!snapshot.exists()||!snapshot.contains("tabs"))return;
@@ -83,6 +84,9 @@ public final class AppTabs {
                 a.getSharedPreferences(PREFS,Activity.MODE_PRIVATE).edit().putString("tabs",tabs.toString()).apply();
                 render(a,active,bar,tabs);
             });
+        } catch (RuntimeException e) {
+            android.util.Log.w("ZadNavigation","Cloud navigation sync unavailable; using local tabs",e);
+        }
     }
 
     private static void render(Activity a,String active,LinearLayout outer,JSONArray config) {
