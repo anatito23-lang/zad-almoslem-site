@@ -131,11 +131,40 @@ public class RamadanActivity extends Activity {
             catch(Exception e){Toast.makeText(this,"تعذر فتح مصدر الصوت: "+e.getMessage(),Toast.LENGTH_LONG).show();}});
     }
     private void addAudioTestButton(LinearLayout box,String label,String key){
-        Button b=new Button(this);b.setText(label);box.addView(b,full());
-        b.setOnClickListener(v->{
-            Intent play=new Intent(this,RamadanAudioService.class);play.putExtra("key",key);
+        LinearLayout controls=new LinearLayout(this);
+        controls.setOrientation(LinearLayout.HORIZONTAL);
+        Button playButton=new Button(this);playButton.setText(label);
+        Button stopButton=new Button(this);stopButton.setText("إيقاف");
+        controls.addView(playButton,new LinearLayout.LayoutParams(0,dp(48),1));
+        controls.addView(stopButton,new LinearLayout.LayoutParams(0,dp(48),1));
+        box.addView(controls,full());
+
+        String volumeKey="ramadan_volume_"+key;
+        int savedVolume=prefs.getInt(volumeKey,100);
+        TextView volumeLabel=text("مستوى الصوت: "+savedVolume+"٪",13,AppThemeColors.muted(this),false);
+        box.addView(volumeLabel,full());
+        SeekBar volumeBar=new SeekBar(this);volumeBar.setMax(100);volumeBar.setProgress(savedVolume);
+        box.addView(volumeBar,full());
+        volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            public void onProgressChanged(SeekBar bar,int value,boolean fromUser){
+                volumeLabel.setText("مستوى الصوت: "+value+"٪");
+                if(fromUser)prefs.edit().putInt(volumeKey,value).apply();
+            }
+            public void onStartTrackingTouch(SeekBar bar){}
+            public void onStopTrackingTouch(SeekBar bar){}
+        });
+
+        playButton.setOnClickListener(v->{
+            Intent play=new Intent(this,RamadanAudioService.class);
+            play.putExtra("key",key);
+            play.putExtra("volume",prefs.getInt(volumeKey,100)/100f);
             try{if(android.os.Build.VERSION.SDK_INT>=26)startForegroundService(play);else startService(play);}
             catch(Exception e){Toast.makeText(this,"تعذر تشغيل الصوت: "+e.getMessage(),Toast.LENGTH_LONG).show();}
+        });
+        stopButton.setOnClickListener(v->{
+            Intent stop=new Intent(this,RamadanAudioService.class);stop.putExtra("key","stop");
+            try{startService(stop);}
+            catch(Exception e){Toast.makeText(this,"تعذر إيقاف الصوت: "+e.getMessage(),Toast.LENGTH_LONG).show();}
         });
     }
     private void addAudioPicker(LinearLayout box,String label,String file,int request){
