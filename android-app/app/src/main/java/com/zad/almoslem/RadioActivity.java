@@ -36,7 +36,7 @@ public class RadioActivity extends Activity {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(16), dp(16), dp(16), dp(24));
-        root.setBackgroundColor(AppThemeColors.bg(this));
+        root.setBackground(new IslamicWallpaperDrawable(this, "radio"));
         setContentView(AppTabs.wrap(this, root, "radio"));
 
         TextView title = new TextView(this);
