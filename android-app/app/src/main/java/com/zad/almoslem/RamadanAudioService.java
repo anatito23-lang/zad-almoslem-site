@@ -66,8 +66,8 @@ public class RamadanAudioService extends Service {
                 float boom=(float)Math.sin(2.0*Math.PI*sweep*t);
                 seed=(seed*25214903917L+11)&((1L<<48)-1);
                 float noise=(((seed>>>16)&0x7fff)/16384f)-1f;
-                float transient=(float)Math.exp(-22f*t);
-                float sample=(boom*0.72f+noise*transient*0.30f)*envelope;
+                float transientNoise=(float)Math.exp(-22f*t);
+                float sample=(boom*0.72f+noise*transientNoise*0.30f)*envelope;
                 pcm[i]=(short)(Math.max(-1f,Math.min(1f,sample))*24500);
             }
             AudioTrack track=new AudioTrack.Builder()
