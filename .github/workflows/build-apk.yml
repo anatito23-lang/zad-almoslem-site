@@ -1,17 +1,23 @@
-name: Build Zad Almoslem APK
+name: Build Zad Almoslem Android
 
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main]
+    branches: [main, native-android-app, feature/firebase-content-sync, feature/firebase-admin-panel]
     paths:
       - 'android-app/**'
       - '.github/workflows/build-apk.yml'
+      - 'admin.html'
+      - 'content-admin.html'
+      - 'firestore.rules'
   push:
     paths:
       - 'android-app/**'
       - '.github/workflows/build-apk.yml'
-    branches: [main, feat/per-prayer-adhan-voices]
+      - 'admin.html'
+      - 'content-admin.html'
+      - 'firestore.rules'
+    branches: [main, feat/per-prayer-adhan-voices, native-android-app, feature/firebase-content-sync, feature/firebase-admin-panel, update-v3-prayer-mushaf-tabs, release/google-play-readiness]
 
 jobs:
   build:
@@ -26,37 +32,105 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+
       - name: Accept Android SDK licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-      - name: Install Android SDK packages
-        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
-      - name: Set up Gradle
+
+      - name: Install Android SDK 36
+        run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Set up Gradle 8.11.1
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+
+      # Download the licensed source photographs during CI and package them as
+      # Android drawable resources. They are therefore present in every APK/AAB.
+      - name: Download and validate bundled adhan photographs
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="android-app/app/src/main/res/drawable-nodpi"
+          mkdir -p "$DEST"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
+            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
+            "https://commons.wikimedia.org/wiki/Special:Redirect/file/AlAzhar_Mosque.jpg?width=960" \
+            -o "$DEST/azhar_mosque_bg.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
+            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
+            "https://commons.wikimedia.org/wiki/Special:Redirect/file/Holy_Kaaba.jpg?width=960" \
+            -o "$DEST/kaaba_wallpaper.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
+            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
+            "https://commons.wikimedia.org/wiki/Special:Redirect/file/Al_Masjid_an_Nabawi.jpg?width=960" \
+            -o "$DEST/madinah_wallpaper.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
+            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
+            "https://commons.wikimedia.org/wiki/Special:Redirect/file/%D8%A7%D9%84%D9%85%D8%B3%D8%AC%D8%AF_%D8%A7%D9%84%D8%A3%D9%82%D8%B5%D9%89_%D8%A7%D9%84%D9%85%D8%A8%D8%A7%D8%B1%D9%83%D9%A1.jpg?width=960" \
+            -o "$DEST/aqsa_wallpaper.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
+            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
+            "https://commons.wikimedia.org/wiki/Special:Redirect/file/A_photo_of_a_Quran.jpg?width=500" \
+            -o "$DEST/quran_wallpaper.jpg"
+          python3 - "$DEST" <<'PY'
+          import pathlib, sys
+          folder = pathlib.Path(sys.argv[1])
+          names = ["azhar_mosque_bg.jpg", "kaaba_wallpaper.jpg", "madinah_wallpaper.jpg",
+                   "aqsa_wallpaper.jpg", "quran_wallpaper.jpg"]
+          for name in names:
+              path = folder / name
+              data = path.read_bytes()
+              if len(data) < 2048 or not data.startswith(bytes.fromhex("ffd8")) or not data.endswith(bytes.fromhex("ffd9")):
+                  raise SystemExit(f"Invalid or incomplete JPEG wallpaper: {name}")
+              print(f"Validated {name}: {len(data)} bytes")
+          PY
+
       - name: Build debug APK
         working-directory: android-app
         run: gradle assembleDebug
+
       - name: Prepare release signing key
-        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        shell: bash
         run: |
-          if echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android-app/app/release-key.jks 2>/dev/null && test -s android-app/app/release-key.jks; then
-            echo "ANDROID_SIGNING_READY=true" >> "$GITHUB_ENV"
+          secrets_present=0
+          for value in "$ANDROID_KEYSTORE_BASE64" "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEY_ALIAS" "$ANDROID_KEY_PASSWORD"; do
+            if [ -n "$value" ]; then secrets_present=$((secrets_present + 1)); fi
+          done
+          if [ "$secrets_present" -eq 4 ]; then
+            if printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android-app/app/release-key.jks 2>/dev/null &&
+               test -s android-app/app/release-key.jks &&
+               keytool -list -keystore android-app/app/release-key.jks -storepass "$ANDROID_KEYSTORE_PASSWORD" >/dev/null 2>&1; then
+              echo "ANDROID_SIGNING_READY=true" >> "$GITHUB_ENV"
+              echo "A valid release keystore was found."
+            else
+              rm -f android-app/app/release-key.jks
+              echo "ANDROID_SIGNING_READY=false" >> "$GITHUB_ENV"
+              echo "::warning::Release signing secrets are present but the keystore is invalid. Building an unsigned AAB for validation only."
+            fi
           else
-            echo "ANDROID_SIGNING_READY=false" >> "$GITHUB_ENV"
             rm -f android-app/app/release-key.jks
-            echo "::warning::Release signing key is invalid; debug APK will still be uploaded."
+            echo "ANDROID_SIGNING_READY=false" >> "$GITHUB_ENV"
+            if [ "$secrets_present" -eq 0 ]; then
+              echo "No release key configured; the AAB will be built unsigned for validation only."
+            else
+              echo "::warning::Release signing secrets are incomplete. Building an unsigned AAB for validation only."
+            fi
           fi
-      - name: Build signed release APK
-        if: env.ANDROID_SIGNING_READY == 'true'
+
+      - name: Build release Android App Bundle
         working-directory: android-app
-        run: gradle assembleRelease
+        run: gradle bundleRelease
+
       - name: Remove temporary signing key
         if: always()
         run: rm -f android-app/app/release-key.jks
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
@@ -64,11 +138,11 @@ jobs:
           path: android-app/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
-      - name: Upload signed release APK
-        if: env.ANDROID_SIGNING_READY == 'true'
+
+      - name: Upload release AAB
         uses: actions/upload-artifact@v4
         with:
-          name: zad-almoslem-release-apk
-          path: android-app/app/build/outputs/apk/release/app-release.apk
+          name: ${{ env.ANDROID_SIGNING_READY == 'true' && 'zad-almoslem-signed-release-aab' || 'zad-almoslem-unsigned-release-aab-validation-only' }}
+          path: android-app/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 90
