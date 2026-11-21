@@ -4,6 +4,8 @@ import android.app.*;
 import android.content.Intent;
 import android.media.AudioAttributes;
 import android.media.MediaPlayer;
+import android.media.AudioFormat;
+import android.media.AudioTrack;
 import android.os.*;
 import android.speech.tts.TextToSpeech;
 import java.io.File;
@@ -13,6 +15,7 @@ public class RamadanAudioService extends Service {
     private static final String CHANNEL="zad_ramadan_audio";
     private static final int ID=7630;
     private MediaPlayer player;
+    private AudioTrack cannonTrack;
     private TextToSpeech tts;
     private PowerManager.WakeLock wakeLock;
     @Override public int onStartCommand(Intent intent,int flags,int startId){
@@ -25,6 +28,10 @@ public class RamadanAudioService extends Service {
         stopCurrent();
         String fileName="ramadan_iftar_voice".equals(key)?"iftar_voice.mp3":
                 "ramadan_iftar_cannon".equals(key)?"iftar_cannon.mp3":"mesaharaty.mp3";
+        if ("ramadan_iftar_cannon".equals(key)) {
+            playCannonSound();
+            return START_NOT_STICKY;
+        }
         File file=new File(new File(getFilesDir(),"ramadan_audio"),fileName);
         if(file.isFile()&&file.length()>1000){playFile(file);return START_NOT_STICKY;}
         speakFallback(key);
@@ -45,6 +52,48 @@ public class RamadanAudioService extends Service {
             player.setDataSource(file.getAbsolutePath());player.setOnPreparedListener(MediaPlayer::start);player.prepareAsync();
         }catch(Exception e){android.util.Log.e("ZadRamadan","Audio file playback failed",e);speakFallback("");}
     }
+    // A short, locally synthesized cannon boom: no user audio file or internet required.
+    private void playCannonSound(){
+        try {
+            final int sampleRate=44100;
+            final int count=(int)(sampleRate*2.1f);
+            short[] pcm=new short[count];
+            long seed=0x5DEECE66DL;
+            for(int i=0;i<count;i++){
+                float t=i/(float)sampleRate;
+                float envelope=(float)Math.exp(-3.1f*t);
+                float sweep=78f-34f*Math.min(1f,t/1.7f);
+                float boom=(float)Math.sin(2.0*Math.PI*sweep*t);
+                seed=(seed*25214903917L+11)&((1L<<48)-1);
+                float noise=(((seed>>>16)&0x7fff)/16384f)-1f;
+                float transient=(float)Math.exp(-22f*t);
+                float sample=(boom*0.72f+noise*transient*0.30f)*envelope;
+                pcm[i]=(short)(Math.max(-1f,Math.min(1f,sample))*24500);
+            }
+            AudioTrack track=new AudioTrack.Builder()
+                .setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+                .setAudioFormat(new AudioFormat.Builder()
+                    .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                    .setSampleRate(sampleRate)
+                    .setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build())
+                .setTransferMode(AudioTrack.MODE_STATIC)
+                .setBufferSizeInBytes(pcm.length*2).build();
+            cannonTrack=track;
+            track.write(pcm,0,pcm.length);
+            track.setNotificationMarkerPosition(pcm.length);
+            track.setPlaybackPositionUpdateListener(new AudioTrack.OnPlaybackPositionUpdateListener(){
+                public void onMarkerReached(AudioTrack t){finish();}
+                public void onPeriodicNotification(AudioTrack t){}
+            });
+            track.play();
+            new Handler(Looper.getMainLooper()).postDelayed(this::finish,2600);
+        } catch(Exception error) {
+            android.util.Log.e("ZadRamadan","Cannon sound playback failed",error);
+            speakFallback("ramadan_iftar_cannon");
+        }
+    }
     private void speakFallback(String key){
         String phrase="ramadan_iftar_voice".equals(key)?"اقترب موعد الإفطار، اللهم تقبل صيامكم.":
                 "ramadan_suhoor".equals(key)?"اصحى يا نايم، وحد الدايم، قوم اتسحر واستعد لصلاة الفجر، رمضان كريم.":
@@ -59,6 +108,7 @@ public class RamadanAudioService extends Service {
     }
     private void stopCurrent(){
         if(player!=null){try{player.stop();}catch(Exception ignored){}try{player.release();}catch(Exception ignored){}player=null;}
+        if(cannonTrack!=null){try{cannonTrack.stop();}catch(Exception ignored){}try{cannonTrack.release();}catch(Exception ignored){}cannonTrack=null;}
         if(tts!=null){try{tts.stop();tts.shutdown();}catch(Exception ignored){}tts=null;}
     }
     private void finish(){stopCurrent();if(wakeLock!=null&&wakeLock.isHeld()){try{wakeLock.release();}catch(Exception ignored){}wakeLock=null;}stopForeground(true);stopSelf();}
