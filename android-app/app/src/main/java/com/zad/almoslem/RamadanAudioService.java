@@ -36,12 +36,22 @@ public class RamadanAudioService extends Service {
         // Built-in Arabic speech: no user-provided recording or network download is required.
         // The actual voice is supplied by the device's installed TTS engine; pitch is lowered
         // for a deeper delivery, but Android does not expose reliable voice-gender metadata.
-        if ("ramadan_iftar_voice".equals(key) || "ramadan_iftar_voice_test".equals(key)) {
+        boolean iftarVoiceMode="voice".equals(getSharedPreferences("zad_ramadan",MODE_PRIVATE).getString("iftar_mode","music"));
+        boolean suhoorVoiceMode="voice".equals(getSharedPreferences("zad_ramadan",MODE_PRIVATE).getString("suhoor_mode","music"));
+        if ("ramadan_iftar_voice_test".equals(key) || ("ramadan_iftar_voice".equals(key)&&iftarVoiceMode)) {
             speakArabic("اقترب موعد أذان المغرب");
             return START_NOT_STICKY;
         }
-        if ("ramadan_suhoor".equals(key) || "ramadan_suhoor_voice_test".equals(key)) {
+        if ("ramadan_suhoor_voice_test".equals(key) || ("ramadan_suhoor".equals(key)&&suhoorVoiceMode)) {
             speakArabic("اصحى يا نايم، وحد الله");
+            return START_NOT_STICKY;
+        }
+        if ("ramadan_music_test".equals(key) || (("ramadan_iftar_voice".equals(key)||"ramadan_suhoor".equals(key))&&!iftarVoiceMode&&!suhoorVoiceMode)) {
+            playFile(generateRamadanMusicFile());
+            return START_NOT_STICKY;
+        }
+        if ("ramadan_iftar_cannon".equals(key) || "ramadan_cannon_test".equals(key)) {
+            playFile(generateCannonFile());
             return START_NOT_STICKY;
         }
         if(fileName!=null){
@@ -110,6 +120,56 @@ public class RamadanAudioService extends Service {
         }catch(Exception e){android.util.Log.e("ZadRamadan","Could not show TTS notice",e);}
         new Handler(Looper.getMainLooper()).postDelayed(this::finish,2500);
     }
+    // Original, locally synthesized gentle bell-like Ramadan melody. No download or external track.
+    private File generateRamadanMusicFile(){
+        final int rate=22050; final double[] notes={392.00,440.00,523.25,493.88,440.00,392.00,329.63,392.00,440.00,523.25,587.33,523.25,440.00,392.00};
+        try{
+            File out=new File(getCacheDir(),"zad_ramadan_melody.wav");
+            int samples=(int)(rate*0.72*notes.length);
+            try(java.io.DataOutputStream d=new java.io.DataOutputStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(out)))){
+                writeWavHeader(d,samples,rate);
+                for(int i=0;i<samples;i++){
+                    double t=i/(double)rate, beat=t/0.72;int n=Math.min(notes.length-1,(int)beat);
+                    double local=(beat-n)*0.72, env=Math.min(1,local/0.035)*Math.min(1,(0.72-local)/0.18);
+                    double f=notes[n];double bell=Math.sin(2*Math.PI*f*t)+0.22*Math.sin(2*Math.PI*f*2.01*t)+0.08*Math.sin(2*Math.PI*f*3.98*t);
+                    double pad=0.12*Math.sin(2*Math.PI*130.81*t)+0.08*Math.sin(2*Math.PI*196*t);
+                    short v=(short)(Math.max(-1,Math.min(1,(bell*0.19*env+pad*0.22))*0.72)*32767);
+                    d.writeShort(Short.reverseBytes(v));
+                }
+            }
+            return out;
+        }catch(Exception e){throw new RuntimeException("Could not create Ramadan melody",e);}
+    }
+    // A short synthesized low boom for the iftar-cannon cue; generated on-device.
+    private File generateCannonFile(){
+        final int rate=22050,samples=rate*3;
+        try{
+            File out=new File(getCacheDir(),"zad_iftar_cannon.wav");
+            try(java.io.DataOutputStream d=new java.io.DataOutputStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(out)))){
+                writeWavHeader(d,samples,rate);
+                long seed=246813579L;
+                for(int i=0;i<samples;i++){
+                    double t=i/(double)rate;
+                    double decay=Math.exp(-t*3.1);
+                    seed=(seed*1103515245L+12345L)&0x7fffffffL;
+                    double noise=((seed/1073741824.0)-1.0);
+                    double boom=Math.sin(2*Math.PI*(82-18*t)*t)*0.9+noise*0.18;
+                    double attack=Math.min(1,t/0.008);
+                    short v=(short)(Math.max(-1,Math.min(1,boom*decay*attack*0.9))*32767);
+                    d.writeShort(Short.reverseBytes(v));
+                }
+            }
+            return out;
+        }catch(Exception e){throw new RuntimeException("Could not create cannon cue",e);}
+    }
+    private void writeWavHeader(java.io.DataOutputStream d,int samples,int rate)throws java.io.IOException{
+        int dataBytes=samples*2;
+        d.writeBytes("RIFF");writeIntLE(d,36+dataBytes);d.writeBytes("WAVEfmt ");writeIntLE(d,16);
+        writeShortLE(d,1);writeShortLE(d,1);writeIntLE(d,rate);writeIntLE(d,rate*2);writeShortLE(d,2);writeShortLE(d,16);
+        d.writeBytes("data");writeIntLE(d,dataBytes);
+    }
+    private void writeIntLE(java.io.DataOutputStream d,int v)throws java.io.IOException{d.writeInt(Integer.reverseBytes(v));}
+    private void writeShortLE(java.io.DataOutputStream d,int v)throws java.io.IOException{d.writeShort(Short.reverseBytes((short)v));}
     private void playFile(File file){
         try{
             PowerManager pm=(PowerManager)getSystemService(POWER_SERVICE);
