@@ -221,7 +221,7 @@ public class MainActivity extends Activity {
         refreshReminderAudioStatus(reminderAudioStatus);
         downloadReminderAudio.setOnClickListener(v->downloadReminderRecitations(downloadReminderAudio,reminderAudioStatus));
         root.addView(reminderAudioCard,matchWrap());
-        if (countSavedReminderAudio() < REMINDER_AUDIO_FILES.length) {
+        if (countSavedReminderAudio() < REMINDER_AUDIO_TOTAL) {
             reminderAudioStatus.setText("سيتم تجهيز التسجيلات البشرية تلقائيًا عند توفر الإنترنت...");
             downloadReminderAudio.postDelayed(() -> downloadReminderRecitations(downloadReminderAudio,reminderAudioStatus), 1200);
         }
