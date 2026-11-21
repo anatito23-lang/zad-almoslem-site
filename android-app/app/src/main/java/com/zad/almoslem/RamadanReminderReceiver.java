@@ -27,7 +27,7 @@ public class RamadanReminderReceiver extends BroadcastReceiver {
             boolean voiceMode="voice".equals(p.getString("iftar_mode","music"));
             if(voiceMode&&p.getBoolean("iftar_voice_enabled",true))scheduleDaily(context,"ramadan_iftar_voice",maghrib,maghribMinute,p.getInt("iftar_lead_minutes",5),startAt);
             else cancel(context,"ramadan_iftar_voice");
-            if(p.getBoolean("cannon_enabled",true))scheduleDaily(context,"ramadan_iftar_cannon",maghrib,maghribMinute,0,startAt);
+            if(voiceMode&&p.getBoolean("cannon_enabled",true))scheduleDaily(context,"ramadan_iftar_cannon",maghrib,maghribMinute,0,startAt);
             else cancel(context,"ramadan_iftar_cannon");
         }
         if(fajr>=0&&fajr<=23&&p.getBoolean("suhoor_enabled",true))
