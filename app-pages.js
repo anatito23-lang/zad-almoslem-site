@@ -49,6 +49,10 @@ if(!nativeApp){
  const webStyle=document.createElement('style');
  webStyle.textContent='.zad-web-shortcuts{max-width:1160px;margin:-26px auto 26px;padding:0 22px;position:relative;z-index:4;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:9px}.zad-web-shortcuts a{min-height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center;text-decoration:none;color:#174638;background:#fff;border:1px solid #e5e9df;border-radius:15px;box-shadow:0 7px 22px #163c2c0b;transition:transform .2s,border-color .2s}.zad-web-shortcuts a:hover{transform:translateY(-3px);border-color:#c9a45c}.zad-web-shortcuts a span{font-size:22px;color:#b18a49}.zad-web-shortcuts a b{font-size:12px;font-weight:700}.zad-public-website .date-strip{margin-top:0}.zad-public-website .prayer-tracker,.zad-public-website .adhan-settings{display:none!important}.zad-public-website #prayerMethod,.zad-public-website #prayerSchool{display:none!important}.zad-public-website .hadith-feature{max-width:850px;margin:auto;text-align:center;padding:30px 24px;background:linear-gradient(145deg,#fff,#f7f5ec);border-color:#e9dfc8}.hadith-mark{font-size:28px;color:#b18a49}.hadith-kicker{display:block;margin:7px 0;color:#9a7b40;font-size:13px;font-weight:700}.hadith-text{font-family:Georgia,Tahoma,serif;font-size:clamp(22px,3vw,30px)!important;line-height:2.1;color:#183e32}.hadith-source{margin:10px 0;color:#8a7144}.hadith-actions{display:flex;justify-content:center;margin:14px 0}.hadith-note{border-top:1px solid #e9e2d2;padding-top:12px}.zad-public-website .section#hadith-dua{margin-top:42px}.zad-public-website .quran-tools{grid-template-columns:minmax(170px,.8fr) minmax(220px,1.2fr) minmax(170px,1fr) auto}.zad-public-website #reciterSearch{width:100%}@media(max-width:850px){.zad-web-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr));padding:0 15px;gap:8px}.zad-web-shortcuts a{min-height:72px}.zad-public-website .quran-tools{grid-template-columns:1fr}}@media(max-width:480px){.zad-web-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr))}.zad-web-shortcuts a b{font-size:11px}}';
  document.head.append(webStyle);
+ const reciterSelect=document.getElementById('reciter');
+ if(reciterSelect&&!document.getElementById('reciterSearch')){
+  const search=document.createElement('input');search.type='search';search.id='reciterSearch';search.placeholder='ابحث باسم الشيخ...';search.setAttribute('aria-label','ابحث عن قارئ القرآن');reciterSelect.insertAdjacentElement('beforebegin',search);
+ }
  const reciterSearch=document.getElementById('reciterSearch');
  if(reciterSearch)reciterSearch.addEventListener('input',()=>{const term=reciterSearch.value.trim().toLocaleLowerCase('ar'),select=document.getElementById('reciter');if(!select)return;Array.from(select.options).forEach(o=>o.hidden=!!term&&!o.textContent.toLocaleLowerCase('ar').includes(term));const cur=select.selectedOptions[0];if(term&&cur&&cur.hidden){const first=Array.from(select.options).find(o=>!o.hidden);if(first)select.value=first.value;}});
 
@@ -72,6 +76,10 @@ if(!nativeApp){
 document.getElementById('kids')?.remove();
 document.querySelectorAll('a[href="#kids"]').forEach(link=>link.remove());
 // The public website is a continuous, scrollable web page. Keep tab navigation only in the native Android app.
+if(nativeApp){
+ const hadithSection=document.getElementById('hadith-dua'),duaSection=document.getElementById('duas');
+ if(hadithSection&&duaSection)hadithSection.append(duaSection);
+}
 if(!nativeApp)return;
 if(!main||!header||$('zadAppPages'))return;
 
