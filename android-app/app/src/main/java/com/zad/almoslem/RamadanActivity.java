@@ -86,8 +86,8 @@ public class RamadanActivity extends Activity {
         chooseStart.setOnClickListener(v->{Calendar now=Calendar.getInstance();long saved=prefs.getLong("start_at",0L);if(saved>0)now.setTimeInMillis(saved);
             new DatePickerDialog(this,(picker,y,m,d)->{Calendar first=Calendar.getInstance();first.set(y,m,d,0,0,0);first.set(Calendar.MILLISECOND,0);prefs.edit().putLong("start_at",first.getTimeInMillis()).apply();updateStartLabel(startLabel);RamadanReminderReceiver.scheduleAll(this);},now.get(Calendar.YEAR),now.get(Calendar.MONTH),now.get(Calendar.DAY_OF_MONTH)).show();});
         Switch iftarVoice=new Switch(this);iftarVoice.setText("تنبيه صوتي قبل المغرب");iftarVoice.setTextColor(AppThemeColors.text(this));iftarVoice.setChecked(prefs.getBoolean("iftar_voice_enabled",true));settings.addView(iftarVoice,full());
-        Switch cannon=new Switch(this);cannon.setText("إطلاق صوت مدفع الإفطار مع المغرب");cannon.setTextColor(AppThemeColors.text(this));cannon.setChecked(prefs.getBoolean("cannon_enabled",true));settings.addView(cannon,full());
-        Switch suhoor=new Switch(this);suhoor.setText("تنبيه المسحراتي قبل الفجر");suhoor.setTextColor(AppThemeColors.text(this));suhoor.setChecked(prefs.getBoolean("suhoor_enabled",true));settings.addView(suhoor,full());
+        Switch cannon=new Switch(this);cannon.setText("تشغيل الموسيقى الرمضانية مع المغرب");cannon.setTextColor(AppThemeColors.text(this));cannon.setChecked(prefs.getBoolean("cannon_enabled",true));settings.addView(cannon,full());
+        Switch suhoor=new Switch(this);suhoor.setText("تشغيل الموسيقى الرمضانية قبل الفجر");suhoor.setTextColor(AppThemeColors.text(this));suhoor.setChecked(prefs.getBoolean("suhoor_enabled",true));settings.addView(suhoor,full());
         addMinutesControl(settings,"التنبيه قبل المغرب بدقائق","iftar_lead_minutes",5,1,30);
         addMinutesControl(settings,"تنبيه السحور قبل الفجر بدقائق","suhoor_lead_minutes",45,10,120);
         TextView note=text("تُحسب المواعيد من مواقيت المغرب والفجر المحفوظة في التطبيق. يلزم ضبط مواقيت الصلاة والسماح بالتنبيهات الدقيقة.",12,AppThemeColors.muted(this),false);note.setPadding(0,dp(7),0,dp(7));settings.addView(note,full());
@@ -96,16 +96,12 @@ public class RamadanActivity extends Activity {
         cannon.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("cannon_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
         suhoor.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("suhoor_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
 
-        LinearLayout audio=card("أصوات رمضان — المسحراتي");
-        audioStatus=text("أذان بشري حقيقي مضمّن داخل التطبيق بترخيص CC0. ويمكنك إضافة تسجيلك البشري للمسحراتي أو تنبيه الإفطار ليعمل دون إنترنت. تسجيلات سيد مكاوي وحمزة نمرة تظل عبر مصادرها الرسمية احترامًا لحقوق النشر.",12,AppThemeColors.muted(this),false);
+        LinearLayout audio=card("موسيقى رمضان — أجواء إسلامية هادئة");
+        audioStatus=text("استبدلنا صوت المسحراتي ومدفع الإفطار بمقطوعة إسلامية هادئة تختارها مرة واحدة من جهازك. تُحفظ داخل التطبيق وتعمل دون إنترنت، ويمكن تشغيلها وقت المغرب وقبل الفجر. الأذان البشري يظل منفصلًا كما هو.",12,AppThemeColors.muted(this),false);
         audio.addView(audioStatus,full());
-        addAudioTestButton(audio,"تجربة الأذان البشري المسجّل","ramadan_adhan_test");
-        addAudioPicker(audio,"إضافة تسجيل مسحراتي بشري من جهازك","mesaharaty.mp3",PICK_SUHOOR);
-        addAudioPicker(audio,"إضافة تسجيل صوت بشري لتنبيه الإفطار","iftar_voice.mp3",PICK_IFTAR);
-        addExternalAudioButton(audio,"استماع إلى المسحراتي — سيد مكاوي","https://www.youtube.com/watch?v=w3ff3_5uJUU");
-        addExternalAudioButton(audio,"استماع إلى ألبوم مسحراتي — حمزة نمرة","https://play.anghami.com/album/942038?lang=ar");
-        addAudioPicker(audio,"إضافة تسجيل بشري لمدفع الإفطار من جهازك","iftar_cannon.mp3",PICK_CANNON);
-        addAudioTestButton(audio,"تجربة تسجيل مدفع الإفطار البشري","ramadan_iftar_cannon");
+        addAudioTestButton(audio,"تجربة الأذان البشري","ramadan_adhan_test");
+        addAudioPicker(audio,"اختيار المقطوعة الإسلامية الرمضانية","ramadan_music.mp3",PICK_CANNON);
+        addAudioTestButton(audio,"تجربة الموسيقى الرمضانية","ramadan_music_test");
         setContentView(AppTabs.wrap(this,scroll,"ramadan"));
     }
     private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("لم يتم تحديد بداية الشهر بعد؛ اختر أول يوم حتى تتوقف التنبيهات تلقائيًا بعد 30 يومًا.");return;}Calendar c=Calendar.getInstance();c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
