@@ -35,6 +35,7 @@ public class MainActivity extends Activity {
     private TextView progressText;
     private Button downloadButton;
     private boolean downloading = false;
+    private static boolean reminderAudioDownloading = false;
     private SharedPreferences prefs;
     private final TextView[] homePrayerTimeViews = new TextView[5];
 
@@ -207,6 +208,10 @@ public class MainActivity extends Activity {
         refreshReminderAudioStatus(reminderAudioStatus);
         downloadReminderAudio.setOnClickListener(v->downloadReminderRecitations(downloadReminderAudio,reminderAudioStatus));
         root.addView(reminderAudioCard,matchWrap());
+        if (countSavedReminderAudio() < REMINDER_AUDIO_FILES.length) {
+            reminderAudioStatus.setText("سيتم تجهيز التسجيلات البشرية تلقائيًا عند توفر الإنترنت...");
+            downloadReminderAudio.postDelayed(() -> downloadReminderRecitations(downloadReminderAudio,reminderAudioStatus), 1200);
+        }
 
         TextView silentInfo = text("يمكنك اختيار الصلوات التي تريد فيها تفعيل الوضع الصامت وقت الأذان، ثم يعود الهاتف لوضعه السابق تلقائيًا. يتطلب ذلك إذن عدم الإزعاج من إعدادات Android.",13,Color.rgb(70,85,75),false);
         addCard(root,silentInfo);
@@ -780,19 +785,27 @@ public class MainActivity extends Activity {
     private static final String[] REMINDER_AUDIO_FILES={"approach","gentle_0","gentle_1","gentle_2","gentle_3"};
     private static final String[] REMINDER_AUDIO_AYAT={"002238","013028","002152","033041","003191"};
 
-    private void refreshReminderAudioStatus(TextView label) {
+    private int countSavedReminderAudio() {
         File dir=new File(getFilesDir(),"reminders"); int ready=0;
         for(String name:REMINDER_AUDIO_FILES) if(isAudioFileValid(new File(dir,name+".mp3"))) ready++;
-        label.setText("التسجيلات المحفوظة: "+ready+" من "+REMINDER_AUDIO_FILES.length);
+        return ready;
+    }
+
+    private void refreshReminderAudioStatus(TextView label) {
+        label.setText("التسجيلات المحفوظة: "+countSavedReminderAudio()+" من "+REMINDER_AUDIO_FILES.length);
     }
 
     private void downloadReminderRecitations(Button button,TextView label) {
-        button.setEnabled(false); label.setText("جارٍ تنزيل آيات الشيخ عبدالباسط...");
+        if (reminderAudioDownloading) return;
+        reminderAudioDownloading = true;
+        button.setEnabled(false); label.setText("جارٍ تنزيل تسجيلات الشيخ عبدالباسط بصوت بشري...");
         new Thread(()->{
             List<String> failed=new ArrayList<>(); File dir=new File(getFilesDir(),"reminders");
             if(!dir.exists())dir.mkdirs();
             for(int i=0;i<REMINDER_AUDIO_FILES.length;i++){
                 String filename=REMINDER_AUDIO_FILES[i]+".mp3";
+                File existing=new File(dir,filename);
+                if (isAudioFileValid(existing)) continue;
                 String url="https://everyayah.com/data/Abdul_Basit_Murattal_192kbps/"+REMINDER_AUDIO_AYAT[i]+".mp3";
                 HttpURLConnection connection=null; File temp=new File(dir,filename+".part"), target=new File(dir,filename);
                 try{
@@ -815,9 +828,11 @@ public class MainActivity extends Activity {
                 runOnUiThread(()->label.setText("تم تجهيز "+completed+" من "+REMINDER_AUDIO_FILES.length+" تسجيلات..."));
             }
             runOnUiThread(()->{
+                reminderAudioDownloading = false;
                 button.setEnabled(true); refreshReminderAudioStatus(label);
                 if(!failed.isEmpty())label.append(" — تعذر تنزيل: "+android.text.TextUtils.join("، ",failed));
-                else label.append(" — جاهزة للتشغيل دون إنترنت.");
+                else if (countSavedReminderAudio() == REMINDER_AUDIO_FILES.length) label.append(" — جاهزة بصوت بشري وتعمل دون إنترنت.");
+                else label.append(" — أعد المحاولة عند توفر الإنترنت.");
             });
         },"reminder-recitation-download").start();
     }
