@@ -12,8 +12,10 @@ public class RamadanReminderReceiver extends BroadcastReceiver {
     public static void scheduleAll(Context context) {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_ramadan",Context.MODE_PRIVATE);
         long startAt=p.getLong("start_at",0L);
+        Calendar monthEnd=Calendar.getInstance();
+        if(startAt>0){monthEnd.setTimeInMillis(startAt);monthEnd.add(Calendar.DAY_OF_YEAR,30);}
         long now=System.currentTimeMillis();
-        if(!p.getBoolean("enabled",false)||startAt<=0||now>=startAt+30L*24L*60L*60L*1000L){
+        if(!p.getBoolean("enabled",false)||startAt<=0||now>=monthEnd.getTimeInMillis()){
             cancel(context,"ramadan_iftar_voice");cancel(context,"ramadan_iftar_cannon");cancel(context,"ramadan_suhoor");return;
         }
         android.content.SharedPreferences times=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
