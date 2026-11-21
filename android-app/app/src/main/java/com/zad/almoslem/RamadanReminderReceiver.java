@@ -11,23 +11,32 @@ import java.util.Calendar;
 public class RamadanReminderReceiver extends BroadcastReceiver {
     public static void scheduleAll(Context context) {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_ramadan",Context.MODE_PRIVATE);
-        if(!p.getBoolean("enabled",false)){cancel(context,"ramadan_iftar_voice");cancel(context,"ramadan_iftar_cannon");cancel(context,"ramadan_suhoor");return;}
+        long startAt=p.getLong("start_at",0L);
+        long now=System.currentTimeMillis();
+        if(!p.getBoolean("enabled",false)||startAt<=0||now>=startAt+30L*24L*60L*60L*1000L){
+            cancel(context,"ramadan_iftar_voice");cancel(context,"ramadan_iftar_cannon");cancel(context,"ramadan_suhoor");return;
+        }
         android.content.SharedPreferences times=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
         int maghrib=times.getInt("native_time_hour_المغرب",-1), maghribMinute=times.getInt("native_time_minute_المغرب",0);
         int fajr=times.getInt("native_time_hour_الفجر",-1), fajrMinute=times.getInt("native_time_minute_الفجر",0);
         if(maghrib>=0&&maghrib<=23){
-            if(p.getBoolean("iftar_voice_enabled",true))scheduleDaily(context,"ramadan_iftar_voice",maghrib,maghribMinute,p.getInt("iftar_lead_minutes",5));
+            if(p.getBoolean("iftar_voice_enabled",true))scheduleDaily(context,"ramadan_iftar_voice",maghrib,maghribMinute,p.getInt("iftar_lead_minutes",5),startAt);
             else cancel(context,"ramadan_iftar_voice");
-            if(p.getBoolean("cannon_enabled",true))scheduleDaily(context,"ramadan_iftar_cannon",maghrib,maghribMinute,0);
+            if(p.getBoolean("cannon_enabled",true))scheduleDaily(context,"ramadan_iftar_cannon",maghrib,maghribMinute,0,startAt);
             else cancel(context,"ramadan_iftar_cannon");
         }
         if(fajr>=0&&fajr<=23&&p.getBoolean("suhoor_enabled",true))
-            scheduleDaily(context,"ramadan_suhoor",fajr,fajrMinute,p.getInt("suhoor_lead_minutes",45));
+            scheduleDaily(context,"ramadan_suhoor",fajr,fajrMinute,p.getInt("suhoor_lead_minutes",45),startAt);
         else cancel(context,"ramadan_suhoor");
     }
-    private static void scheduleDaily(Context context,String key,int hour,int minute,int lead){
-        Calendar c=Calendar.getInstance();c.set(Calendar.HOUR_OF_DAY,hour);c.set(Calendar.MINUTE,minute);c.set(Calendar.SECOND,0);c.set(Calendar.MILLISECOND,0);c.add(Calendar.MINUTE,-Math.max(0,lead));
+    private static void scheduleDaily(Context context,String key,int hour,int minute,int lead,long startAt){
+        Calendar start=Calendar.getInstance();start.setTimeInMillis(startAt);start.set(Calendar.HOUR_OF_DAY,0);start.set(Calendar.MINUTE,0);start.set(Calendar.SECOND,0);start.set(Calendar.MILLISECOND,0);
+        Calendar today=Calendar.getInstance();today.set(Calendar.HOUR_OF_DAY,0);today.set(Calendar.MINUTE,0);today.set(Calendar.SECOND,0);today.set(Calendar.MILLISECOND,0);
+        Calendar c=(Calendar)(today.after(start)?today.clone():start.clone());
+        c.set(Calendar.HOUR_OF_DAY,hour);c.set(Calendar.MINUTE,minute);c.set(Calendar.SECOND,0);c.set(Calendar.MILLISECOND,0);c.add(Calendar.MINUTE,-Math.max(0,lead));
         if(c.getTimeInMillis()<=System.currentTimeMillis())c.add(Calendar.DAY_OF_YEAR,1);
+        Calendar end=(Calendar)start.clone();end.add(Calendar.DAY_OF_YEAR,30);
+        if(!c.before(end)){cancel(context,key);return;}
         AlarmManager am=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Intent i=new Intent(context,RamadanReminderReceiver.class);i.putExtra("key",key);
         PendingIntent pi=PendingIntent.getBroadcast(context,key.hashCode(),i,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
