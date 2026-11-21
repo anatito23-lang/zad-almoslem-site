@@ -61,7 +61,18 @@ jobs:
           test -n "$ANDROID_KEYSTORE_PASSWORD"
           test -n "$ANDROID_KEY_ALIAS"
           test -n "$ANDROID_KEY_PASSWORD"
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android-app/app/release-key.jks
+          python3 - <<'PY'
+          import base64, os, re
+          value = os.environ["ANDROID_KEYSTORE_BASE64"].strip().strip('"').strip("'")
+          value = re.sub(r"\\s+", "", value)
+          value = re.sub(r"[^A-Za-z0-9_+/=-]", "", value)
+          data = base64.b64decode(value, altchars=b"-_", validate=True)
+          if not data:
+              raise SystemExit("Decoded signing keystore is empty")
+          with open("android-app/app/release-key.jks", "wb") as output:
+              output.write(data)
+          print(f"Decoded signing keystore: {len(data)} bytes")
+          PY
           test -s android-app/app/release-key.jks
           keytool -list -keystore android-app/app/release-key.jks -storepass "$ANDROID_KEYSTORE_PASSWORD" >/dev/null
       - name: Set up Gradle
@@ -101,3 +112,4 @@ jobs:
 
 # Rebuild release to verify the current signing secrets.
 # Rebuild after correcting the existing keystore Base64 secret.
+# Normalize pasted Base64 whitespace before validating the keystore.
