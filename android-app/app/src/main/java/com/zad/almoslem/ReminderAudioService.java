@@ -3,6 +3,7 @@ package com.zad.almoslem;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -75,10 +76,16 @@ public class ReminderAudioService extends Service {
                 "gentle".equals(kind) ? "تذكير بالذكر" : "قيام الليل";
         Notification.Builder b = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
+        Intent stopIntent = new Intent(this, ReminderAudioService.class);
+        stopIntent.setAction(ACTION_STOP);
+        PendingIntent stopAction = PendingIntent.getService(this, 7521, stopIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle("زاد المسلم")
                 .setContentText("يتم تشغيل " + title)
-                .setOngoing(true);
+                .setOngoing(true)
+                .addAction(android.R.drawable.ic_media_pause,
+                        "dua".equals(kind) ? "إيقاف الدعاء" : "إيقاف الصوت", stopAction);
         startForeground(NOTIFICATION_ID, b.build());
         boolean adhanActive = getSharedPreferences("zad_reminders", MODE_PRIVATE).getBoolean("adhan_active", false);
         if (adhanActive && !"dua".equals(kind)) { finishPlayback(); return START_NOT_STICKY; }
