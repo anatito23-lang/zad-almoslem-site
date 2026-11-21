@@ -125,9 +125,10 @@ public class RadioPlaybackService extends Service {
         adhanPauseRequested = true;
         resumeOnAudioFocusGain = false;
         if (player == null || pausedForAdhan) return;
-        resumeAfterAdhan = player.getPlayWhenReady() &&
+        resumeAfterAdhan = (player.getPlayWhenReady() || resumeOnAudioFocusGain) &&
                 player.getPlaybackState() != Player.STATE_IDLE &&
                 player.getPlaybackState() != Player.STATE_ENDED;
+        resumeOnAudioFocusGain = false;
         if (!resumeAfterAdhan) return;
         positionBeforeAdhan = Math.max(0L, player.getCurrentPosition());
         pausedForAdhan = true;
