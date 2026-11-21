@@ -47,7 +47,7 @@ public class RamadanAudioService extends Service {
         }
         String fallbackFileName="ramadan_iftar_voice".equals(key)?"iftar_announcement.mp3":"suhoor_voice.mp3";
         File fallbackFile=new File(new File(getFilesDir(),"ramadan_audio"),fallbackFileName);
-        if(fallbackFile.isFile()&&fallbackFile.length()>1000){playFile(fallbackFile);return START_NOT_STICKY;}
+        if(fallbackFile.isFile()&&fallbackFile.length()>1000){playFile(fallbackFile,1f);return START_NOT_STICKY;}
         showMissingRecording();
         return START_NOT_STICKY;
     }
