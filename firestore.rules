@@ -31,5 +31,11 @@ service cloud.firestore {
       allow read: if isAdmin() || isPublished();
       allow create, update, delete: if isAdmin();
     }
+
+    // Public app configuration is readable by installed apps; only the owner can change it.
+    match /appConfig/{document} {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
   }
 }

@@ -50,15 +50,67 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <div id="adminMessage" class="notice hidden" role="status"></div>
 </section>
 <section class="card hidden" id="listCard"><h2>المحتوى المسجل</h2><div id="itemsList"><p class="small">جارٍ التحميل…</p></div></section>
+<section class="card hidden" id="appNavigationCard">
+<h2>التحكم في تبويبات التطبيق</h2>
+<p class="small">غيّر اسم ورمز كل تبويب، وأظهره أو أخفه، ورتّب ظهوره في الشريط السفلي. تُحفظ الإعدادات على الإنترنت وتُطبّق على التطبيق عند اتصاله.</p>
+<div id="navigationRows"></div>
+<div class="actions"><button type="button" id="saveNavigationButton">حفظ إعدادات التبويبات</button><button type="button" class="secondary" id="resetNavigationButton">استعادة الوضع الافتراضي</button></div>
+<div id="navigationMessage" class="notice hidden" role="status"></div>
+</section>
 </main>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,collection,getDocs,addDoc,updateDoc,deleteDoc,deleteField,doc,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,collection,getDocs,addDoc,updateDoc,deleteDoc,deleteField,doc,serverTimestamp,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const firebaseConfig={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
 const ADMIN_UID="5UkeBQyyGGZcICXULT9LUD0S4lt2";
 const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id);
 const names={azkar:"الذكر",duas:"الدعاء",khutbahs:"الخطبة",waqafat:"الوقفة الإيمانية"};
+
+const DEFAULT_TABS=[
+ {key:"more",label:"المزيد",icon:"☰",visible:true},
+ {key:"tasbeeh",label:"السبحة",icon:"۞",visible:true},
+ {key:"calendar",label:"التقويم",icon:"▦",visible:true},
+ {key:"radio",label:"الإذاعة",icon:"◉",visible:true},
+ {key:"quran",label:"استماع",icon:"♫",visible:true},
+ {key:"mushaf",label:"المصحف",icon:"▤",visible:true},
+ {key:"home",label:"الرئيسية",icon:"⌂",visible:true}
+];
+let navigationTabs=DEFAULT_TABS.map(x=>({...x}));
+function navigationMessage(text,error=false){const el=$("navigationMessage");el.textContent=text;el.classList.remove("hidden","error");if(error)el.classList.add("error");}
+function renderNavigationRows(){
+ const host=$("navigationRows");host.innerHTML="";
+ navigationTabs.forEach((tab,index)=>{
+  const row=document.createElement("div");row.className="item";
+  const top=document.createElement("div");top.className="row";
+  const name=document.createElement("strong");name.textContent=tab.key;
+  const visible=document.createElement("label");visible.className="check";const check=document.createElement("input");check.type="checkbox";check.checked=tab.visible!==false;check.addEventListener("change",()=>{tab.visible=check.checked;});visible.append(check,document.createTextNode(" ظاهر"));
+  top.append(name,visible);row.append(top);
+  const fields=document.createElement("div");fields.className="row";
+  const labelWrap=document.createElement("div");const label=document.createElement("label");label.textContent="اسم التبويب";const input=document.createElement("input");input.maxLength=24;input.value=tab.label;input.addEventListener("input",()=>tab.label=input.value);labelWrap.append(label,input);
+  const iconWrap=document.createElement("div");const iconLabel=document.createElement("label");iconLabel.textContent="الرمز";const icon=document.createElement("input");icon.maxLength=4;icon.value=tab.icon;icon.addEventListener("input",()=>tab.icon=icon.value);iconWrap.append(iconLabel,icon);
+  fields.append(labelWrap,iconWrap);row.append(fields);
+  const actions=document.createElement("div");actions.className="actions";
+  const up=document.createElement("button");up.type="button";up.className="secondary";up.textContent="↑ لأعلى";up.disabled=index===0;up.addEventListener("click",()=>{[navigationTabs[index-1],navigationTabs[index]]=[navigationTabs[index],navigationTabs[index-1]];renderNavigationRows();});
+  const down=document.createElement("button");down.type="button";down.className="secondary";down.textContent="↓ لأسفل";down.disabled=index===navigationTabs.length-1;down.addEventListener("click",()=>{[navigationTabs[index+1],navigationTabs[index]]=[navigationTabs[index],navigationTabs[index+1]];renderNavigationRows();});
+  actions.append(up,down);row.append(actions);host.append(row);
+ });
+}
+async function loadNavigationConfig(){
+ try{const snap=await getDoc(doc(db,"appConfig","navigation"));if(snap.exists()){const raw=snap.data().tabs;if(Array.isArray(raw)){const allowed=new Set(DEFAULT_TABS.map(x=>x.key));const byKey=new Map(DEFAULT_TABS.map(x=>[x.key,x]));const next=raw.filter(x=>x&&allowed.has(x.key)).map(x=>({key:x.key,label:String(x.label||byKey.get(x.key).label).slice(0,24),icon:String(x.icon||byKey.get(x.key).icon).slice(0,4),visible:x.visible!==false}));DEFAULT_TABS.forEach(x=>{if(!next.some(y=>y.key===x.key))next.push({...x});});if(next.some(x=>x.visible))navigationTabs=next;}}}catch(e){navigationMessage("تعذر تحميل إعدادات التبويبات: "+e.message,true);}
+ renderNavigationRows();
+}
+async function saveNavigationConfig(){
+ if(auth.currentUser?.uid!==ADMIN_UID)return;
+ if(!navigationTabs.some(x=>x.visible)){navigationMessage("يجب إبقاء تبويب واحد ظاهرًا على الأقل.",true);return;}
+ const button=$("saveNavigationButton");button.disabled=true;
+ try{await setDoc(doc(db,"appConfig","navigation"),{tabs:navigationTabs.map(x=>({key:x.key,label:x.label.trim()||x.key,icon:x.icon.trim()||"•",visible:x.visible})),updatedAt:serverTimestamp()},{merge:true});navigationMessage("تم حفظ الإعدادات. ستظهر التغييرات في التطبيق بعد المزامنة.");}
+ catch(e){navigationMessage("تعذر الحفظ. تأكد من نشر قواعد Firestore المحدّثة. "+e.message,true);}
+ finally{button.disabled=false;}
+}
+$("saveNavigationButton").addEventListener("click",saveNavigationConfig);
+$("resetNavigationButton").addEventListener("click",()=>{navigationTabs=DEFAULT_TABS.map(x=>({...x}));renderNavigationRows();navigationMessage("تمت استعادة القيم الافتراضية. اضغط حفظ لاعتمادها.");});
+
 const isPublished=item=>item.published===true||item["تم النشر"]===true||item["النشر"]===true;
 let busy=false;
 function message(id,text,error=false){const el=$(id);el.textContent=text;el.classList.remove("hidden","error");if(error)el.classList.add("error");}
@@ -121,9 +173,9 @@ $("contentForm").addEventListener("submit",async e=>{
 });
 updateFields();
 onAuthStateChanged(auth,async user=>{
- if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");return;}
+ if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");$("appNavigationCard").classList.add("hidden");return;}
  if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return;}
- $("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";await loadItems();
+ $("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("appNavigationCard").classList.remove("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";await Promise.all([loadItems(),loadNavigationConfig()]);
 });
 </script>
 </body></html>
