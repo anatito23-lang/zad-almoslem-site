@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="زاد وطمأنينة">
 <script data-goatcounter="https://zadalmuslim2026.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-<title>زاد وطمأنينة | مواقيت الصلاة والقرآن والأذكار</title>
+<title>زاد وطمأنينة | مواقيت الصلاة والقرآن والسنة</title>
 <style>
 :root{--bg:#f5f7f3;--paper:#fff;--ink:#18332d;--muted:#71817b;--green:#0c3b32;--green2:#155b49;--gold:#c9a45c;--line:#e5ebe5;--soft:#eaf2ed;--shadow:0 12px 35px rgba(18,55,43,.08)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,Arial,sans-serif;line-height:1.8}
@@ -36,7 +36,7 @@ button,input,select{font:inherit}button{cursor:pointer}
 .row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.row>*{flex:1}
 input,select{border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px 12px;color:var(--ink);min-width:0}
 .small{font-size:12px;color:var(--muted)}.muted{color:var(--muted)}
-.quran-tools{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;margin-bottom:13px}
+.quran-tools{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(220px,1.2fr) minmax(170px,1fr) auto;gap:9px;margin-bottom:13px}\n@media(max-width:700px){.quran-tools{grid-template-columns:1fr}}
 .surah-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 13px;background:#fff;border:1px solid var(--line);border-radius:12px;color:var(--green);text-decoration:none}.surah-item strong{font-size:13px;color:#987b43}
 .ayah{background:linear-gradient(135deg,#f7f4e9,#fff);border:1px solid #eee5cd;border-radius:17px;padding:18px;margin-top:12px}
 .ayah-text{font-family:"Times New Roman",serif;font-size:25px;line-height:2.1;text-align:center;color:#24483d}
@@ -319,7 +319,7 @@ footer{background:#071522;color:#c9d6e2}
   <div class="hero-content">
     <div class="eyebrow">رفيقك إلى الطاعة والطمأنينة</div>
     <h1>اجعل يومك عامرًا بذكر الله</h1>
-    <p>مساحة إيمانية تجمع لك مواقيت الصلاة والقرآن الكريم والأذكار والرقية الشرعية والمكتبة الإسلامية، بتجربة تصفح هادئة وواضحة على كل الأجهزة.</p>
+    <p>زاد وطمأنينة؛ رفيقك إلى القرآن الكريم والسنة النبوية ومواقيت الصلاة، في تجربة إيمانية هادئة وسهلة التصفح.</p>
     <div class="hero-editorial-card" aria-label="آية قرآنية">
       <span class="hero-card-kicker">زاد يومك</span>
       <div class="hero-card-ayah">﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾</div>
@@ -536,7 +536,7 @@ footer{background:#071522;color:#c9d6e2}
   </script>
 
   <section class="section" id="quran">
-    <div class="section-head"><div><h2>القرآن الكريم — استماع فقط</h2><p>تلاوات لشيوخ مصر القدامى، من غير عرض نص الآيات أو البحث فيها</p></div></div>
+    <div class="section-head"><div><h2>استماع القرآن الكريم</h2><p>اختر القارئ والسورة، واستمع إلى تلاوات من مكتبة واسعة من القراء.</p></div></div>
     <div class="card">
       <div class="quran-tools">
         <select id="reciter" aria-label="اختر الشيخ">
@@ -555,7 +555,7 @@ footer{background:#071522;color:#c9d6e2}
       <p id="quranStatus" class="small" role="status" style="margin:8px 0 12px">جارٍ تحميل قائمة التسجيلات الصوتية...</p>
       <audio id="audio" controls class="hidden" preload="none" style="width:100%;margin-top:8px"></audio>
       <div id="shuaishaTracks" class="list hidden" style="margin-top:12px"></div>
-      <div class="notice">القسم مخصص للاستماع فقط. التسجيلات المتاحة للشيوخ الخمسة الأولى تُجلب من مكتبة MP3Quran، أما الشيخ أبو العينين شعيشع فالمتاح حاليًا له 12 سورة على موقع السبيل، والشيخ عزت السيد راشد له خمس تلاوات تفتح صفحة الاستماع الخارجية مؤقتًا. يلزم الاتصال بالإنترنت للتشغيل.</div>
+      <div class="notice">القسم مخصص للاستماع فقط. التسجيلات المتاحة للشيوخ الخمسة الأولى تُجلب من مكتبة MP3Quran، ويُحدَّث دليل القراء من مكتبة MP3Quran عند فتح الموقع. يلزم الاتصال بالإنترنت للتشغيل.</div>
     </div>
   </section>
 
@@ -921,22 +921,23 @@ footer{background:#071522;color:#c9d6e2}
   
 
   <section class="section" id="hadith-dua">
-    <div class="section-head"><div><h2>السنة النبوية والأدعية</h2><p>أحاديث صحيحة وأدعية من القرآن الكريم</p></div></div>
+    <div class="section-head"><div><h2>الحديث الشريف</h2><p>من هدي النبي ﷺ — أحاديث صحيحة وحسنة مع عزو مختصر للمصدر</p></div></div>
+    <div class="card hadith-feature" id="hadith">
+      <div class="hadith-mark">ﷺ</div><span class="hadith-kicker">من السنة النبوية</span>
+      <div id="dailyHadith" class="arabic hadith-text">«إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى»</div>
+      <p id="dailyHadithSource" class="small hadith-source">رواه البخاري (1) ومسلم (1907)</p>
+      <div class="hadith-actions"><button class="btn green" id="nextHadith" type="button">حديث آخر</button></div>
+      <p class="small hadith-note">نحرص على ذكر الأحاديث الثابتة، مع بيان مصدر الحديث ودرجته عند الحاجة.</p>
+    </div>
+  </section>
+  <section class="section" id="duas">
+    <div class="section-head"><div><h2>أدعية قرآنية وخطة الختمة</h2><p>أدعية من كتاب الله، ومساعدة لتنظيم ورد التلاوة</p></div></div>
     <div class="grid">
-      <div class="card">
-        <div class="icon">ﷺ</div><h3>حديث نبوي</h3>
-        <div id="dailyHadith" class="arabic" style="font-size:20px">«إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى»</div>
-        <p id="dailyHadithSource" class="small" style="text-align:center">متفق عليه</p>
-        <button class="btn light" id="nextHadith" style="margin-top:12px">حديث آخر</button>
-      </div>
-      <div class="card">
-        <div class="icon">🤲</div><h3>دعاء من القرآن</h3>
+      <div class="card"><div class="icon">🤲</div><h3>دعاء من القرآن</h3>
         <div id="dailyDua" class="arabic" style="font-size:20px">﴿رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ﴾</div>
-        <p id="dailyDuaSource" class="small" style="text-align:center">سورة البقرة: 201</p>
-        <button class="btn light" id="nextDua" style="margin-top:12px">دعاء آخر</button>
+        <p id="dailyDuaSource" class="small" style="text-align:center">سورة البقرة: 201</p><button class="btn light" id="nextDua" style="margin-top:12px">دعاء آخر</button>
       </div>
-      <div class="card">
-        <div class="icon">📖</div><h3>خطة ختم القرآن</h3>
+      <div class="card"><div class="icon">📖</div><h3>خطة ختم القرآن</h3>
         <p>اختر عدد الأيام التي تريد ختم القرآن خلالها، وسنحسب لك الورد اليومي على أساس مصحف من 604 صفحات.</p>
         <div class="row" style="margin-top:12px"><input id="khatmaDays" type="number" min="1" max="365" value="30" aria-label="عدد أيام الختمة"><button class="btn green" id="calcKhatma">احسب الورد</button></div>
         <p id="khatmaResult" style="margin-top:10px;color:var(--green);font-weight:700">وردك اليومي: 21 صفحة تقريبًا</p>
@@ -1586,24 +1587,20 @@ mushafSwipeArea.addEventListener('pointercancel',()=>{mushafMouseStart=null;});
 
 async function loadOldEgyptianReciters(){
  try{
-  const r=await zadFetchTimeout('https://mp3quran.net/api/v3/reciters?language=ar',{},8000);
+  const r=await zadFetchTimeout('https://mp3quran.net/api/v3/reciters?language=ar',{},12000);
   if(!r.ok)throw new Error('reciter api');
-  const data=await r.json();
-  const all=data.reciters||[];
+  const data=await r.json(),all=data.reciters||[],select=$('reciter'),known=new Set();
   Object.entries(reciterMatches).forEach(([key,tokens])=>{
-   const found=all.find(rec=>{
-    const n=normalizeReciterName(rec.name);
-    return tokens.some(token=>n.includes(normalizeReciterName(token)));
-   });
-   if(found)window.zadReciterData[key]=found;
+   const found=all.find(rec=>{const n=normalizeReciterName(rec.name);return tokens.some(token=>n.includes(normalizeReciterName(token)));});
+   if(found){window.zadReciterData[key]=found;known.add(String(found.id));}
   });
-  const missing=Object.keys(reciterMatches).filter(key=>!window.zadReciterData[key]);
-  $('quranStatus').textContent=missing.length
-   ? 'تم تحميل المصادر. إذا لم يظهر تسجيل أحد الشيوخ فالمصدر لا يوفره حاليًا.'
-   : 'تم تحميل تسجيلات الشيوخ. اختر الشيخ والسورة ثم اضغط «استمع الآن».';
- }catch(e){
-  $('quranStatus').textContent='تعذر الاتصال بمكتبة التسجيلات الآن. تحقق من الإنترنت ثم أعد تحميل الصفحة.';
- }
+  all.forEach(rec=>{
+   if(!rec||!rec.id||!Array.isArray(rec.moshaf)||!rec.moshaf.length)return;
+   window.zadReciterData['api_'+rec.id]=rec;if(known.has(String(rec.id)))return;
+   const option=document.createElement('option');option.value='api_'+rec.id;option.textContent=rec.name+(rec.moshaf.length>1?' — '+rec.moshaf.length+' روايات':'');select.append(option);
+  });
+  $('quranStatus').textContent='تم تحميل '+all.length+' قارئًا من مكتبة MP3Quran. ابحث باسم الشيخ ثم اختر السورة.';
+ }catch(e){$('quranStatus').textContent='تعذر تحميل قائمة القراء الآن. يمكنك اختيار القراء الأساسيين أو إعادة تحميل الصفحة.';}
 }
 function showShuaishaTracks(){
  const tracks=[
@@ -1726,11 +1723,26 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeTasbeeh();});
 
 
 const hadithData=[
- ['«إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى»','متفق عليه'],
- ['«من كان يؤمن بالله واليوم الآخر فليقل خيرًا أو ليصمت»','متفق عليه'],
- ['«لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه»','متفق عليه'],
- ['«الكلمة الطيبة صدقة»','متفق عليه'],
- ['«اتق الله حيثما كنت، وأتبع السيئة الحسنة تمحها، وخالق الناس بخلق حسن»','رواه الترمذي وقال: حديث حسن']
+ ['«إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى»','رواه البخاري (1) ومسلم (1907)'],
+ ['«من كان يؤمن بالله واليوم الآخر فليقل خيرًا أو ليصمت»','رواه البخاري (6018) ومسلم (47)'],
+ ['«لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه»','رواه البخاري (13) ومسلم (45)'],
+ ['«الكلمة الطيبة صدقة»','رواه البخاري (2989) ومسلم (1009)'],
+ ['«أحب الأعمال إلى الله أدومها وإن قل»','رواه البخاري (6465) ومسلم (783)'],
+ ['«الطهور شطر الإيمان»','رواه مسلم (223)'],
+ ['«من سلك طريقًا يلتمس فيه علمًا سهل الله له به طريقًا إلى الجنة»','رواه مسلم (2699)'],
+ ['«لا تغضب»','رواه البخاري (6116)'],
+ ['«المسلم من سلم المسلمون من لسانه ويده»','رواه البخاري (10) ومسلم (40)'],
+ ['«من لا يَرحم لا يُرحم»','رواه البخاري (5997) ومسلم (2318)'],
+ ['«إن الله رفيق يحب الرفق في الأمر كله»','رواه البخاري (6927) ومسلم (2165)'],
+ ['«اتقوا النار ولو بشق تمرة»','رواه البخاري (1417) ومسلم (1016)'],
+ ['«من صلى عليَّ واحدة صلى الله عليه بها عشرًا»','رواه مسلم (408)'],
+ ['«لا تحقرن من المعروف شيئًا، ولو أن تلقى أخاك بوجه طلق»','رواه مسلم (2626)'],
+ ['«من دل على خير فله مثل أجر فاعله»','رواه مسلم (1893)'],
+ ['«كل معروف صدقة»','رواه البخاري (6021) ومسلم (1005)'],
+ ['«إن الله لا ينظر إلى صوركم وأموالكم، ولكن ينظر إلى قلوبكم وأعمالكم»','رواه مسلم (2564)'],
+ ['«يسروا ولا تعسروا، وبشروا ولا تنفروا»','رواه البخاري (69) ومسلم (1734)'],
+ ['«الراحمون يرحمهم الرحمن، ارحموا من في الأرض يرحمكم من في السماء»','رواه أبو داود (4941) والترمذي (1924)، وصححه الترمذي'],
+ ['«من كان في حاجة أخيه كان الله في حاجته»','رواه البخاري (2442) ومسلم (2580)']
 ];
 const duaData=[
  ['﴿رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ﴾','سورة البقرة: 201'],
@@ -2198,7 +2210,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261121-clean-web2"></script>
+<script src="./app-pages.js?v=20261121-web-shortcuts-hadith-quran"></script>
 
 <style id="website-cleanup-20261121">
 /* إخفاء البوصلة والسبحة من واجهة الموقع فقط */
