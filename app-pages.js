@@ -92,11 +92,11 @@ const prayerTitle=document.querySelector('#prayer .section-head p');if(prayerTit
 document.getElementById('kids')?.remove();
 document.querySelectorAll('a[href="#kids"]').forEach(link=>link.remove());
 // The public website is a continuous, scrollable web page. Keep tab navigation only in the native Android app.
-if(nativeApp){
+if(nativeApp && !publicWebsite){
  const hadithSection=document.getElementById('hadith-dua'),duaSection=document.getElementById('duas');
  if(hadithSection&&duaSection)hadithSection.append(duaSection);
 }
-if(!nativeApp)return;
+if(!nativeApp || publicWebsite)return;
 if(!main||!header||$('zadAppPages'))return;
 
 const meta=[['calendar','التقويم الشهري','🗓️'],['prayer','مواقيت الصلاة','🕰️'],['quran','استماع القرآن','📖'],['mushaf','المصحف الشريف','۞'],['ruqyah','الرقية الشرعية','🤲'],['radio-egypt','إذاعة القرآن الكريم','📻'],['azkar','الأذكار اليومية','☀️'],['books-library','مكتبة الكتب الإسلامية','📚'],...(!nativeApp?[['kids','ركن الأطفال','🧒']]:[]),['reminders',nativeApp?'تنبيهات الصلاة والأذان':'التنبيهات اليومية',nativeApp?'🕌':'🔔'],['hadith-dua','السنة والدعاء','🌿'],['daily-wird','وردي اليومي','📿'],['friday-wird','ورد الجمعة','🌙'],['qalbi-itmaann','قلبي اطمأن','💚'],['library','نفحات إيمانية','✨'],['khutbahs','خطب الجمعة','🎙️'],['nasheed','الإنشاد والابتهالات','🎵']];
@@ -238,7 +238,7 @@ const swipe=document.getElementById('mushafSwipeArea');
 if(swipe&&!swipe.dataset.readerTapBound){swipe.dataset.readerTapBound='1';swipe.addEventListener('click',()=>{const content=document.getElementById('mushafContent');if(content)content.classList.toggle('zad-reader-controls-visible');});}
 
 /* Radio playback controls are wired only in the native Android app. */
-if(nativeApp){
+if(nativeApp && !publicWebsite){
  const radio=$('egyptQuranRadio'), fallback=$('radioFallbackBtn'), primary=$('radioPrimaryBtn'), status=$('radioStatus');
  if(radio&&!radio.dataset.zadRadioBound){
   radio.dataset.zadRadioBound='1';
