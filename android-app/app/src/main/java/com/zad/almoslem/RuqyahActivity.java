@@ -29,6 +29,12 @@ public class RuqyahActivity extends Activity {
         return t;
     }
     private LinearLayout.LayoutParams match() { return new LinearLayout.LayoutParams(-1, -2); }
+    private void styleAction(Button button, int color) {
+        GradientDrawable shape = bg(color, 14);
+        button.setBackground(shape);
+        button.setTextColor(Color.WHITE);
+        button.setAllCaps(false);
+    }
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -80,7 +86,8 @@ public class RuqyahActivity extends Activity {
         card.addView(title, match());
 
         Button play = new Button(this);
-        play.setText("▶ تشغيل الرقية");
+        play.setText("▶  تشغيل الرقية");
+        styleAction(play,0xFF416C50);
         card.addView(play, match());
         play.setOnClickListener(v -> {
             Intent i = new Intent(this, RadioPlaybackService.class);
@@ -98,7 +105,8 @@ public class RuqyahActivity extends Activity {
         });
 
         Button pause = new Button(this);
-        pause.setText("Ⅱ إيقاف مؤقت / ▶ استئناف");
+        pause.setText("Ⅱ  إيقاف مؤقت / ▶  استئناف");
+        styleAction(pause,0xFF637C69);
         card.addView(pause, match());
         pause.setOnClickListener(v -> {
             Intent control = new Intent(this, RadioPlaybackService.class);
@@ -108,7 +116,8 @@ public class RuqyahActivity extends Activity {
         });
 
         Button stop = new Button(this);
-        stop.setText("■ إيقاف الصوت");
+        stop.setText("■  إيقاف الصوت");
+        styleAction(stop,0xFF76514B);
         card.addView(stop, match());
         stop.setOnClickListener(v -> stopAudio());
 
