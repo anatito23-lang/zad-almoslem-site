@@ -6,42 +6,47 @@ service cloud.firestore {
         && request.auth.uid == "5UkeBQyyGGZcICXULT9LUD0S4lt2";
     }
 
-    // Public clients may read published content only.
-    // The custom-tabs metadata document contains navigation labels/icons,
-    // not drafts or unpublished content, so it is readable but writable only by admin.
+    // Keep compatibility with content created by older admin versions.
+    // Missing publication fields are treated as unpublished.
+    function isPublished() {
+      return resource.data.get('published', false) == true
+        || resource.data.get('تم النشر', false) == true
+        || resource.data.get('النشر', false) == true;
+    }
+
+    // Full configuration (including hidden tabs) is private.
     match /waqafat/__custom_tabs__ {
-      // Complete tab configuration, including hidden tabs, is admin-only.
       allow read, write: if isAdmin();
     }
 
+    // Only the deliberately public navigation projection is readable by visitors.
     match /waqafat/__custom_tabs_public__ {
-      // Public app receives only the visible-tab projection.
       allow get: if true;
       allow list: if isAdmin();
       allow create, update, delete: if isAdmin();
     }
 
     match /azkar/{documentId} {
-      allow read: if isAdmin() || resource.data.published == true;
+      allow read: if isAdmin() || isPublished();
       allow create, update, delete: if isAdmin();
     }
 
     match /duas/{documentId} {
-      allow read: if isAdmin() || resource.data.published == true;
+      allow read: if isAdmin() || isPublished();
       allow create, update, delete: if isAdmin();
     }
 
     match /khutbahs/{documentId} {
-      allow read: if isAdmin() || resource.data.published == true;
+      allow read: if isAdmin() || isPublished();
       allow create, update, delete: if isAdmin();
     }
 
     match /waqafat/{documentId} {
-      allow read: if isAdmin() || resource.data.published == true;
+      allow read: if isAdmin() || isPublished();
       allow create, update, delete: if isAdmin();
     }
 
-    // Default deny: no other collection/document is accessible.
+    // Deny access to every collection not explicitly listed above.
     match /{document=**} {
       allow read, write: if false;
     }
