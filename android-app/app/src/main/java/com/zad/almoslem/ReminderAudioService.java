@@ -155,14 +155,16 @@ public class ReminderAudioService extends Service {
     }
 
     private String recordedRecitationUrl(String kind) {
-        int surah;
-        if ("gentle_0".equals(kind)) surah = 112;
-        else if ("gentle_1".equals(kind)) surah = 113;
-        else if ("gentle_2".equals(kind)) surah = 114;
-        else if ("gentle_3".equals(kind)) surah = 1;
-        else if ("approach".equals(kind)) surah = 93;
+        String ayah;
+        if ("approach".equals(kind)) ayah="002238";
+        else if ("gentle_0".equals(kind)) ayah="013028";
+        else if ("gentle_1".equals(kind)) ayah="002152";
+        else if ("gentle_2".equals(kind)) ayah="033041";
+        else if ("gentle_3".equals(kind)) ayah="003191";
         else return null;
-        return "https://server13.mp3quran.net/husr/" + String.format(Locale.US, "%03d.mp3", surah);
+        String reciter=getSharedPreferences("zad_reminders",MODE_PRIVATE).getString("reminder_reciter","basit");
+        String folder="husary".equals(reciter)?"Husary_128kbps":"Abdul_Basit_Murattal_192kbps";
+        return "https://everyayah.com/data/"+folder+"/"+ayah+".mp3";
     }
 
     private void stopCurrentPlayers() {
