@@ -83,7 +83,8 @@ public class RadioActivity extends Activity {
         }
         deck.addView(equalizer, new LinearLayout.LayoutParams(-1, dp(30)));
         Button toggleAudio = new Button(this);
-        toggleAudio.setText("Ⅱ إيقاف مؤقت / ▶ استئناف");
+        toggleAudio.setText("Ⅱ  إيقاف مؤقت / ▶  استئناف");
+        styleAction(toggleAudio,0xFF244D61);
         deck.addView(toggleAudio, match());
         toggleAudio.setOnClickListener(v -> {
             Intent control = new Intent(this, RadioPlaybackService.class);
@@ -154,11 +155,13 @@ public class RadioActivity extends Activity {
         card.addView(subtitle, match());
 
         Button play = new Button(this);
-        play.setText("▶ تشغيل المحطة");
+        play.setText("▶  تشغيل المحطة");
+        styleAction(play,0xFF244D61);
         card.addView(play, match());
         play.setOnClickListener(v -> start(url, label, station));
         Button stopStation = new Button(this);
-        stopStation.setText("■ إيقاف المحطة");
+        stopStation.setText("■  إيقاف المحطة");
+        styleAction(stopStation,0xFF53636B);
         card.addView(stopStation, match());
         stopStation.setOnClickListener(v -> stopPlayback());
 
@@ -173,6 +176,15 @@ public class RadioActivity extends Activity {
             try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(officialUrl))); }
             catch (Exception e) { if (status != null) status.setText("تعذر فتح موقع المحطة."); }
         });
+    }
+
+    private void styleAction(Button button, int color) {
+        GradientDrawable shape = new GradientDrawable();
+        shape.setColor(color);
+        shape.setCornerRadius(dp(16));
+        button.setBackground(shape);
+        button.setTextColor(Color.WHITE);
+        button.setAllCaps(false);
     }
 
     private LinearLayout.LayoutParams match() {
