@@ -10,6 +10,12 @@ service cloud.firestore {
     // The custom-tabs metadata document contains navigation labels/icons,
     // not drafts or unpublished content, so it is readable but writable only by admin.
     match /waqafat/__custom_tabs__ {
+      // Complete tab configuration, including hidden tabs, is admin-only.
+      allow read, write: if isAdmin();
+    }
+
+    match /waqafat/__custom_tabs_public__ {
+      // Public app receives only the visible-tab projection.
       allow get: if true;
       allow list: if isAdmin();
       allow create, update, delete: if isAdmin();
