@@ -68,9 +68,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
-      - name: Build signed release APK
+      - name: Build signed release APK and Google Play AAB
         working-directory: android-app
-        run: gradle assembleRelease
+        run: gradle assembleRelease bundleRelease
       - name: Verify APK signature and prepare download
         shell: bash
         run: |
@@ -78,7 +78,11 @@ jobs:
           APK="android-app/app/build/outputs/apk/release/app-release.apk"
           test -s "$APK"
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
+          AAB="android-app/app/build/outputs/bundle/release/app-release.aab"
+          test -s "$AAB"
+          jarsigner -verify -verbose "$AAB" >/dev/null
           cp "$APK" zad-almoslem.apk
+          cp "$AAB" zad-almoslem.aab
       - name: Remove temporary signing key
         if: always()
         run: rm -f android-app/app/release-key.jks
@@ -90,5 +94,7 @@ jobs:
           target_commitish: main
           make_latest: true
           prerelease: false
-          files: zad-almoslem.apk
+          files: |
+            zad-almoslem.apk
+            zad-almoslem.aab
           overwrite_files: true
