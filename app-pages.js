@@ -2,12 +2,29 @@
 'use strict';
 const $=id=>document.getElementById(id), main=document.querySelector('main.wrap'), header=document.querySelector('header.hero');
 const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp());
+/*
+ * The website displays prayer times, but adhan playback and background
+ * prayer alerts are Android-app features. Keep those controls native-only.
+ */
+if(!nativeApp){
+ const adhanSettings=document.querySelector('.adhan-settings');
+ if(adhanSettings)adhanSettings.remove();
+ const countdownLabel=document.querySelector('#nextPrayerCountdown .next-prayer-clock .next-prayer-kicker');
+ if(countdownLabel)countdownLabel.textContent='متبقي على الصلاة';
+ document.querySelectorAll('#daily-reminder-settings .card').forEach(card=>{
+  const heading=card.querySelector('h3')?.textContent||'';
+  if(heading.includes('بعد الأذان')||heading.includes('الأذان عند دخول وقت الصلاة'))card.remove();
+ });
+ const qiyamDescription=document.querySelector('#daily-reminder-settings .grid .card:nth-child(3) p');
+ if(qiyamDescription)qiyamDescription.textContent='تذكير قبل الفجر بنصف ساعة، ويمكنك تغيير الموعد.';
+}
+
 // Keep the website and Android app section lists identical: the Kids section is disabled in both.
 document.getElementById('kids')?.remove();
 document.querySelectorAll('a[href="#kids"]').forEach(link=>link.remove());
 if(!main||!header||$('zadAppPages'))return;
 
-const meta=[['calendar','التقويم الشهري','🗓️'],['prayer','مواقيت الصلاة','🕰️'],['quran','استماع القرآن','📖'],['mushaf','المصحف الشريف','۞'],['ruqyah','الرقية الشرعية','🤲'],['radio-egypt','إذاعة القرآن الكريم','📻'],['azkar','الأذكار اليومية','☀️'],['books-library','مكتبة الكتب الإسلامية','📚'],...(!nativeApp?[['kids','ركن الأطفال','🧒']]:[]),['reminders','تنبيهات الصلاة والأذان','🕌'],['hadith-dua','السنة والدعاء','🌿'],['daily-wird','وردي اليومي','📿'],['friday-wird','ورد الجمعة','🌙'],['qalbi-itmaann','قلبي اطمأن','💚'],['library','نفحات إيمانية','✨'],['khutbahs','خطب الجمعة','🎙️'],['nasheed','الإنشاد والابتهالات','🎵']];
+const meta=[['calendar','التقويم الشهري','🗓️'],['prayer','مواقيت الصلاة','🕰️'],['quran','استماع القرآن','📖'],['mushaf','المصحف الشريف','۞'],['ruqyah','الرقية الشرعية','🤲'],['radio-egypt','إذاعة القرآن الكريم','📻'],['azkar','الأذكار اليومية','☀️'],['books-library','مكتبة الكتب الإسلامية','📚'],...(!nativeApp?[['kids','ركن الأطفال','🧒']]:[]),['reminders',nativeApp?'تنبيهات الصلاة والأذان':'التنبيهات اليومية',nativeApp?'🕌':'🔔'],['hadith-dua','السنة والدعاء','🌿'],['daily-wird','وردي اليومي','📿'],['friday-wird','ورد الجمعة','🌙'],['qalbi-itmaann','قلبي اطمأن','💚'],['library','نفحات إيمانية','✨'],['khutbahs','خطب الجمعة','🎙️'],['nasheed','الإنشاد والابتهالات','🎵']];
 const root=document.createElement('div');root.id='zadAppPages';
 const home=document.createElement('div');home.className='zad-page is-active';home.id='zad-page-home';home.dataset.page='home';
 const pages=document.createElement('div');pages.className='zad-pages-content';
