@@ -96,37 +96,34 @@ jobs:
         working-directory: android-app
         run: gradle assembleDebug
 
-      - name: Prepare release signing key
+      - name: Prepare and require release signing key
         shell: bash
         run: |
-          secrets_present=0
-          for value in "$ANDROID_KEYSTORE_BASE64" "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEY_ALIAS" "$ANDROID_KEY_PASSWORD"; do
-            if [ -n "$value" ]; then secrets_present=$((secrets_present + 1)); fi
-          done
-          if [ "$secrets_present" -eq 4 ]; then
-            if printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android-app/app/release-key.jks 2>/dev/null &&
-               test -s android-app/app/release-key.jks &&
-               keytool -list -keystore android-app/app/release-key.jks -storepass "$ANDROID_KEYSTORE_PASSWORD" >/dev/null 2>&1; then
-              echo "ANDROID_SIGNING_READY=true" >> "$GITHUB_ENV"
-              echo "A valid release keystore was found."
-            else
-              rm -f android-app/app/release-key.jks
-              echo "ANDROID_SIGNING_READY=false" >> "$GITHUB_ENV"
-              echo "::warning::Release signing secrets are present but the keystore is invalid. Building an unsigned AAB for validation only."
-            fi
-          else
-            rm -f android-app/app/release-key.jks
-            echo "ANDROID_SIGNING_READY=false" >> "$GITHUB_ENV"
-            if [ "$secrets_present" -eq 0 ]; then
-              echo "No release key configured; the AAB will be built unsigned for validation only."
-            else
-              echo "::warning::Release signing secrets are incomplete. Building an unsigned AAB for validation only."
-            fi
-          fi
+          set -euo pipefail
+          test -n "$ANDROID_KEYSTORE_BASE64" || { echo "::error::Missing ANDROID_KEYSTORE_BASE64 repository secret."; exit 1; }
+          test -n "$ANDROID_KEYSTORE_PASSWORD" || { echo "::error::Missing ANDROID_KEYSTORE_PASSWORD repository secret."; exit 1; }
+          test -n "$ANDROID_KEY_ALIAS" || { echo "::error::Missing ANDROID_KEY_ALIAS repository secret."; exit 1; }
+          test -n "$ANDROID_KEY_PASSWORD" || { echo "::error::Missing ANDROID_KEY_PASSWORD repository secret."; exit 1; }
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android-app/app/release-key.jks
+          test -s android-app/app/release-key.jks
+          keytool -list -keystore android-app/app/release-key.jks -storepass "$ANDROID_KEYSTORE_PASSWORD" >/dev/null
+          echo "Release keystore validated; release outputs will be signed."
 
       - name: Build release APK and Android App Bundle
         working-directory: android-app
         run: gradle assembleRelease bundleRelease
+
+      - name: Verify release APK and AAB signatures
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="android-app/app/build/outputs/apk/release/app-release.apk"
+          AAB="android-app/app/build/outputs/bundle/release/app-release.aab"
+          test -s "$APK"
+          test -s "$AAB"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
+          jarsigner -verify -verbose "$AAB" >/dev/null
+          echo "Verified: release APK and Google Play AAB are signed."
 
       - name: Remove temporary signing key
         if: always()
@@ -143,7 +140,7 @@ jobs:
       - name: Upload release APK
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ANDROID_SIGNING_READY == 'true' && 'zad-almoslem-signed-release-apk' || 'zad-almoslem-unsigned-release-apk-validation-only' }}
+          name: zad-almoslem-signed-release-apk
           path: android-app/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 90
@@ -151,7 +148,7 @@ jobs:
       - name: Upload release AAB
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.ANDROID_SIGNING_READY == 'true' && 'zad-almoslem-signed-release-aab' || 'zad-almoslem-unsigned-release-aab-validation-only' }}
+          name: zad-almoslem-signed-release-aab
           path: android-app/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 90
