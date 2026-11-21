@@ -2259,7 +2259,7 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
 })();
 </script>
 <script>
-if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261121-calm-contrast", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261121-calm-contrast-v2", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
 </script>
 
 <style id="hide-floating-shortcuts">
@@ -2270,7 +2270,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261121-calm-contrast"></script>
+<script src="./app-pages.js?v=20261121-calm-contrast-v2"></script>
 
 <style id="website-cleanup-20261121">
 /* إخفاء البوصلة والسبحة من واجهة الموقع فقط */
@@ -2373,6 +2373,46 @@ footer{padding:38px 20px}
  .section h2{font-size:22px}
  .card{padding:18px}
 }
+</style>
+
+
+<style id="zad-calm-contrast-final-v2">
+/* تنسيق ثابت للموقع، لا يعتمد على تشغيل JavaScript أو اكتشاف وضع التطبيق */
+:root{color-scheme:light!important;--bg:#f4f6f2!important;--paper:#fff!important;--ink:#263a32!important;--muted:#65766e!important;--green:#285747!important;--green2:#376b56!important;--gold:#b89a60!important;--line:#e2e8e0!important;--soft:#edf2ec!important}
+html,body{background:#f4f6f2!important;color:#263a32!important}
+body{padding-bottom:24px!important}
+body .hero{background:linear-gradient(135deg,#294d40 0%,#37634f 58%,#55745d 100%)!important;color:#fff!important}
+body .hero h1,body .hero .brand,body .hero .brand-mark,body .hero .hero-actions{color:#fff!important}
+body .hero p{color:#edf3ed!important}
+body .hero .eyebrow{color:#f0dfb7!important}
+body .top nav a{color:#f5f7f2!important;background:#ffffff12!important;border-color:#ffffff30!important}
+body main,body .wrap{background:transparent!important;color:#263a32!important}
+body .date-strip,body .prayer,body .card,body .surah-item,body .zikr-item,body .book-card,body .khutbah-card{background:#fff!important;color:#263a32!important;border-color:#e2e8e0!important}
+body .section h2,body .card h3,body .prayer .ptime,body .surah-item,body .compass-label,body .khutbah-card summary{color:#285747!important}
+body .section-head p,body .card p,body .date-strip span,body .small,body .muted,body .prayer .pname,body .book-author{color:#65766e!important}
+body input,body select,body textarea{background:#fff!important;color:#263a32!important;border:1px solid #dce4dc!important}
+body input::placeholder,body textarea::placeholder{color:#78877f!important;opacity:1}
+body .btn{background:#376b56!important;color:#fff!important;border-color:#376b56!important}
+body .btn.light,body .surah-item button{background:#edf2ec!important;color:#285747!important;border-color:#dce6dc!important}
+body .btn.ghost{background:#ffffff18!important;color:#fff!important;border-color:#ffffff65!important}
+body .next-prayer-card,body .ramadan-hero{background:linear-gradient(120deg,#315846,#426b55)!important;color:#fff!important}
+body .next-prayer-card *,body .ramadan-hero{color:#fff!important}
+body .next-prayer-clock strong,body .ramadan-hero h3,body .ramadan-hero strong{color:#fff1c9!important}
+body .next-prayer-copy .small,body .next-prayer-clock .small,body .ramadan-hero p,body .ramadan-hero small{color:#edf3ed!important}
+body .ramadan-steps span{background:#edf2ec!important;color:#40594b!important}
+body .ramadan-steps b{color:#285747!important}
+body .ayah,body .mushaf-text,body .hadith-feature{background:#fffdf8!important;color:#30483d!important;border-color:#e8e1d2!important}
+body .ayah-text,body .mushaf-text,body .hadith-text{color:#30483d!important}
+body .ayah-ref,body .hadith-source{color:#806b43!important}
+body footer{background:#294d40!important;color:#f1f5ef!important}
+body footer p,body footer a{color:#f1f5ef!important}
+body .zad-web-shortcuts a{background:#fff!important;color:#285747!important;border-color:#e2e8e0!important}
+body .zad-web-shortcuts a b{color:#285747!important}
+body .zad-web-shortcuts a span{color:#9a7c48!important}
+body .notice{background:#f7f1e4!important;color:#6d5832!important;border:1px solid #eadfc8!important}
+body .article p{color:#65766e!important}
+body .section h2:before{background:#b89a60!important}
+@media(max-width:700px){body .hero{padding-bottom:54px!important}body .wrap{margin-top:-24px}}
 </style>
 
 </body>
