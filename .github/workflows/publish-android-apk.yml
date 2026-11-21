@@ -15,6 +15,10 @@ jobs:
     env:
       ANDROID_HOME: /usr/local/lib/android/sdk
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,16 +53,36 @@ jobs:
                   raise SystemExit(f"Invalid or incomplete JPEG wallpaper: {name}")
               print(f"Validated {name}: {len(data)} bytes")
           PY
+      - name: Prepare release signing key
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_KEY_ALIAS"
+          test -n "$ANDROID_KEY_PASSWORD"
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android-app/app/release-key.jks
+          test -s android-app/app/release-key.jks
+          keytool -list -keystore android-app/app/release-key.jks -storepass "$ANDROID_KEYSTORE_PASSWORD" >/dev/null
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
-      - name: Build installable APK
+      - name: Build signed release APK
         working-directory: android-app
-        run: gradle assembleDebug
-      - name: Prepare stable APK filename
-        run: cp android-app/app/build/outputs/apk/debug/app-debug.apk zad-almoslem.apk
-      - name: Publish APK download
+        run: gradle assembleRelease
+      - name: Verify APK signature and prepare download
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="android-app/app/build/outputs/apk/release/app-release.apk"
+          test -s "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
+          cp "$APK" zad-almoslem.apk
+      - name: Remove temporary signing key
+        if: always()
+        run: rm -f android-app/app/release-key.jks
+      - name: Publish signed APK download
         uses: softprops/action-gh-release@v2
         with:
           tag_name: android-latest
