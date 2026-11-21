@@ -7,9 +7,7 @@ import android.media.MediaPlayer;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.os.*;
-import android.speech.tts.TextToSpeech;
 import java.io.File;
-import java.util.Locale;
 
 public class RamadanAudioService extends Service {
     private static final String CHANNEL="zad_ramadan_audio";
@@ -26,15 +24,19 @@ public class RamadanAudioService extends Service {
           .setContentText("تذكير رمضاني").setOngoing(true);
         startForeground(ID,b.build());
         stopCurrent();
-        String fileName="ramadan_iftar_voice".equals(key)?"iftar_voice.mp3":
-                "ramadan_iftar_cannon".equals(key)?"iftar_cannon.mp3":"mesaharaty.mp3";
         if ("ramadan_iftar_cannon".equals(key)) {
             playCannonSound();
             return START_NOT_STICKY;
         }
+        if ("ramadan_adhan_test".equals(key)) {
+            playBundledAdhan();
+            return START_NOT_STICKY;
+        }
+        String fileName="ramadan_iftar_voice".equals(key)?"iftar_voice.mp3":"mesaharaty.mp3";
         File file=new File(new File(getFilesDir(),"ramadan_audio"),fileName);
         if(file.isFile()&&file.length()>1000){playFile(file);return START_NOT_STICKY;}
-        speakFallback(key);
+        if ("ramadan_iftar_voice".equals(key)) playBundledAdhan();
+        else showMissingRecording();
         return START_NOT_STICKY;
     }
     private void createChannel(){
@@ -50,7 +52,7 @@ public class RamadanAudioService extends Service {
             player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
             player.setOnCompletionListener(mp->finish());player.setOnErrorListener((mp,w,e)->{finish();return true;});
             player.setDataSource(file.getAbsolutePath());player.setOnPreparedListener(MediaPlayer::start);player.prepareAsync();
-        }catch(Exception e){android.util.Log.e("ZadRamadan","Audio file playback failed",e);speakFallback("");}
+        }catch(Exception e){android.util.Log.e("ZadRamadan","Audio file playback failed",e);showMissingRecording();}
     }
     // A short, locally synthesized cannon boom: no user audio file or internet required.
     private void playCannonSound(){
@@ -91,20 +93,41 @@ public class RamadanAudioService extends Service {
             new Handler(Looper.getMainLooper()).postDelayed(this::finish,2600);
         } catch(Exception error) {
             android.util.Log.e("ZadRamadan","Cannon sound playback failed",error);
-            speakFallback("ramadan_iftar_cannon");
+            showMissingRecording();
         }
     }
-    private void speakFallback(String key){
-        String phrase="ramadan_iftar_voice".equals(key)?"اقترب موعد الإفطار، اللهم تقبل صيامكم.":
-                "ramadan_suhoor".equals(key)?"اصحى يا نايم، وحد الدايم، قوم اتسحر واستعد لصلاة الفجر، رمضان كريم.":
-                "حان وقت الإفطار، تقبل الله صيامكم.";
-        tts=new TextToSpeech(this,status->{
-            if(status==TextToSpeech.SUCCESS){tts.setLanguage(new Locale("ar","EG"));tts.setSpeechRate(0.88f);
-                if(Build.VERSION.SDK_INT>=21)tts.speak(phrase,TextToSpeech.QUEUE_FLUSH,null,"ramadan-alert");
-                else tts.speak(phrase,TextToSpeech.QUEUE_FLUSH,null);
-                new Handler(Looper.getMainLooper()).postDelayed(this::finish,12000);
-            }else finish();
-        });
+    private void playBundledAdhan(){
+        try{
+            PowerManager pm=(PowerManager)getSystemService(POWER_SERVICE);
+            wakeLock=pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"ZadAlmoslem:RamadanAdhan");
+            wakeLock.acquire(4*60*1000L);
+            player=new MediaPlayer();
+            player.setWakeMode(this,PowerManager.PARTIAL_WAKE_LOCK);
+            player.setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
+            android.content.res.AssetFileDescriptor audio=getResources().openRawResourceFd(R.raw.beautiful_adhan);
+            try{player.setDataSource(audio.getFileDescriptor(),audio.getStartOffset(),audio.getLength());}
+            finally{audio.close();}
+            player.setOnCompletionListener(mp->finish());
+            player.setOnErrorListener((mp,w,e)->{finish();return true;});
+            player.setOnPreparedListener(MediaPlayer::start);
+            player.prepareAsync();
+        }catch(Exception e){
+            android.util.Log.e("ZadRamadan","Bundled human adhan playback failed",e);
+            showMissingRecording();
+        }
+    }
+    private void showMissingRecording(){
+        try{
+            Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
+            b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+                    .setContentTitle("زاد وطمأنينة — تسجيل صوتي")
+                    .setContentText("أضف تسجيلًا بشريًا من إعدادات أصوات رمضان لتشغيله هنا.")
+                    .setOngoing(false).setAutoCancel(true);
+            getSystemService(NotificationManager.class).notify(ID,b.build());
+        }catch(Exception e){android.util.Log.e("ZadRamadan","Could not show missing recording notice",e);}
+        new Handler(Looper.getMainLooper()).postDelayed(this::finish,2500);
     }
     private void stopCurrent(){
         if(player!=null){try{player.stop();}catch(Exception ignored){}try{player.release();}catch(Exception ignored){}player=null;}
