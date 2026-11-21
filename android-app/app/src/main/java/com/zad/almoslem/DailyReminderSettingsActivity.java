@@ -25,10 +25,8 @@ public class DailyReminderSettingsActivity extends Activity {
  @Override public void onCreate(Bundle state){
   super.onCreate(state);prefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);
   getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);
-  if(!prefs.contains("morning_enabled"))ReminderReceiver.scheduleDaily(this,"morning",7,0,"حان وقت أذكار الصباح، لا تنس وردك من ذكر الله.");
-  if(!prefs.contains("evening_enabled"))ReminderReceiver.scheduleDaily(this,"evening",17,0,"حان وقت أذكار المساء، لا تنس وردك من ذكر الله.");
-  if(!prefs.contains("qiyam_enabled"))ReminderReceiver.scheduleDaily(this,"qiyam",4,0,"حان وقت قيام الليل، قم إلى الصلاة والذكر.");
   if(!prefs.contains("gentle_start_hour"))prefs.edit().putInt("gentle_start_hour",9).putInt("gentle_start_minute",0).apply();
+  ReminderReceiver.ensureDefaultDailyReminders(this);
   build();
  }
  private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
