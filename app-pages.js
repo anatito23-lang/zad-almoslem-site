@@ -210,7 +210,7 @@ document.head.append(css);
   const kindNames={articles:"خواطر ومقالات",stories:"قصص",biographies:"سير وتراجم",general:""};
   tabs.sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
    for (const tab of tabs) {
-   if($(tab.id)||items.some(x=>x.id===tab.id))return;
+   if($(tab.id)||items.some(x=>x.id===tab.id))continue;
    const section=document.createElement("section");section.className="section";section.id=tab.id;
    const heading=document.createElement("div");heading.className="section-head";
    heading.innerHTML='<div><h2>'+safe(tab.icon||"✨")+' '+safe(tab.title)+'</h2><p>'+safe(kindNames[tab.kind]||"")+'</p></div>';
@@ -232,7 +232,7 @@ document.head.append(css);
    addTile(homeGrid,"zad-home-item");
    const moreGrid=$("zadMoreGrid");if(moreGrid)addTile(moreGrid,"zad-more-item");
    valid.push(tab.id);
-  });
+   }
   const hash=location.hash.slice(1);if(tabs.some(t=>t.id===hash))showPage(hash,true);
  }catch(error){console.warn("تعذر تحميل التبويبات الإضافية",error);}
 })();
