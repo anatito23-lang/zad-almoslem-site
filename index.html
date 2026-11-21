@@ -944,6 +944,17 @@ footer{background:#071522;color:#c9d6e2}
       </div>
     </div>
   </section>
+<script id="zad-native-hadith-restore">
+if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp()){
+ const section=document.getElementById('hadith-dua');
+ const duaSection=document.getElementById('duas');
+ if(section){
+  section.innerHTML='<div class="section-head"><div><h2>السنة النبوية والأدعية</h2><p>أحاديث صحيحة وأدعية من القرآن الكريم</p></div></div><div class="grid"><div class="card"><div class="icon">ﷺ</div><h3>حديث نبوي</h3><div id="dailyHadith" class="arabic" style="font-size:20px">«إنما الأعمال بالنيات، وإنما لكل امرئ ما نوى»</div><p id="dailyHadithSource" class="small" style="text-align:center">متفق عليه</p><button class="btn light" id="nextHadith" style="margin-top:12px">حديث آخر</button></div><div class="card"><div class="icon">🤲</div><h3>دعاء من القرآن</h3><div id="dailyDua" class="arabic" style="font-size:20px">﴿رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ﴾</div><p id="dailyDuaSource" class="small" style="text-align:center">سورة البقرة: 201</p><button class="btn light" id="nextDua" style="margin-top:12px">دعاء آخر</button></div><div class="card"><div class="icon">📖</div><h3>خطة ختم القرآن</h3><p>اختر عدد الأيام التي تريد ختم القرآن خلالها، وسنحسب لك الورد اليومي على أساس مصحف من 604 صفحات.</p><div class="row" style="margin-top:12px"><input id="khatmaDays" type="number" min="1" max="365" value="30" aria-label="عدد أيام الختمة"><button class="btn green" id="calcKhatma">احسب الورد</button></div><p id="khatmaResult" style="margin-top:10px;color:var(--green);font-weight:700">وردك اليومي: 21 صفحة تقريبًا</p></div></div>';
+ }
+ if(duaSection)duaSection.remove();
+}
+</script>
+
 
   
 
