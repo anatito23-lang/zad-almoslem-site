@@ -26,7 +26,7 @@ public class RamadanReminderReceiver extends BroadcastReceiver {
         if(maghrib>=0&&maghrib<=23){
             String iftarMode=p.getString("iftar_mode","music");
             // Keep the three choices independent: melody, human announcement, or cannon.
-            if(("music".equals(iftarMode)||"voice".equals(iftarMode))&&p.getBoolean("iftar_voice_enabled",true))
+            if("upload".equals(iftarMode))
                 scheduleDaily(context,"ramadan_iftar_voice",maghrib,maghribMinute,p.getInt("iftar_lead_minutes",5),startAt);
             else cancel(context,"ramadan_iftar_voice");
             if("cannon".equals(iftarMode)&&p.getBoolean("cannon_enabled",true))
@@ -70,7 +70,7 @@ public class RamadanReminderReceiver extends BroadcastReceiver {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_ramadan",Context.MODE_PRIVATE);
         if(!p.getBoolean("enabled",false))return;
         String iftarMode=p.getString("iftar_mode","music");
-        if("ramadan_iftar_voice".equals(key)&&("music".equals(iftarMode)||"voice".equals(iftarMode))&&p.getBoolean("iftar_voice_enabled",true)
+        if("ramadan_iftar_voice".equals(key)&&"upload".equals(iftarMode)
                 ||"ramadan_iftar_cannon".equals(key)&&"cannon".equals(iftarMode)&&p.getBoolean("cannon_enabled",true)
                 ||"ramadan_suhoor".equals(key)&&p.getBoolean("suhoor_enabled",true)){
             Intent play=new Intent(context,RamadanAudioService.class);play.putExtra("key",key);
