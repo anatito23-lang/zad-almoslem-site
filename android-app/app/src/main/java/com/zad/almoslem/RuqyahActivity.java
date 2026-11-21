@@ -49,13 +49,12 @@ public class RuqyahActivity extends Activity {
         LinearLayout hero = new LinearLayout(this);
         hero.setOrientation(LinearLayout.VERTICAL);
         hero.setGravity(Gravity.CENTER);
-        hero.setPadding(dp(12), dp(12), dp(12), dp(14));
-        hero.setBackground(bg(AppThemeColors.primary(this),22));
-        hero.addView(new SectionArtworkView(this,"ruqyah"), new LinearLayout.LayoutParams(-1, dp(164)));
-        TextView title = label("الرقية الشرعية", 23, Color.WHITE, true);
+        hero.setPadding(dp(12), dp(8), dp(12), dp(8));
+        hero.setBackground(bg(AppThemeColors.surface(this),16));
+        TextView title = label("الرقية الشرعية", 23, AppThemeColors.text(this), true);
         title.setGravity(Gravity.CENTER);
         hero.addView(title, match());
-        TextView intro = label("آيات من القرآن الكريم… وطمأنينة للقلب", 13, 0xFFE9DDBD, false);
+        TextView intro = label("آيات من القرآن الكريم… وطمأنينة للقلب", 13, AppThemeColors.muted(this), false);
         intro.setGravity(Gravity.CENTER);
         intro.setPadding(0, dp(5), 0, 0);
         hero.addView(intro, match());
