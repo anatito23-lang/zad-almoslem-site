@@ -68,7 +68,7 @@ public final class AppTabs {
     }
 
     private static void syncNavigation(Activity a,String active,LinearLayout bar) {
-        FirebaseFirestore.getInstance().collection("appConfig").document("navigation").get()
+        FirebaseFirestore.getInstance().collection("waqafat").document("__app_navigation__").get()
             .addOnSuccessListener(snapshot->{
                 if(!snapshot.exists()||!snapshot.contains("tabs"))return;
                 Object value=snapshot.get("tabs");if(!(value instanceof java.util.List))return;
