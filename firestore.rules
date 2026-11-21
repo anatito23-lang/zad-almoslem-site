@@ -3,10 +3,10 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function isAdmin() {
       return request.auth != null
-        && request.auth.uid == "5UkeBQyyGGZcICXULT9LUD0S4lt2";
+        && request.auth.uid == "5UkeBQyyGGZCICXULT9LUD0S4lt2";
     }
 
-    // Keep compatibility with content created by older admin versions.
+    // Preserve the existing publication behavior, including legacy Arabic flags.
     // Missing publication fields are treated as unpublished.
     function isPublished() {
       return resource.data.get('published', false) == true
@@ -19,36 +19,19 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
-    // Only the deliberately public navigation projection is readable by visitors.
+    // Visitors can read only the public navigation projection.
     match /waqafat/custom_tabs_public {
       allow get: if true;
       allow list: if isAdmin();
       allow create, update, delete: if isAdmin();
     }
 
-    match /azkar/{documentId} {
+    // Keep the existing app contract for every top-level content collection:
+    // public reads are allowed only for published documents; writes are admin-only.
+    // This avoids breaking any current or future collection used by the app.
+    match /{collection}/{documentId} {
       allow read: if isAdmin() || isPublished();
       allow create, update, delete: if isAdmin();
-    }
-
-    match /duas/{documentId} {
-      allow read: if isAdmin() || isPublished();
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /khutbahs/{documentId} {
-      allow read: if isAdmin() || isPublished();
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /waqafat/{documentId} {
-      allow read: if isAdmin() || isPublished();
-      allow create, update, delete: if isAdmin();
-    }
-
-    // Deny access to every collection not explicitly listed above.
-    match /{document=**} {
-      allow read, write: if false;
     }
   }
 }
