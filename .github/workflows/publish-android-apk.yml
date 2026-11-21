@@ -56,6 +56,8 @@ jobs:
       - name: Build installable APK
         working-directory: android-app
         run: gradle assembleDebug
+      - name: Prepare stable APK filename
+        run: cp android-app/app/build/outputs/apk/debug/app-debug.apk zad-almoslem.apk
       - name: Publish APK download
         uses: softprops/action-gh-release@v2
         with:
@@ -64,5 +66,5 @@ jobs:
           target_commitish: main
           make_latest: true
           prerelease: false
-          files: android-app/app/build/outputs/apk/debug/app-debug.apk
+          files: zad-almoslem.apk
           overwrite_files: true
