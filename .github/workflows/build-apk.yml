@@ -86,7 +86,7 @@ jobs:
           for name in names:
               path = folder / name
               data = path.read_bytes()
-              if len(data) < 2048 or not data.startswith(b"\\xff\\xd8") or not data.endswith(b"\\xff\\xd9"):
+    if len(data) < 2048 or not data.startswith(bytes.fromhex("ffd8")) or not data.endswith(bytes.fromhex("ffd9")):
                   raise SystemExit(f"Invalid or incomplete JPEG wallpaper: {name}")
               print(f"Validated {name}: {len(data)} bytes")
           PY
