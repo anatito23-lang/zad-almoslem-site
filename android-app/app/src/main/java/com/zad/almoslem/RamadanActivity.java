@@ -148,7 +148,8 @@ public class RamadanActivity extends Activity {
             Uri uri=data.getData();try(InputStream in=getContentResolver().openInputStream(uri);FileOutputStream out=new FileOutputStream(new File(dir,name))){
                 if(in==null)throw new Exception("تعذر فتح التسجيل");byte[] buf=new byte[8192];int len;while((len=in.read(buf))!=-1)out.write(buf,0,len);
             }
-            if(request==PICK_CANNON)prefs.edit().putBoolean("cannon_enabled",true).apply();
+            if(request==PICK_IFTAR)prefs.edit().putString("iftar_mode","upload").apply();
+            if(request==PICK_CANNON)prefs.edit().putString("iftar_mode","cannon").putBoolean("cannon_enabled",true).apply();
             Toast.makeText(this,"تم حفظ التسجيل داخل التطبيق، وسيعمل دون إنترنت.",Toast.LENGTH_LONG).show();
             RamadanReminderReceiver.scheduleAll(this);
         }catch(Exception e){Toast.makeText(this,"تعذر حفظ التسجيل: "+e.getMessage(),Toast.LENGTH_LONG).show();}
