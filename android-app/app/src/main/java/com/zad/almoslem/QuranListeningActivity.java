@@ -16,18 +16,6 @@ private void addCard(LinearLayout root,View card){if(card instanceof LinearLayou
 private void build(){ScrollView scroll=new ScrollView(this);LinearLayout root=column();root.setPadding(dp(16),dp(16),dp(16),dp(24));root.setBackgroundColor(AppThemeColors.bg(this));scroll.addView(root);
 TextView title=text("استماع القرآن الكريم",24,AppThemeColors.text(this),true);title.setGravity(Gravity.CENTER);root.addView(title);
 TextView intro=text("اختر القارئ والسورة، واستمع مباشرة أو نزّلها للاستماع دون إنترنت. هذه الصفحة للتلاوات فقط وليست إذاعة مباشرة.",14,AppThemeColors.muted(this),false);intro.setPadding(0,dp(8),0,dp(14));root.addView(intro);
-        LinearLayout listeningHero=column();
-        listeningHero.setGravity(Gravity.CENTER);
-        listeningHero.setPadding(dp(18),dp(20),dp(18),dp(20));
-        GradientDrawable heroBg=new GradientDrawable(GradientDrawable.Orientation.TL_BR,
-                new int[]{Color.rgb(8,48,40),Color.rgb(24,105,78),Color.rgb(7,42,35)});
-        heroBg.setCornerRadius(dp(24));listeningHero.setBackground(heroBg);
-        listeningHero.addView(new SectionArtworkView(this,"listening"),new LinearLayout.LayoutParams(-1,dp(164)));
-        TextView heroTitle=text("مجالس القرآن",21,Color.WHITE,true);heroTitle.setGravity(Gravity.CENTER);
-        listeningHero.addView(heroTitle,matchWrap());
-        TextView heroCaption=text("تلاوات خاشعة… تصحب يومك بالسكينة",13,Color.rgb(235,224,195),false);heroCaption.setGravity(Gravity.CENTER);
-        heroCaption.setPadding(0,dp(5),0,0);listeningHero.addView(heroCaption,matchWrap());
-        LinearLayout.LayoutParams heroLp=matchWrap();heroLp.bottomMargin=dp(16);root.addView(listeningHero,heroLp);
 buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
     private void buildPlayer(LinearLayout root) {
         TextView section=text("اختر تلاوتك",18,AppThemeColors.primary(this),true);
