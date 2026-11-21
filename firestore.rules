@@ -3,7 +3,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function isAdmin() {
       return request.auth != null
-        && request.auth.uid == "5UkeBQyyGGZCICXULT9LUD0S4lt2";
+        && request.auth.uid == "5UkeBQyyGGZcICXULT9LUD0S4lt2";
     }
 
     // Preserve the existing publication behavior, including legacy Arabic flags.
