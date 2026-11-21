@@ -18,7 +18,7 @@ public class AdhanFullScreenActivity extends Activity {
   getWindow().setStatusBarColor(Color.TRANSPARENT);getWindow().setNavigationBarColor(Color.BLACK);getWindow().setBackgroundDrawable(new ColorDrawable(Color.BLACK));
   String prayer=getIntent().getStringExtra("prayer");if(prayer==null)prayer="الصلاة";
   int choice=getSharedPreferences("zad_reminders",MODE_PRIVATE).getInt("adhan_wallpaper",0);if(choice<0||choice>=ids.length)choice=0;
-  FrameLayout frame=new FrameLayout(this);ImageView image=new ImageView(this);image.setScaleType(ImageView.ScaleType.CENTER_CROP);image.setImageResource(getResources().getIdentifier(ids[choice],"drawable",getPackageName()));frame.addView(image,new FrameLayout.LayoutParams(-1,-1));
+  FrameLayout frame=new FrameLayout(this);ImageView image=new ImageView(this);image.setScaleType(ImageView.ScaleType.CENTER_CROP);AdhanWallpaperImages.load(this,image,ids[choice]);frame.addView(image,new FrameLayout.LayoutParams(-1,-1));
   View shade=new View(this);shade.setBackgroundColor(0x77000000);frame.addView(shade,new FrameLayout.LayoutParams(-1,-1));
   LinearLayout content=new LinearLayout(this);content.setOrientation(1);content.setGravity(Gravity.CENTER);content.setPadding(dp(24),dp(40),dp(24),dp(40));
   TextView brand=new TextView(this);brand.setText("زاد المسلم");brand.setTextColor(Color.WHITE);brand.setTextSize(19);brand.setTypeface(Typeface.DEFAULT,Typeface.BOLD);brand.setGravity(Gravity.CENTER);
