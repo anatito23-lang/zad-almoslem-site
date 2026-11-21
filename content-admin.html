@@ -97,15 +97,15 @@ function renderNavigationRows(){
  });
 }
 async function loadNavigationConfig(){
- try{const snap=await getDoc(doc(db,"waqafat","__app_navigation__"));if(snap.exists()){const raw=snap.data().tabs;if(Array.isArray(raw)){const allowed=new Set(DEFAULT_TABS.map(x=>x.key));const byKey=new Map(DEFAULT_TABS.map(x=>[x.key,x]));const next=raw.filter(x=>x&&allowed.has(x.key)).map(x=>({key:x.key,label:String(x.label||byKey.get(x.key).label).slice(0,24),icon:String(x.icon||byKey.get(x.key).icon).slice(0,4),visible:x.visible!==false}));DEFAULT_TABS.forEach(x=>{if(!next.some(y=>y.key===x.key))next.push({...x});});if(next.some(x=>x.visible))navigationTabs=next;}}}catch(e){navigationMessage("تعذر تحميل إعدادات التبويبات: "+e.message,true);}
+ try{const snap=await getDoc(doc(db,"appConfig","navigation"));if(snap.exists()){const raw=snap.data().tabs;if(Array.isArray(raw)){const allowed=new Set(DEFAULT_TABS.map(x=>x.key));const byKey=new Map(DEFAULT_TABS.map(x=>[x.key,x]));const next=raw.filter(x=>x&&allowed.has(x.key)).map(x=>({key:x.key,label:String(x.label||byKey.get(x.key).label).slice(0,24),icon:String(x.icon||byKey.get(x.key).icon).slice(0,4),visible:x.visible!==false}));DEFAULT_TABS.forEach(x=>{if(!next.some(y=>y.key===x.key))next.push({...x});});if(next.some(x=>x.visible))navigationTabs=next;}}}catch(e){navigationMessage("تعذر تحميل إعدادات التبويبات: "+e.message,true);}
  renderNavigationRows();
 }
 async function saveNavigationConfig(){
  if(auth.currentUser?.uid!==ADMIN_UID)return;
  if(!navigationTabs.some(x=>x.visible)){navigationMessage("يجب إبقاء تبويب واحد ظاهرًا على الأقل.",true);return;}
  const button=$("saveNavigationButton");button.disabled=true;
- try{await setDoc(doc(db,"waqafat","__app_navigation__"),{tabs:navigationTabs.map(x=>({key:x.key,label:x.label.trim()||x.key,icon:x.icon.trim()||"•",visible:x.visible})),published:true,"تم النشر":true,"النشر":true,updatedAt:serverTimestamp()},{merge:true});navigationMessage("تم حفظ الإعدادات. ستظهر التغييرات في التطبيق بعد المزامنة.");}
- catch(e){navigationMessage("تعذر الحفظ. تأكد من اتصال الإنترنت وصلاحية المسؤول. "+e.message,true);}
+ try{await setDoc(doc(db,"appConfig","navigation"),{tabs:navigationTabs.map(x=>({key:x.key,label:x.label.trim()||x.key,icon:x.icon.trim()||"•",visible:x.visible})),updatedAt:serverTimestamp()},{merge:true});navigationMessage("تم حفظ الإعدادات. ستظهر التغييرات في التطبيق بعد المزامنة.");}
+ catch(e){navigationMessage("تعذر الحفظ. تأكد من نشر قواعد Firestore المحدّثة. "+e.message,true);}
  finally{button.disabled=false;}
 }
 $("saveNavigationButton").addEventListener("click",saveNavigationConfig);
@@ -135,8 +135,7 @@ async function loadItems(){
  try{
   const snap=await getDocs(collection(db,type));
   if(snap.empty){$("itemsList").innerHTML='<p class="small">لا توجد عناصر في هذا القسم حتى الآن.</p>';return;}
-  const rows=snap.docs.filter(d=>!(type==="waqafat"&&d.id==="__app_navigation__")).map(d=>({id:d.id,...d.data()}));
-  if(!rows.length){$("itemsList").innerHTML='<p class="small">لا توجد عناصر في هذا القسم حتى الآن.</p>';return;}
+  const rows=snap.docs.map(d=>({id:d.id,...d.data()}));
   $("itemsList").innerHTML=rows.map(item=>{
    const title=esc(titleOf(item,type)),meta=[item.date,item.category,item.source].filter(Boolean).map(esc).join(" · ");
    return '<article class="item"><div class="row"><strong>'+title+'</strong><span class="tag">'+(isPublished(item)?"منشور":"مسودة")+'</span></div><p class="small">'+meta+'</p><p>'+esc((item.body||item.text||item["نص"]||"").slice(0,220))+'</p><div class="actions"><button type="button" class="secondary" data-edit="'+esc(item.id)+'">تعديل</button><button type="button" class="gold" data-toggle="'+esc(item.id)+'" data-published="'+(isPublished(item)?"true":"false")+'">'+(isPublished(item)?"إلغاء النشر":"نشر")+'</button><button type="button" class="danger" data-delete="'+esc(item.id)+'">حذف</button></div></article>';
