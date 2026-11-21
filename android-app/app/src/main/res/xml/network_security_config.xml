@@ -3,7 +3,7 @@
     <base-config cleartextTrafficPermitted="false" />
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">quran-radio.org</domain>
-        <domain>www.quran-radio.org</domain>
+        <domain includeSubdomains="false">www.quran-radio.org</domain>
         <domain includeSubdomains="true">quran-radio.com</domain>
     </domain-config>
 </network-security-config>
