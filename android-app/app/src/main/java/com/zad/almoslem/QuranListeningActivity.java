@@ -47,7 +47,7 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         card.addView(text("السورة",12,AppThemeColors.text(this),true));card.addView(surahSpinner,matchWrap());
         Button play=new Button(this);play.setText("استمع الآن");card.addView(play,matchWrap());
         Button toggle=new Button(this);toggle.setText("Ⅱ إيقاف مؤقت / ▶ استئناف");card.addView(toggle,matchWrap());
-         toggle.setOnClickListener(v->{Intent control=new Intent(this,RadioPlaybackService.class);control.setAction(RadioPlaybackService.ACTION_TOGGLE);try{startService(control);state.setText("تم تحديث حالة التلاوة.");}catch(Exception e){state.setText("تعذر التحكم في التلاوة: "+e.getMessage());}});
+         toggle.setOnClickListener(v->{Intent control=new Intent(this,RadioPlaybackService.class);control.setAction(RadioPlaybackService.ACTION_TOGGLE);try{startService(control);Toast.makeText(this,"تم تحديث حالة التلاوة.",Toast.LENGTH_SHORT).show();}catch(Exception e){Toast.makeText(this,"تعذر التحكم في التلاوة: "+e.getMessage(),Toast.LENGTH_LONG).show();}});
          Button stop=new Button(this);stop.setText("■ إيقاف التلاوة");card.addView(stop,matchWrap());
         stop.setOnClickListener(v->{Intent stopIntent=new Intent(this,RadioPlaybackService.class);stopIntent.setAction(RadioPlaybackService.ACTION_STOP);try{startService(stopIntent);Toast.makeText(this,"تم إيقاف التلاوة",Toast.LENGTH_SHORT).show();}catch(Exception e){Toast.makeText(this,"تعذر إيقاف التلاوة",Toast.LENGTH_SHORT).show();}});
         Button download=new Button(this);download.setText("تنزيل السورة للاستماع دون إنترنت");card.addView(download,matchWrap());
