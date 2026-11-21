@@ -372,7 +372,7 @@ footer{background:#071522;color:#c9d6e2}
         <span class="small" id="nextPrayerAt">حسب المدينة المختارة</span>
       </div>
       <div class="next-prayer-clock">
-        <span class="next-prayer-kicker">متبقي على الأذان</span>
+        <span class="next-prayer-kicker">متبقي على الصلاة</span>
         <strong id="nextPrayerRemaining" dir="ltr">--:--:--</strong>
         <span class="small" id="nextPrayerMessage">يتم تحديث العداد تلقائيًا</span>
       </div>
@@ -2217,7 +2217,7 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
 })();
 </script>
 <script>
-if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261119prayer-volume1", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261121-ramadan-prayer-only", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
 </script>
 
 <style id="hide-floating-shortcuts">
@@ -2228,7 +2228,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261121-web-shortcuts-hadith-quran"></script>
+<script src="./app-pages.js?v=20261121-ramadan-prayer-only"></script>
 
 <style id="website-cleanup-20261121">
 /* إخفاء البوصلة والسبحة من واجهة الموقع فقط */
