@@ -206,8 +206,6 @@ document.head.append(css);
   if(!tabsSnap.exists())return;
   const tabs=Array.isArray(tabsSnap.data().tabs)?tabsSnap.data().tabs.filter(t=>t&&t.id&&t.title&&t.visible!==false):[];
   if(!tabs.length)return;
-  const contentSnap=await getDocs(collection(db,"waqafat"));
-  const all=contentSnap.docs.map(d=>({id:d.id,...d.data()}));
   const safe=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const kindNames={articles:"خواطر ومقالات",stories:"قصص",biographies:"سير وتراجم",general:""};
   tabs.sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)).forEach(tab=>{
@@ -216,7 +214,9 @@ document.head.append(css);
    const heading=document.createElement("div");heading.className="section-head";
    heading.innerHTML='<div><h2>'+safe(tab.icon||"✨")+' '+safe(tab.title)+'</h2><p>'+safe(kindNames[tab.kind]||"")+'</p></div>';
    section.append(heading);
-   const records=all.filter(x=>x.tabId===tab.id&&(x.published===true||x["تم النشر"]===true||x["النشر"]===true)).sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+    const publishedQuery=query(collection(db,"waqafat"),where("tabId","==",tab.id),where("published","==",true));
+    const contentSnap=await getDocs(publishedQuery);
+    const records=contentSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
    if(!records.length){const empty=document.createElement("p");empty.className="small muted";empty.textContent="لا يوجد محتوى منشور في هذا القسم حاليًا.";section.append(empty);}
    records.forEach(item=>{
     const article=document.createElement("article");article.className="card";article.style.margin="12px 0";
