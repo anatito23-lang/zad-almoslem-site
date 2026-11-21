@@ -61,16 +61,25 @@ jobs:
           for value in "$ANDROID_KEYSTORE_BASE64" "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEY_ALIAS" "$ANDROID_KEY_PASSWORD"; do
             if [ -n "$value" ]; then secrets_present=$((secrets_present + 1)); fi
           done
-          if [ "$secrets_present" -eq 0 ]; then
-            echo "ANDROID_SIGNING_READY=false" >> "$GITHUB_ENV"
-            echo "No release key configured; the AAB will be built unsigned for validation only."
-          elif [ "$secrets_present" -ne 4 ]; then
-            echo "::error::Release signing secrets are incomplete. Configure all four secrets or none."
-            exit 1
+          if [ "$secrets_present" -eq 4 ]; then
+            if printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android-app/app/release-key.jks 2>/dev/null &&
+               test -s android-app/app/release-key.jks &&
+               keytool -list -keystore android-app/app/release-key.jks -storepass "$ANDROID_KEYSTORE_PASSWORD" >/dev/null 2>&1; then
+              echo "ANDROID_SIGNING_READY=true" >> "$GITHUB_ENV"
+              echo "A valid release keystore was found."
+            else
+              rm -f android-app/app/release-key.jks
+              echo "ANDROID_SIGNING_READY=false" >> "$GITHUB_ENV"
+              echo "::warning::Release signing secrets are present but the keystore is invalid. Building an unsigned AAB for validation only."
+            fi
           else
-            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android-app/app/release-key.jks
-            keytool -list -keystore android-app/app/release-key.jks -storepass "$ANDROID_KEYSTORE_PASSWORD" >/dev/null
-            echo "ANDROID_SIGNING_READY=true" >> "$GITHUB_ENV"
+            rm -f android-app/app/release-key.jks
+            echo "ANDROID_SIGNING_READY=false" >> "$GITHUB_ENV"
+            if [ "$secrets_present" -eq 0 ]; then
+              echo "No release key configured; the AAB will be built unsigned for validation only."
+            else
+              echo "::warning::Release signing secrets are incomplete. Building an unsigned AAB for validation only."
+            fi
           fi
 
       - name: Build release Android App Bundle
