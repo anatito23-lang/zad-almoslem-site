@@ -20,22 +20,29 @@ public class RamadanAudioService extends Service {
           .setContentText("تذكير رمضاني").setOngoing(true);
         startForeground(ID,b.build());
         stopCurrent();
-        if ("ramadan_iftar_cannon".equals(key) || "ramadan_suhoor".equals(key)
-                || "ramadan_music_test".equals(key)) {
-            File music=new File(new File(getFilesDir(),"ramadan_audio"),"ramadan_music.mp3");
-            if(music.isFile()&&music.length()>1000)playFile(music);
-            else showMissingRecording();
+        String mode=getSharedPreferences("zad_ramadan",MODE_PRIVATE).getString(
+                "ramadan_iftar_cannon".equals(key)||"ramadan_iftar_voice".equals(key)?"iftar_mode":"suhoor_mode","music");
+        String fileName=null;
+        if("ramadan_music_test".equals(key))fileName="ramadan_music.mp3";
+        else if("ramadan_iftar_voice_test".equals(key))fileName="iftar_announcement.mp3";
+        else if("ramadan_cannon_test".equals(key))fileName="iftar_cannon.mp3";
+        else if("ramadan_suhoor_voice_test".equals(key))fileName="suhoor_voice.mp3";
+        else if("ramadan_iftar_voice".equals(key))fileName="voice".equals(mode)?"iftar_announcement.mp3":"ramadan_music.mp3";
+        else if("ramadan_iftar_cannon".equals(key))fileName="voice".equals(mode)?"iftar_cannon.mp3":"ramadan_music.mp3";
+        else if("ramadan_suhoor".equals(key))fileName="voice".equals(mode)?"suhoor_voice.mp3":"ramadan_music.mp3";
+        if(fileName!=null){
+            File audio=new File(new File(getFilesDir(),"ramadan_audio"),fileName);
+            if(audio.isFile()&&audio.length()>1000)playFile(audio);else showMissingRecording();
             return START_NOT_STICKY;
         }
         if ("ramadan_adhan_test".equals(key)) {
             playBundledAdhan();
             return START_NOT_STICKY;
         }
-        String fileName="ramadan_iftar_voice".equals(key)?"iftar_voice.mp3":"ramadan_music.mp3";
+        String fileName="ramadan_iftar_voice".equals(key)?"iftar_announcement.mp3":"suhoor_voice.mp3";
         File file=new File(new File(getFilesDir(),"ramadan_audio"),fileName);
         if(file.isFile()&&file.length()>1000){playFile(file);return START_NOT_STICKY;}
-        if ("ramadan_iftar_voice".equals(key)) playBundledAdhan();
-        else showMissingRecording();
+        showMissingRecording();
         return START_NOT_STICKY;
     }
     private void createChannel(){
@@ -80,7 +87,7 @@ public class RamadanAudioService extends Service {
             Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
             b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                     .setContentTitle("زاد وطمأنينة — تسجيل صوتي")
-                    .setContentText("أضف المقطوعة الإسلامية من قسم موسيقى رمضان لتشغيلها هنا.")
+                    .setContentText("أضف التسجيل الصوتي المطلوب من قسم أصوات رمضان لتشغيله هنا.")
                     .setOngoing(false).setAutoCancel(true);
             getSystemService(NotificationManager.class).notify(ID,b.build());
         }catch(Exception e){android.util.Log.e("ZadRamadan","Could not show missing recording notice",e);}
