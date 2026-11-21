@@ -20,8 +20,8 @@ before(async () => {
     await setDoc(doc(db, "azkar", "published-arabic"), { "تم النشر": true, text: "legacy" });
     await setDoc(doc(db, "azkar", "published-old-arabic"), { "النشر": true, text: "legacy" });
     await setDoc(doc(db, "azkar", "draft"), { published: false, text: "private" });
-    await setDoc(doc(db, "waqafat", "__custom_tabs__"), { tabs: [{ id: "hidden", visible: false }] });
-    await setDoc(doc(db, "waqafat", "__custom_tabs_public__"), { tabs: [{ id: "visible", visible: true }] });
+    await setDoc(doc(db, "waqafat", "custom_tabs_config"), { tabs: [{ id: "hidden", visible: false }] });
+    await setDoc(doc(db, "waqafat", "custom_tabs_public"), { tabs: [{ id: "visible", visible: true }] });
     await setDoc(doc(db, "waqafat", "custom-published"), { tabId: "visible", published: true, title: "public" });
     await setDoc(doc(db, "waqafat", "custom-draft"), { tabId: "visible", published: false, title: "draft" });
   });
@@ -33,8 +33,8 @@ after(async () => {
 
 test("anonymous users can read only the public tab projection", async () => {
   const db = env.unauthenticatedContext().firestore();
-  await assertSucceeds(getDoc(doc(db, "waqafat", "__custom_tabs_public__")));
-  await assertFails(getDoc(doc(db, "waqafat", "__custom_tabs__")));
+  await assertSucceeds(getDoc(doc(db, "waqafat", "custom_tabs_public")));
+  await assertFails(getDoc(doc(db, "waqafat", "custom_tabs_config")));
 });
 
 test("anonymous users can read documents published with current and legacy flags", async () => {
