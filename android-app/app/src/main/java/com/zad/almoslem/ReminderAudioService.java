@@ -11,10 +11,7 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.PowerManager;
 import android.os.IBinder;
-import android.speech.tts.TextToSpeech;
-import android.speech.tts.UtteranceProgressListener;
 import java.io.File;
-import java.util.Locale;
 
 public class ReminderAudioService extends Service {
     public static final String ACTION_PLAY = "com.zad.almoslem.PLAY_REMINDER_AUDIO";
@@ -23,7 +20,6 @@ public class ReminderAudioService extends Service {
     private static final String CHANNEL = "zad_reminder_audio";
     private static final int NOTIFICATION_ID = 7520;
     private MediaPlayer player;
-    private TextToSpeech tts;
     private String activeKind;
 
     public static void play(Context context, String kind) {
@@ -87,11 +83,13 @@ public class ReminderAudioService extends Service {
             try { startService(stopRadio); } catch (Exception ignored) {}
         }
         stopCurrentPlayers();
-        if ("qiyam".equals(kind)) {
-            speak("حان وقت قيام الليل، لا تنسَ نصيبك من صلاة الليل");
-        } else if ("approach".equals(kind) || "gentle".equals(kind)) {
-            // These reminders use real recorded Quran recitation, never Android TextToSpeech.
-            playFile(requestedAudioFile == null ? ("approach".equals(kind) ? "approach" : "gentle_0") : requestedAudioFile, reminderMessage);
+        if ("approach".equals(kind)) {
+            playFile(requestedAudioFile == null ? "approach" : requestedAudioFile, null);
+        } else if ("gentle".equals(kind)) {
+            playFile(requestedAudioFile == null ? nextRecordedAyah() : requestedAudioFile, null);
+        } else if ("morning".equals(kind) || "evening".equals(kind) || "qiyam".equals(kind)) {
+            // All spoken reminders use the downloaded human Quran recitations only.
+            playFile(nextRecordedAyah(), null);
         } else {
             playFile(kind, null);
         }
@@ -107,23 +105,20 @@ public class ReminderAudioService extends Service {
         }
     }
 
-    private void playFile(String kind, String fallbackMessage) {
+    private String nextRecordedAyah() {
+        android.content.SharedPreferences prefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);
+        int index=prefs.getInt("recorded_ayah_rotation",0);
+        if(index<0 || index>3) index=0;
+        prefs.edit().putInt("recorded_ayah_rotation",(index+1)%4).apply();
+        return "gentle_"+index;
+    }
+
+    private void playFile(String kind, String unusedMessage) {
         try {
             File file = new File(new File(getFilesDir(), "reminders"), kind + ".mp3");
             if (!file.isFile() || file.length() < 10000) {
-                if ("dua".equals(kind)) {
-                    android.util.Log.w("ZadAlmoslem", "Recorded reminder audio is missing: " + kind);
-                    finishPlayback();
-                    return;
-                }
-                if ("approach".equals(kind) || kind.startsWith("gentle_")) {
-                    android.util.Log.w("ZadAlmoslem", "Recorded reminder audio is missing; using Arabic speech fallback: " + kind);
-                    speak(fallbackMessage == null || fallbackMessage.trim().isEmpty()
-                            ? "تذكير من زاد المسلم، لا تنس ذكر الله"
-                            : fallbackMessage);
-                    return;
-                }
-                speak("حان وقت " + ("morning".equals(kind) ? "أذكار الصباح" : "أذكار المساء") + "، لا تنسَ ذكر الله");
+                android.util.Log.w("ZadAlmoslem", "Human recorded reminder audio is missing; playback skipped: " + kind);
+                finishPlayback();
                 return;
             }
             player = new MediaPlayer();
@@ -143,48 +138,11 @@ public class ReminderAudioService extends Service {
         } catch (Exception e) { finishPlayback(); }
     }
 
-    private void speak(String message) {
-        try {
-            tts = new TextToSpeech(this, status -> {
-                if (status != TextToSpeech.SUCCESS || tts == null) { finishPlayback(); return; }
-                if (Build.VERSION.SDK_INT >= 21) {
-                    tts.setAudioAttributes(new AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_ALARM)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
-                            .build());
-                }
-                int languageResult = tts.setLanguage(new Locale("ar", "EG"));
-                if (languageResult == TextToSpeech.LANG_MISSING_DATA
-                        || languageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    languageResult = tts.setLanguage(new Locale("ar"));
-                }
-                if (languageResult == TextToSpeech.LANG_MISSING_DATA
-                        || languageResult == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    finishPlayback();
-                    return;
-                }
-                tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-                    @Override public void onStart(String id) {}
-                    @Override public void onDone(String id) { finishPlayback(); }
-                    @Override public void onError(String id) { finishPlayback(); }
-                });
-                if (Build.VERSION.SDK_INT >= 21)
-                    tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, "zad-reminder");
-                else
-                    tts.speak(message, TextToSpeech.QUEUE_FLUSH, null);
-            });
-        } catch (Exception e) { finishPlayback(); }
-    }
-
     private void stopCurrentPlayers() {
         if (player != null) {
             try { player.stop(); } catch (Exception ignored) {}
             try { player.release(); } catch (Exception ignored) {}
             player = null;
-        }
-        if (tts != null) {
-            try { tts.stop(); tts.shutdown(); } catch (Exception ignored) {}
-            tts = null;
         }
     }
 
