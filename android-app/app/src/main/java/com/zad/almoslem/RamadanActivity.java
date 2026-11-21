@@ -111,6 +111,7 @@ public class RamadanActivity extends Activity {
         addAudioPicker(audio,"اختيار تسجيل إعلان المغرب","iftar_announcement.mp3",PICK_IFTAR);
         addAudioPicker(audio,"اختيار تسجيل مدفع الإفطار","iftar_cannon.mp3",PICK_CANNON);
         addAudioPicker(audio,"اختيار تسجيل المسحراتي","suhoor_voice.mp3",PICK_SUHOOR);
+        addAudioTestButton(audio,"تجربة تسجيل إعلان المغرب","ramadan_iftar_voice_test");
         addAudioTestButton(audio,"تجربة صوت مدفع الإفطار","ramadan_cannon_test");
         addAudioTestButton(audio,"تجربة تسجيل المسحراتي","ramadan_suhoor_voice_test");
         setContentView(AppTabs.wrap(this,scroll,"ramadan"));
