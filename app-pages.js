@@ -202,7 +202,7 @@ document.head.append(css);
   const {getFirestore,doc,getDoc,collection,getDocs,query,where}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
   const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
   const app=getApps().length?getApps()[0]:initializeApp(cfg),db=getFirestore(app);
-  const tabsSnap=await getDoc(doc(db,"waqafat","__custom_tabs__"));
+  const tabsSnap=await getDoc(doc(db,"waqafat","__custom_tabs_public__"));
   if(!tabsSnap.exists())return;
   const tabs=Array.isArray(tabsSnap.data().tabs)?tabsSnap.data().tabs.filter(t=>t&&t.id&&t.title&&t.visible!==false):[];
   if(!tabs.length)return;
