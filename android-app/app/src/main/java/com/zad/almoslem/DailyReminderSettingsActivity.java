@@ -1,5 +1,7 @@
 package com.zad.almoslem;
 import android.app.Activity;
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.app.TimePickerDialog;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -32,7 +34,13 @@ public class DailyReminderSettingsActivity extends Activity {
  private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
  private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.RIGHT);t.setTextDirection(android.view.View.TEXT_DIRECTION_RTL);if(bold)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
  private GradientDrawable bg(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));return d;}
- private String timeText(String key,int i){return String.format(Locale.getDefault(),"%02d:%02d",prefs.getInt(key+"_hour",defaultHours[i]),prefs.getInt(key+"_minute",0));}
+ private String formatTime(int hour,int minute){
+  int displayHour=hour%12;
+  if(displayHour==0)displayHour=12;
+  String period=hour<12?"صباحًا":"مساءً";
+  return String.format(Locale.forLanguageTag("ar"),"%d:%02d %s",displayHour,minute,period);
+ }
+ private String timeText(String key,int i){return formatTime(prefs.getInt(key+"_hour",defaultHours[i]),prefs.getInt(key+"_minute",0));}
  private void schedule(int i){String key=keys[i];ReminderReceiver.scheduleDaily(this,key,prefs.getInt(key+"_hour",defaultHours[i]),prefs.getInt(key+"_minute",0),"حان وقت "+names[i]+"، لا تنس ذكر الله.");}
  private void build(){
   ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(15),dp(15),dp(15),dp(25));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);setContentView(scroll);
@@ -59,16 +67,16 @@ public class DailyReminderSettingsActivity extends Activity {
   audio.setChecked(prefs.getBoolean("gentle_audio_enabled",true));card.addView(audio);
   audio.setOnCheckedChangeListener((button,checked)->prefs.edit().putBoolean("gentle_audio_enabled",checked).apply());
   LinearLayout timeRow=new LinearLayout(this);timeRow.setGravity(Gravity.CENTER_VERTICAL);
-  TextView startTime=label(String.format(Locale.getDefault(),"%02d:%02d",prefs.getInt("gentle_start_hour",9),prefs.getInt("gentle_start_minute",0)),17,green,true);
+  TextView startTime=label(formatTime(prefs.getInt("gentle_start_hour",9),prefs.getInt("gentle_start_minute",0)),17,green,true);
   Button chooseStart=new Button(this);chooseStart.setText("اختيار وقت التنبيه");
   timeRow.addView(startTime,new LinearLayout.LayoutParams(0,dp(48),1));
   timeRow.addView(chooseStart,new LinearLayout.LayoutParams(dp(160),dp(48)));
   card.addView(timeRow);
   chooseStart.setOnClickListener(v->new TimePickerDialog(this,(picker,hour,minute)->{
    prefs.edit().putInt("gentle_start_hour",hour).putInt("gentle_start_minute",minute).apply();
-   startTime.setText(String.format(Locale.getDefault(),"%02d:%02d",hour,minute));
+   startTime.setText(formatTime(hour,minute));
    if(enabled.isChecked())ReminderReceiver.scheduleGentleReminder(this);
-  },prefs.getInt("gentle_start_hour",9),prefs.getInt("gentle_start_minute",0),true).show());
+  },prefs.getInt("gentle_start_hour",9),prefs.getInt("gentle_start_minute",0),false).show());
   TextView value=label("التكرار كل "+prefs.getInt("gentle_interval_hours",3)+" ساعات",14,green,false);card.addView(value);
   SeekBar interval=new SeekBar(this);interval.setMax(5);interval.setProgress(Math.max(1,Math.min(6,prefs.getInt("gentle_interval_hours",3)))-1);card.addView(interval);
   enabled.setOnCheckedChangeListener((button,checked)->ReminderReceiver.setGentleRemindersEnabled(this,checked));
@@ -104,7 +112,23 @@ public class DailyReminderSettingsActivity extends Activity {
   });
  }
 
- private void addExactAlarmAccess(LinearLayout root){
+
+ private void addNotificationAccess(LinearLayout root){
+  if(Build.VERSION.SDK_INT<33 || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED)return;
+  Button grant=new Button(this);
+  grant.setText("السماح بإظهار التنبيهات");
+  grant.setOnClickListener(v->requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},701));
+  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(grant,lp);
+ }
+ @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
+  super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+  if(requestCode==701){
+   if(grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED)
+    Toast.makeText(this,"تم تفعيل إذن التنبيهات",Toast.LENGTH_SHORT).show();
+   else Toast.makeText(this,"لن تظهر التنبيهات حتى تسمح بها من إعدادات التطبيق",Toast.LENGTH_LONG).show();
+  }
+ }
+\n private void addExactAlarmAccess(LinearLayout root){
   if(Build.VERSION.SDK_INT<31)return;
   AlarmManager manager=(AlarmManager)getSystemService(ALARM_SERVICE);
   if(manager.canScheduleExactAlarms())return;
@@ -148,7 +172,7 @@ public class DailyReminderSettingsActivity extends Activity {
   LinearLayout row=new LinearLayout(this);row.setGravity(Gravity.CENTER_VERTICAL);
   timeLabels[i]=label(timeText(key,i),18,green,true);Button choose=new Button(this);choose.setText("تغيير الوقت");
   row.addView(timeLabels[i],new LinearLayout.LayoutParams(0,dp(48),1));row.addView(choose,new LinearLayout.LayoutParams(dp(130),dp(48)));card.addView(row);
-  choose.setOnClickListener(v->{int h=prefs.getInt(key+"_hour",defaultHours[i]),m=prefs.getInt(key+"_minute",0);new TimePickerDialog(this,(picker,hour,minute)->{prefs.edit().putInt(key+"_hour",hour).putInt(key+"_minute",minute).apply();timeLabels[i].setText(timeText(key,i));if(enabled.isChecked())schedule(i);},h,m,true).show();});
+  choose.setOnClickListener(v->{int h=prefs.getInt(key+"_hour",defaultHours[i]),m=prefs.getInt(key+"_minute",0);new TimePickerDialog(this,(picker,hour,minute)->{prefs.edit().putInt(key+"_hour",hour).putInt(key+"_minute",minute).apply();timeLabels[i].setText(timeText(key,i));if(enabled.isChecked())schedule(i);},h,m,false).show();});
   enabled.setOnCheckedChangeListener((button,checked)->{if(checked)schedule(i);else ReminderReceiver.cancelDaily(this,key);});
  }
 }
