@@ -70,7 +70,7 @@ public class RadioActivity extends Activity {
         deckBg.setCornerRadius(dp(24));
         deck.setBackground(deckBg);
         ImageView studio = new ImageView(this);
-        studio.setImageResource(R.drawable.radio_studio_wallpaper);
+        studio.setImageDrawable(new IslamicWallpaperDrawable(this,"radio"));
         studio.setScaleType(ImageView.ScaleType.CENTER_CROP);
         deck.addView(studio, new LinearLayout.LayoutParams(-1, dp(142)));
         TextView deckTitle = new TextView(this);
