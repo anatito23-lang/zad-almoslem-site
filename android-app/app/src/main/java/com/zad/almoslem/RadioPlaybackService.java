@@ -49,7 +49,7 @@ public class RadioPlaybackService extends Service {
         if(intent!=null && ACTION_STOP.equals(intent.getAction())) { stopRadio(); return START_NOT_STICKY; }
         if(intent!=null && (ACTION_TOGGLE.equals(intent.getAction()) || ACTION_PAUSE.equals(intent.getAction()) || ACTION_RESUME.equals(intent.getAction()))) {
             if (player != null) {
-                boolean shouldPlay = ACTION_TOGGLE.equals(intent.getAction()) ? !player.getPlayWhenReady() : ACTION_RESUME.equals(intent.getAction());
+                boolean shouldPlay = ACTION_TOGGLE.equals(intent.getAction()) ? !(player.getPlayWhenReady() || resumeOnAudioFocusGain || (adhanPauseRequested && resumeAfterAdhan)) : ACTION_RESUME.equals(intent.getAction());
                 if (adhanPauseRequested) {
                     // A deliberate pause during adhan cancels the automatic return.
                     // A deliberate resume keeps the user's request queued until dua ends.
@@ -351,7 +351,7 @@ public class RadioPlaybackService extends Service {
         open.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent content = PendingIntent.getActivity(this, 7411, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        boolean playing = player != null && player.getPlayWhenReady();
+        boolean playing = player != null && (player.getPlayWhenReady() || resumeOnAudioFocusGain || (adhanPauseRequested && resumeAfterAdhan));
         Intent toggle = new Intent(this, RadioPlaybackService.class);
         toggle.setAction(ACTION_TOGGLE);
         PendingIntent toggleAction = PendingIntent.getService(this, 7413, toggle,
