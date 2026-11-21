@@ -146,6 +146,58 @@ public class RadioPlaybackService extends Service {
         play(url,allowedLocal?localFile:null);
         return START_STICKY;
     }
+    // Continue sequential Quran playback when the current surah reaches its end.
+    private void playNextQuranSurah() {
+        android.content.SharedPreferences prefs = getSharedPreferences("zad_audio", MODE_PRIVATE);
+        int current = prefs.getInt("last_quran_surah_id", 0);
+        String server = prefs.getString("last_quran_server", "");
+        String available = prefs.getString("last_quran_surah_list", "");
+        String reciter = prefs.getString("last_quran_reciter", "القارئ");
+        String storageKey = prefs.getString("last_quran_storage_key", "unknown");
+        if (current < 1 || current >= 114 || server == null || server.trim().isEmpty()) {
+            stopRadio();
+            return;
+        }
+        Set<Integer> surahs = new HashSet<>();
+        if (available != null) {
+            for (String part : available.split(",")) {
+                try { surahs.add(Integer.parseInt(part.trim())); } catch (Exception ignored) {}
+            }
+        }
+        int next = current + 1;
+        while (next <= 114 && !surahs.contains(next)) next++;
+        if (next > 114) {
+            stopRadio();
+            return;
+        }
+        try {
+            String base = server.endsWith("/") ? server : server + "/";
+            String nextUrl = base + String.format(java.util.Locale.US, "%03d.mp3", next);
+            File quranDir = new File(getFilesDir(), "quran");
+            File offline = new File(quranDir, "reciter_" + storageKey + "_surah_" + next + ".mp3");
+            File legacyOffline = new File(quranDir, "reciter_" + storageKey + "_surah_" + next + ".mp3");
+            File local = offline.isFile() && offline.length() > 10000 ? offline :
+                    (legacyOffline.isFile() && legacyOffline.length() > 10000 ? legacyOffline : null);
+            String title = "سورة رقم " + next + " — " + reciter;
+            prefs.edit().putInt("last_quran_surah_id", next)
+                    .putString("last_quran_url", nextUrl)
+                    .putString("last_quran_title", title)
+                    .putString("radio_title", title)
+                    .putString("stream_url", nextUrl)
+                    .putString("stream_local_path", local == null ? "" : local.getAbsolutePath())
+                    .putBoolean("radio_playing", true).putBoolean("radio_paused", false).apply();
+            QuranHomeWidget.refreshAll(this);
+            Uri source = local == null ? Uri.parse(nextUrl) : Uri.fromFile(local);
+            player.setMediaItem(MediaItem.fromUri(source));
+            player.prepare();
+            player.play();
+            updateRadioNotification(title, "انتقل التشغيل تلقائيًا إلى السورة التالية");
+        } catch (Exception e) {
+            android.util.Log.e("ZadAlmoslem", "Could not continue to next Quran surah", e);
+            stopRadio();
+        }
+    }
+
     private void pauseForAdhan() {
         adhanPauseRequested = true;
         resumeOnAudioFocusGain = false;
@@ -222,6 +274,11 @@ public class RadioPlaybackService extends Service {
                     .build(), false);
             player.addListener(new Player.Listener() {
                 @Override public void onPlaybackStateChanged(int state) {
+                    if (state == Player.STATE_ENDED &&
+                            "quran".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""))) {
+                        playNextQuranSurah();
+                        return;
+                    }
                     if (state == Player.STATE_BUFFERING) {
                         updateRadioNotification(playbackTitle(), "جارٍ الاتصال بالبث...");
                     } else if (state == Player.STATE_READY) {
