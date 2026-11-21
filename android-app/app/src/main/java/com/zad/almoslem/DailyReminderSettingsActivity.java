@@ -27,6 +27,8 @@ public class DailyReminderSettingsActivity extends Activity {
   getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);
   if(!prefs.contains("morning_enabled"))ReminderReceiver.scheduleDaily(this,"morning",7,0,"حان وقت أذكار الصباح، لا تنس وردك من ذكر الله.");
   if(!prefs.contains("evening_enabled"))ReminderReceiver.scheduleDaily(this,"evening",17,0,"حان وقت أذكار المساء، لا تنس وردك من ذكر الله.");
+  if(!prefs.contains("qiyam_enabled"))ReminderReceiver.scheduleDaily(this,"qiyam",4,0,"حان وقت قيام الليل، قم إلى الصلاة والذكر.");
+  if(!prefs.contains("gentle_start_hour"))prefs.edit().putInt("gentle_start_hour",9).putInt("gentle_start_minute",0).apply();
   build();
  }
  private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
@@ -55,10 +57,21 @@ public class DailyReminderSettingsActivity extends Activity {
   desc.setPadding(0,dp(5),0,dp(8));card.addView(desc);
   Switch enabled=new Switch(this);enabled.setText("تفعيل التذكيرات الدورية");
   enabled.setChecked(prefs.getBoolean("gentle_enabled",true));card.addView(enabled);
-  Switch audio=new Switch(this);audio.setText("تشغيل آيات قرآنية بصوت الشيخ عبدالباسط");
+  Switch audio=new Switch(this);audio.setText("تشغيل تلاوة للشيخ محمود خليل الحصري");
   audio.setChecked(prefs.getBoolean("gentle_audio_enabled",true));card.addView(audio);
   audio.setOnCheckedChangeListener((button,checked)->prefs.edit().putBoolean("gentle_audio_enabled",checked).apply());
-  TextView value=label("التذكير كل "+prefs.getInt("gentle_interval_hours",3)+" ساعات",14,green,false);card.addView(value);
+  LinearLayout timeRow=new LinearLayout(this);timeRow.setGravity(Gravity.CENTER_VERTICAL);
+  TextView startTime=label(String.format(Locale.getDefault(),"%02d:%02d",prefs.getInt("gentle_start_hour",9),prefs.getInt("gentle_start_minute",0)),17,green,true);
+  Button chooseStart=new Button(this);chooseStart.setText("اختيار وقت التنبيه");
+  timeRow.addView(startTime,new LinearLayout.LayoutParams(0,dp(48),1));
+  timeRow.addView(chooseStart,new LinearLayout.LayoutParams(dp(160),dp(48)));
+  card.addView(timeRow);
+  chooseStart.setOnClickListener(v->new TimePickerDialog(this,(picker,hour,minute)->{
+   prefs.edit().putInt("gentle_start_hour",hour).putInt("gentle_start_minute",minute).apply();
+   startTime.setText(String.format(Locale.getDefault(),"%02d:%02d",hour,minute));
+   if(enabled.isChecked())ReminderReceiver.scheduleGentleReminder(this);
+  },prefs.getInt("gentle_start_hour",9),prefs.getInt("gentle_start_minute",0),true).show());
+  TextView value=label("التكرار كل "+prefs.getInt("gentle_interval_hours",3)+" ساعات",14,green,false);card.addView(value);
   SeekBar interval=new SeekBar(this);interval.setMax(5);interval.setProgress(Math.max(1,Math.min(6,prefs.getInt("gentle_interval_hours",3)))-1);card.addView(interval);
   enabled.setOnCheckedChangeListener((button,checked)->ReminderReceiver.setGentleRemindersEnabled(this,checked));
   interval.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
