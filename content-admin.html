@@ -104,8 +104,8 @@ async function saveNavigationConfig(){
  if(auth.currentUser?.uid!==ADMIN_UID)return;
  if(!navigationTabs.some(x=>x.visible)){navigationMessage("يجب إبقاء تبويب واحد ظاهرًا على الأقل.",true);return;}
  const button=$("saveNavigationButton");button.disabled=true;
- try{await setDoc(doc(db,"appConfig","navigation"),{tabs:navigationTabs.map(x=>({key:x.key,label:x.label.trim()||x.key,icon:x.icon.trim()||"•",visible:x.visible})),published:true,"تم النشر":true,"النشر":true,updatedAt:serverTimestamp()},{merge:true});navigationMessage("تم حفظ الإعدادات. ستظهر التغييرات في التطبيق بعد المزامنة.");}
- catch(e){navigationMessage("تعذر الحفظ. تأكد من نشر قواعد Firestore المحدّثة. "+e.message,true);}
+ try{await setDoc(doc(db,"waqafat","__app_navigation__"),{tabs:navigationTabs.map(x=>({key:x.key,label:x.label.trim()||x.key,icon:x.icon.trim()||"•",visible:x.visible})),published:true,"تم النشر":true,"النشر":true,updatedAt:serverTimestamp()},{merge:true});navigationMessage("تم حفظ الإعدادات. ستظهر التغييرات في التطبيق بعد المزامنة.");}
+ catch(e){navigationMessage("تعذر الحفظ. تأكد من اتصال الإنترنت وصلاحية المسؤول. "+e.message,true);}
  finally{button.disabled=false;}
 }
 $("saveNavigationButton").addEventListener("click",saveNavigationConfig);
