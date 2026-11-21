@@ -178,21 +178,22 @@ public class ReminderReceiver extends BroadcastReceiver {
         boolean exactAlarmAudioAllowed = Build.VERSION.SDK_INT < 31
                 || ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).canScheduleExactAlarms();
         boolean audioStartFailed = false;
-        if (!prayer && ("morning".equals(key) || "evening".equals(key) || "qiyam".equals(key))) {
+        boolean reminderAudioMasterEnabled = prefs.getBoolean("reminder_audio_master_enabled", true);
+        if (reminderAudioMasterEnabled && !prayer && ("morning".equals(key) || "evening".equals(key) || "qiyam".equals(key))) {
             if (prefs.getBoolean(key + "_audio_enabled", true) && exactAlarmAudioAllowed) {
                 try { ReminderAudioService.play(context, key); } catch (Exception error) {
                     audioStartFailed = true;
                     android.util.Log.e("ZadAlmoslem", "Unable to start daily reminder audio", error);
                 }
             }
-        } else if (key.startsWith("approach_")) {
-            if (exactAlarmAudioAllowed) {
+        } else if (reminderAudioMasterEnabled && key.startsWith("approach_")) {
+            if (prefs.getBoolean("approach_alert_enabled", true) && exactAlarmAudioAllowed) {
                 try { ReminderAudioService.play(context, "approach", title, "approach"); } catch (Exception error) {
                     audioStartFailed = true;
                     android.util.Log.e("ZadAlmoslem", "Unable to start prayer approach audio", error);
                 }
             }
-        } else if ("gentle_reminder".equals(key)) {
+        } else if (reminderAudioMasterEnabled && "gentle_reminder".equals(key)) {
             if (prefs.getBoolean("gentle_audio_enabled", true) && exactAlarmAudioAllowed) {
                 try {
                     int audioIndex=prefs.getInt("gentle_message_index",1)-1;
@@ -250,7 +251,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         boolean gentleAudioEnabled = prefs.getBoolean("gentle_audio_enabled", true);
         boolean approachAlert = key.startsWith("approach_");
         boolean dailyAudioReminder = "morning".equals(key) || "evening".equals(key) || "qiyam".equals(key);
-        boolean fallbackAudioNotification = !prayer && (!exactAlarmAudioAllowed || audioStartFailed) && (
+        boolean fallbackAudioNotification = reminderAudioMasterEnabled && !prayer && (!exactAlarmAudioAllowed || audioStartFailed) && (
                 (gentle && gentleAudioEnabled)
                 || (approachAlert && prefs.getBoolean("approach_alert_enabled", true))
                 || (dailyAudioReminder && prefs.getBoolean(key + "_audio_enabled", true)));
