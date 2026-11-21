@@ -2,6 +2,19 @@
 'use strict';
 const $=id=>document.getElementById(id), main=document.querySelector('main.wrap'), header=document.querySelector('header.hero');
 const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp());
+if(!nativeApp){
+ const heroContent=document.querySelector('.hero-content');
+ if(heroContent&&!document.getElementById('zadInstallAppBanner')){
+  const style=document.createElement('style');
+  style.textContent='.zad-install-banner{margin:20px 0 0;padding:16px 18px;border:1px solid #e4d4a8;border-radius:18px;background:linear-gradient(120deg,#fffaf0,#fff);color:#18332d;display:flex;align-items:center;justify-content:space-between;gap:14px;box-shadow:0 10px 28px #001b1520}.zad-install-copy{display:flex;align-items:center;gap:12px}.zad-install-icon{width:46px;height:46px;flex:0 0 46px;border-radius:14px;background:#eaf2ed;display:grid;place-items:center;font-size:25px}.zad-install-banner strong{display:block;font-size:16px;color:#0c3b32}.zad-install-banner p{margin:3px 0 0;color:#61756b;font-size:13px}.zad-install-link{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;text-decoration:none;border-radius:12px;padding:10px 15px;background:#0c3b32;color:#fff;font-weight:700;font-size:14px}.zad-install-link:hover{background:#155b49}@media(max-width:560px){.zad-install-banner{align-items:stretch;flex-direction:column}.zad-install-link{width:100%}}';
+  document.head.append(style);
+  const box=document.createElement('div');
+  box.className='zad-install-banner';box.id='zadInstallAppBanner';
+  box.innerHTML='<div class="zad-install-copy"><span class="zad-install-icon" aria-hidden="true">📲</span><div><strong>زاد وطمأنينة معك أينما كنت</strong><p>ثبّت تطبيق أندرويد واستمتع بالأذكار والتنبيهات والتلاوات حتى دون اتصال.</p></div></div><a class="zad-install-link" href="https://github.com/anatito23-lang/zad-almoslem-site/releases/latest/download/zad-almoslem.apk">ثبّت التطبيق الآن ↓</a>';
+  heroContent.append(box);
+ }
+}
+
 /*
  * The website displays prayer times, but adhan playback and background
  * prayer alerts are Android-app features. Keep those controls native-only.
