@@ -197,9 +197,22 @@ public class MainActivity extends Activity {
         reminderAudioCard.setPadding(dp(14),dp(12),dp(14),dp(12));
         TextView reminderAudioTitle=text("التذكيرات الصوتية — تسجيلات الشيخ عبدالباسط",16,Color.rgb(8,48,40),true);
         reminderAudioCard.addView(reminderAudioTitle);
-        TextView reminderAudioInfo=text("آيات قرآنية بصوت الشيخ عبدالباسط عبدالصمد. تُنزّل مرة واحدة وتحفظ داخل التطبيق لتعمل دون إنترنت. لن نستخدم الصوت الآلي في تذكير اقتراب الصلاة أو تذكير الذكر.",12,Color.rgb(80,90,82),false);
+        TextView reminderAudioInfo=text("آيات مختارة مناسبة للذكر والطمأنينة بصوت الشيخين الحصري وعبدالباسط. تُنزّل الملفات مرة واحدة وتحفظ داخل التطبيق لتعمل دون إنترنت.",12,Color.rgb(80,90,82),false);
         reminderAudioInfo.setPadding(0,dp(5),0,dp(8));
         reminderAudioCard.addView(reminderAudioInfo);
+        RadioGroup reminderReciterChoices=new RadioGroup(this);
+        reminderReciterChoices.setOrientation(RadioGroup.HORIZONTAL);
+        RadioButton basitReciter=new RadioButton(this);basitReciter.setText("عبدالباسط");
+        RadioButton husaryReciter=new RadioButton(this);husaryReciter.setText("الحصري");
+        basitReciter.setId(View.generateViewId());husaryReciter.setId(View.generateViewId());
+        reminderReciterChoices.addView(basitReciter);reminderReciterChoices.addView(husaryReciter);
+        String savedReminderReciter=prefs.getString("reminder_reciter","basit");
+        reminderReciterChoices.check("husary".equals(savedReminderReciter)?husaryReciter.getId():basitReciter.getId());
+        reminderReciterChoices.setOnCheckedChangeListener((group,checkedId)->{
+            String selected=checkedId==husaryReciter.getId()?"husary":"basit";
+            prefs.edit().putString("reminder_reciter",selected).apply();
+        });
+        reminderAudioCard.addView(reminderReciterChoices);
         Button downloadReminderAudio=new Button(this);
         downloadReminderAudio.setText("تنزيل تسجيلات التذكير");
         reminderAudioCard.addView(downloadReminderAudio,matchWrap());
@@ -782,56 +795,64 @@ public class MainActivity extends Activity {
         downloadFile(url,voice+".mp3");
     }
  
-    private static final String[] REMINDER_AUDIO_FILES={"approach","gentle_0","gentle_1","gentle_2","gentle_3"};
+    private static final String[] REMINDER_AUDIO_KEYS={"approach","gentle_0","gentle_1","gentle_2","gentle_3"};
     private static final String[] REMINDER_AUDIO_AYAT={"002238","013028","002152","033041","003191"};
+    private static final String[] REMINDER_RECITERS={"basit","husary"};
+    private static final int REMINDER_AUDIO_TOTAL=REMINDER_AUDIO_KEYS.length*REMINDER_RECITERS.length;
 
     private int countSavedReminderAudio() {
         File dir=new File(getFilesDir(),"reminders"); int ready=0;
-        for(String name:REMINDER_AUDIO_FILES) if(isAudioFileValid(new File(dir,name+".mp3"))) ready++;
+        for(String reciter:REMINDER_RECITERS) for(String key:REMINDER_AUDIO_KEYS)
+            if(isAudioFileValid(new File(dir,reciter+"_"+key+".mp3"))) ready++;
         return ready;
     }
 
     private void refreshReminderAudioStatus(TextView label) {
-        label.setText("التسجيلات المحفوظة: "+countSavedReminderAudio()+" من "+REMINDER_AUDIO_FILES.length);
+        label.setText("التسجيلات المحفوظة للقارئين: "+countSavedReminderAudio()+" من "+REMINDER_AUDIO_TOTAL);
     }
 
     private void downloadReminderRecitations(Button button,TextView label) {
         if (reminderAudioDownloading) return;
         reminderAudioDownloading = true;
-        button.setEnabled(false); label.setText("جارٍ تنزيل تسجيلات الشيخ عبدالباسط بصوت بشري...");
+        button.setEnabled(false); label.setText("جارٍ تنزيل آيات مختارة للحصري وعبدالباسط...");
         new Thread(()->{
             List<String> failed=new ArrayList<>(); File dir=new File(getFilesDir(),"reminders");
             if(!dir.exists())dir.mkdirs();
-            for(int i=0;i<REMINDER_AUDIO_FILES.length;i++){
-                String filename=REMINDER_AUDIO_FILES[i]+".mp3";
+            int completed=0;
+            for(String reciter:REMINDER_RECITERS) for(int i=0;i<REMINDER_AUDIO_KEYS.length;i++){
+                String filename=reciter+"_"+REMINDER_AUDIO_KEYS[i]+".mp3";
                 File existing=new File(dir,filename);
-                if (isAudioFileValid(existing)) continue;
-                String url="https://everyayah.com/data/Abdul_Basit_Murattal_192kbps/"+REMINDER_AUDIO_AYAT[i]+".mp3";
-                HttpURLConnection connection=null; File temp=new File(dir,filename+".part"), target=new File(dir,filename);
-                try{
-                    connection=(HttpURLConnection)new URL(url).openConnection();
-                    connection.setConnectTimeout(20000); connection.setReadTimeout(60000);
-                    connection.setInstanceFollowRedirects(true);
-                    int code=connection.getResponseCode(); if(code!=200)throw new Exception("HTTP "+code);
-                    long received=0;
-                    try(InputStream in=connection.getInputStream();FileOutputStream out=new FileOutputStream(temp)){
-                        byte[] buffer=new byte[8192]; int n;
-                        while((n=in.read(buffer))!=-1){received+=n;if(received>8L*1024*1024)throw new Exception("حجم التسجيل غير متوقع");out.write(buffer,0,n);}
-                        out.getFD().sync();
-                    }
-                    if(received<10000||!validAudio(temp))throw new Exception("ملف صوت غير صالح");
-                    if(target.exists()&&!target.delete())throw new Exception("تعذر استبدال الملف");
-                    if(!temp.renameTo(target))throw new Exception("تعذر حفظ الملف");
-                }catch(Exception error){failed.add(filename+": "+(error.getMessage()==null?"فشل":error.getMessage()));}
-                finally{if(connection!=null)connection.disconnect();if(temp.exists())temp.delete();}
-                final int completed=i+1;
-                runOnUiThread(()->label.setText("تم تجهيز "+completed+" من "+REMINDER_AUDIO_FILES.length+" تسجيلات..."));
+                if (!isAudioFileValid(existing)) {
+                    String folder="husary".equals(reciter)?"Husary_128kbps":"Abdul_Basit_Murattal_192kbps";
+                    String url="https://everyayah.com/data/"+folder+"/"+REMINDER_AUDIO_AYAT[i]+".mp3";
+                    HttpURLConnection connection=null; File temp=new File(dir,filename+".part"), target=new File(dir,filename);
+                    try{
+                        connection=(HttpURLConnection)new URL(url).openConnection();
+                        connection.setConnectTimeout(20000); connection.setReadTimeout(60000);
+                        connection.setInstanceFollowRedirects(true);
+                        connection.setRequestProperty("User-Agent","ZadAlmoslem Android");
+                        int code=connection.getResponseCode(); if(code!=200)throw new Exception("HTTP "+code);
+                        long received=0;
+                        try(InputStream in=connection.getInputStream();FileOutputStream out=new FileOutputStream(temp)){
+                            byte[] buffer=new byte[8192]; int n;
+                            while((n=in.read(buffer))!=-1){received+=n;if(received>8L*1024*1024)throw new Exception("حجم التسجيل غير متوقع");out.write(buffer,0,n);}
+                            out.getFD().sync();
+                        }
+                        if(received<5000||!validAudio(temp))throw new Exception("ملف صوت غير صالح");
+                        if(target.exists()&&!target.delete())throw new Exception("تعذر استبدال الملف");
+                        if(!temp.renameTo(target))throw new Exception("تعذر حفظ الملف");
+                    }catch(Exception error){failed.add(filename+": "+(error.getMessage()==null?"فشل":error.getMessage()));}
+                    finally{if(connection!=null)connection.disconnect();if(temp.exists())temp.delete();}
+                }
+                completed++;
+                final int progressCount=completed;
+                runOnUiThread(()->label.setText("تم تجهيز "+progressCount+" من "+REMINDER_AUDIO_TOTAL+" تسجيلات..."));
             }
             runOnUiThread(()->{
                 reminderAudioDownloading = false;
                 button.setEnabled(true); refreshReminderAudioStatus(label);
                 if(!failed.isEmpty())label.append(" — تعذر تنزيل: "+android.text.TextUtils.join("، ",failed));
-                else if (countSavedReminderAudio() == REMINDER_AUDIO_FILES.length) label.append(" — جاهزة بصوت بشري وتعمل دون إنترنت.");
+                else if (countSavedReminderAudio() == REMINDER_AUDIO_TOTAL) label.append(" — محفوظة داخل التطبيق وتعمل دون إنترنت.");
                 else label.append(" — أعد المحاولة عند توفر الإنترنت.");
             });
         },"reminder-recitation-download").start();
