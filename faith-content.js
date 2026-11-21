@@ -50,7 +50,7 @@ async function renderCollection(name, targetId, renderer) {
   if (!target) return;
   try {
     const snapshot = await getDocs(query(collection(db, name), where("published", "==", true)));
-    const rows = snapshot.docs.filter(doc => doc.id !== "__app_navigation__").map(doc => ({ id: doc.id, ...doc.data() }));
+    const rows = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     rows.sort((a, b) => String(b.date || "").localeCompare(String(a.date || "")));
     target.innerHTML = rows.length ? rows.map(renderer).join("") : "";
   } catch (error) {

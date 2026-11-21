@@ -105,7 +105,7 @@ public final class AppTabs {
             String key=row.optString("key","");int index=indexOf(key);if(index<0)continue;
             final Class<?> target=SCREENS[index];boolean selected=key.equals(active);
             String labelText=row.optString("label",LABELS[index]);String iconText=row.optString("icon",ICONS[index]);
-            if(li>0)labelText=localizedLabel(index,li,labelText);
+            if(li>0 && LABELS[index].equals(labelText))labelText=localizedLabel(index,li,labelText);
             LinearLayout item=new LinearLayout(a);item.setOrientation(1);item.setGravity(Gravity.CENTER);
             item.setClickable(!selected);item.setFocusable(!selected);item.setPadding(dp(a,1),dp(a,3),dp(a,1),dp(a,2));
             if(selected){GradientDrawable s=new GradientDrawable();s.setColor(AppThemeColors.primary(a));s.setCornerRadius(dp(a,13));s.setStroke(dp(a,1),Color.rgb(190,158,91));item.setBackground(s);}
