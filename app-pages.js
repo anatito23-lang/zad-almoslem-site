@@ -208,7 +208,8 @@ document.head.append(css);
   if(!tabs.length)return;
   const safe=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const kindNames={articles:"خواطر ومقالات",stories:"قصص",biographies:"سير وتراجم",general:""};
-  tabs.sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)).forEach(tab=>{
+  tabs.sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
+   for (const tab of tabs) {
    if($(tab.id)||items.some(x=>x.id===tab.id))return;
    const section=document.createElement("section");section.className="section";section.id=tab.id;
    const heading=document.createElement("div");heading.className="section-head";
