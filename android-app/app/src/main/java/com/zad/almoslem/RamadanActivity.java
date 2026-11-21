@@ -41,9 +41,9 @@ public class RamadanActivity extends Activity {
     }
     private void build(){
         ScrollView scroll=new ScrollView(this);root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(15),dp(14),dp(15),dp(24));root.setBackground(new IslamicWallpaperDrawable(this,"ramadan"));scroll.setBackground(new IslamicWallpaperDrawable(this,"ramadan"));scroll.addView(root);
-        LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(15),dp(30),dp(15),dp(30));hero.setBackground(new IslamicWallpaperDrawable(this,"ramadan"));
-        TextView moon=text("☾  ✦  🏮",42,0xFFFFD98A,true);moon.setGravity(Gravity.CENTER);hero.addView(moon,full());
+        root.setPadding(dp(15),dp(14),dp(15),dp(24));root.setBackgroundColor(AppThemeColors.bg(this));scroll.setBackgroundColor(AppThemeColors.bg(this));scroll.addView(root);
+        LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(15),dp(30),dp(15),dp(30));hero.setBackground(shape(Color.rgb(31,43,70),24));
+        hero.addView(new SectionArtworkView(this,"ramadan"),new LinearLayout.LayoutParams(-1,dp(164)));\n        TextView moon=text("☾  ✦  🏮",32,0xFFFFD98A,true);moon.setGravity(Gravity.CENTER);hero.addView(moon,full());
         TextView title=text("رمضان شهر الصيام والقرآن",23,Color.WHITE,true);title.setGravity(Gravity.CENTER);hero.addView(title,full());
         TextView subtitle=text("رمضان كريم  •  جدّد نيتك، واملأ أيام الشهر بالطاعة  •  ✦",13,0xFFFFE9BE,false);subtitle.setGravity(Gravity.CENTER);hero.addView(subtitle,full());
         root.addView(hero,full());
