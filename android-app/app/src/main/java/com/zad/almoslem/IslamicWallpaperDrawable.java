@@ -1,6 +1,8 @@
 package com.zad.almoslem;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -8,80 +10,99 @@ import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 
-/** Locally drawn, scalable Islamic geometric wallpaper for every app tab. */
+/** Full-bleed photographic Islamic wallpapers with a restrained readable overlay. */
 public final class IslamicWallpaperDrawable extends Drawable {
-    private final Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
     private final String style;
-    public IslamicWallpaperDrawable(Activity activity, String style) { this.style = style == null ? "home" : style; }
+    private final Bitmap wallpaper;
 
-    private int base() {
-        if ("radio".equals(style)) return Color.rgb(10,45,58);
-        if ("ruqyah".equals(style)) return Color.rgb(13,53,43);
-        if ("recordings".equals(style)) return Color.rgb(35,39,61);
-        if ("ramadan".equals(style)) return Color.rgb(22,39,65);
-        if ("quran".equals(style) || "mushaf".equals(style)) return Color.rgb(8,55,43);
-        if ("tasbeeh".equals(style)) return Color.rgb(22,57,52);
-        if ("calendar".equals(style)) return Color.rgb(30,53,57);
-        return Color.rgb(12,48,43);
+    public IslamicWallpaperDrawable(Activity activity, String style) {
+        this.style = style == null ? "home" : style;
+        String asset = "quran_wallpaper";
+        if ("radio".equals(this.style)) asset = "madinah_wallpaper";
+        else if ("ruqyah".equals(this.style)) asset = "quran_wallpaper";
+        else if ("recordings".equals(this.style)) asset = "azhar_mosque_bg";
+        else if ("ramadan".equals(this.style)) asset = "kaaba_wallpaper";
+        else if ("quran".equals(this.style) || "mushaf".equals(this.style)) asset = "quran_wallpaper";
+        else if ("home".equals(this.style)) asset = "aqsa_wallpaper";
+
+        int id = activity.getResources().getIdentifier(asset, "drawable", activity.getPackageName());
+        Bitmap decoded = null;
+        if (id != 0) {
+            try { decoded = BitmapFactory.decodeResource(activity.getResources(), id); }
+            catch (Exception ignored) { decoded = null; }
+        }
+        wallpaper = decoded;
     }
 
-    @Override public void draw(Canvas c) {
-        float w=getBounds().width(), h=getBounds().height();
-        if(w<=0 || h<=0) return;
-        int b=base();
-        p.setShader(new LinearGradient(0,0,w,h,new int[]{mix(b,Color.rgb(4,18,30),.28f),b,mix(b,Color.rgb(3,23,20),.2f)},null,Shader.TileMode.CLAMP));
-        p.setStyle(Paint.Style.FILL); c.drawRect(getBounds(),p); p.setShader(null);
+    private int fallbackBase() {
+        if ("radio".equals(style)) return Color.rgb(8, 37, 48);
+        if ("ruqyah".equals(style)) return Color.rgb(7, 43, 35);
+        if ("recordings".equals(style)) return Color.rgb(29, 31, 49);
+        if ("ramadan".equals(style)) return Color.rgb(22, 35, 57);
+        return Color.rgb(8, 43, 38);
+    }
 
-        // Delicate eight-point stars and interlaced circles.
-        p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(Math.max(1f,w/430f)); p.setColor(0x22E9D39B);
-        float step=Math.max(64f,w/4.2f);
-        for(float y=20;y<h+step;y+=step) for(float x=15;x<w+step;x+=step) {
-            float xx=x+((((int)(y/step))&1)==0?0:step/2);
-            star(c,xx,y,step*.18f); c.drawCircle(x,y,step*.31f,p);
+    @Override public void draw(Canvas canvas) {
+        Rect bounds = getBounds();
+        float w = bounds.width(), h = bounds.height();
+        if (w <= 0 || h <= 0) return;
+
+        if (wallpaper != null && !wallpaper.isRecycled()) {
+            float scale = Math.max(w / wallpaper.getWidth(), h / wallpaper.getHeight());
+            float sw = wallpaper.getWidth() * scale, sh = wallpaper.getHeight() * scale;
+            float left = (w - sw) / 2f, top = (h - sh) / 2f;
+            Rect src = new Rect(0, 0, wallpaper.getWidth(), wallpaper.getHeight());
+            Rect dst = new Rect((int)left, (int)top, (int)(left + sw), (int)(top + sh));
+            paint.setAlpha(255);
+            canvas.drawBitmap(wallpaper, src, dst, paint);
+        } else {
+            paint.setShader(new LinearGradient(0, 0, w, h,
+                    new int[]{fallbackBase(), Color.rgb(3, 18, 24), fallbackBase()},
+                    null, Shader.TileMode.CLAMP));
+            paint.setStyle(Paint.Style.FILL);
+            canvas.drawRect(bounds, paint);
+            paint.setShader(null);
         }
 
-        // Large mihrab contour.
-        p.setStrokeWidth(Math.max(2f,w/125f)); p.setColor(0x24E9D39B);
-        Path arch=new Path(); float mid=w/2;
-        arch.moveTo(w*.10f,h*.62f); arch.lineTo(w*.10f,h*.25f);
-        arch.quadTo(w*.10f,h*.07f,mid,h*.07f); arch.quadTo(w*.90f,h*.07f,w*.90f,h*.25f);
-        arch.lineTo(w*.90f,h*.62f); c.drawPath(arch,p);
+        // Deep translucent veil: keeps text readable without hiding the photograph.
+        paint.setStyle(Paint.Style.FILL);
+        paint.setShader(new LinearGradient(0, 0, 0, h,
+                new int[]{0xB9001118, 0x78001218, 0xA9001118},
+                new float[]{0f, .52f, 1f}, Shader.TileMode.CLAMP));
+        canvas.drawRect(bounds, paint);
+        paint.setShader(null);
 
-        // Low-contrast mosque silhouette along the bottom.
-        p.setStyle(Paint.Style.FILL); p.setColor(0x26020D12);
-        Path mosque=new Path(); mosque.moveTo(0,h*.89f); mosque.lineTo(w*.13f,h*.89f);
-        mosque.lineTo(w*.13f,h*.76f); mosque.quadTo(w*.20f,h*.62f,w*.27f,h*.76f);
-        mosque.lineTo(w*.27f,h*.89f); mosque.lineTo(w*.39f,h*.89f);
-        mosque.lineTo(w*.39f,h*.80f); mosque.quadTo(mid,h*.57f,w*.61f,h*.80f);
-        mosque.lineTo(w*.61f,h*.89f); mosque.lineTo(w*.73f,h*.89f);
-        mosque.lineTo(w*.73f,h*.76f); mosque.quadTo(w*.80f,h*.62f,w*.87f,h*.76f);
-        mosque.lineTo(w*.87f,h*.89f); mosque.lineTo(w,h*.89f); mosque.lineTo(w,h); mosque.lineTo(0,h); mosque.close();
-        c.drawPath(mosque,p);
+        // Fine warm-gold framing and a quiet mihrab motif.
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(Math.max(1f, w / 420f));
+        paint.setColor(0x36E8D3A0);
+        float inset = Math.max(13f, w * .045f);
+        canvas.drawRoundRect(inset, inset, w - inset, h - inset,
+                Math.max(14f, w * .035f), Math.max(14f, w * .035f), paint);
 
-        p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(Math.max(1f,w/280f)); p.setColor(0x35E9D39B);
-        c.drawLine(0,h*.89f,w,h*.89f,p);
-        minaret(c,w*.075f,h*.89f,h*.27f); minaret(c,w*.925f,h*.89f,h*.27f);
-        p.setStyle(Paint.Style.FILL);
+        paint.setStrokeWidth(Math.max(1.5f, w / 230f));
+        paint.setColor(0x25F0D9A2);
+        float mid = w / 2f;
+        Path arch = new Path();
+        arch.moveTo(w * .13f, h * .48f);
+        arch.lineTo(w * .13f, h * .25f);
+        arch.quadTo(w * .13f, h * .075f, mid, h * .075f);
+        arch.quadTo(w * .87f, h * .075f, w * .87f, h * .25f);
+        arch.lineTo(w * .87f, h * .48f);
+        canvas.drawPath(arch, paint);
+
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(0x2DEBD5A0);
+        float radius = Math.max(2f, w * .004f);
+        canvas.drawCircle(mid, h * .075f, radius, paint);
     }
 
-    private void star(Canvas c,float x,float y,float r) {
-        Path path=new Path();
-        for(int i=0;i<16;i++){double a=Math.PI*i/8-Math.PI/2;float rr=(i%2==0)?r:r*.48f;
-            float xx=x+(float)Math.cos(a)*rr, yy=y+(float)Math.sin(a)*rr;
-            if(i==0)path.moveTo(xx,yy);else path.lineTo(xx,yy);}
-        path.close(); c.drawPath(path,p);
-    }
-    private void minaret(Canvas c,float x,float base,float h) {
-        p.setColor(0x28E9D39B); p.setStrokeWidth(Math.max(1f,h/55f));
-        c.drawLine(x,base,x,base-h*.72f,p); c.drawLine(x-h*.05f,base-h*.42f,x+h*.05f,base-h*.42f,p);
-        c.drawLine(x-h*.04f,base-h*.72f,x+h*.04f,base-h*.72f,p); c.drawLine(x,base-h*.72f,x,base-h,p);
-        c.drawCircle(x,base-h,h*.018f,p);
-    }
-    private int mix(int a,int b,float t){return Color.rgb((int)(Color.red(a)*(1-t)+Color.red(b)*t),(int)(Color.green(a)*(1-t)+Color.green(b)*t),(int)(Color.blue(a)*(1-t)+Color.blue(b)*t));}
-    @Override public void setAlpha(int alpha){p.setAlpha(alpha);invalidateSelf();}
-    @Override public void setColorFilter(ColorFilter filter){p.setColorFilter(filter);invalidateSelf();}
-    @Override public int getOpacity(){return PixelFormat.TRANSLUCENT;}
+    @Override public void setAlpha(int alpha) { paint.setAlpha(alpha); invalidateSelf(); }
+    @Override public void setColorFilter(ColorFilter filter) { paint.setColorFilter(filter); invalidateSelf(); }
+    @Override public int getOpacity() { return PixelFormat.TRANSLUCENT; }
 }
