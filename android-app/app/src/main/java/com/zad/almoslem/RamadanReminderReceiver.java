@@ -66,8 +66,9 @@ public class RamadanReminderReceiver extends BroadcastReceiver {
         if(intent==null)return;String key=intent.getStringExtra("key");if(key==null)return;
         android.content.SharedPreferences p=context.getSharedPreferences("zad_ramadan",Context.MODE_PRIVATE);
         if(!p.getBoolean("enabled",false))return;
+        boolean iftarVoiceMode="voice".equals(p.getString("iftar_mode","music"));
         if("ramadan_iftar_voice".equals(key)&&p.getBoolean("iftar_voice_enabled",true)
-                ||"ramadan_iftar_cannon".equals(key)&&p.getBoolean("cannon_enabled",true)
+                ||"ramadan_iftar_cannon".equals(key)&&iftarVoiceMode&&p.getBoolean("cannon_enabled",true)
                 ||"ramadan_suhoor".equals(key)&&p.getBoolean("suhoor_enabled",true)){
             Intent play=new Intent(context,RamadanAudioService.class);play.putExtra("key",key);
             try{if(Build.VERSION.SDK_INT>=26)context.startForegroundService(play);else context.startService(play);}
