@@ -16,6 +16,9 @@ private void addCard(LinearLayout root,View card){if(card instanceof LinearLayou
 private void build(){ScrollView scroll=new ScrollView(this);LinearLayout root=column();root.setPadding(dp(16),dp(16),dp(16),dp(24));root.setBackgroundColor(AppThemeColors.bg(this));scroll.addView(root);
 TextView title=text("استماع القرآن الكريم",24,AppThemeColors.text(this),true);title.setGravity(Gravity.CENTER);root.addView(title);
 TextView intro=text("اختر القارئ والسورة، واستمع مباشرة أو نزّلها للاستماع دون إنترنت. هذه الصفحة للتلاوات فقط وليست إذاعة مباشرة.",14,AppThemeColors.muted(this),false);intro.setPadding(0,dp(8),0,dp(14));root.addView(intro);
+AudioEqualizerView equalizer=new AudioEqualizerView(this,"quran");
+equalizer.setContentDescription("مؤشر متحرك أثناء تشغيل التلاوة");
+root.addView(equalizer,new LinearLayout.LayoutParams(-1,dp(42)));
 buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
     private void buildPlayer(LinearLayout root) {
         TextView section=text("اختر تلاوتك",18,AppThemeColors.primary(this),true);
