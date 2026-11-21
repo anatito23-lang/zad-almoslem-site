@@ -27,6 +27,28 @@ jobs:
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
       - name: Install Android SDK 36
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+      - name: Download and validate bundled adhan photographs
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="android-app/app/src/main/res/drawable-nodpi"
+          mkdir -p "$DEST"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" "https://commons.wikimedia.org/wiki/Special:Redirect/file/AlAzhar_Mosque.jpg?width=960" -o "$DEST/azhar_mosque_bg.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" "https://commons.wikimedia.org/wiki/Special:Redirect/file/Holy_Kaaba.jpg?width=960" -o "$DEST/kaaba_wallpaper.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" "https://commons.wikimedia.org/wiki/Special:Redirect/file/Al_Masjid_an_Nabawi.jpg?width=960" -o "$DEST/madinah_wallpaper.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" "https://commons.wikimedia.org/wiki/Special:Redirect/file/%D8%A7%D9%84%D9%85%D8%B3%D8%AC%D8%AF_%D8%A7%D9%84%D8%A3%D9%82%D8%B5%D9%89_%D8%A7%D9%84%D9%85%D8%A8%D8%A7%D8%B1%D9%83%D9%A1.jpg?width=960" -o "$DEST/aqsa_wallpaper.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" "https://commons.wikimedia.org/wiki/Special:Redirect/file/A_photo_of_a_Quran.jpg?width=500" -o "$DEST/quran_wallpaper.jpg"
+          python3 - "$DEST" <<'PY'
+          import pathlib, sys
+          folder = pathlib.Path(sys.argv[1])
+          names = ["azhar_mosque_bg.jpg", "kaaba_wallpaper.jpg", "madinah_wallpaper.jpg", "aqsa_wallpaper.jpg", "quran_wallpaper.jpg"]
+          for name in names:
+              path = folder / name
+              data = path.read_bytes()
+              if len(data) < 2048 or not data.startswith(bytes.fromhex("ffd8")) or not data.endswith(bytes.fromhex("ffd9")):
+                  raise SystemExit(f"Invalid or incomplete JPEG wallpaper: {name}")
+              print(f"Validated {name}: {len(data)} bytes")
+          PY
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
