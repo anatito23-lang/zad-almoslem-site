@@ -2192,5 +2192,17 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
 <script src="./app-pages.js?v=20261121-install-banner-fix1"></script>
+
+<style id="website-cleanup-20261121">
+/* إخفاء البوصلة والسبحة من واجهة الموقع فقط */
+#qibla, #tasbeeh,
+a[href="#qibla"], a[href="#tasbeeh"],
+.tasbeeh-float, #tasbeehFab, #mushafFloatingButton, .mushaf-floating-button {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+</style>
+
 </body>
 </html>
