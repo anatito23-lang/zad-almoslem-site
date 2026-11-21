@@ -38,21 +38,29 @@ public class NowPlayingActivity extends Activity {
         if (Build.VERSION.SDK_INT >= 29) getWindow().setNavigationBarContrastEnforced(false);
         FrameLayout frame = new FrameLayout(this);
         frame.setBackgroundColor(AppThemeColors.bg(this));
+        String kind = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", "quran");
+        String photoTitle = "radio".equals(kind) ? "إذاعة القرآن الكريم" :
+                "ruqyah".equals(kind) ? "الرقية الشرعية" :
+                "quran".equals(kind) ? "استماع القرآن الكريم" : "زاد المسلم";
+        String photoSubtitle = "radio".equals(kind) ? "بث مباشر" :
+                "ruqyah".equals(kind) ? "سكينة وطمأنينة" : "أنصت بقلبك";
+        PhotoHeaderView photo = new PhotoHeaderView(this, kind, photoTitle, photoSubtitle);
+        frame.addView(photo, new FrameLayout.LayoutParams(-1, dp(220), Gravity.TOP));
 
         LinearLayout panel = new LinearLayout(this);
         panel.setOrientation(LinearLayout.VERTICAL);
         panel.setGravity(Gravity.CENTER);
         panel.setPadding(dp(26),dp(30),dp(26),dp(30));
-        panel.setBackground(rounded(AppThemeColors.surface(this),20));
-        FrameLayout.LayoutParams panelLp = new FrameLayout.LayoutParams(-1,-2,Gravity.CENTER);
-        panelLp.setMargins(dp(22),dp(24),dp(22),dp(24));
+        panel.setBackground(rounded(0xF01C2925,20));
+        FrameLayout.LayoutParams panelLp = new FrameLayout.LayoutParams(-1,-2,Gravity.BOTTOM);
+        panelLp.setMargins(dp(18),dp(8),dp(18),dp(22));
         frame.addView(panel,panelLp);
 
-        TextView emblem=text("♫",48,AppThemeColors.accent(this),true);
+        TextView emblem=text("♫",42,AppThemeColors.accent(this),true);
         panel.addView(emblem,new LinearLayout.LayoutParams(-1,dp(88)));
-        panel.addView(text("زاد المسلم",17,AppThemeColors.text(this),true));
+        panel.addView(text("مشغل الصوت",15,AppThemeColors.muted(this),true));
         title=text("مجالس القرآن",23,AppThemeColors.text(this),true);
-        LinearLayout.LayoutParams titleLp=new LinearLayout.LayoutParams(-1,-2);titleLp.topMargin=dp(24);
+        LinearLayout.LayoutParams titleLp=new LinearLayout.LayoutParams(-1,-2);titleLp.topMargin=dp(10);
         panel.addView(title,titleLp);
         subtitle=text("أنصت بقلبك… واطمئن بذكر الله",14,AppThemeColors.muted(this),false);
         LinearLayout.LayoutParams subLp=new LinearLayout.LayoutParams(-1,-2);subLp.topMargin=dp(9);
