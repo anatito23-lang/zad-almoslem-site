@@ -22,8 +22,10 @@ TextView intro=text("اختر القارئ والسورة، واستمع مبا�
         GradientDrawable heroBg=new GradientDrawable(GradientDrawable.Orientation.TL_BR,
                 new int[]{Color.rgb(8,48,40),Color.rgb(24,105,78),Color.rgb(7,42,35)});
         heroBg.setCornerRadius(dp(24));listeningHero.setBackground(heroBg);
-        TextView ornament=text("۞",44,Color.rgb(226,197,130),true);ornament.setGravity(Gravity.CENTER);
-        listeningHero.addView(ornament,matchWrap());
+        ImageView readerImage=new ImageView(this);
+        readerImage.setImageResource(R.drawable.quran_reader_wallpaper);
+        readerImage.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        listeningHero.addView(readerImage,new LinearLayout.LayoutParams(-1,dp(142)));
         TextView heroTitle=text("مجالس القرآن",21,Color.WHITE,true);heroTitle.setGravity(Gravity.CENTER);
         listeningHero.addView(heroTitle,matchWrap());
         TextView heroCaption=text("تلاوات خاشعة… تصحب يومك بالسكينة",13,Color.rgb(235,224,195),false);heroCaption.setGravity(Gravity.CENTER);
