@@ -1399,7 +1399,7 @@ const apiDate=d=>String(d.getDate()).padStart(2,'0')+'-'+String(d.getMonth()+1).
 function prayerDateTime(day,raw){const parts=(raw||'').split(' ')[0].split(':');if(parts.length<2)return null;const h=Number(parts[0]),m=Number(parts[1]);if(!Number.isFinite(h)||!Number.isFinite(m))return null;return new Date(day.getFullYear(),day.getMonth(),day.getDate(),h,m,0,0);}
 let tomorrowPrayerFailedUntil=0;
 async function getTomorrowPrayerTimings(day,city){const s=prayerSettings(),loc=window.zadPrayerLocation?window.zadPrayerLocation.latitude+','+window.zadPrayerLocation.longitude:s.city+','+s.country;const key=localDayKey(day)+'_'+loc+'_'+s.method+'_'+s.school;if(tomorrowPrayerCache.key===key&&tomorrowPrayerCache.timings)return tomorrowPrayerCache.timings;if(Date.now()<tomorrowPrayerFailedUntil)throw new Error('retry delayed');if(tomorrowPrayerRequest)return tomorrowPrayerRequest;tomorrowPrayerRequest=(async()=>{try{const data=await getPrayerData(city,day);tomorrowPrayerCache={key,timings:data.data.timings};tomorrowPrayerFailedUntil=0;return data.data.timings;}catch(error){tomorrowPrayerFailedUntil=Date.now()+60000;throw error;}finally{tomorrowPrayerRequest=null;}})();return tomorrowPrayerRequest;}
-function showCountdown(prayer,target,now){const remaining=Math.max(0,target.getTime()-now.getTime());const total=Math.floor(remaining/1000);const hours=Math.floor(total/3600);const minutes=Math.floor((total%3600)/60);const seconds=total%60;$('nextPrayerName').textContent=prayer;$('nextPrayerAt').textContent='موعد الأذان: '+fmtTime(String(target.getHours()).padStart(2,'0')+':'+String(target.getMinutes()).padStart(2,'0'));$('nextPrayerRemaining').textContent=String(hours).padStart(2,'0')+':'+String(minutes).padStart(2,'0')+':'+String(seconds).padStart(2,'0');$('nextPrayerMessage').textContent='ساعة : دقيقة : ثانية';}
+function showCountdown(prayer,target,now){const remaining=Math.max(0,target.getTime()-now.getTime());const total=Math.floor(remaining/1000);const hours=Math.floor(total/3600);const minutes=Math.floor((total%3600)/60);const seconds=total%60;$('nextPrayerName').textContent=prayer;$('nextPrayerAt').textContent='موعد الصلاة: '+fmtTime(String(target.getHours()).padStart(2,'0')+':'+String(target.getMinutes()).padStart(2,'0'));$('nextPrayerRemaining').textContent=String(hours).padStart(2,'0')+':'+String(minutes).padStart(2,'0')+':'+String(seconds).padStart(2,'0');$('nextPrayerMessage').textContent='ساعة : دقيقة : ثانية';}
 async function updatePrayerCountdown(){if(!window.zadPrayerTimings)return;const now=new Date();const todayKey=localDayKey(now);if(countdownDayKey&&countdownDayKey!==todayKey){countdownDayKey=todayKey;tomorrowPrayerCache={key:'',timings:null};loadPrayer();}const city=$('city').value;const timings=window.zadPrayerTimings;let next=null;for(const item of countdownPrayerNames){const target=prayerDateTime(now,timings[item[1]]);if(target&&target>now){next={name:item[0],target:target};break;}}if(!next){const tomorrow=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1);try{const nextTimings=await getTomorrowPrayerTimings(tomorrow,city);const target=prayerDateTime(tomorrow,nextTimings.Fajr);if(target)next={name:'الفجر',target:target};}catch(e){$('nextPrayerName').textContent='تعذر حساب الصلاة القادمة';$('nextPrayerAt').textContent='تحقق من اتصال الإنترنت';$('nextPrayerRemaining').textContent='--:--:--';return;}}if(next)showCountdown(next.name,next.target,now);}
 countdownDayKey=localDayKey(new Date());
 updatePrayerCountdown();
@@ -2259,7 +2259,7 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
 })();
 </script>
 <script>
-if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261121-calm-contrast-v2", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261121-website-clean-v3", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
 </script>
 
 <style id="hide-floating-shortcuts">
@@ -2270,7 +2270,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261121-calm-contrast-v2"></script>
+<script src="./app-pages.js?v=20261121-website-clean-v3"></script>
 
 <style id="website-cleanup-20261121">
 /* إخفاء البوصلة والسبحة من واجهة الموقع فقط */
