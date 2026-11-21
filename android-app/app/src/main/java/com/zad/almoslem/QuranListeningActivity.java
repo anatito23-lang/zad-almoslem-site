@@ -14,16 +14,17 @@ private GradientDrawable shape(int color,int radius){GradientDrawable d=new Grad
 private void addCard(LinearLayout root,View card){if(card instanceof LinearLayout){card.setBackground(shape(AppThemeColors.surface(this),16));card.setPadding(dp(14),dp(12),dp(14),dp(12));}LinearLayout.LayoutParams lp=matchWrap();lp.bottomMargin=dp(10);root.addView(card,lp);}
 @Override public void onCreate(Bundle b){super.onCreate(b);AppThemeColors.apply(this);build();}
 private void build(){ScrollView scroll=new ScrollView(this);LinearLayout root=column();root.setPadding(dp(16),dp(16),dp(16),dp(24));root.setBackgroundColor(AppThemeColors.bg(this));scroll.addView(root);
-TextView title=text("استماع القرآن الكريم",24,AppThemeColors.text(this),true);title.setGravity(Gravity.CENTER);root.addView(title);
-TextView intro=text("اختر القارئ والسورة، واستمع مباشرة أو نزّلها للاستماع دون إنترنت. هذه الصفحة للتلاوات فقط وليست إذاعة مباشرة.",14,AppThemeColors.muted(this),false);intro.setPadding(0,dp(8),0,dp(14));root.addView(intro);
+PhotoHeaderView header=new PhotoHeaderView(this,"quran","استماع القرآن الكريم","اختر القارئ والسورة… وأنصت بقلبك");
+root.addView(header,new LinearLayout.LayoutParams(-1,dp(190)));
+View headerGap=new View(this);root.addView(headerGap,new LinearLayout.LayoutParams(1,dp(12)));
 AudioEqualizerView equalizer=new AudioEqualizerView(this,"quran");
 equalizer.setContentDescription("مؤشر متحرك أثناء تشغيل التلاوة");
 root.addView(equalizer,new LinearLayout.LayoutParams(-1,dp(42)));
 buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
     private void buildPlayer(LinearLayout root) {
-        TextView section=text("اختر تلاوتك",18,AppThemeColors.primary(this),true);
+        TextView section=text("مشغل التلاوة",18,AppThemeColors.text(this),true);
         section.setPadding(0,dp(4),0,dp(8));root.addView(section);
-        LinearLayout card=column();card.setBackground(shape(Color.WHITE,16));card.setPadding(dp(14),dp(12),dp(14),dp(12));
+        LinearLayout card=column();card.setBackground(shape(AppThemeColors.surface(this),16));card.setPadding(dp(14),dp(12),dp(14),dp(12));
         card.addView(text("اختر القارئ والسورة، وسيعمل الصوت في مشغل Android بالخلفية دون فتح الموقع.",13,AppThemeColors.muted(this),false));
         Spinner categorySpinner=new Spinner(this),reciterSpinner=new Spinner(this),surahSpinner=new Spinner(this);
         categorySpinner.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,new String[]{"كل القراء من مختلف الدول","القراء المصريون القدامى","القراء المصريون المعاصرون","القرآن المجوّد — المصريون فقط"}));
