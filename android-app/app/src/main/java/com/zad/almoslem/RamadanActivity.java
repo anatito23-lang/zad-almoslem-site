@@ -111,16 +111,12 @@ public class RamadanActivity extends Activity {
         suhoor.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("suhoor_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
 
         LinearLayout audio=card("أصوات رمضان — اختر الموسيقى أو الصوت الرجالي");
-        audioStatus=text("يمكنك اختيار موسيقى إسلامية أو تسجيلات صوتية رجالية لكل من المغرب والسحور. اختر الملفات مرة واحدة لتحفظ داخل التطبيق وتعمل دون إنترنت. الأذان البشري يظل منفصلًا.",12,AppThemeColors.muted(this),false);
+        audioStatus=text("الأصوات الرمضانية مدمجة وتُنشأ داخل التطبيق دون تنزيل ملفات أو فتح روابط. اختر بشكل مستقل بين اللحن الرمضاني الهادئ والصوت العربي في المغرب والسحور. يعمل الصوت الرجالي عبر محرك النطق العربي المثبت على الجهاز، وقد تختلف طبيعة الصوت حسب المحرك المتاح. الأذان البشري مستقل عن إعلان المغرب والمدفع.",12,AppThemeColors.muted(this),false);
         audio.addView(audioStatus,full());
-        addAudioPicker(audio,"اختيار الموسيقى الإسلامية","ramadan_music.mp3",PICK_MUSIC);
-        addAudioTestButton(audio,"تجربة الموسيقى الإسلامية","ramadan_music_test");
-        addAudioPicker(audio,"تسجيل رجالي: اقترب موعد أذان المغرب","iftar_announcement.mp3",PICK_IFTAR);
-        addAudioTestButton(audio,"تجربة إعلان اقتراب المغرب","ramadan_iftar_voice_test");
-        addAudioPicker(audio,"تسجيل صوت مدفع الإفطار","iftar_cannon.mp3",PICK_CANNON);
-        addAudioTestButton(audio,"تجربة صوت المدفع","ramadan_cannon_test");
-        addAudioPicker(audio,"تسجيل رجالي للسحور: اصحى يا نايم وحد الدايم","suhoor_voice.mp3",PICK_SUHOOR);
-        addAudioTestButton(audio,"تجربة نداء السحور","ramadan_suhoor_voice_test");
+        addAudioTestButton(audio,"تجربة اللحن الرمضاني الهادئ","ramadan_music_test");
+        addAudioTestButton(audio,"تجربة الصوت الرجالي: اقترب موعد أذان المغرب","ramadan_iftar_voice_test");
+        addAudioTestButton(audio,"تجربة صوت مدفع الإفطار","ramadan_cannon_test");
+        addAudioTestButton(audio,"تجربة نداء السحور: اصحى يا نايم، وحد الله","ramadan_suhoor_voice_test");
         addAudioTestButton(audio,"تجربة الأذان البشري","ramadan_adhan_test");
         setContentView(AppTabs.wrap(this,scroll,"ramadan"));
     }
