@@ -25,7 +25,8 @@ public class RamadanReminderReceiver extends BroadcastReceiver {
         int fajr=times.getInt("native_time_hour_الفجر",-1), fajrMinute=times.getInt("native_time_minute_الفجر",0);
         if(maghrib>=0&&maghrib<=23){
             boolean voiceMode="voice".equals(p.getString("iftar_mode","music"));
-            if(voiceMode&&p.getBoolean("iftar_voice_enabled",true))scheduleDaily(context,"ramadan_iftar_voice",maghrib,maghribMinute,p.getInt("iftar_lead_minutes",5),startAt);
+            // The same scheduled key plays the selected mode: built-in melody or Arabic announcement.
+            if(p.getBoolean("iftar_voice_enabled",true))scheduleDaily(context,"ramadan_iftar_voice",maghrib,maghribMinute,p.getInt("iftar_lead_minutes",5),startAt);
             else cancel(context,"ramadan_iftar_voice");
             if(voiceMode&&p.getBoolean("cannon_enabled",true))scheduleDaily(context,"ramadan_iftar_cannon",maghrib,maghribMinute,0,startAt);
             else cancel(context,"ramadan_iftar_cannon");
