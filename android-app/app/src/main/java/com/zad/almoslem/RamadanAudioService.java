@@ -15,6 +15,9 @@ public class RamadanAudioService extends Service {
     private PowerManager.WakeLock wakeLock;
     @Override public int onStartCommand(Intent intent,int flags,int startId){
         String key=intent==null?"":intent.getStringExtra("key");
+        if("stop".equals(key)){finish();return START_NOT_STICKY;}
+        float volume=intent==null?1f:intent.getFloatExtra("volume",1f);
+        volume=Math.max(0f,Math.min(1f,volume));
         createChannel();
         Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("زاد وطمأنينة — رمضان")
@@ -34,7 +37,7 @@ public class RamadanAudioService extends Service {
 
         if (fileName != null) {
             File audio=new File(new File(getFilesDir(),"ramadan_audio"),fileName);
-            if (audio.isFile() && audio.length()>1000) playFile(audio);
+            if (audio.isFile() && audio.length()>1000) playFile(audio,volume);
             else showMissingRecording();
             return START_NOT_STICKY;
         }
@@ -53,14 +56,14 @@ public class RamadanAudioService extends Service {
             NotificationChannel c=new NotificationChannel(CHANNEL,"تنبيهات رمضان الصوتية",NotificationManager.IMPORTANCE_HIGH);
             c.setDescription("الموسيقى الرمضانية والأذان");nm.createNotificationChannel(c);}
     }
-    private void playFile(File file){
+    private void playFile(File file,float volume){
         try{
             PowerManager pm=(PowerManager)getSystemService(POWER_SERVICE);
             wakeLock=pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"ZadAlmoslem:RamadanAudio");wakeLock.acquire(3*60*1000L);
             player=new MediaPlayer();player.setWakeMode(this,PowerManager.PARTIAL_WAKE_LOCK);
             player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
             player.setOnCompletionListener(mp->finish());player.setOnErrorListener((mp,w,e)->{finish();return true;});
-            player.setDataSource(file.getAbsolutePath());player.setOnPreparedListener(MediaPlayer::start);player.prepareAsync();
+            player.setDataSource(file.getAbsolutePath());player.setOnPreparedListener(mp->{mp.setVolume(volume,volume);mp.start();});player.prepareAsync();
         }catch(Exception e){android.util.Log.e("ZadRamadan","Audio file playback failed",e);showMissingRecording();}
     }
     private void playBundledAdhan(){
