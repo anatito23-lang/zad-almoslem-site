@@ -131,7 +131,7 @@ public class RamadanActivity extends Activity {
     }
     @Override protected void onActivityResult(int request,int result,Intent data){
         super.onActivityResult(request,result,data);if(result!=RESULT_OK||data==null||data.getData()==null)return;
-        String name=request==PICK_IFTAR?"iftar_voice.mp3":request==PICK_CANNON?"iftar_cannon.mp3":"mesaharaty.mp3";
+        String name=request==PICK_IFTAR?"iftar_voice.mp3":request==PICK_CANNON?"ramadan_music.mp3":"mesaharaty.mp3";
         try{
             File dir=new File(getFilesDir(),"ramadan_audio");if(!dir.exists()&&!dir.mkdirs())throw new Exception("تعذر إنشاء مجلد الأصوات");
             Uri uri=data.getData();try(InputStream in=getContentResolver().openInputStream(uri);FileOutputStream out=new FileOutputStream(new File(dir,name))){
