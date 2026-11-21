@@ -64,7 +64,6 @@ public final class AdhanWallpaperImages {
             cached.delete();
         }
 
-        final Context appContext = context.getApplicationContext();
         EXECUTOR.execute(() -> {
             File temporary = new File(directory, imageId + ".download");
             HttpURLConnection connection = null;
