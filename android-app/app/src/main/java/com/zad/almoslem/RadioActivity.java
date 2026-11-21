@@ -39,44 +39,30 @@ public class RadioActivity extends Activity {
         root.setBackgroundColor(AppThemeColors.bg(this));
         setContentView(AppTabs.wrap(this, root, "radio"));
 
-        TextView title = new TextView(this);
-        title.setText("إذاعة القرآن الكريم");
-        title.setTextSize(25);
-        title.setTextColor(Color.WHITE);
-        title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-        title.setGravity(Gravity.CENTER);
-        title.setPadding(dp(12), dp(22), dp(12), dp(22));
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(AppThemeColors.primary(this));
-        bg.setCornerRadius(28);
-        title.setBackground(bg);
-        root.addView(title, match());
-
-        TextView desc = new TextView(this);
-        desc.setText("اختر المحطة التي تحب الاستماع إليها. يستمر البث في الخلفية بعد مغادرة الصفحة.");
-        desc.setTextSize(15);
-        desc.setTextColor(AppThemeColors.muted(this));
-        desc.setPadding(0, dp(14), 0, dp(14));
-        root.addView(desc, match());
+        PhotoHeaderView header = new PhotoHeaderView(this,"radio",
+                "إذاعة القرآن الكريم","بث مباشر من محطات القرآن الكريم");
+        root.addView(header,new LinearLayout.LayoutParams(-1,dp(190)));
+        View headerGap = new View(this);
+        root.addView(headerGap,new LinearLayout.LayoutParams(1,dp(12)));
 
         // Minimal audio player; the equalizer moves only while the live stream is ready.
         LinearLayout deck = new LinearLayout(this);
         deck.setOrientation(LinearLayout.VERTICAL);
         deck.setGravity(Gravity.CENTER);
-        deck.setPadding(dp(18), dp(20), dp(18), dp(20));
+        deck.setPadding(dp(18), dp(16), dp(18), dp(16));
         GradientDrawable deckBg = new GradientDrawable();
         deckBg.setColor(AppThemeColors.surface(this));
         deckBg.setCornerRadius(dp(18));
         deck.setBackground(deckBg);
         TextView deckTitle = new TextView(this);
-        deckTitle.setText("راديو زاد المسلم");
+        deckTitle.setText("مشغل الإذاعة المباشرة");
         deckTitle.setTextSize(21);
         deckTitle.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         deckTitle.setTextColor(AppThemeColors.text(this));
         deckTitle.setGravity(Gravity.CENTER);
         deck.addView(deckTitle, match());
         TextView deckSub = new TextView(this);
-        deckSub.setText("أنصت بقلبك… واطمئن بذكر الله");
+        deckSub.setText("البث يستمر حتى عند مغادرة التبويب");
         deckSub.setTextSize(13);
         deckSub.setTextColor(AppThemeColors.muted(this));
         deckSub.setGravity(Gravity.CENTER);
