@@ -79,6 +79,11 @@ public class RamadanActivity extends Activity {
 
         LinearLayout settings=card("إعدادات الشهر والتنبيهات");
         Switch enabled=new Switch(this);enabled.setText("تفعيل تنبيهات رمضان");enabled.setTextColor(AppThemeColors.text(this));enabled.setChecked(prefs.getBoolean("enabled",false));settings.addView(enabled,full());
+        TextView startLabel=text("",13,AppThemeColors.muted(this),false);settings.addView(startLabel,full());
+        Button chooseStart=new Button(this);chooseStart.setText("تحديد أول يوم في رمضان");settings.addView(chooseStart,full());
+        updateStartLabel(startLabel);
+        chooseStart.setOnClickListener(v->{Calendar now=Calendar.getInstance();long saved=prefs.getLong("start_at",0L);if(saved>0)now.setTimeInMillis(saved);
+            new DatePickerDialog(this,(picker,y,m,d)->{Calendar first=Calendar.getInstance();first.set(y,m,d,0,0,0);first.set(Calendar.MILLISECOND,0);prefs.edit().putLong("start_at",first.getTimeInMillis()).apply();updateStartLabel(startLabel);RamadanReminderReceiver.scheduleAll(this);},now.get(Calendar.YEAR),now.get(Calendar.MONTH),now.get(Calendar.DAY_OF_MONTH)).show();});
         Switch iftarVoice=new Switch(this);iftarVoice.setText("تنبيه صوتي قبل المغرب");iftarVoice.setTextColor(AppThemeColors.text(this));iftarVoice.setChecked(prefs.getBoolean("iftar_voice_enabled",true));settings.addView(iftarVoice,full());
         Switch cannon=new Switch(this);cannon.setText("إطلاق صوت مدفع الإفطار مع المغرب");cannon.setTextColor(AppThemeColors.text(this));cannon.setChecked(prefs.getBoolean("cannon_enabled",true));settings.addView(cannon,full());
         Switch suhoor=new Switch(this);suhoor.setText("تنبيه المسحراتي قبل الفجر");suhoor.setTextColor(AppThemeColors.text(this));suhoor.setChecked(prefs.getBoolean("suhoor_enabled",true));settings.addView(suhoor,full());
@@ -97,6 +102,7 @@ public class RamadanActivity extends Activity {
         addAudioPicker(audio,"اختيار تسجيل المسحراتي","mesaharaty.mp3",PICK_SUHOOR);
         setContentView(AppTabs.wrap(this,scroll,"ramadan"));
     }
+    private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("لم يتم تحديد بداية الشهر بعد؛ اختر أول يوم حتى تتوقف التنبيهات تلقائيًا بعد 30 يومًا.");return;}Calendar c=Calendar.getInstance();c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
     private void addDua(LinearLayout box,String heading,String body){TextView h=text(heading,14,AppThemeColors.accent(this),true);h.setPadding(0,dp(9),0,dp(2));box.addView(h,full());box.addView(text(body,14,AppThemeColors.text(this),false),full());}
     private void updateFastCount(){int n=0;for(int i=1;i<=30;i++)if(prefs.getBoolean("fast_"+i,false))n++;if(fastCount!=null)fastCount.setText("أيام الصيام المسجلة: "+n+" من 30");}
     private void updateKhatma(){int n=prefs.getInt("khatma_page",0);if(khatmaProgress!=null)khatmaProgress.setText("أنجزت "+n+" من 604 صفحة — "+Math.round(n*100f/604)+"٪");}
