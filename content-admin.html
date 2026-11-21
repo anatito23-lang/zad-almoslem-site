@@ -64,7 +64,7 @@ const firebaseConfig={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomai
 const ADMIN_UID="5UkeBQyyGGZcICXULT9LUD0S4lt2",app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id);
 const names={azkar:"الأذكار",duas:"الأدعية",khutbahs:"الخطب",waqafat:"الوقفات الإيمانية"};
 const isPublished=item=>item.published===true||item["تم النشر"]===true||item["النشر"]===true;
-let customTabs=[];const CUSTOM_TABS_DOC="__custom_tabs__";let customContentRows=[];
+let customTabs=[];const CUSTOM_TABS_DOC="custom_tabs_config";const CUSTOM_TABS_PUBLIC_DOC="custom_tabs_public";let customContentRows=[];
 const isLong=()=>["khutbahs","waqafat"].includes($("collection").value);
 let busy=false;
 function message(id,value,error=false){const el=$(id);el.textContent=value;el.classList.remove("hidden","error");if(error)el.classList.add("error")}
@@ -81,7 +81,7 @@ $("category").required=azkar;$("title").required=long;
 function resetForm(){ $("contentForm").reset();$("documentId").value="";$("published").checked=true;$("count").value="1";$("saveButton").textContent="حفظ المحتوى";updateFields();clearMessage("adminMessage")}
 async function loadItems(){if(auth.currentUser?.uid!==ADMIN_UID)return;setBusy(true);$("itemsList").innerHTML='<p class="small">جارٍ تحميل المحتوى…</p>';
 try{const snap=await getDocs(collection(db,$("collection").value));if(snap.empty){$("itemsList").innerHTML='<p class="small">لا توجد مستندات في هذا القسم حتى الآن.</p>';return}
-const rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(item=>item.id!==CUSTOM_TABS_DOC&&!item.tabId);$("itemsList").innerHTML=rows.map(item=>{const heading=escapeHtml(item.title||value(item,"text")||"بدون عنوان");const preview=escapeHtml((item.body||item.text||value(item,"text")||"").slice(0,220));const meta=[item.date,item.category,value(item,"source")].filter(Boolean).map(escapeHtml).join(" · ");return '<article class="item"><div class="row"><strong>'+heading+'</strong><span class="tag">'+(isPublished(item)?"منشور":"مسودة")+'</span></div><p>'+preview+(preview.length>=220?"…":"")+'</p><p class="small">'+meta+'</p><div class="actions"><button type="button" class="secondary" data-edit="'+escapeHtml(item.id)+'">تعديل</button><button type="button" class="gold" data-toggle="'+escapeHtml(item.id)+'" data-published="'+isPublished(item)+'">'+(isPublished(item)?"إلغاء النشر":"نشر")+'</button><button type="button" class="danger" data-delete="'+escapeHtml(item.id)+'">حذف</button></div></article>'}).join("");
+const rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(item=>item.id!==CUSTOM_TABS_DOC&&item.id!==CUSTOM_TABS_PUBLIC_DOC&&!item.tabId);$("itemsList").innerHTML=rows.map(item=>{const heading=escapeHtml(item.title||value(item,"text")||"بدون عنوان");const preview=escapeHtml((item.body||item.text||value(item,"text")||"").slice(0,220));const meta=[item.date,item.category,value(item,"source")].filter(Boolean).map(escapeHtml).join(" · ");return '<article class="item"><div class="row"><strong>'+heading+'</strong><span class="tag">'+(isPublished(item)?"منشور":"مسودة")+'</span></div><p>'+preview+(preview.length>=220?"…":"")+'</p><p class="small">'+meta+'</p><div class="actions"><button type="button" class="secondary" data-edit="'+escapeHtml(item.id)+'">تعديل</button><button type="button" class="gold" data-toggle="'+escapeHtml(item.id)+'" data-published="'+isPublished(item)+'">'+(isPublished(item)?"إلغاء النشر":"نشر")+'</button><button type="button" class="danger" data-delete="'+escapeHtml(item.id)+'">حذف</button></div></article>'}).join("");
 $("itemsList").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>editItem(rows.find(x=>x.id===b.dataset.edit))));
 $("itemsList").querySelectorAll("[data-toggle]").forEach(b=>b.addEventListener("click",()=>togglePublished(b.dataset.toggle,b.dataset.published==="true")));
 $("itemsList").querySelectorAll("[data-delete]").forEach(b=>b.addEventListener("click",()=>removeItem(b.dataset.delete)));
@@ -106,7 +106,7 @@ async function readCustomTabs(){const snap=await getDoc(doc(db,"waqafat",CUSTOM_
 async function saveCustomTabs(){
  const batch=writeBatch(db),updatedAt=serverTimestamp();
  batch.set(doc(db,"waqafat",CUSTOM_TABS_DOC),{tabs:customTabs,updatedAt},{merge:true});
- batch.set(doc(db,"waqafat","__custom_tabs_public__"),{tabs:customTabs.filter(t=>t.visible!==false),updatedAt},{merge:true});
+ batch.set(doc(db,"waqafat",CUSTOM_TABS_PUBLIC_DOC),{tabs:customTabs.filter(t=>t.visible!==false),updatedAt},{merge:true});
  await batch.commit();renderCustomTabs()
 }
 function renderCustomTabs(){
