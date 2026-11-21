@@ -25,7 +25,7 @@ public final class AudioEqualizerView extends View {
 
     private boolean isPlaying() {
         SharedPreferences p = getContext().getSharedPreferences("zad_audio", Context.MODE_PRIVATE);
-        if (!p.getBoolean("radio_playing", false) || p.getBoolean("radio_paused", false)) return false;
+        if (!p.getBoolean("radio_playing", false) || !p.getBoolean("radio_ready", false) || p.getBoolean("radio_paused", false)) return false;
         String active = p.getString("active_kind", "");
         for (String kind : kinds) if (kind.equals(active)) return true;
         return false;
