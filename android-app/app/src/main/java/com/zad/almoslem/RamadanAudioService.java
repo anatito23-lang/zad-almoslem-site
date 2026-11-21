@@ -84,28 +84,6 @@ public class RamadanAudioService extends Service {
             return out;
         }catch(Exception e){throw new RuntimeException("Could not create Ramadan melody",e);}
     }
-    // A short synthesized low boom for the iftar-cannon cue; generated on-device.
-    private File generateCannonFile(){
-        final int rate=22050,samples=rate*3;
-        try{
-            File out=new File(getCacheDir(),"zad_iftar_cannon.wav");
-            try(java.io.DataOutputStream d=new java.io.DataOutputStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(out)))){
-                writeWavHeader(d,samples,rate);
-                long seed=246813579L;
-                for(int i=0;i<samples;i++){
-                    double t=i/(double)rate;
-                    double decay=Math.exp(-t*3.1);
-                    seed=(seed*1103515245L+12345L)&0x7fffffffL;
-                    double noise=((seed/1073741824.0)-1.0);
-                    double boom=Math.sin(2*Math.PI*(82-18*t)*t)*0.9+noise*0.18;
-                    double attack=Math.min(1,t/0.008);
-                    short v=(short)(Math.max(-1,Math.min(1,boom*decay*attack*0.9))*32767);
-                    d.writeShort(Short.reverseBytes(v));
-                }
-            }
-            return out;
-        }catch(Exception e){throw new RuntimeException("Could not create cannon cue",e);}
-    }
     private void writeWavHeader(java.io.DataOutputStream d,int samples,int rate)throws java.io.IOException{
         int dataBytes=samples*2;
         d.writeBytes("RIFF");writeIntLE(d,36+dataBytes);d.writeBytes("WAVEfmt ");writeIntLE(d,16);
