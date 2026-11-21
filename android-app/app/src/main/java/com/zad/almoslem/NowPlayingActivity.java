@@ -11,7 +11,6 @@ import android.os.Handler;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -38,37 +37,31 @@ public class NowPlayingActivity extends Activity {
         super.onCreate(stateBundle);
         if (Build.VERSION.SDK_INT >= 29) getWindow().setNavigationBarContrastEnforced(false);
         FrameLayout frame = new FrameLayout(this);
-        ImageView wallpaper = new ImageView(this);
-        wallpaper.setImageResource(R.drawable.azhar_mosque_bg);
-        wallpaper.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        frame.addView(wallpaper, new FrameLayout.LayoutParams(-1,-1));
-        ViewOverlay overlay = new ViewOverlay(this);
-        frame.addView(overlay, new FrameLayout.LayoutParams(-1,-1));
+        frame.setBackgroundColor(AppThemeColors.bg(this));
 
         LinearLayout panel = new LinearLayout(this);
         panel.setOrientation(LinearLayout.VERTICAL);
         panel.setGravity(Gravity.CENTER);
         panel.setPadding(dp(26),dp(30),dp(26),dp(30));
-        GradientDrawable panelBg = new GradientDrawable(GradientDrawable.Orientation.TL_BR,
-                new int[]{0xE90A3028,0xE91A604B,0xE9082924});
-        panelBg.setCornerRadius(dp(28));
-        panel.setBackground(panelBg);
+        panel.setBackground(rounded(AppThemeColors.surface(this),20));
         FrameLayout.LayoutParams panelLp = new FrameLayout.LayoutParams(-1,-2,Gravity.CENTER);
         panelLp.setMargins(dp(22),dp(24),dp(22),dp(24));
         frame.addView(panel,panelLp);
 
-        TextView emblem=text("۞",64,0xFFE5C987,true);
+        TextView emblem=text("♫",48,AppThemeColors.accent(this),true);
         panel.addView(emblem,new LinearLayout.LayoutParams(-1,dp(88)));
-        panel.addView(text("زاد وطمأنينة",17,0xFFECE3C8,true));
-        title=text("مجالس القرآن",23,Color.WHITE,true);
+        panel.addView(text("زاد المسلم",17,AppThemeColors.text(this),true));
+        title=text("مجالس القرآن",23,AppThemeColors.text(this),true);
         LinearLayout.LayoutParams titleLp=new LinearLayout.LayoutParams(-1,-2);titleLp.topMargin=dp(24);
         panel.addView(title,titleLp);
-        subtitle=text("أنصت بقلبك… واطمئن بذكر الله",14,0xFFE7DDC4,false);
+        subtitle=text("أنصت بقلبك… واطمئن بذكر الله",14,AppThemeColors.muted(this),false);
         LinearLayout.LayoutParams subLp=new LinearLayout.LayoutParams(-1,-2);subLp.topMargin=dp(9);
         panel.addView(subtitle,subLp);
-        state=text("جارٍ تجهيز الصوت",13,0xFFE8D9AE,false);
+        state=text("جارٍ تجهيز الصوت",13,AppThemeColors.muted(this),false);
         LinearLayout.LayoutParams stateLp=new LinearLayout.LayoutParams(-1,-2);stateLp.topMargin=dp(24);
         panel.addView(state,stateLp);
+        AudioEqualizerView equalizer=new AudioEqualizerView(this,"radio","quran","ruqyah","nasheed");
+        panel.addView(equalizer,new LinearLayout.LayoutParams(-1,dp(52)));
 
         LinearLayout controls=new LinearLayout(this);
         controls.setGravity(Gravity.CENTER);
@@ -76,9 +69,9 @@ public class NowPlayingActivity extends Activity {
         controlsLp.topMargin=dp(24);
         panel.addView(controls,controlsLp);
         toggle=new TextView(this);
-        toggle.setTextColor(0xFF12382F);toggle.setTextSize(16);toggle.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
+        toggle.setTextColor(AppThemeColors.text(this));toggle.setTextSize(16);toggle.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
         toggle.setGravity(Gravity.CENTER);toggle.setPadding(dp(28),dp(14),dp(28),dp(14));
-        toggle.setBackground(rounded(0xFFF0D99E,30));
+        toggle.setBackground(rounded(AppThemeColors.accent(this),30));
         controls.addView(toggle,new LinearLayout.LayoutParams(-1,-2));
         toggle.setOnClickListener(v->sendControl(RadioPlaybackService.ACTION_TOGGLE));
 
