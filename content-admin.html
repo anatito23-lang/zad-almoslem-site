@@ -59,7 +59,7 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,collection,getDocs,addDoc,updateDoc,deleteDoc,doc,serverTimestamp,getDoc,setDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,collection,getDocs,addDoc,updateDoc,deleteDoc,doc,serverTimestamp,getDoc,setDoc,writeBatch} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 const firebaseConfig={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
 const ADMIN_UID="5UkeBQyyGGZcICXULT9LUD0S4lt2",app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id);
 const names={azkar:"الأذكار",duas:"الأدعية",khutbahs:"الخطب",waqafat:"الوقفات الإيمانية"};
@@ -103,7 +103,12 @@ updateFields();
 
 function customMessage(value,error=false){const el=$("customTabsMessage");el.textContent=value;el.classList.remove("hidden","error");if(error)el.classList.add("error")}
 async function readCustomTabs(){const snap=await getDoc(doc(db,"waqafat",CUSTOM_TABS_DOC));customTabs=snap.exists()&&Array.isArray(snap.data().tabs)?snap.data().tabs:[];renderCustomTabs();await loadCustomContent()}
-async function saveCustomTabs(){await setDoc(doc(db,"waqafat",CUSTOM_TABS_DOC),{tabs:customTabs,updatedAt:serverTimestamp()},{merge:true});renderCustomTabs()}
+async function saveCustomTabs(){
+ const batch=writeBatch(db),updatedAt=serverTimestamp();
+ batch.set(doc(db,"waqafat",CUSTOM_TABS_DOC),{tabs:customTabs,updatedAt},{merge:true});
+ batch.set(doc(db,"waqafat","__custom_tabs_public__"),{tabs:customTabs.filter(t=>t.visible!==false),updatedAt},{merge:true});
+ await batch.commit();renderCustomTabs()
+}
 function renderCustomTabs(){
  $("customTabsList").innerHTML=customTabs.length?customTabs.map(t=>'<article class="item"><div class="row"><strong>'+escapeHtml(t.icon||"✨")+' '+escapeHtml(t.title)+'</strong><span class="tag">'+(t.visible===false?"مخفي":"ظاهر")+'</span></div><p class="small">'+escapeHtml(({articles:"خواطر ومقالات",stories:"قصص",biographies:"سير وتراجم",general:"محتوى عام"})[t.kind]||"محتوى عام")+'</p><div class="actions"><button type="button" class="secondary" data-tab-edit="'+escapeHtml(t.id)+'">تعديل الاسم والأيقونة</button><button type="button" class="secondary" data-tab-up="'+escapeHtml(t.id)+'">↑</button><button type="button" class="secondary" data-tab-down="'+escapeHtml(t.id)+'">↓</button><button type="button" class="secondary" data-tab-toggle="'+escapeHtml(t.id)+'">'+(t.visible===false?"إظهار":"إخفاء")+'</button><button type="button" class="danger" data-tab-delete="'+escapeHtml(t.id)+'">حذف التبويب</button></div></article>').join(""):'<p class="small">لم تنشئ تبويبات إضافية بعد.</p>';
  const select=$("customContentTab");const old=select.value;select.innerHTML=customTabs.map(t=>'<option value="'+escapeHtml(t.id)+'">'+escapeHtml(t.title)+'</option>').join("");if(customTabs.some(t=>t.id===old))select.value=old;
