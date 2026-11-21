@@ -53,6 +53,22 @@ jobs:
                   raise SystemExit(f"Invalid or incomplete JPEG wallpaper: {name}")
               print(f"Validated {name}: {len(data)} bytes")
           PY
+      - name: Download and validate human-recorded CC0 adhan
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST="android-app/app/src/main/res/raw"
+          mkdir -p "$DEST"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \\
+            "https://upload.wikimedia.org/wikipedia/commons/b/b0/Beautiful_adhan.ogg" \\
+            -o "$DEST/beautiful_adhan.ogg"
+          python3 - "$DEST/beautiful_adhan.ogg" <<'PY'
+          import pathlib, sys
+          p = pathlib.Path(sys.argv[1]); data = p.read_bytes()
+          if len(data) < 100000 or not data.startswith(b"OggS"):
+              raise SystemExit("Invalid or incomplete human-recorded adhan audio")
+          print(f"Validated CC0 human adhan: {len(data)} bytes")
+          PY
       - name: Prepare release signing key
         shell: bash
         run: |
