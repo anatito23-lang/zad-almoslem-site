@@ -34,7 +34,15 @@ public final class AppTabs {
         else { scroll=new ScrollView(a); scroll.setFillViewport(true); scroll.addView(content); }
         scroll.setFillViewport(true); scroll.setClipToPadding(false);
         View page = scroll.getChildAt(0);
-        if (page != null) page.setBackground(new IslamicWallpaperDrawable(a, wallpaperStyle));
+        // Keep the decorative wallpaper only on the four sections explicitly designed for it.
+        // All other tabs retain their original screen backgrounds (including the Mushaf).
+        boolean useIslamicWallpaper = "quran".equals(wallpaperStyle)
+                || "radio".equals(wallpaperStyle)
+                || "ramadan".equals(wallpaperStyle)
+                || "ruqyah".equals(wallpaperStyle);
+        if (page != null && useIslamicWallpaper) {
+            page.setBackground(new IslamicWallpaperDrawable(a, wallpaperStyle));
+        }
         LinearLayout shell=new LinearLayout(a); shell.setOrientation(1); shell.setBackgroundColor(AppThemeColors.bg(a));
         shell.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
         LinearLayout bar=createBar(a,active);
