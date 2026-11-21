@@ -6,6 +6,7 @@ import android.media.AudioManager;
 import android.media.AudioAttributes;
 import android.media.AudioFocusRequest;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.C;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.exoplayer.ExoPlayer;
@@ -47,6 +48,16 @@ public class RadioPlaybackService extends Service {
         if (getSharedPreferences("zad_reminders", MODE_PRIVATE).getBoolean("adhan_active", false))
             adhanPauseRequested = true;
         if(intent!=null && ACTION_STOP.equals(intent.getAction())) { stopRadio(); return START_NOT_STICKY; }
+        if (intent == null) {
+            android.content.SharedPreferences saved = getSharedPreferences("zad_audio", MODE_PRIVATE);
+            if (!saved.getBoolean("radio_playing", false) || saved.getBoolean("radio_paused", false)) return START_NOT_STICKY;
+            intent = new Intent(this, RadioPlaybackService.class);
+            intent.putExtra("url", saved.getString("stream_url", null));
+            intent.putExtra("kind", saved.getString("active_kind", "radio"));
+            intent.putExtra("label", saved.getString("radio_title", "زاد وطمأنينة"));
+            intent.putExtra("station", saved.getString("radio_station", ""));
+            intent.putExtra("local_path", saved.getString("stream_local_path", null));
+        }
         if(intent!=null && (ACTION_TOGGLE.equals(intent.getAction()) || ACTION_PAUSE.equals(intent.getAction()) || ACTION_RESUME.equals(intent.getAction()))) {
             if (player != null) {
                 boolean shouldPlay = ACTION_TOGGLE.equals(intent.getAction()) ? !(player.getPlayWhenReady() || resumeOnAudioFocusGain || (adhanPauseRequested && resumeAfterAdhan)) : ACTION_RESUME.equals(intent.getAction());
@@ -69,8 +80,20 @@ public class RadioPlaybackService extends Service {
                 }
                 getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_paused", !shouldPlay).putBoolean("waiting_for_audio_focus", shouldPlay && !player.getPlayWhenReady() && !adhanPauseRequested).apply();
                 updateRadioNotification(playbackTitle(), shouldPlay ? "يعمل الآن" : "متوقف مؤقتًا");
+            } else {
+                android.content.SharedPreferences saved = getSharedPreferences("zad_audio", MODE_PRIVATE);
+                if (saved.getBoolean("radio_playing", false)) {
+                    Intent restore = new Intent(this, RadioPlaybackService.class);
+                    restore.putExtra("url", saved.getString("stream_url", null));
+                    restore.putExtra("kind", saved.getString("active_kind", "radio"));
+                    restore.putExtra("label", saved.getString("radio_title", "زاد وطمأنينة"));
+                    restore.putExtra("station", saved.getString("radio_station", ""));
+                    restore.putExtra("local_path", saved.getString("stream_local_path", null));
+                    intent = restore;
+                } else return START_NOT_STICKY;
             }
-            return START_NOT_STICKY;
+            // If Android recreated the service after process eviction, the persisted stream
+            // is restored below and remains in the foreground independently of the Activity.
         }
         if(intent!=null && ACTION_PAUSE_FOR_ADHAN.equals(intent.getAction())) {
             pauseForAdhan();
@@ -116,10 +139,12 @@ public class RadioPlaybackService extends Service {
         if(!allowedRadio && !allowedQuran && !allowedLocal && !allowedAudio) { stopRadio(); return START_NOT_STICKY; }
         String label=intent==null?null:intent.getStringExtra("label");
         getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",true).putBoolean("radio_ready",false).remove("radio_last_error").putString("active_kind",kind==null?"radio":kind).putString("radio_station",intent==null?"":intent.getStringExtra("station"))
-          .putString("radio_title",label==null?defaultTitle(kind):label).putBoolean("radio_paused",false).apply();
+          .putString("radio_title",label==null?defaultTitle(kind):label).putString("stream_url",url)
+          .putString("stream_local_path",allowedLocal?localFile.getAbsolutePath():"")
+          .putBoolean("radio_paused",false).putBoolean("waiting_for_audio_focus",false).apply();
         QuranHomeWidget.refreshAll(this);
         play(url,allowedLocal?localFile:null);
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
     private void pauseForAdhan() {
         adhanPauseRequested = true;
@@ -189,6 +214,7 @@ public class RadioPlaybackService extends Service {
                     .setReadTimeoutMs(45000);
             player = new ExoPlayer.Builder(this)
                     .setMediaSourceFactory(new DefaultMediaSourceFactory(httpFactory))
+                    .setWakeMode(C.WAKE_MODE_NETWORK)
                     .build();
             player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
                     .setUsage(androidx.media3.common.C.USAGE_MEDIA)
@@ -429,7 +455,13 @@ public class RadioPlaybackService extends Service {
             player = null;
         }
     }
-    private void stopRadio() { adhanPauseRequested=false; pausedForAdhan=false; resumeAfterAdhan=false; getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").putString("radio_title","").putBoolean("radio_paused",false).putBoolean("waiting_for_audio_focus",false).apply(); QuranHomeWidget.refreshAll(this); releasePlayer(); stopForeground(true); stopSelf(); }
+    private void stopRadio() { adhanPauseRequested=false; pausedForAdhan=false; resumeAfterAdhan=false; getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").putString("radio_title","").remove("stream_url").remove("stream_local_path")
+        .putBoolean("radio_paused",false).putBoolean("waiting_for_audio_focus",false).apply(); QuranHomeWidget.refreshAll(this); releasePlayer(); stopForeground(true); stopSelf(); }
+    @Override public void onTaskRemoved(Intent rootIntent) {
+        // Playback is a media foreground service: removing the app task must not stop it.
+        android.util.Log.i("ZadAlmoslem", "App task removed; continuing foreground audio playback");
+        super.onTaskRemoved(rootIntent);
+    }
     @Override public void onDestroy(){releasePlayer();super.onDestroy();}
     @Override public IBinder onBind(Intent intent){return null;}
 }
