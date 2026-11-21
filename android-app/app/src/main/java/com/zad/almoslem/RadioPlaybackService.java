@@ -36,6 +36,7 @@ public class RadioPlaybackService extends Service {
     private static final String CHANNEL="zad_radio_playback";
     private static final int NOTIFICATION=7410;
     private ExoPlayer player;
+    private PowerManager.WakeLock playbackWakeLock;
     private AudioManager audioManager;
     private AudioFocusRequest audioFocusRequest;
     private boolean resumeOnAudioFocusGain;
@@ -266,7 +267,7 @@ public class RadioPlaybackService extends Service {
                     .setReadTimeoutMs(45000);
             player = new ExoPlayer.Builder(this)
                     .setMediaSourceFactory(new DefaultMediaSourceFactory(httpFactory))
-                    .setWakeMode(C.WAKE_MODE_NETWORK_AND_LOCAL)
+                    .setWakeMode(C.WAKE_MODE_NETWORK)
                     .build();
             player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
                     .setUsage(androidx.media3.common.C.USAGE_MEDIA)
@@ -300,6 +301,7 @@ public class RadioPlaybackService extends Service {
                     }
                 }
                 @Override public void onIsPlayingChanged(boolean isPlaying) {
+                    setPlaybackWakeLock(isPlaying);
                     getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_paused", player == null || !player.getPlayWhenReady()).apply();
                     updateRadioNotification(playbackTitle(), isPlaying ? "يعمل الآن" : "متوقف مؤقتًا");
                 }
@@ -502,7 +504,27 @@ public class RadioPlaybackService extends Service {
             android.util.Log.e("ZadAlmoslem", "Could not show radio error notification", e);
         }
     }
+    private void setPlaybackWakeLock(boolean playing) {
+        try {
+            if (playing) {
+                if (playbackWakeLock == null) {
+                    PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+                    if (powerManager != null) {
+                        playbackWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                                "ZadAlmoslem:AudioPlayback");
+                        playbackWakeLock.setReferenceCounted(false);
+                    }
+                }
+                if (playbackWakeLock != null && !playbackWakeLock.isHeld()) playbackWakeLock.acquire();
+            } else if (playbackWakeLock != null && playbackWakeLock.isHeld()) {
+                playbackWakeLock.release();
+            }
+        } catch (Exception e) {
+            android.util.Log.w("ZadAlmoslem", "Could not update playback wake lock", e);
+        }
+    }
     private void releasePlayer() {
+        setPlaybackWakeLock(false);
         abandonAudioFocus();
         if (startupTimeout != null) {
             playbackHandler.removeCallbacks(startupTimeout);
