@@ -95,11 +95,11 @@ public class RamadanActivity extends Activity {
         cannon.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("cannon_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
         suhoor.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("suhoor_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
 
-        LinearLayout audio=card("الأصوات المحفوظة على الهاتف");
-        audioStatus=text("أضف تسجيلًا صوتيًا بصيغة MP3 لكل تنبيه؛ سيُحفظ داخل التطبيق ليعمل دون إنترنت.",12,AppThemeColors.muted(this),false);audio.addView(audioStatus,full());
-        addAudioPicker(audio,"اختيار تسجيل تنبيه الإفطار","iftar_voice.mp3",PICK_IFTAR);
-        addAudioPicker(audio,"اختيار صوت مدفع الإفطار","iftar_cannon.mp3",PICK_CANNON);
-        addAudioPicker(audio,"اختيار تسجيل المسحراتي","mesaharaty.mp3",PICK_SUHOOR);
+        LinearLayout audio=card("الأصوات الرمضانية المدمجة");
+        audioStatus=text("صوت مدفع الإفطار وصوت المسحراتي يعملان من داخل التطبيق تلقائيًا، دون اختيار ملفات أو اتصال بالإنترنت.",12,AppThemeColors.muted(this),false);
+        audio.addView(audioStatus,full());
+        addAudioTestButton(audio,"تجربة صوت مدفع الإفطار","ramadan_iftar_cannon");
+        addAudioTestButton(audio,"تجربة نداء السحور","ramadan_suhoor");
         setContentView(AppTabs.wrap(this,scroll,"ramadan"));
     }
     private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("لم يتم تحديد بداية الشهر بعد؛ اختر أول يوم حتى تتوقف التنبيهات تلقائيًا بعد 30 يومًا.");return;}Calendar c=Calendar.getInstance();c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
@@ -110,6 +110,14 @@ public class RamadanActivity extends Activity {
         box.addView(text(title,13,AppThemeColors.text(this),false),full());TextView value=text(prefs.getInt(key,def)+" دقيقة",13,AppThemeColors.accent(this),true);box.addView(value,full());
         SeekBar bar=new SeekBar(this);bar.setMax(max-min);bar.setProgress(Math.max(0,Math.min(max-min,prefs.getInt(key,def)-min)));box.addView(bar,full());
         bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int p,boolean u){int n=p+min;value.setText(n+" دقيقة");if(u){prefs.edit().putInt(key,n).apply();RamadanReminderReceiver.scheduleAll(RamadanActivity.this);}}public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}});
+    }
+    private void addAudioTestButton(LinearLayout box,String label,String key){
+        Button b=new Button(this);b.setText(label);box.addView(b,full());
+        b.setOnClickListener(v->{
+            Intent play=new Intent(this,RamadanAudioService.class);play.putExtra("key",key);
+            try{if(android.os.Build.VERSION.SDK_INT>=26)startForegroundService(play);else startService(play);}
+            catch(Exception e){Toast.makeText(this,"تعذر تشغيل الصوت: "+e.getMessage(),Toast.LENGTH_LONG).show();}
+        });
     }
     private void addAudioPicker(LinearLayout box,String label,String file,int request){
         Button b=new Button(this);b.setText(label);box.addView(b,full());b.setOnClickListener(v->{Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.setType("audio/*");i.addCategory(Intent.CATEGORY_OPENABLE);i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);startActivityForResult(i,request);});
