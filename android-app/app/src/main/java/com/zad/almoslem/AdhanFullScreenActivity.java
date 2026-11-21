@@ -21,7 +21,7 @@ public class AdhanFullScreenActivity extends Activity {
   FrameLayout frame=new FrameLayout(this);ImageView image=new ImageView(this);image.setScaleType(ImageView.ScaleType.CENTER_CROP);AdhanWallpaperImages.load(this,image,ids[choice]);frame.addView(image,new FrameLayout.LayoutParams(-1,-1));
   View shade=new View(this);shade.setBackgroundColor(0x77000000);frame.addView(shade,new FrameLayout.LayoutParams(-1,-1));
   LinearLayout content=new LinearLayout(this);content.setOrientation(1);content.setGravity(Gravity.CENTER);content.setPadding(dp(24),dp(40),dp(24),dp(40));
-  TextView brand=new TextView(this);brand.setText("زاد المسلم");brand.setTextColor(Color.WHITE);brand.setTextSize(19);brand.setTypeface(Typeface.DEFAULT,Typeface.BOLD);brand.setGravity(Gravity.CENTER);
+  TextView brand=new TextView(this);brand.setText("زاد وطمأنينة");brand.setTextColor(Color.WHITE);brand.setTextSize(19);brand.setTypeface(Typeface.DEFAULT,Typeface.BOLD);brand.setGravity(Gravity.CENTER);
   TextView title=new TextView(this);title.setText("حان الآن وقت صلاة");title.setTextColor(Color.WHITE);title.setTextSize(24);title.setGravity(Gravity.CENTER);title.setPadding(0,dp(24),0,dp(8));
   TextView name=new TextView(this);name.setText(prayer);name.setTextColor(Color.WHITE);name.setTextSize(38);name.setTypeface(Typeface.DEFAULT,Typeface.BOLD);name.setGravity(Gravity.CENTER);
   TextView call=new TextView(this);call.setText("الصلاة نور وطمأنينة");call.setTextColor(Color.WHITE);call.setTextSize(18);call.setGravity(Gravity.CENTER);call.setPadding(0,dp(12),0,dp(30));
