@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid == "5UkeBQyyGGZcICXULT9LUD0S4lt2";
+    }
+
+    // Preserve the existing publication behavior, including legacy Arabic flags.
+    // Missing publication fields are treated as unpublished.
+    function isPublished() {
+      return resource.data.get('published', false) == true
+        || resource.data.get('تم النشر', false) == true
+        || resource.data.get('النشر', false) == true;
+    }
+
+    // Full configuration (including hidden tabs) is private.
+    match /waqafat/custom_tabs_config {
+      allow read, write: if isAdmin();
+    }
+
+    // Visitors can read only the public navigation projection.
+    match /waqafat/custom_tabs_public {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Keep the existing app contract for every top-level content collection:
+    // public reads are allowed only for published documents; writes are admin-only.
+    // This avoids breaking any current or future collection used by the app.
+    match /{collection}/{documentId} {
+      allow read: if isAdmin() || isPublished();
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}
