@@ -39,9 +39,9 @@ public class RamadanAudioService extends Service {
             playBundledAdhan();
             return START_NOT_STICKY;
         }
-        String fileName="ramadan_iftar_voice".equals(key)?"iftar_announcement.mp3":"suhoor_voice.mp3";
-        File file=new File(new File(getFilesDir(),"ramadan_audio"),fileName);
-        if(file.isFile()&&file.length()>1000){playFile(file);return START_NOT_STICKY;}
+        String fallbackFileName="ramadan_iftar_voice".equals(key)?"iftar_announcement.mp3":"suhoor_voice.mp3";
+        File fallbackFile=new File(new File(getFilesDir(),"ramadan_audio"),fallbackFileName);
+        if(fallbackFile.isFile()&&fallbackFile.length()>1000){playFile(fallbackFile);return START_NOT_STICKY;}
         showMissingRecording();
         return START_NOT_STICKY;
     }
