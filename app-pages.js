@@ -2,7 +2,8 @@
 'use strict';
 const $=id=>document.getElementById(id), main=document.querySelector('main.wrap'), header=document.querySelector('header.hero');
 const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp());
-if(!nativeApp){
+const publicWebsite=location.hostname==='anatito23-lang.github.io';
+if(!nativeApp || publicWebsite){
  const heroContent=document.querySelector('.hero-content');
  if(heroContent&&!document.getElementById('zadInstallAppBanner')){
   const style=document.createElement('style');
@@ -19,7 +20,7 @@ if(!nativeApp){
  * The website displays prayer times, but adhan playback and background
  * prayer alerts are Android-app features. Keep those controls native-only.
  */
-if(!nativeApp){
+if(!nativeApp || publicWebsite){
  const webCleanup=document.createElement('style');
  webCleanup.id='zad-web-prayer-only-cleanup';
  webCleanup.textContent='body.zad-public-website .adhan-settings,body.zad-public-website .prayer-tracker,body.zad-public-website .tasbeeh-float,body.zad-public-website #tasbeehPanel,body.zad-public-website #tasbeehFab,body.zad-public-website .bottom-nav{display:none!important;visibility:hidden!important;pointer-events:none!important}';
@@ -44,6 +45,7 @@ if(!nativeApp){
  }
  // Remove any legacy tasbeeh UI and add a Ramadan-only website section.
  document.querySelectorAll('.tasbeeh-float,#tasbeehPanel,#tasbeehFab,.bottom-nav,#zad-page-tasbeeh,a[href*="tasbeeh"]').forEach(node=>node.remove());
+ document.querySelectorAll('a[href="#adhan"],a[href="#adhan-settings"],a[href="#prayer-tracker"]').forEach(node=>node.remove());
  if(!document.getElementById('ramadan')){
   const ramadan=document.createElement('section');
   ramadan.className='section ramadan-section';ramadan.id='ramadan';
