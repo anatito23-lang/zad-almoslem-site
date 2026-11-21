@@ -48,9 +48,9 @@ public class RuqyahActivity extends Activity {
         hero.setOrientation(LinearLayout.VERTICAL);
         hero.setGravity(Gravity.CENTER);
         hero.setPadding(dp(12), dp(12), dp(12), dp(14));
-        hero.setBackground(bg(AppThemeColors.primary(this), 20));
+        hero.setBackground(new IslamicWallpaperDrawable(this,"ruqyah"));
         ImageView artwork = new ImageView(this);
-        artwork.setImageResource(R.drawable.ruqyah_wallpaper);
+        artwork.setImageDrawable(new IslamicWallpaperDrawable(this,"ruqyah"));
         artwork.setScaleType(ImageView.ScaleType.CENTER_CROP);
         hero.addView(artwork, new LinearLayout.LayoutParams(-1, dp(150)));
         TextView title = label("الرقية الشرعية", 23, Color.WHITE, true);
@@ -77,7 +77,7 @@ public class RuqyahActivity extends Activity {
         status = label("حالة الاستماع ستظهر هنا.", 12, AppThemeColors.muted(this), false);
         status.setPadding(0, dp(12), 0, 0);
         root.addView(status, match());
-        setContentView(AppTabs.wrap(this, scroll, "more"));
+        setContentView(AppTabs.wrap(this, scroll, "more", "ruqyah"));
     }
 
     private void addCard(LinearLayout root, String name, String url) {
