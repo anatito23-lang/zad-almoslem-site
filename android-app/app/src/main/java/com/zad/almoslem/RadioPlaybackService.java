@@ -280,6 +280,7 @@ public class RadioPlaybackService extends Service {
                         return;
                     }
                     if (state == Player.STATE_BUFFERING) {
+                        getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_ready", false).apply();
                         updateRadioNotification(playbackTitle(), "جارٍ الاتصال بالبث...");
                     } else if (state == Player.STATE_READY) {
                         String active = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", "");
@@ -291,6 +292,7 @@ public class RadioPlaybackService extends Service {
                             QuranHomeWidget.refreshAll(RadioPlaybackService.this);
                             updateRadioNotification(playbackTitle(), "البث يعمل الآن");
                         } else {
+                            getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_ready", true).apply();
                             String title = "quran".equals(active) ? "استماع القرآن الكريم" :
                                     ("nasheed".equals(active) ? "الإنشاد والابتهالات" : "الرقية الشرعية");
                             updateRadioNotification(title, "يعمل الآن");
