@@ -38,6 +38,8 @@ public class RuqyahActivity extends Activity {
 
     private void build() {
         ScrollView scroll = new ScrollView(this);
+        scroll.setFillViewport(true);
+        scroll.setBackground(new IslamicWallpaperDrawable(this, "ruqyah"));
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(15), dp(16), dp(15), dp(24));
