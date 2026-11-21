@@ -138,7 +138,7 @@ public class MainActivity extends Activity {
         }
         @JavascriptInterface public boolean isReminderAudioDownloaded() {
             File dir = new File(getFilesDir(), "reminders");
-            for (String name : new String[]{"morning", "evening", "dua"}) {
+            for (String name : new String[]{"morning", "evening", "qiyam", "dua"}) {
                 if (!isValidReminderAudio(new File(dir, name + ".mp3"))) return false;
             }
             return true;
@@ -154,8 +154,11 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void downloadReminderAudio() {
             new Thread(() -> {
                 String[][] sources = {
-                    {"morning", "https://archive.org/download/makkah-live.-net-athkar-01/MakkahLive.Net_athkar_03.mp3"},
-                    {"evening", "https://archive.org/download/makkah-live.-net-athkar-01/MakkahLive.Net_athkar_04.mp3"},
+                    // Sheikh Mahmoud Khalil Al-Husary — complete, unedited ayah recordings.
+                    // Morning: Ar-Ra'd 13:28; Evening: Al-Ahzab 33:41; Night prayer: Al-Isra 17:79.
+                    {"morning", "https://everyayah.com/data/Husary_128kbps/013028.mp3"},
+                    {"evening", "https://everyayah.com/data/Husary_128kbps/033041.mp3"},
+                    {"qiyam", "https://everyayah.com/data/Husary_128kbps/017079.mp3"},
                     {"dua", "https://archive.org/download/Islamic_Tape-258_uP_bY_mUSLEm/sharawy_doaa_24.mp3"}
                 };
                 File dir = new File(getFilesDir(), "reminders");

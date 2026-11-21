@@ -14,7 +14,7 @@
    if(!window.ZadAndroid||reminderAudioDownloadPending)return;
    if(window.ZadAndroid.isReminderAudioDownloaded()){
      const status=$('dailyReminderStatus');
-     if(status)status.textContent='ملفات أذكار الصباح والمساء ودعاء الشعراوي محفوظة على الجهاز وتعمل دون إنترنت.';
+     if(status)status.textContent='تلاوات الشيخ محمود خليل الحصري لتذكيرات الصباح والمساء وقيام الليل محفوظة على الجهاز وتعمل دون إنترنت.';
      return;
    }
    reminderAudioDownloadPending=true;
@@ -22,7 +22,7 @@
      reminderAudioDownloadPending=false;
      const status=$('dailyReminderStatus');
      if(status)status.textContent=ok
-       ?'تم التأكد من حفظ ملفات الأذكار ودعاء الشعراوي للعمل دون إنترنت.'
+       ?'تم حفظ تلاوات الشيخ محمود خليل الحصري للتذكيرات للعمل دون إنترنت.'
        :'تعذر تنزيل بعض الملفات. '+(details||'افحص اتصال الإنترنت ثم اضغط حفظ الإعدادات لإعادة المحاولة.');
    };
    window.ZadAndroid.downloadReminderAudio();
