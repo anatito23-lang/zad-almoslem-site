@@ -69,7 +69,7 @@ public final class AppTabs {
         outer.setPadding(dp(a,6),dp(a,5),dp(a,6),0);
         LinearLayout homeSlot=new LinearLayout(a);
         homeSlot.setGravity(Gravity.CENTER);
-        outer.addView(homeSlot,new LinearLayout.LayoutParams(dp(a,50),dp(a,50)));
+
         HorizontalScrollView dockScroll=new HorizontalScrollView(a);
         dockScroll.setHorizontalScrollBarEnabled(false);
         dockScroll.setHorizontalFadingEdgeEnabled(true);
