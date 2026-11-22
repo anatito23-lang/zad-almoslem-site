@@ -26,7 +26,7 @@ if(!nativeApp || publicWebsite){
  webCleanup.textContent='body.zad-public-website .adhan-settings,body.zad-public-website .prayer-tracker,body.zad-public-website .tasbeeh-float,body.zad-public-website #tasbeehPanel,body.zad-public-website #tasbeehFab,body.zad-public-website .bottom-nav{display:none!important;visibility:hidden!important;pointer-events:none!important}';
  document.head.append(webCleanup);
  document.querySelectorAll('.adhan-settings,.prayer-tracker,.tasbeeh-float,#tasbeehPanel,#tasbeehFab,.bottom-nav,#zad-page-tasbeeh').forEach(node=>node.remove());
- document.querySelectorAll('a[href="#tasbeehFab"],a[href="#tasbeeh"],a[href="#qibla"],a[href="#azkar"],a[href="#reminders"]').forEach(node=>node.remove()); const countdownLabel=document.querySelector('#nextPrayerCountdown .next-prayer-clock .next-prayer-kicker');
+ document.querySelectorAll('a[href="#tasbeehFab"],a[href="#tasbeeh"],a[href="#qibla"],a[href="#reminders"]').forEach(node=>node.remove()); const countdownLabel=document.querySelector('#nextPrayerCountdown .next-prayer-clock .next-prayer-kicker');
  if(countdownLabel)countdownLabel.textContent='متبقي على الصلاة';
  document.querySelectorAll('#daily-reminder-settings .card').forEach(card=>{
   const heading=card.querySelector('h3')?.textContent||'';
@@ -35,7 +35,7 @@ if(!nativeApp || publicWebsite){
  const qiyamDescription=document.querySelector('#daily-reminder-settings .grid .card:nth-child(3) p');
  if(qiyamDescription)qiyamDescription.textContent='تذكير قبل الفجر بنصف ساعة، ويمكنك تغيير الموعد.';
  // Website-only cleanup: retain prayer times only, and remove app-specific controls.
- ['#azkar','#daily-reminder-settings','.azkar-ticker','.prayer-tracker','.adhan-settings','.tasbeeh-float','#tasbeehPanel','.bottom-nav','#qibla'].forEach(selector=>document.querySelectorAll(selector).forEach(node=>node.remove()));
+ ['#daily-reminder-settings','.azkar-ticker','.prayer-tracker','.adhan-settings','.tasbeeh-float','#tasbeehPanel','.bottom-nav','#qibla'].forEach(selector=>document.querySelectorAll(selector).forEach(node=>node.remove()));
  const prayerSettings=document.querySelector('.prayer-location-settings');
  if(prayerSettings){
   prayerSettings.style.cssText='display:grid;grid-template-columns:minmax(180px,260px) auto;gap:10px;align-items:end;width:100%;margin-top:12px';
@@ -58,7 +58,7 @@ const prayerTitle=document.querySelector('#prayer .section-head p');if(prayerTit
  quick.innerHTML=[['#prayer','🕌','مواقيت الصلاة'],['#quran','📖','استماع القرآن'],['#hadith','ﷺ','الحديث الشريف'],['#ramadan','🌙','رمضان'],['#mushaf','۞','المصحف'],['#radio-egypt','📻','الإذاعة'],['#ruqyah','🤲','الرقية'],['#books-library','📚','المكتبة'],['#khutbahs','🎙️','الخطب']].map(([href,ico,label])=>'<a href="'+href+'"><span>'+ico+'</span><b>'+label+'</b></a>').join('');
  if(header&&!document.querySelector('.zad-web-shortcuts'))header.insertAdjacentElement('afterend',quick);
  const topNav=document.querySelector('.top nav');
- if(topNav){topNav.querySelectorAll('a').forEach(link=>{if(['#kids','#azkar','#reminders','#daily-reminder-settings','#qibla','#tasbeehFab'].includes(link.getAttribute('href')))link.remove();});if(!topNav.querySelector('a[href="#hadith"]')){const l=document.createElement('a');l.href='#hadith';l.textContent='الحديث الشريف';topNav.append(l);}}
+ if(topNav){topNav.querySelectorAll('a').forEach(link=>{if(['#kids','#reminders','#daily-reminder-settings','#qibla','#tasbeehFab'].includes(link.getAttribute('href')))link.remove();});if(!topNav.querySelector('a[href="#hadith"]')){const l=document.createElement('a');l.href='#hadith';l.textContent='الحديث الشريف';topNav.append(l);}}
  if(topNav&&!topNav.querySelector('a[href="#ramadan"]')){const l=document.createElement('a');l.href='#ramadan';l.textContent='رمضان';topNav.append(l);}
  document.body.classList.add('zad-public-website');
  const webStyle=document.createElement('style');
