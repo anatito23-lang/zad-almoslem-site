@@ -42,7 +42,7 @@ public final class AppTabs {
         LinearLayout shell=new LinearLayout(a); shell.setOrientation(1); shell.setBackgroundColor(AppThemeColors.bg(a));
         shell.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
         LinearLayout bar=createBar(a,active);
-        shell.addView(bar,new LinearLayout.LayoutParams(-1,dp(a,58)));
+        shell.addView(bar,new LinearLayout.LayoutParams(-1,dp(a,62)));
         shell.setOnApplyWindowInsetsListener((v,insets)->{
             int bottom=0,top=0;
             if(Build.VERSION.SDK_INT>=30){
@@ -52,7 +52,7 @@ public final class AppTabs {
             } else { bottom=insets.getSystemWindowInsetBottom();top=insets.getSystemWindowInsetTop(); }
             int safe=Math.max(0,bottom);shell.setPadding(0,Math.max(0,top),0,0);
             bar.setPadding(dp(a,6),dp(a,2),dp(a,6),safe);
-            LinearLayout.LayoutParams p=(LinearLayout.LayoutParams)bar.getLayoutParams();int h=dp(a,58)+safe;
+            LinearLayout.LayoutParams p=(LinearLayout.LayoutParams)bar.getLayoutParams();int h=dp(a,62)+safe;
             if(p.height!=h){p.height=h;bar.setLayoutParams(p);}return insets;
         });
         shell.setFitsSystemWindows(false);shell.requestApplyInsets();
@@ -191,7 +191,7 @@ public final class AppTabs {
         if(selected){GradientDrawable selectedBg=new GradientDrawable();selectedBg.setColor(Color.rgb(48,75,66));selectedBg.setCornerRadius(dp(a,12));selectedBg.setStroke(dp(a,1),Color.rgb(207,174,112));item.setBackground(selectedBg);}
         else {GradientDrawable idleBg=new GradientDrawable();idleBg.setColor(Color.TRANSPARENT);idleBg.setCornerRadius(dp(a,12));item.setBackground(idleBg);}
         item.addView(new IllustratedTabIcon(a, key, selected),
-                new LinearLayout.LayoutParams(-1, dp(a,25)));
+                new LinearLayout.LayoutParams(-1, dp(a,34)));
         TextView label=new TextView(a);label.setText(labelText);label.setTextSize(9);label.setSingleLine(true);label.setGravity(Gravity.CENTER);
         label.setTextColor(selected?Color.WHITE:Color.rgb(195,204,199));label.setTypeface(Typeface.DEFAULT,selected?Typeface.BOLD:Typeface.NORMAL);
         item.addView(label,new LinearLayout.LayoutParams(-1,dp(a,15)));
@@ -223,7 +223,7 @@ public final class AppTabs {
             float cx=getWidth()/2f, cy=getHeight()/2f;
             canvas.save();
             canvas.translate(cx,cy);
-            canvas.scale(.82f,.82f);
+            canvas.scale(1.02f,1.02f);
             switch (kind) {
                 case "mushaf": drawMushaf3D(canvas); break;
                 case "radio": drawMicrophone3D(canvas); break;
@@ -239,9 +239,9 @@ public final class AppTabs {
         }
         private void drawMushaf3D(Canvas c) {
             canvasShadow(c, 0x99000000, 2.2f, 1.2f, 1.8f);
-            fill(c, 0xFF123C31); c.drawRoundRect(new RectF(-11,-10,11,10),3,3,paint);
+            fill(c, 0xFF075A3D); c.drawRoundRect(new RectF(-11,-10,11,10),3,3,paint);
             paint.clearShadowLayer();
-            fill(c, 0xFF286B53); c.drawRoundRect(new RectF(-9,-9,9,8),2,2,paint);
+            fill(c, 0xFF13A66A); c.drawRoundRect(new RectF(-9,-9,9,8),2,2,paint);
             line(gold,1.2f); c.drawRoundRect(new RectF(-10,-10,10,10),3,3,paint);
             fill(c, page);
             Path l=new Path(); l.moveTo(0,-6);l.quadTo(-5,-9,-8,-6);l.lineTo(-8,6);l.quadTo(-4,4,0,7);l.close();
@@ -253,9 +253,9 @@ public final class AppTabs {
         }
         private void drawMicrophone3D(Canvas c) {
             canvasShadow(c,0xAA000000,2f,1f,2f);
-            fill(c,0xFF17485A);c.drawRoundRect(new RectF(-5,-12,5,5),5,5,paint);
+            fill(c,0xFF075BC8);c.drawRoundRect(new RectF(-5,-12,5,5),5,5,paint);
             paint.clearShadowLayer();
-            fill(c,0xFF347D8B);c.drawRoundRect(new RectF(-3.7f,-10.5f,2,-1),3,3,paint);
+            fill(c,0xFF12A8E8);c.drawRoundRect(new RectF(-3.7f,-10.5f,2,-1),3,3,paint);
             line(gold,1.1f);c.drawRoundRect(new RectF(-5,-12,5,5),5,5,paint);
             line(page,.7f);for(int x=-2;x<=2;x+=2)c.drawLine(x,-8,x,-2,paint);
             line(gold,1.5f);c.drawArc(new RectF(-9,-7,9,10),0,180,false,paint);c.drawLine(0,10,0,13,paint);c.drawLine(-5,13,5,13,paint);
@@ -263,16 +263,16 @@ public final class AppTabs {
         }
         private void drawMusicNote3D(Canvas c) {
             Path note=new Path();note.moveTo(2,-10);note.lineTo(9,-12);note.lineTo(9,4);note.cubicTo(9,8,3,9,2,6);note.cubicTo(1,3,5,1,7,3);note.lineTo(7,-7);note.lineTo(2,-6);note.close();
-            canvasShadow(c,0xAA000000,2f,1f,2f);fill(c,0xFF9B713B);c.drawPath(note,paint);paint.clearShadowLayer();
-            fill(c,0xFFFFD98B);Path shine=new Path();shine.moveTo(3,-9);shine.lineTo(8,-10);shine.lineTo(8,-8);shine.lineTo(3,-7);shine.close();c.drawPath(shine,paint);
-            fill(c,0xFFFFE7B0);c.drawOval(new RectF(-7,3,-1,8),paint);
+            canvasShadow(c,0xAA000000,2f,1f,2f);fill(c,0xFFFF9D00);c.drawPath(note,paint);paint.clearShadowLayer();
+            fill(c,0xFFFFD21C);Path shine=new Path();shine.moveTo(3,-9);shine.lineTo(8,-10);shine.lineTo(8,-8);shine.lineTo(3,-7);shine.close();c.drawPath(shine,paint);
+            fill(c,0xFFFFF3A6);c.drawOval(new RectF(-7,3,-1,8),paint);
             fill(c,0xFFD6AD68);c.drawOval(new RectF(-8,4,-2,9),paint);
             line(0xFFFFE7B0,.8f);c.drawLine(2,-5,2,1,paint);
         }
         private void drawTasbeeh3D(Canvas c) {
             line(0xFF8C6638,1.8f);c.drawArc(new RectF(-10,-10,10,10),-205,230,false,paint);
             for(int i=0;i<13;i++){double a=Math.toRadians(-205+i*(230.0/12));float x=(float)Math.cos(a)*9.5f,y=(float)Math.sin(a)*9.5f;
-                canvasShadow(c,0x99000000,1.4f,.6f,1f);fill(c,(i%2==0)?0xFFB88A4D:0xFFEAD6A9);c.drawCircle(x,y,2.05f,paint);paint.clearShadowLayer();
+                canvasShadow(c,0x99000000,1.4f,.6f,1f);fill(c,(i%2==0)?0xFF13BFA0:0xFF00A878);c.drawCircle(x,y,2.05f,paint);paint.clearShadowLayer();
                 fill(c,0xFFFFF0C9);c.drawCircle(x-.55f,y-.65f,.65f,paint);
             }
             fill(c,0xFF9D713E);c.drawCircle(0,-12,2.2f,paint);fill(c,0xFFFFE2A0);c.drawCircle(-.6f,-12.6f,.7f,paint);line(gold,1);c.drawLine(0,-10,0,-8,paint);
@@ -282,7 +282,7 @@ public final class AppTabs {
             canvasShadow(c,0xAA000000,2f,1f,2f);
             fill(c,0xFFB98643);c.drawCircle(-5,-3,8.5f,paint);
             fill(c,0xFFFFE3A0);c.drawCircle(-6,-4,7.6f,paint);
-            fill(c,0xFF193F36);c.drawCircle(-2,-6,7.2f,paint);
+            fill(c,0xFF0C5AC8);c.drawCircle(-2,-6,7.2f,paint);
             paint.clearShadowLayer();
             fill(c,0xFFFFE8B0);c.drawCircle(7,-8,1.2f,paint);c.drawCircle(10,-3,.8f,paint);
             // Hanging Ramadan lantern.
@@ -290,26 +290,26 @@ public final class AppTabs {
             Path cap=new Path();cap.moveTo(-4,4);cap.lineTo(4,4);cap.lineTo(3,6);cap.lineTo(-3,6);cap.close();
             fill(c,0xFF9D6B35);c.drawPath(cap,paint);
             canvasShadow(c,0x99000000,1.8f,.6f,1.4f);
-            fill(c,0xFFC28B45);c.drawRoundRect(new RectF(-3.2f,6,3.2f,13),1,1,paint);
+            fill(c,0xFF00A6E8);c.drawRoundRect(new RectF(-3.2f,6,3.2f,13),1,1,paint);
             paint.clearShadowLayer();
-            fill(c,0xFFFFE5A0);c.drawRoundRect(new RectF(-1.7f,7,1.4f,12),.7f,.7f,paint);
+            fill(c,0xFFFFE64D);c.drawRoundRect(new RectF(-1.7f,7,1.4f,12),.7f,.7f,paint);
             line(0xFF8B6339,.9f);c.drawLine(-4,7,-3,6,paint);c.drawLine(4,7,3,6,paint);c.drawLine(-3,13,3,13,paint);
             fill(c,0xFFFFE3A0);c.drawCircle(0,14,1,paint);
         }
         private void drawCalendar3D(Canvas c) {
-            canvasShadow(c,0xAA000000,2f,1f,2f);fill(c,0xFFEEE4CC);c.drawRoundRect(new RectF(-10,-10,10,11),3,3,paint);paint.clearShadowLayer();
-            fill(c,0xFF1E604D);c.drawRoundRect(new RectF(-9,-9,9,-3),2,2,paint);
+            canvasShadow(c,0xAA000000,2f,1f,2f);fill(c,0xFFFFF5E5);c.drawRoundRect(new RectF(-10,-10,10,11),3,3,paint);paint.clearShadowLayer();
+            fill(c,0xFFE53935);c.drawRoundRect(new RectF(-9,-9,9,-3),2,2,paint);
             line(gold,1f);c.drawRoundRect(new RectF(-10,-10,10,11),3,3,paint);c.drawLine(-5,-12,-5,-7,paint);c.drawLine(5,-12,5,-7,paint);
-            fill(c,0xFF315F4B);for(int row=0;row<2;row++)for(int col=0;col<3;col++)c.drawCircle(-5+col*5,1+row*5,1.2f,paint);
+            fill(c,0xFF1689E8);for(int row=0;row<2;row++)for(int col=0;col<3;col++)c.drawCircle(-5+col*5,1+row*5,1.2f,paint);
             fill(c,0xFFD9A85F);c.drawCircle(5,6,1.3f,paint);
             fill(c,0xFFFFFFFF);c.drawCircle(-5.4f,-6.5f,.7f,paint);
         }
         private void drawHome3D(Canvas c) {
             Path roof=new Path();roof.moveTo(-12,-1);roof.lineTo(0,-11);roof.lineTo(12,-1);roof.close();
-            canvasShadow(c,0xAA000000,2f,1f,2f);fill(c,0xFF8C6338);c.drawPath(roof,paint);paint.clearShadowLayer();
-            fill(c,0xFFFFD98B);Path roofLight=new Path();roofLight.moveTo(-10,-2);roofLight.lineTo(0,-10);roofLight.lineTo(0,-7);roofLight.lineTo(-7,-1);roofLight.close();c.drawPath(roofLight,paint);
+            canvasShadow(c,0xAA000000,2f,1f,2f);fill(c,0xFFB84A16);c.drawPath(roof,paint);paint.clearShadowLayer();
+            fill(c,0xFFFFC928);Path roofLight=new Path();roofLight.moveTo(-10,-2);roofLight.lineTo(0,-10);roofLight.lineTo(0,-7);roofLight.lineTo(-7,-1);roofLight.close();c.drawPath(roofLight,paint);
             fill(c,0xFFEEE4CC);c.drawRoundRect(new RectF(-9,-1,9,11),2,2,paint);
-            fill(c,0xFF28614C);c.drawRoundRect(new RectF(-2,3,2,11),1,1,paint);
+            fill(c,0xFF00A6A6);c.drawRoundRect(new RectF(-2,3,2,11),1,1,paint);
             line(gold,.9f);c.drawRoundRect(new RectF(-9,-1,9,11),2,2,paint);
         }
         private void drawMore3D(Canvas c) {
