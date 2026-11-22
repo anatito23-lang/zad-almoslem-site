@@ -111,9 +111,28 @@ public class QuranTextActivity extends Activity {
             verse.setText(a.optString("text","")+"  ۞ "+local);
             verse.setTextSize(21);verse.setTextColor(Color.rgb(31,75,59));
             verse.setTypeface(Typeface.create("serif",Typeface.NORMAL));
-            verse.setTextIsSelectable(false);verse.setLongClickable(false);verse.setFocusable(false);
+            verse.setTextIsSelectable(false);
+            verse.setLongClickable(false);
+            verse.setFocusable(false);
+            verse.setHighlightColor(Color.TRANSPARENT);
             verse.setPadding(dp(14),dp(14),dp(14),dp(14));
             verse.setBackground(bg(Color.WHITE,12));
+            // Consume long-press explicitly so Android cannot enter text-selection/
+            // contextual-action mode or leave a dimmed pressed/selected appearance.
+            verse.setOnLongClickListener(v -> {
+                v.cancelLongPress();
+                v.setPressed(false);
+                ((TextView)v).setTextColor(Color.rgb(31,75,59));
+                return true;
+            });
+            verse.setOnTouchListener((v,event) -> {
+                int action=event.getActionMasked();
+                if(action==android.view.MotionEvent.ACTION_UP || action==android.view.MotionEvent.ACTION_CANCEL){
+                    v.setPressed(false);
+                    ((TextView)v).setTextColor(Color.rgb(31,75,59));
+                }
+                return false;
+            });
             LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(7);verses.addView(verse,lp);
             verse.setOnClickListener(v->{currentIndex=index;playAyah(index,true);});
         }
