@@ -14,6 +14,7 @@ const egyptCoords={
  Arish:[31.1316,33.7984],Sohag:[26.5569,31.6948]
 };
 let coordinatesPromise=null;
+let forcePrayerFallback=false;
 const radians=d=>d*Math.PI/180;
 const degrees=r=>r*180/Math.PI;
 function localPrayerTimings(day,lat,lon,method){
@@ -75,6 +76,7 @@ async function fallbackPrayerData(day){
 if(typeof window.getPrayerData==='function'&&!window.getPrayerData.__zadResilient){
  const original=window.getPrayerData.bind(window);
  const resilient=async function(city,day){
+  if(forcePrayerFallback)return fallbackPrayerData(day instanceof Date?day:new Date());
   try{return await original(city,day);}
   catch(error){
    try{return await fallbackPrayerData(day instanceof Date?day:new Date());}
@@ -176,6 +178,6 @@ document.getElementById('audio')?.addEventListener('error',()=>{
 });
 
 // If the first prayer request is blocked, retry through the local calculation fallback.
-setTimeout(()=>{if(!window.zadPrayerTimings&&typeof window.loadPrayer==='function')window.loadPrayer();},8500);
+setTimeout(()=>{if(!window.zadPrayerTimings&&typeof window.loadPrayer==='function'){forcePrayerFallback=true;window.loadPrayer();}},8500);
 
 })();
