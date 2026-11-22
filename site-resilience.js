@@ -6,7 +6,12 @@ window.__zadSiteResilienceLoaded=true;
 const egyptCoords={
  Cairo:[30.0444,31.2357],Zagazig:[30.5877,31.5020],Alexandria:[31.2001,29.9187],Giza:[30.0131,31.2089],
  Mansoura:[31.0409,31.3785],Tanta:[30.7865,31.0004],Ismailia:[30.5965,32.2715],Suez:[29.9668,32.5498],
- 'Port Said':[31.2653,32.3019],Asyut:[27.1783,31.1859],Luxor:[25.6872,32.6398],Aswan:[24.0889,32.8998]
+ 'Port Said':[31.2653,32.3019],Asyut:[27.1783,31.1859],Luxor:[25.6872,32.6398],Aswan:[24.0889,32.8998],
+ Damanhur:[31.0341,30.4682],Hurghada:[27.2579,33.8116],Fayoum:[29.3084,30.8428],
+ 'Shebin El Kom':[30.5526,31.0090],Minya:[28.1099,30.7503],Banha:[30.4667,31.1833],
+ Kharga:[25.4390,30.5586],'Beni Suef':[29.0661,31.0994],'Tor Sinai':[28.2417,33.6222],
+ 'Kafr El Sheikh':[31.1117,30.9399],'Marsa Matruh':[31.3525,27.2453],Qena:[26.1551,32.7160],
+ Arish:[31.1316,33.7984],Sohag:[26.5569,31.6948]
 };
 let coordinatesPromise=null;
 const radians=d=>d*Math.PI/180;
@@ -132,7 +137,7 @@ function bindQuranFallback(){
   const audio=document.getElementById('audio'),status=document.getElementById('quranStatus');
   if(!audio)return;
   const names={basit:'عبد الباسط عبد الصمد',minshawi:'محمد صديق المنشاوي',husary:'محمود خليل الحصري'};
-  audio.pause();
+  audio.pause();audio.dataset.zadFallbackTried='1';
   audio.src='https://cdn.islamic.network/quran/audio-surah/128/'+edition+'/'+surah+'.mp3';
   audio.classList.remove('hidden');audio.load();
   if(status)status.textContent='تلاوة '+names[key]+' — سورة '+surahNames[surah-1]+' من مكتبة AlQuran Cloud.';
@@ -156,8 +161,21 @@ if(quranCard&&!document.getElementById('zadQuranSourceNotice')){
  quranCard.append(notice);
 }
 document.getElementById('audio')?.addEventListener('error',()=>{
- const status=document.getElementById('quranStatus');
- if(status&&status.textContent.includes('تلاوة'))status.textContent='فشل تحميل ملف التلاوة. قد تكون شبكة العمل تحجب خادم الصوت؛ جرّب شبكة أخرى أو افتح مصدر التلاوة مباشرة.';
+ const audio=document.getElementById('audio'),status=document.getElementById('quranStatus');
+ const key=document.getElementById('reciter')?.value,edition=fallbackEditions[key];
+ const surah=Number(document.getElementById('surahSelect')?.value);
+ if(edition&&surah&&audio&&!audio.dataset.zadFallbackTried&&audio.src&&!audio.src.includes('cdn.islamic.network')){
+  audio.dataset.zadFallbackTried='1';
+  audio.src='https://cdn.islamic.network/quran/audio-surah/128/'+edition+'/'+surah+'.mp3';
+  audio.load();
+  if(status)status.textContent='تعذر المصدر الأول؛ نجرب مصدرًا احتياطيًا للتلاوة...';
+  audio.play().catch(()=>{if(status)status.textContent='تعذر تشغيل التلاوة من المصدرين. قد تحجب شبكة العمل خوادم الصوت؛ جرّب شبكة أخرى أو افتح مصدر التلاوة مباشرة.';});
+  return;
+ }
+ if(status)status.textContent='فشل تحميل ملف التلاوة. قد تكون شبكة العمل تحجب خادم الصوت؛ جرّب شبكة أخرى أو افتح مصدر التلاوة مباشرة.';
 });
+
+// If the first prayer request is blocked, retry through the local calculation fallback.
+setTimeout(()=>{if(!window.zadPrayerTimings&&typeof window.loadPrayer==='function')window.loadPrayer();},8500);
 
 })();
