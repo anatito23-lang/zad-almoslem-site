@@ -1279,6 +1279,16 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
 const $=id=>document.getElementById(id);
 const cityNames={Cairo:"القاهرة",Zagazig:"الزقازيق",Alexandria:"الإسكندرية",Giza:"الجيزة",Mansoura:"المنصورة",Tanta:"طنطا",Ismailia:"الإسماعيلية",Suez:"السويس","Port Said":"بورسعيد",Asyut:"أسيوط",Luxor:"الأقصر",Aswan:"أسوان"};
 window.zadPrayerLocation=null;
+/* قائمة دول العالم: القيمة الإنجليزية لخدمة المواقيت والاسم الظاهر بالعربية. */
+(function populatePrayerCountries(){
+ const select=document.getElementById('prayerCountry');if(!select||select.dataset.allCountriesReady)return;
+ const codes='AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS XK YE YT ZA ZM ZW'.split(' ');
+ const ar=new Intl.DisplayNames(['ar'],{type:'region'}),en=new Intl.DisplayNames(['en'],{type:'region'}),current=select.value;
+ const opts=codes.map(code=>({code,ar:ar.of(code)||code,en:en.of(code)||code})).sort((a,b)=>a.ar.localeCompare(b.ar,'ar'));
+ select.innerHTML='<option value="Egypt">مصر</option>'+opts.filter(x=>x.code!=='EG').map(x=>'<option value="'+x.en.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'">'+x.ar+'</option>').join('')+'<option value="Other">دولة أخرى / إدخال يدوي</option>';
+ if(current&&[...select.options].some(o=>o.value===current))select.value=current;
+ select.dataset.allCountriesReady='1';
+})();
 function syncPrayerPlaceControls(){
  const country=$('prayerCountry').value,egypt=country==='Egypt';
  $('egyptGovernorateWrap').style.display=egypt?'block':'none';
@@ -2240,7 +2250,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261122-navfix1"></script>
+<script src="./app-pages.js?v=20261122-worldprayer-tabs2"></script>
 <script id="zad-public-site-final-guard">
 (function(){
  if(location.hostname!=='anatito23-lang.github.io')return;
@@ -2605,17 +2615,17 @@ html{scroll-padding-top:14px}
 <script id="zad-web-tabs-repair-20261122">
 (function(){
  if(location.hostname!=='anatito23-lang.github.io')return;
- document.addEventListener('click',function(event){
-  const link=event.target.closest('.top nav a[href^="#"],.zad-web-shortcuts a[href^="#"]');
-  if(!link)return;
-  const id=decodeURIComponent((link.getAttribute('href')||'').slice(1));
-  const target=document.getElementById(id);
-  if(!target)return;
-  event.preventDefault();
-  history.replaceState(null,'','#'+id);
-  target.scrollIntoView({behavior:'smooth',block:'start'});
- },true);
+ const links=()=>Array.from(document.querySelectorAll('.top nav a[href^="#"],.zad-web-shortcuts a[href^="#"]'));
+ function markActive(){const id=decodeURIComponent(location.hash.slice(1));links().forEach(a=>{if(a.getAttribute('href')==='#'+id){a.setAttribute('aria-current','location');a.classList.add('is-current-tab');}else{a.removeAttribute('aria-current');a.classList.remove('is-current-tab');}});}
+ document.addEventListener('click',function(event){const link=event.target.closest('.top nav a[href^="#"],.zad-web-shortcuts a[href^="#"]');if(!link)return;const id=decodeURIComponent((link.getAttribute('href')||'').slice(1)),target=document.getElementById(id);if(!target)return;event.preventDefault();history.pushState(null,'','#'+id);target.scrollIntoView({behavior:'smooth',block:'start'});markActive();},true);
+ window.addEventListener('hashchange',markActive);window.addEventListener('popstate',markActive);markActive();
 })();
 </script>
+<style id="zad-tabs-active-style-20261122">
+.top nav a.is-current-tab{background:#e8f0e7!important;border-color:#b99b65!important;color:#294b39!important}
+.zad-web-shortcuts a.is-current-tab{border-color:#b99b65!important;box-shadow:0 0 0 2px #b99b6522!important}
+.prayer-location-settings label{min-width:0}
+.prayer-location-settings select,.prayer-location-settings input{width:100%;min-width:0;box-sizing:border-box}
+</style>
 </body>
 </html>
