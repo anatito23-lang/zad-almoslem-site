@@ -131,7 +131,7 @@ const prayerTitle=document.querySelector('#prayer .section-head p');if(prayerTit
    }
    const contentSnap=await getDocs(query(collection(db,"site_content"),where("published","==",true)));
    const rows=contentSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-   rows.forEach(item=>{const section=document.getElementById(item.sectionId);if(section)addCard(section,item);});
+   rows.forEach(item=>{if(item.sectionId==="quran")return;const section=document.getElementById(item.sectionId);if(section)addCard(section,item);});
   }catch(error){console.warn("تعذر تحميل محتوى لوحة إدارة الموقع",error);}
  })();
 
