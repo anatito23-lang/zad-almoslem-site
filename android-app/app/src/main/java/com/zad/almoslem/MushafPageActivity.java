@@ -334,6 +334,15 @@ public class MushafPageActivity extends Activity {
         startActivity(open);
     }
 
+    private void showSearchVerseResult(String message) {
+        status.setText(message);
+        status.setTextSize(17);
+        status.setTextColor(AppThemeColors.text(this));
+        status.setGravity(Gravity.CENTER);
+        status.setPadding(dp(12), dp(12), dp(12), dp(12));
+        status.setBackground(shape(Color.rgb(255, 253, 244), 12, Color.rgb(177, 157, 112)));
+    }
+
     private File pageFile(int number) {
         File dir = new File(getFilesDir(), "mushaf_images");
         if (!dir.exists()) dir.mkdirs();
@@ -356,7 +365,8 @@ public class MushafPageActivity extends Activity {
             Bitmap bitmap = BitmapFactory.decodeFile(cached.getAbsolutePath());
             if (bitmap != null) {
                 pageImage.setImageBitmap(bitmap);
-                status.setText(pendingAyahMessage.isEmpty() ? "صفحة محفوظة على الهاتف — يمكنك القراءة دون إنترنت" : pendingAyahMessage + " — الصفحة محفوظة على الهاتف");
+                if (pendingAyahMessage.isEmpty()) status.setText("صفحة محفوظة على الهاتف — يمكنك القراءة دون إنترنت");
+                else showSearchVerseResult(pendingAyahMessage);
                 pendingAyahMessage = "";
                 progress.setVisibility(View.GONE);
                 return;
@@ -392,7 +402,8 @@ public class MushafPageActivity extends Activity {
                 runOnUiThread(() -> {
                     if (page == number) {
                         pageImage.setImageBitmap(bitmap);
-                        status.setText(pendingAyahMessage.isEmpty() ? "تم تحميل الصفحة وحفظها على الهاتف" : pendingAyahMessage);
+                        if (pendingAyahMessage.isEmpty()) status.setText("تم تحميل الصفحة وحفظها على الهاتف");
+                        else showSearchVerseResult(pendingAyahMessage);
                         pendingAyahMessage = "";
                     }
                 });
