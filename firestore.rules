@@ -14,6 +14,21 @@ service cloud.firestore {
         || resource.data.get('النشر', false) == true;
     }
 
+    match /waqafat/__app_navigation__ {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /site_custom_tabs/site_custom_tabs_config {
+      allow read, write: if isAdmin();
+    }
+    match /site_custom_tabs/site_custom_tabs_public {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
     // Full configuration (including hidden tabs) is private.
     match /waqafat/custom_tabs_config {
       allow read, write: if isAdmin();
