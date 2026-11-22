@@ -55,7 +55,26 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <div class="actions"><button type="submit">حفظ المحتوى</button><button class="secondary" id="customContentCancel" type="button">إلغاء التعديل</button></div>
 </form>
 <div id="customContentList"></div><div id="customTabsMessage" class="notice hidden" role="status"></div>
-</section></main>
+</section>
+<section class="card hidden" id="siteContentCard">
+<h2>إدارة جميع تبويبات الموقع</h2>
+<p class="small">أضف منشورات ومواد وروابط داخل أي قسم ظاهر بالموقع، مع إمكانية تعديلها أو إخفائها أو حذفها. المحتوى الأصلي والأدوات التفاعلية تظل كما هي.</p>
+<form id="siteContentForm">
+<input id="siteContentId" type="hidden">
+<label for="siteContentSection">انشر داخل التبويب</label><select id="siteContentSection" required></select>
+<label for="siteContentTitle">عنوان المحتوى *</label><input id="siteContentTitle" maxlength="200" required placeholder="عنوان المادة أو الإعلان">
+<label for="siteContentBody">النص *</label><textarea id="siteContentBody" maxlength="30000" required placeholder="اكتب المحتوى الذي سيظهر داخل القسم"></textarea>
+<div class="row"><div><label for="siteContentSource">المصدر (اختياري)</label><input id="siteContentSource" maxlength="300" placeholder="الكتاب أو المرجع"></div><div><label for="siteContentOrder">ترتيب الظهور</label><input id="siteContentOrder" type="number" min="0" max="9999" value="0"></div></div>
+<label for="siteContentUrl">رابط مرفق (اختياري)</label><input id="siteContentUrl" type="url" maxlength="1500" placeholder="https://...">
+<label for="siteContentUrlLabel">نص زر الرابط</label><input id="siteContentUrlLabel" maxlength="80" placeholder="افتح الرابط أو استمع أو اقرأ الملف">
+<label class="check"><input id="siteContentPublished" type="checkbox" checked> نشر المحتوى للزوار</label>
+<div class="actions"><button id="siteContentSave" type="submit">نشر المحتوى</button><button class="secondary" id="siteContentCancel" type="button">إلغاء</button><button class="secondary" id="siteContentRefresh" type="button">تحديث القائمة</button></div>
+</form>
+<div id="siteContentMessage" class="notice hidden" role="status"></div>
+<hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+<h2>المواد المنشورة في تبويبات الموقع</h2><div id="siteContentList"><p class="small">سجّل الدخول لعرض المحتوى.</p></div>
+</section>
+</main>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -131,5 +150,53 @@ $("customTabForm").addEventListener("submit",async e=>{e.preventDefault();const 
 $("customContentForm").addEventListener("submit",async e=>{e.preventDefault();const tabId=$("customContentTab").value,title=$("customContentTitle").value.trim(),body=$("customContentBody").value.trim();if(!tabId||!title||!body){customMessage("اختر تبويبًا وأكمل العنوان والنص.",true);return}const pub=$("customContentPublished").checked,data={tabId,title,body,source:$("customContentSource").value.trim(),published:pub,"تم النشر":pub,"النشر":pub,updatedAt:serverTimestamp()};try{const id=$("customContentId").value;if(id)await updateDoc(doc(db,"waqafat",id),data);else{data.createdAt=serverTimestamp();await addDoc(collection(db,"waqafat"),data)}$("customContentForm").reset();$("customContentId").value="";$("customContentPublished").checked=true;await loadCustomContent();customMessage("تم حفظ المحتوى.")}catch(e){customMessage("تعذر حفظ المحتوى: "+e.message,true)}});
 $("customContentCancel").addEventListener("click",()=>{$("customContentForm").reset();$("customContentId").value="";$("customContentPublished").checked=true});
 
-onAuthStateChanged(auth,async user=>{if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");$("customTabsCard").classList.add("hidden");return}if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return}$("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("customTabsCard").classList.remove("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";await loadItems();try{await readCustomTabs()}catch(e){customMessage("تعذر تحميل التبويبات: "+e.message,true)}});
+
+// إدارة المنشورات الإضافية داخل جميع أقسام الموقع
+const SITE_SECTIONS=[
+ ["prayer","مواقيت الصلاة"],["calendar","التقويم الشهري"],["quran","استماع القرآن الكريم"],
+ ["nasheed","الإنشاد الديني والابتهالات"],["mushaf","المصحف الشريف"],["ruqyah","الرقية الشرعية"],
+ ["radio-egypt","إذاعة القرآن الكريم"],["azkar","الأذكار اليومية"],["books-library","مكتبة الكتب الإسلامية"],
+ ["hadith-dua","الحديث الشريف"],["duas","الأدعية"],["daily-wird","وردي اليومي"],
+ ["friday-wird","ورد الجمعة"],["qalbi-itmaann","قلبي اطمأن"],["library","المكتبة الإيمانية"],
+ ["friday-live","بث خطبة الجمعة"],["khutbahs","خطب الجمعة"],["shaaraawi","خواطر الشعراوي"],
+ ["islamic-knowledge","زاد العلم والإيمان"],["ramadan","زادك في رمضان"]
+];
+function siteMsg(value,error=false){const el=$("siteContentMessage");el.textContent=value;el.classList.remove("hidden","error");if(error)el.classList.add("error")}
+function resetSiteForm(){ $("siteContentForm").reset();$("siteContentId").value="";$("siteContentOrder").value="0";$("siteContentPublished").checked=true;$("siteContentSave").textContent="نشر المحتوى";}
+function fillSiteSections(){
+ const select=$("siteContentSection"),old=select.value;
+ const options=SITE_SECTIONS.map(([id,title])=>({id,title}));
+ customTabs.filter(t=>t&&t.id&&t.title&&t.visible!==false).forEach(t=>{if(!options.some(x=>x.id===t.id))options.push({id:t.id,title:t.title+" (تبويب إضافي)"})});
+ select.innerHTML=options.map(x=>'<option value="'+escapeHtml(x.id)+'">'+escapeHtml(x.title)+'</option>').join("");
+ if(options.some(x=>x.id===old))select.value=old;
+}
+async function loadSiteContent(){
+ if(auth.currentUser?.uid!==ADMIN_UID)return;
+ $("siteContentList").innerHTML='<p class="small">جارٍ تحميل المنشورات…</p>';
+ try{
+  const snap=await getDocs(collection(db,"site_content"));
+  const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  if(!rows.length){$("siteContentList").innerHTML='<p class="small">لا توجد منشورات إضافية حتى الآن.</p>';return}
+  const sectionName=id=>SITE_SECTIONS.find(x=>x[0]===id)?.[1]||customTabs.find(t=>t.id===id)?.title||id;
+  $("siteContentList").innerHTML=rows.map(x=>'<article class="item"><div class="row"><strong>'+escapeHtml(x.title||"بدون عنوان")+'</strong><span class="tag">'+(isPublished(x)?"منشور":"مسودة")+'</span></div><p class="small">القسم: '+escapeHtml(sectionName(x.sectionId))+' · الترتيب: '+escapeHtml(String(x.order??0))+'</p><p>'+escapeHtml((x.body||"").slice(0,240))+'</p>'+(x.url?'<p class="small">'+escapeHtml(x.url)+'</p>':'')+'<div class="actions"><button type="button" class="secondary" data-site-edit="'+escapeHtml(x.id)+'">تعديل</button><button type="button" class="gold" data-site-toggle="'+escapeHtml(x.id)+'" data-published="'+isPublished(x)+'">'+(isPublished(x)?"إلغاء النشر":"نشر")+'</button><button type="button" class="danger" data-site-delete="'+escapeHtml(x.id)+'">حذف</button></div></article>').join("");
+  $("siteContentList").querySelectorAll("[data-site-edit]").forEach(b=>b.addEventListener("click",()=>{const x=rows.find(r=>r.id===b.dataset.siteEdit);if(!x)return;$("siteContentId").value=x.id;$("siteContentSection").value=x.sectionId||"prayer";$("siteContentTitle").value=x.title||"";$("siteContentBody").value=x.body||"";$("siteContentSource").value=x.source||"";$("siteContentOrder").value=String(x.order??0);$("siteContentUrl").value=x.url||"";$("siteContentUrlLabel").value=x.urlLabel||"";$("siteContentPublished").checked=isPublished(x);$("siteContentSave").textContent="حفظ التعديلات";window.scrollTo({top:$("siteContentCard").offsetTop,behavior:"smooth"})}));
+  $("siteContentList").querySelectorAll("[data-site-toggle]").forEach(b=>b.addEventListener("click",async()=>{const next=b.dataset.published!=="true";try{await updateDoc(doc(db,"site_content",b.dataset.siteToggle),{published:next,"تم النشر":next,updatedAt:serverTimestamp()});siteMsg(next?"تم نشر المحتوى.":"تم إلغاء النشر.");await loadSiteContent()}catch(e){siteMsg("تعذر تغيير حالة النشر: "+e.message,true)}}));
+  $("siteContentList").querySelectorAll("[data-site-delete]").forEach(b=>b.addEventListener("click",async()=>{if(!confirm("هل تريد حذف هذا المحتوى نهائيًا؟"))return;try{await deleteDoc(doc(db,"site_content",b.dataset.siteDelete));siteMsg("تم حذف المحتوى.");await loadSiteContent()}catch(e){siteMsg("تعذر الحذف: "+e.message,true)}}));
+ }catch(e){$("siteContentList").textContent="تعذر تحميل المحتوى: "+e.message}
+}
+$("siteContentForm").addEventListener("submit",async e=>{
+ e.preventDefault();if(auth.currentUser?.uid!==ADMIN_UID)return;
+ const sectionId=$("siteContentSection").value,title=$("siteContentTitle").value.trim(),body=$("siteContentBody").value.trim(),url=$("siteContentUrl").value.trim();
+ if(!sectionId||!title||!body){siteMsg("اختر القسم واكتب العنوان والنص.",true);return}
+ if(url&&!/^https:\/\//i.test(url)){siteMsg("الرابط يجب أن يبدأ بـ https://",true);return}
+ const order=Number($("siteContentOrder").value);if(!Number.isInteger(order)||order<0||order>9999){siteMsg("أدخل ترتيبًا صحيحًا من 0 إلى 9999.",true);return}
+ const published=$("siteContentPublished").checked,data={sectionId,title,body,source:$("siteContentSource").value.trim(),order,url,urlLabel:$("siteContentUrlLabel").value.trim()||"فتح الرابط",published,"تم النشر":published,updatedAt:serverTimestamp()};
+ const id=$("siteContentId").value;
+ try{if(id)await updateDoc(doc(db,"site_content",id),data);else{data.createdAt=serverTimestamp();await addDoc(collection(db,"site_content"),data)}resetSiteForm();siteMsg(id?"تم حفظ التعديلات.":"تم نشر المحتوى في القسم المحدد.");await loadSiteContent()}
+ catch(e){siteMsg("تعذر حفظ المحتوى: "+e.message,true)}
+});
+$("siteContentCancel").addEventListener("click",resetSiteForm);
+$("siteContentRefresh").addEventListener("click",loadSiteContent);
+
+onAuthStateChanged(auth,async user=>{if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");$("customTabsCard").classList.add("hidden");return}if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return}$("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("customTabsCard").classList.remove("hidden");$("siteContentCard").classList.remove("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";await loadItems();try{await readCustomTabs();fillSiteSections();await loadSiteContent()}catch(e){customMessage("تعذر تحميل التبويبات: "+e.message,true)}});
 </script></body></html>
