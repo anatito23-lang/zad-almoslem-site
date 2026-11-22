@@ -270,8 +270,8 @@ public class MushafPageActivity extends Activity {
                 String value = ayahNumber.getText().toString().trim();
                 if (value.isEmpty()) {
                     pendingAyahMessage = "";
-                status.setClickable(false);
-                status.setOnClickListener(null);
+                    status.setClickable(false);
+                    status.setOnClickListener(null);
                     showPage(SURAH_PAGES[surah - 1]);
                     return;
                 }
@@ -421,8 +421,6 @@ public class MushafPageActivity extends Activity {
                         if (pendingAyahMessage.isEmpty()) status.setText("تم تحميل الصفحة وحفظها على الهاتف");
                         else showSearchVerseResult(pendingAyahMessage);
                         pendingAyahMessage = "";
-                        status.setClickable(false);
-                        status.setOnClickListener(null);
                     }
                 });
             } catch (Exception error) {
