@@ -86,6 +86,55 @@ const prayerTitle=document.querySelector('#prayer .section-head p');if(prayerTit
  const webLayoutStyle=document.createElement('style');
  webLayoutStyle.textContent='body.zad-public-website{padding-top:0!important}.zad-public-website .top{position:relative;z-index:5;max-width:1240px;margin:0 auto;padding:16px 24px}.zad-public-website .top nav{justify-content:center;gap:8px}.zad-public-website .top nav a{padding:9px 12px;border:1px solid #ffffff20;border-radius:999px;white-space:nowrap;transition:background .2s,border-color .2s}.zad-public-website .top nav a:hover{background:#ffffff20;border-color:#d7bd80}.zad-public-website .hero-content{max-width:1160px;margin:34px auto 0}.zad-public-website main.wrap{max-width:1160px;margin:0 auto;padding:28px 22px 70px}.zad-public-website main.wrap>.section{scroll-margin-top:22px;margin-bottom:34px}.zad-public-website .section-divider{margin:30px 0}.zad-public-website footer{margin-top:36px}@media(max-width:700px){.zad-public-website .top{padding:12px 15px}.zad-public-website .top nav{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;padding-bottom:7px}.zad-public-website main.wrap{padding:20px 14px 48px}.zad-public-website .hero-content{margin-top:24px}}';
  document.head.append(webLayoutStyle);
+ // نشر المواد التي يضيفها المسؤول داخل أي تبويب بالموقع العام.
+ (async function loadWebsiteManagedContent(){
+  try{
+   const {initializeApp,getApps}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+   const {getFirestore,doc,getDoc,collection,getDocs,query,where}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+   const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
+   const app=getApps().length?getApps()[0]:initializeApp(cfg),db=getFirestore(app);
+   const safeUrl=value=>{try{const u=new URL(value,location.href);return u.protocol==="https:"?u.href:""}catch(_){return""}};
+   const addCard=(section,item)=>{
+    if(!section||!item)return;
+    const article=document.createElement("article");article.className="card site-managed-card";article.style.margin="12px 0";
+    const title=document.createElement("h3");title.textContent=item.title||"مادة جديدة";article.append(title);
+    const body=document.createElement("p");body.textContent=item.body||"";body.style.whiteSpace="pre-wrap";body.style.lineHeight="2";article.append(body);
+    if(item.source){const source=document.createElement("p");source.className="small";source.style.marginTop="10px";source.textContent="المصدر: "+item.source;article.append(source);}
+    const href=safeUrl(item.url||"");
+    if(href){const link=document.createElement("a");link.className="btn light";link.href=href;link.target="_blank";link.rel="noopener noreferrer";link.textContent=item.urlLabel||"فتح الرابط";link.style.display="inline-block";link.style.marginTop="10px";article.append(link);}
+    section.append(article);
+   };
+   // التبويبات الإضافية التي أنشأها المسؤول.
+   const tabsSnap=await getDoc(doc(db,"waqafat","custom_tabs_public"));
+   let customTabs=[];
+   if(tabsSnap.exists()&&Array.isArray(tabsSnap.data().tabs)){
+    customTabs=tabsSnap.data().tabs.filter(t=>t&&t.id&&t.title&&t.visible!==false).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
+   }
+   for(const tab of customTabs){
+    let section=document.getElementById(tab.id);
+    if(!section){
+     section=document.createElement("section");section.className="section";section.id=tab.id;
+     const heading=document.createElement("div");heading.className="section-head";
+     const inner=document.createElement("div"),h=document.createElement("h2"),desc=document.createElement("p");
+     h.textContent=(tab.icon||"✨")+" "+tab.title;desc.textContent="محتوى يضاف ويُنشر من لوحة إدارة زاد المسلم";
+     inner.append(h,desc);heading.append(inner);section.append(heading);main?.append(section);
+    }
+    const nav=document.querySelector(".top nav");
+    if(nav&&!nav.querySelector('a[href="#'+CSS.escape(tab.id)+'"]')){const a=document.createElement("a");a.href="#"+tab.id;a.textContent=tab.title;nav.append(a);}
+    const shortcuts=document.querySelector(".zad-web-shortcuts");
+    if(shortcuts&&!shortcuts.querySelector('a[href="#'+CSS.escape(tab.id)+'"]')){const a=document.createElement("a");a.href="#"+tab.id;const icon=document.createElement("span"),label=document.createElement("b");icon.textContent=tab.icon||"✨";label.textContent=tab.title;a.append(icon,label);shortcuts.append(a);}
+   }
+   if(customTabs.length){
+    const customSnap=await getDocs(query(collection(db,"waqafat"),where("published","==",true)));
+    const customRows=customSnap.docs.map(d=>({id:d.id,...d.data()}));
+    customRows.forEach(item=>{if(!item.tabId)return;const section=document.getElementById(item.tabId);if(section)addCard(section,{title:item.title,body:item.body,source:item.source,url:item.url,urlLabel:item.urlLabel});});
+   }
+   const contentSnap=await getDocs(query(collection(db,"site_content"),where("published","==",true)));
+   const rows=contentSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+   rows.forEach(item=>{const section=document.getElementById(item.sectionId);if(section)addCard(section,item);});
+  }catch(error){console.warn("تعذر تحميل محتوى لوحة إدارة الموقع",error);}
+ })();
+
 }
 
 // Keep the website and Android app section lists identical: the Kids section is disabled in both.
