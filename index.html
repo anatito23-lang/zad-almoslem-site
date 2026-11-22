@@ -2376,7 +2376,7 @@ if(new Date().getDay()===5){$('fridayBadge').textContent='اليوم يوم ال
     const url=b.fileUrl||(b.storagePath?await getDownloadURL(ref(storage,b.storagePath)):"");
     const card=document.createElement("article");card.className="card book-card";card.dataset.bookCategory=b.category||"other";
     const icon=document.createElement("div");icon.className="icon";icon.textContent="📚";card.append(icon);
-    const h=document.createElement("h3");h.textContent=b.title||"كتاب إسلامي";card.append(h);
+    if(b.coverUrl){const cover=document.createElement("img");cover.src=b.coverUrl;cover.alt="غلاف "+(b.title||"الكتاب");cover.loading="lazy";cover.style.cssText="width:110px;height:150px;object-fit:contain;display:block;margin:0 auto 12px";card.append(cover)}const h=document.createElement("h3");h.textContent=b.title||"كتاب إسلامي";card.append(h);
     const author=document.createElement("div");author.className="book-author";author.textContent=b.author||"";card.append(author);
     if(b.summary){const p=document.createElement("p");p.textContent=b.summary;card.append(p)}
     const meta=document.createElement("div");meta.className="book-level";meta.textContent=[labels[b.category]||"كتب متنوعة",b.publisher,b.edition].filter(Boolean).join(" · ");card.append(meta);
