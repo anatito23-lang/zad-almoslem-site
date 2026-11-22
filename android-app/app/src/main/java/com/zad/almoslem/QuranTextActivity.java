@@ -119,7 +119,7 @@ public class QuranTextActivity extends Activity {
         }
         if(targetAyah > 0 && !ayahs.isEmpty()) {
             int found = -1;
-            for(int i=0;i<ayahs.size();i++) if(ayahs.get(i).optInt("numberInSurah",-1)==targetAyah){found=i;break;}
+            for(int i=0;i<ayahs.size();i++) { JSONObject candidate=ayahs.get(i); JSONObject candidateSurah=candidate.optJSONObject("surah"); int candidateSurahNumber=candidateSurah==null?surahNumber:candidateSurah.optInt("number",surahNumber); if(candidateSurahNumber==surahNumber && candidate.optInt("numberInSurah",-1)==targetAyah){found=i;break;} }
             if(found >= 0) {
                 final int targetIndex = found;
                 verses.post(() -> {
