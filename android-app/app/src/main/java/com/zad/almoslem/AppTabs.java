@@ -228,10 +228,10 @@ public final class AppTabs {
             float cx=getWidth()/2f, cy=getHeight()/2f;
             canvas.save();
             canvas.translate(cx,cy);
-            canvas.scale(.72f,.72f);
-            if ("mushaf".equals(kind)) drawMushaf(canvas);
+            canvas.scale(.82f,.82f);
+            if ("mushaf".equals(kind)) { canvas.save(); canvas.scale(1.12f,1.12f); drawMushaf(canvas); canvas.restore(); }
             else if ("radio".equals(kind)) drawMicrophone(canvas);
-            else drawCalendar(canvas);
+            else { canvas.save(); canvas.scale(1.12f,1.12f); drawCalendar(canvas); canvas.restore(); }
             canvas.restore();
         }
         private void drawMushaf(Canvas c) {
