@@ -4,13 +4,13 @@ if(location.hostname!=='anatito23-lang.github.io')return;
 document.documentElement.classList.add('zad-public-website');
 document.body.classList.add('zad-public-website');
 const selectors=[
- '.azkar-ticker','#azkar','#daily-reminder-settings',
+ '.azkar-ticker','#daily-reminder-settings',
  '.prayer-tracker','.adhan-settings','#zadAudioSettingsSlot',
  '.tasbeeh-float','#tasbeehPanel','#tasbeehFab','#zad-page-tasbeeh',
  '#qibla','#zad-page-qibla','.bottom-nav','.zad-bottom-nav',
  '#adhan','#adhan-settings'
 ];
-const linkPattern=/#(?:azkar|reminders|daily-reminder-settings|qibla|tasbeeh(?:Fab)?|adhan(?:-settings)?|prayer-tracker)(?:$|[?#])/i;
+const linkPattern=/#(?:reminders|daily-reminder-settings|qibla|tasbeeh(?:Fab)?|adhan(?:-settings)?|prayer-tracker)(?:$|[?#])/i;
 function clean(){
  for(const selector of selectors)document.querySelectorAll(selector).forEach(el=>el.remove());
  document.querySelectorAll('a[href]').forEach(a=>{
@@ -25,7 +25,6 @@ const style=document.createElement('style');
 style.id='zad-website-hard-cleanup';
 style.textContent=`
 body.zad-public-website .azkar-ticker,
-body.zad-public-website #azkar,
 body.zad-public-website #daily-reminder-settings,
 body.zad-public-website .prayer-tracker,
 body.zad-public-website .adhan-settings,
