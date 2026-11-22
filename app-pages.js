@@ -58,7 +58,7 @@ const prayerTitle=document.querySelector('#prayer .section-head p');if(prayerTit
  quick.innerHTML=[['#prayer','🕌','مواقيت الصلاة'],['#quran','📖','استماع القرآن'],['#hadith-dua','ﷺ','الحديث الشريف'],['#azkar','☀️','الأذكار'],['#mushaf','۞','المصحف'],['#radio-egypt','📻','الإذاعة'],['#ruqyah','🤲','الرقية'],['#books-library','📚','المكتبة'],['#khutbahs','🎙️','الخطب']].map(([href,ico,label])=>'<a href="'+href+'"><span>'+ico+'</span><b>'+label+'</b></a>').join('');
  if(header&&!document.querySelector('.zad-web-shortcuts'))header.insertAdjacentElement('afterend',quick);
  const topNav=document.querySelector('.top nav');
- if(topNav){topNav.querySelectorAll('a').forEach(link=>{if(['#kids','#reminders','#daily-reminder-settings','#qibla','#tasbeehFab'].includes(link.getAttribute('href')))link.remove();});if(!topNav.querySelector('a[href="#hadith"]')){const l=document.createElement('a');l.href='#hadith';l.textContent='الحديث الشريف';topNav.append(l);}}
+ if(topNav){topNav.querySelectorAll('a').forEach(link=>{if(['#kids','#reminders','#daily-reminder-settings','#qibla','#tasbeehFab'].includes(link.getAttribute('href')))link.remove();});if(!topNav.querySelector('a[href="#hadith-dua"]')){const l=document.createElement('a');l.href='#hadith-dua';l.textContent='الحديث الشريف';topNav.append(l);}}
  if(topNav&&!topNav.querySelector('a[href="#ramadan"]')){const l=document.createElement('a');l.href='#ramadan';l.textContent='رمضان';topNav.append(l);}
  document.body.classList.add('zad-public-website');
  const webStyle=document.createElement('style');
@@ -289,7 +289,7 @@ $('zadFontSize')?.addEventListener('input',e=>{localStorage.setItem('zad_font_si
 applySettings();
 document.head.append(css);
 
-/* Custom content tabs managed from the admin panel. */
+/* Load admin-managed sections on the public website and in the native app. */
 (async function loadManagedTabs(){
  try{
   const {initializeApp,getApps}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
@@ -301,17 +301,17 @@ document.head.append(css);
   const tabs=Array.isArray(tabsSnap.data().tabs)?tabsSnap.data().tabs.filter(t=>t&&t.id&&t.title&&t.visible!==false):[];
   if(!tabs.length)return;
   const safe=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const kindNames={articles:"خواطر ومقالات",stories:"قصص",biographies:"سير وتراجم",general:""};
+  const kindNames={articles:"خواطر ومقالات",stories:"قصص",biographies:"سير وتراجم",hadith:"أحاديث نبوية",azkar:"أذكار وأدعية",khutbah:"خطب ومواعظ",quran:"آيات وتدبر",general:"محتوى إيماني"};
   tabs.sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
-   for (const tab of tabs) {
-   if($(tab.id)||items.some(x=>x.id===tab.id))continue;
+  for(const tab of tabs){
+   if($(tab.id))continue;
    const section=document.createElement("section");section.className="section";section.id=tab.id;
    const heading=document.createElement("div");heading.className="section-head";
    heading.innerHTML='<div><h2>'+safe(tab.icon||"✨")+' '+safe(tab.title)+'</h2><p>'+safe(kindNames[tab.kind]||"")+'</p></div>';
    section.append(heading);
-    const publishedQuery=query(collection(db,"waqafat"),where("tabId","==",tab.id),where("published","==",true));
-    const contentSnap=await getDocs(publishedQuery);
-    const records=contentSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+   const publishedQuery=query(collection(db,"waqafat"),where("tabId","==",tab.id),where("published","==",true));
+   const contentSnap=await getDocs(publishedQuery);
+   const records=contentSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
    if(!records.length){const empty=document.createElement("p");empty.className="small muted";empty.textContent="لا يوجد محتوى منشور في هذا القسم حاليًا.";section.append(empty);}
    records.forEach(item=>{
     const article=document.createElement("article");article.className="card";article.style.margin="12px 0";
@@ -321,13 +321,27 @@ document.head.append(css);
     if(item.source){const source=document.createElement("p");source.className="small";source.style.marginTop="10px";source.textContent="المصدر: "+item.source;article.append(source);}
     section.append(article);
    });
-   main.append(section);items.push({id:tab.id,title:tab.title,icon:tab.icon||"✨"});
-   const addTile=(container,cls)=>{const b=document.createElement("button");b.type="button";b.className=cls;b.dataset.target=tab.id;b.innerHTML='<span class="'+(cls==="zad-home-item"?"zad-home-icon":"")+'">'+safe(tab.icon||"✨")+'</span><strong>'+safe(tab.title)+'</strong>';b.addEventListener("click",()=>showPage(tab.id));container.append(b);};
-   addTile(homeGrid,"zad-home-item");
-   const moreGrid=$("zadMoreGrid");if(moreGrid)addTile(moreGrid,"zad-more-item");
-   valid.push(tab.id);
+   main?.append(section);
+   if(publicWebsite){
+    const nav=document.querySelector(".top nav");
+    if(nav&&!nav.querySelector('a[href="#'+CSS.escape(tab.id)+'"]')){
+     const link=document.createElement("a");link.href="#"+tab.id;link.textContent=tab.title;nav.append(link);
+    }
+    const shortcuts=document.querySelector(".zad-web-shortcuts");
+    if(shortcuts&&!shortcuts.querySelector('a[href="#'+CSS.escape(tab.id)+'"]')){
+     const link=document.createElement("a");link.href="#"+tab.id;link.innerHTML="<span>"+safe(tab.icon||"✨")+"</span><b>"+safe(tab.title)+"</b>";shortcuts.append(link);
+    }
+   }else if(typeof items!=="undefined"&&typeof valid!=="undefined"){
+    items.push({id:tab.id,title:tab.title,icon:tab.icon||"✨"});
+    const addTile=(container,cls)=>{const b=document.createElement("button");b.type="button";b.className=cls;b.dataset.target=tab.id;b.innerHTML='<span class="'+(cls==="zad-home-item"?"zad-home-icon":"")+'">'+safe(tab.icon||"✨")+'</span><strong>'+safe(tab.title)+'</strong>';b.addEventListener("click",()=>showPage(tab.id));container.append(b);};
+    addTile(homeGrid,"zad-home-item");
+    const moreGrid=$("zadMoreGrid");if(moreGrid)addTile(moreGrid,"zad-more-item");
+    valid.push(tab.id);
    }
-  const hash=location.hash.slice(1);if(tabs.some(t=>t.id===hash))showPage(hash,true);
+  }
+  if(!publicWebsite&&typeof showPage==="function"&&typeof valid!=="undefined"){
+   const hash=location.hash.slice(1);if(tabs.some(t=>t.id===hash))showPage(hash,true);
+  }
  }catch(error){console.warn("تعذر تحميل التبويبات الإضافية",error);}
 })();
 
