@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tasbeeh_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="12dp"
+    android:background="@drawable/quran_widget_bg">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="سبحة زاد المسلم"
+        android:textColor="#F4E6C4"
+        android:textStyle="bold"
+        android:textSize="15sp" />
+    <TextView
+        android:id="@+id/tasbeeh_widget_phrase"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:paddingTop="7dp"
+        android:paddingBottom="4dp"
+        android:text="سبحان الله"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp" />
+    <TextView
+        android:id="@+id/tasbeeh_widget_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 / 33"
+        android:textColor="#F4E6C4"
+        android:textStyle="bold"
+        android:textSize="21sp" />
+    <Button
+        android:id="@+id/tasbeeh_widget_button"
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:text="سبّح +١"
+        android:textAllCaps="false" />
+</LinearLayout>
