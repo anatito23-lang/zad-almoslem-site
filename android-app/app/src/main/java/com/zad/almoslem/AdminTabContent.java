@@ -20,7 +20,7 @@ public final class AdminTabContent {
                 if(snapshot.isEmpty()) return;
                 LinearLayout section=new LinearLayout(a);section.setOrientation(LinearLayout.VERTICAL);
                 section.setPadding(dp(a,14),dp(a,12),dp(a,14),dp(a,8));
-                TextView heading=new TextView(a);heading.setText("إضافات من إدارة زاد المسلم");heading.setTextSize(17);
+                TextView heading=new TextView(a);heading.setText("إضافات من إدارة زاد وطمأنينة");heading.setTextSize(17);
                 heading.setTextColor(AppThemeColors.text(a));heading.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
                 heading.setGravity(Gravity.RIGHT);section.addView(heading,new LinearLayout.LayoutParams(-1,-2));
                 java.util.ArrayList<QueryDocumentSnapshot> rows=new java.util.ArrayList<>();for(QueryDocumentSnapshot d:snapshot)rows.add(d);
