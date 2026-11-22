@@ -2,7 +2,7 @@
 'use strict';
 const $=id=>document.getElementById(id), main=document.querySelector('main.wrap'), header=document.querySelector('header.hero');
 const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp());
-const publicWebsite=location.hostname==='anatito23-lang.github.io';
+const publicWebsite=['anatito23-lang.github.io','zad-almoslem.github.io'].includes(location.hostname);
 if(!nativeApp || publicWebsite){
  const heroContent=document.querySelector('.hero-content');
  if(heroContent&&!document.getElementById('zadInstallAppBanner')){
@@ -11,7 +11,7 @@ if(!nativeApp || publicWebsite){
   document.head.append(style);
   const box=document.createElement('div');
   box.className='zad-install-banner';box.id='zadInstallAppBanner';
-  box.innerHTML='<div class="zad-install-copy"><span class="zad-install-icon" aria-hidden="true">📲</span><div><strong>زاد وطمأنينة معك أينما كنت</strong><p>ثبّت تطبيق أندرويد واستمتع بالأذكار والتنبيهات والتلاوات حتى دون اتصال.</p></div></div><a class="zad-install-link" href="https://github.com/anatito23-lang/zad-almoslem-site/releases/latest/download/zad-almoslem.apk">ثبّت التطبيق الآن ↓</a>';
+  box.innerHTML='<div class="zad-install-copy"><span class="zad-install-icon" aria-hidden="true">📲</span><div><strong>زاد وطمأنينة معك أينما كنت</strong><p>ثبّت تطبيق أندرويد واستمتع بالأذكار والتنبيهات والتلاوات حتى دون اتصال.</p></div></div><a class="zad-install-link" href="https://github.com/zad-almoslem/zad-almoslem.github.io/releases/latest/download/zad-almoslem.apk">ثبّت التطبيق الآن ↓</a>';
   heroContent.append(box);
  }
 }

@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-if(location.hostname!=='anatito23-lang.github.io')return;
+if(!['anatito23-lang.github.io','zad-almoslem.github.io'].includes(location.hostname))return;
 document.documentElement.classList.add('zad-public-website');
 document.body.classList.add('zad-public-website');
 const selectors=[
