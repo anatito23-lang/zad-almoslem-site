@@ -13,6 +13,8 @@ import android.view.Gravity;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.text.InputType;
 import android.widget.*;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -46,7 +48,9 @@ public class MushafPageActivity extends Activity {
 
     private int page = 1;
     private boolean busy = false;
-    private TextView pageLabel, status;
+    private TextView pageLabel, status, attribution;
+    private LinearLayout root, toolbar, offlineRow, pageFrame, nav;
+    private boolean fullScreen = false;
     private ImageView pageImage;
     private Button previous, next;
     private ProgressBar progress;
@@ -85,12 +89,12 @@ public class MushafPageActivity extends Activity {
     }
 
     private void build() {
-        LinearLayout root = new LinearLayout(this);
+        root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(3), dp(3), dp(3), dp(4));
         root.setBackgroundColor(AppThemeColors.bg(this));
 
-        LinearLayout toolbar = new LinearLayout(this);
+        toolbar = new LinearLayout(this);
         toolbar.setGravity(Gravity.CENTER_VERTICAL);
         toolbar.setOrientation(LinearLayout.HORIZONTAL);
 
@@ -103,18 +107,16 @@ public class MushafPageActivity extends Activity {
         pageLabel = label("", 15, AppThemeColors.text(this), true);
         toolbar.addView(pageLabel, new LinearLayout.LayoutParams(0, dp(38), 1));
         Button correction = new Button(this);
-        correction.setText("الآيات التفاعلية");
+        correction.setText("بحث سورة/آية");
         correction.setTextSize(11);
         toolbar.addView(correction, new LinearLayout.LayoutParams(0, dp(38), 1));
-        correction.setOnClickListener(v -> {
-            openInteractivePage();
-        });
+        correction.setOnClickListener(v -> showAyahSearch());
         // Put the controls above the page and let the page consume all remaining
         // available height. A fixed pixel-derived height left a large blank area
         // on phones with different density and navigation-bar sizes.
         root.addView(toolbar, new LinearLayout.LayoutParams(-1, dp(38)));
 
-        LinearLayout offlineRow = new LinearLayout(this);
+        offlineRow = new LinearLayout(this);
         offlineRow.setOrientation(LinearLayout.VERTICAL);
         offlineRow.setPadding(dp(4), dp(3), dp(4), dp(3));
         Button downloadAll = new Button(this);
@@ -126,7 +128,7 @@ public class MushafPageActivity extends Activity {
         root.addView(offlineRow, new LinearLayout.LayoutParams(-1, -2));
         downloadAll.setOnClickListener(v -> downloadAllPages(downloadAll, offlineStatus));
 
-        LinearLayout pageFrame = new LinearLayout(this);
+        pageFrame = new LinearLayout(this);
         pageFrame.setOrientation(LinearLayout.VERTICAL);
         pageFrame.setGravity(Gravity.CENTER);
         pageFrame.setPadding(dp(1), dp(1), dp(1), dp(1));
@@ -143,7 +145,7 @@ public class MushafPageActivity extends Activity {
         gesture = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override public boolean onDown(MotionEvent e) { return true; }
             @Override public boolean onSingleTapUp(MotionEvent e) {
-                openInteractivePage();
+                toggleFullScreen();
                 return true;
             }
             @Override public boolean onFling(MotionEvent e1, MotionEvent e2, float vx, float vy) {
@@ -164,14 +166,14 @@ public class MushafPageActivity extends Activity {
         status.setTextSize(10);
         status.setPadding(0, dp(2), 0, dp(2));
         root.addView(status);
-        TextView attribution = label("صور صفحات المصحف: Quran-Images — ترخيص MIT", 9, AppThemeColors.muted(this), false);
+        attribution = label("صور صفحات المصحف: Quran-Images — ترخيص MIT", 9, AppThemeColors.muted(this), false);
         root.addView(attribution);
 
         progress = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         progress.setIndeterminate(true);
         root.addView(progress, new LinearLayout.LayoutParams(-1, dp(3)));
 
-        LinearLayout nav = new LinearLayout(this);
+        nav = new LinearLayout(this);
         nav.setGravity(Gravity.CENTER);
         previous = new Button(this);
         previous.setText("السابق");
@@ -184,6 +186,92 @@ public class MushafPageActivity extends Activity {
         next.setOnClickListener(v -> { if (page < 604) showPage(page + 1); });
 
         setContentView(AppTabs.wrap(this, root, "mushaf"));
+    }
+
+    private void toggleFullScreen() {
+        fullScreen = !fullScreen;
+        if (fullScreen) {
+            if (root.getParent() instanceof ViewGroup) ((ViewGroup) root.getParent()).removeView(root);
+            root.setPadding(0, 0, 0, 0);
+            toolbar.setVisibility(View.GONE);
+            offlineRow.setVisibility(View.GONE);
+            status.setVisibility(View.GONE);
+            attribution.setVisibility(View.GONE);
+            progress.setVisibility(View.GONE);
+            nav.setVisibility(View.GONE);
+            pageFrame.setPadding(0, 0, 0, 0);
+            pageFrame.setBackgroundColor(Color.BLACK);
+            pageFrame.setLayoutParams(new LinearLayout.LayoutParams(-1, 0, 1f));
+            setContentView(root);
+            getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            );
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(0);
+            AppThemeColors.apply(this);
+            root.setPadding(dp(3), dp(3), dp(3), dp(4));
+            toolbar.setVisibility(View.VISIBLE);
+            offlineRow.setVisibility(View.VISIBLE);
+            status.setVisibility(View.VISIBLE);
+            attribution.setVisibility(View.VISIBLE);
+            nav.setVisibility(View.VISIBLE);
+            pageFrame.setPadding(dp(1), dp(1), dp(1), dp(1));
+            pageFrame.setBackground(shape(Color.rgb(255,253,244), 5, Color.rgb(177,157,112)));
+            pageFrame.setLayoutParams(new LinearLayout.LayoutParams(-1, 0, 1f));
+            setContentView(AppTabs.wrap(this, root, "mushaf"));
+        }
+    }
+
+    @Override public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus && fullScreen) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
+                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            );
+        }
+    }
+
+    private void showAyahSearch() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(18), dp(12), dp(18), dp(6));
+        TextView title = label("اختر السورة واكتب رقم الآية إن أردت", 14, AppThemeColors.text(this), true);
+        title.setGravity(Gravity.RIGHT);
+        box.addView(title, new LinearLayout.LayoutParams(-1, -2));
+        Spinner surahPicker = new Spinner(this);
+        surahPicker.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, SURAHS));
+        box.addView(surahPicker, new LinearLayout.LayoutParams(-1, dp(48)));
+        EditText ayahNumber = new EditText(this);
+        ayahNumber.setSingleLine(true);
+        ayahNumber.setInputType(InputType.TYPE_CLASS_NUMBER);
+        ayahNumber.setHint("رقم الآية (اختياري)");
+        box.addView(ayahNumber, new LinearLayout.LayoutParams(-1, dp(50)));
+        new AlertDialog.Builder(this)
+            .setTitle("البحث في القرآن الكريم")
+            .setView(box)
+            .setPositiveButton("فتح", (dialog, which) -> {
+                int surah = surahPicker.getSelectedItemPosition() + 1;
+                String value = ayahNumber.getText().toString().trim();
+                Intent open = new Intent(this, QuranTextActivity.class);
+                open.putExtra("surah_number", surah);
+                if (!value.isEmpty()) {
+                    try {
+                        int verse = Integer.parseInt(value);
+                        if (verse < 1) throw new NumberFormatException();
+                        open.putExtra("target_ayah", verse);
+                    } catch (NumberFormatException ignored) {
+                        Toast.makeText(this, "اكتب رقم آية صحيحًا", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }
+                startActivity(open);
+            })
+            .setNegativeButton("إلغاء", null)
+            .show();
     }
 
     private void openInteractivePage() {
