@@ -57,7 +57,7 @@ public class BookLibraryActivity extends Activity {
         root.setPadding(dp(15),dp(15),dp(15),dp(28));root.setBackgroundColor(Color.rgb(244,247,243));
         scroll.addView(root);setContentView(scroll);
         TextView title=text("مكتبة الكتب الإسلامية",24,Color.WHITE,true);title.setGravity(Gravity.CENTER);
-        TextView sub=text("فهرس الكتب الموجود في موقع زاد المسلم",13,Color.rgb(222,239,229),false);sub.setGravity(Gravity.CENTER);
+        TextView sub=text("فهرس الكتب الموجود في موقع زاد وطمأنينة",13,Color.rgb(222,239,229),false);sub.setGravity(Gravity.CENTER);
         LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);
         hero.setPadding(dp(15),dp(18),dp(15),dp(18));hero.setBackground(shape(green,18));hero.addView(title);hero.addView(sub);
         root.addView(hero,new LinearLayout.LayoutParams(-1,-2));
