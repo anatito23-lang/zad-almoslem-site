@@ -38,7 +38,11 @@ public class RamadanAudioService extends Service {
         if (fileName != null) {
             File audio=new File(new File(getFilesDir(),"ramadan_audio"),fileName);
             if (audio.isFile() && audio.length()>1000) playFile(audio,volume);
-            else showMissingRecording();
+            else {
+                String remoteUrl=getSharedPreferences("zad_ramadan",MODE_PRIVATE).getString("remote_"+key,"");
+                if(remoteUrl.startsWith("https://")) playRemote(remoteUrl,volume);
+                else showMissingRecording();
+            }
             return START_NOT_STICKY;
         }
         if ("ramadan_adhan_test".equals(key)) {
@@ -50,6 +54,16 @@ public class RamadanAudioService extends Service {
         if(fallbackFile.isFile()&&fallbackFile.length()>1000){playFile(fallbackFile,1f);return START_NOT_STICKY;}
         showMissingRecording();
         return START_NOT_STICKY;
+    }
+    private void playRemote(String url,float volume){
+        try{
+            PowerManager pm=(PowerManager)getSystemService(POWER_SERVICE);
+            wakeLock=pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"ZadAlmoslem:RamadanRemoteAudio");wakeLock.acquire(4*60*1000L);
+            player=new MediaPlayer();player.setWakeMode(this,PowerManager.PARTIAL_WAKE_LOCK);
+            player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
+            player.setOnCompletionListener(mp->finish());player.setOnErrorListener((mp,w,e)->{finish();return true;});
+            player.setDataSource(url);player.setOnPreparedListener(mp->{mp.setVolume(volume,volume);mp.start();});player.prepareAsync();
+        }catch(Exception error){android.util.Log.e("ZadRamadan","Remote Ramadan audio playback failed",error);showMissingRecording();}
     }
     private void createChannel(){
         if(Build.VERSION.SDK_INT>=26){NotificationManager nm=getSystemService(NotificationManager.class);
