@@ -128,7 +128,7 @@ async function saveCustomTabs(){
  batch.set(doc(db,"waqafat",CUSTOM_TABS_PUBLIC_DOC),{tabs:customTabs.filter(t=>t.visible!==false),updatedAt},{merge:true});
  const fixed=[["more","المزيد","☰"],["ramadan","رمضان","🌙"],["tasbeeh","السبحة","۞"],["calendar","التقويم","▦"],["radio","الإذاعة","◉"],["quran","استماع","♫"],["mushaf","المصحف","▤"],["home","الرئيسية","⌂"]];
  const navigation=[...fixed.map(([key,label,icon])=>({key,label,icon,visible:true})),...customTabs.filter(t=>t&&t.id&&t.title&&t.visible!==false).map(t=>({key:t.id,label:t.title,icon:t.icon||"✨",visible:true,custom:true}))];
- batch.set(doc(db,"waqafat","__app_navigation__"),{tabs:navigation,updatedAt},{merge:true});
+ batch.set(doc(db,"waqafat","__app_navigation__"),{tabs:navigation,published:true,updatedAt},{merge:true});
  await batch.commit();renderCustomTabs()
 }
 function renderCustomTabs(){
@@ -201,5 +201,5 @@ $("siteContentForm").addEventListener("submit",async e=>{
 $("siteContentCancel").addEventListener("click",resetSiteForm);
 $("siteContentRefresh").addEventListener("click",loadSiteContent);
 
-onAuthStateChanged(auth,async user=>{if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");$("customTabsCard").classList.add("hidden");$("siteContentCard").classList.add("hidden");return}if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return}$("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("customTabsCard").classList.remove("hidden");$("siteContentCard").classList.add("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";await loadItems();try{await readCustomTabs();fillSiteSections();await loadSiteContent()}catch(e){customMessage("تعذر تحميل التبويبات: "+e.message,true)}});
+onAuthStateChanged(auth,async user=>{if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");$("customTabsCard").classList.add("hidden");$("siteContentCard").classList.add("hidden");return}if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return}$("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("customTabsCard").classList.remove("hidden");$("siteContentCard").classList.add("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";await loadItems();try{await readCustomTabs()}catch(e){customMessage("تعذر تحميل التبويبات: "+e.message,true)}});
 </script></body></html>
