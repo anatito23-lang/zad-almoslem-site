@@ -114,6 +114,18 @@ public class MushafPageActivity extends Activity {
         // on phones with different density and navigation-bar sizes.
         root.addView(toolbar, new LinearLayout.LayoutParams(-1, dp(38)));
 
+        LinearLayout offlineRow = new LinearLayout(this);
+        offlineRow.setOrientation(LinearLayout.VERTICAL);
+        offlineRow.setPadding(dp(4), dp(3), dp(4), dp(3));
+        Button downloadAll = new Button(this);
+        downloadAll.setText("تحميل المصحف كاملًا للعمل دون إنترنت");
+        downloadAll.setAllCaps(false);
+        TextView offlineStatus = label("يمكنك تنزيل الصفحات الـ 604 مرة واحدة والقراءة دون اتصال.", 11, AppThemeColors.muted(this), false);
+        offlineRow.addView(downloadAll, new LinearLayout.LayoutParams(-1, dp(44)));
+        offlineRow.addView(offlineStatus, new LinearLayout.LayoutParams(-1, dp(24)));
+        root.addView(offlineRow, new LinearLayout.LayoutParams(-1, -2));
+        downloadAll.setOnClickListener(v -> downloadAllPages(downloadAll, offlineStatus));
+
         LinearLayout pageFrame = new LinearLayout(this);
         pageFrame.setOrientation(LinearLayout.VERTICAL);
         pageFrame.setGravity(Gravity.CENTER);
@@ -260,12 +272,81 @@ public class MushafPageActivity extends Activity {
     private void showSurahIndex() {
         String[] entries = new String[SURAHS.length];
         for (int i = 0; i < SURAHS.length; i++)
-            entries[i] = String.format(ArabicLocaleHolder.LOCALE, "%03d  سورة %s  —  صفحة %d", i + 1, SURAHS[i], SURAH_PAGES[i]);
+            entries[i] = String.format(ArabicLocaleHolder.LOCALE, "%03d  سورة %s  —  الآية ١  —  صفحة %d", i + 1, SURAHS[i], SURAH_PAGES[i]);
         new AlertDialog.Builder(this)
                 .setTitle("فهرس سور القرآن الكريم")
                 .setItems(entries, (dialog, which) -> showPage(SURAH_PAGES[which]))
                 .setNegativeButton("إغلاق", null)
                 .show();
+    }
+
+
+    private void downloadAllPages(Button button, TextView message) {
+        if (busy) return;
+        File dir = new File(getFilesDir(), "mushaf_images");
+        if (!dir.exists() && !dir.mkdirs()) {
+            message.setText("تعذر إنشاء مساحة حفظ المصحف على الهاتف.");
+            return;
+        }
+        busy = true;
+        button.setEnabled(false);
+        message.setText("جارٍ تجهيز تنزيل المصحف كاملًا...");
+        new Thread(() -> {
+            int completed = 0;
+            int failedPage = -1;
+            for (int number = 1; number <= 604; number++) {
+                File target = new File(dir, number + ".png");
+                if (target.isFile() && target.length() > 10000) {
+                    completed++;
+                } else {
+                    HttpURLConnection connection = null;
+                    File temp = new File(dir, number + ".part");
+                    try {
+                        connection = (HttpURLConnection) new URL(IMAGE_BASE + number + ".png").openConnection();
+                        connection.setConnectTimeout(20000);
+                        connection.setReadTimeout(45000);
+                        connection.setRequestProperty("User-Agent", "ZadAlmoslem Android");
+                        if (connection.getResponseCode() != 200) throw new IOException("HTTP " + connection.getResponseCode());
+                        try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
+                            byte[] buffer = new byte[16384];
+                            int count;
+                            while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
+                            out.getFD().sync();
+                        }
+                        if (temp.length() < 10000) throw new IOException("Incomplete page");
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        options.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFile(temp.getAbsolutePath(), options);
+                        if (options.outWidth <= 0 || options.outHeight <= 0) throw new IOException("Invalid page image");
+                        if (target.exists()) target.delete();
+                        if (!temp.renameTo(target)) throw new IOException("Could not save page");
+                        completed++;
+                    } catch (Exception error) {
+                        failedPage = number;
+                        break;
+                    } finally {
+                        if (connection != null) connection.disconnect();
+                        if (temp.exists()) temp.delete();
+                    }
+                }
+                final int done = completed;
+                if (done % 5 == 0 || done == 604) runOnUiThread(() ->
+                        message.setText("تم حفظ " + done + " من 604 صفحة على الهاتف."));
+            }
+            final int done = completed;
+            final int failed = failedPage;
+            runOnUiThread(() -> {
+                busy = false;
+                button.setEnabled(true);
+                if (failed < 0 && done == 604) {
+                    message.setText("اكتمل تنزيل المصحف كاملًا. يمكنك الآن تقليب الصفحات دون إنترنت.");
+                    getSharedPreferences("zad_mushaf", MODE_PRIVATE).edit().putBoolean("all_pages_downloaded", true).apply();
+                } else {
+                    message.setText("تم حفظ " + done + " صفحة. تعذر تنزيل الصفحة رقم " + failed + "؛ أعد المحاولة لاستكمال الباقي.");
+                    getSharedPreferences("zad_mushaf", MODE_PRIVATE).edit().putBoolean("all_pages_downloaded", false).apply();
+                }
+            });
+        }).start();
     }
 
     private static final class ArabicLocaleHolder {
