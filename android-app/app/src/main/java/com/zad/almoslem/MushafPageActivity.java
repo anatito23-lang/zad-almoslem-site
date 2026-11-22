@@ -220,6 +220,7 @@ public class MushafPageActivity extends Activity {
             pageFrame.setPadding(dp(1), dp(1), dp(1), dp(1));
             pageFrame.setBackground(shape(Color.rgb(255,253,244), 5, Color.rgb(177,157,112)));
             pageFrame.setLayoutParams(new LinearLayout.LayoutParams(-1, 0, 1f));
+            if (root.getParent() instanceof ViewGroup) ((ViewGroup) root.getParent()).removeView(root);
             setContentView(AppTabs.wrap(this, root, "mushaf"));
         }
     }
