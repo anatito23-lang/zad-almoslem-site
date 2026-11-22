@@ -2858,5 +2858,55 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
 
 
 
+
+<script id="zad-site-content-renderer-20261122">
+(function(){
+ if(!['zad-almoslem.github.io','anatito23-lang.github.io'].includes(location.hostname))return;
+ const sectionNames={prayer:"مواقيت الصلاة",calendar:"التقويم الشهري",nasheed:"الإنشاد الديني والابتهالات",ruqyah:"الرقية الشرعية","radio-egypt":"إذاعة القرآن الكريم",azkar:"الأذكار اليومية","books-library":"مكتبة الكتب الإسلامية","hadith-dua":"الحديث الشريف",duas:"الأدعية","daily-wird":"وردي اليومي","friday-wird":"ورد الجمعة","qalbi-itmaann":"قلبي اطمأن",library:"المكتبة الإيمانية","friday-live":"بث خطبة الجمعة",khutbahs:"خطب الجمعة",shaaraawi:"خواطر الشعراوي","islamic-knowledge":"زاد العلم والإيمان",ramadan:"زادك في رمضان"};
+ const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
+ const escId=/^[A-Za-z][A-Za-z0-9_-]{0,59}$/;
+ function addText(parent,tag,text,cls){const el=document.createElement(tag);el.textContent=text||"";if(cls)el.className=cls;parent.append(el);return el;}
+ async function init(){
+  try{
+   const [{initializeApp,getApps},{getFirestore,collection,getDocs}]=await Promise.all([
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")
+   ]);
+   const app=getApps().length?getApps()[0]:initializeApp(cfg),db=getFirestore(app);
+   const snap=await getDocs(collection(db,"site_content"));
+   const rows=snap.docs.map(d=>({id:d.id,...d.data()}))
+    .filter(x=>(x.published===true||x["تم النشر"]===true||x["النشر"]===true)&&x.sectionId&&escId.test(x.sectionId))
+    .sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+   const main=document.querySelector("main.wrap");if(!main)return;
+   const createdSections=new Map();
+   rows.forEach(item=>{
+    let section=document.getElementById(item.sectionId);
+    if(!section){
+     section=createdSections.get(item.sectionId);
+     if(!section){
+      section=document.createElement("section");section.className="section";section.id=item.sectionId;
+      const head=document.createElement("div");head.className="section-head";
+      const title=addText(document.createElement("div"),"h2",sectionNames[item.sectionId]||item.sectionId);
+      head.append(title);section.append(head);main.append(section);createdSections.set(item.sectionId,section);
+      const nav=document.querySelector(".top nav");
+      if(nav&&!nav.querySelector('a[href="#'+item.sectionId+'"]')){const a=document.createElement("a");a.href="#"+item.sectionId;a.textContent=sectionNames[item.sectionId]||item.sectionId;nav.append(a);}
+     }
+    }
+    const card=document.createElement("article");card.className="card site-published-item";card.style.margin="12px 0";
+    if(item.sectionId==="khutbahs")card.classList.add("khutbah-card");
+    if(item.sectionId==="khutbahs")addText(card,"span","خطبة منشورة","topic-tag");
+    addText(card,"h3",item.title||"محتوى جديد");
+    const body=addText(card,"p",item.body||"");body.style.whiteSpace="pre-wrap";body.style.lineHeight="2";
+    if(item.source)addText(card,"p","المصدر: "+item.source,"small");
+    if(item.url&&/^https:\/\//i.test(item.url)){const link=document.createElement("a");link.className="btn green";link.href=item.url;link.target="_blank";link.rel="noopener noreferrer";link.textContent=item.urlLabel||"فتح الرابط";link.style.display="inline-block";link.style.marginTop="10px";card.append(link);}
+    const list=item.sectionId==="khutbahs"?section.querySelector("#khutbahList"):null;
+    (list||section).append(card);
+   });
+  }catch(error){console.warn("تعذر تحميل محتوى الموقع المنشور",error);}
+ }
+ if(document.readyState==="complete")init();else window.addEventListener("load",init,{once:true});
+})();
+</script>
+
 </body>
 </html>
