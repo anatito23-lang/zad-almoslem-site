@@ -18,10 +18,11 @@
         const body = esc(item.body || '').replace(/\n/g, '<br>');
         const audio = item.audio ? '<audio controls preload="none" style="width:100%"><source src="' + esc(item.audio) + '"></audio>' : '';
         const pdf = item.pdf ? '<a class="btn light" href="' + esc(item.pdf) + '" target="_blank" rel="noopener">قراءة ملف الخطبة</a>' : '';
+        const source = item.sourceUrl ? '<a class="btn green" href="' + esc(item.sourceUrl) + '" target="_blank" rel="noopener noreferrer">النص الكامل – وزارة الأوقاف</a>' : '';
         return '<article class="card khutbah-card"><span class="topic-tag">' + category + '</span><h3>' + title + '</h3>' +
           (date ? '<p class="small">' + date + '</p>' : '') +
           (body ? '<details><summary>اقرأ الخطبة كاملة</summary><p style="white-space:normal;line-height:2;margin-top:10px">' + body + '</p></details>' : '') +
-          audio + pdf + '</article>';
+          audio + pdf + source + '</article>';
       }).join('');
     })
     .catch(() => { if (!root.children.length) root.innerHTML = '<div class="card"><p>تعذر تحميل الخطب الآن. حاول تحديث الصفحة بعد قليل.</p></div>'; });
