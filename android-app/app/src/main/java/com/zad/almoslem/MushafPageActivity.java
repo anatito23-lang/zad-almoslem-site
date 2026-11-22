@@ -57,6 +57,8 @@ public class MushafPageActivity extends Activity {
     private GestureDetector gesture;
     private int green;
     private String pendingAyahMessage = "";
+    private int pendingSurahNumber = -1;
+    private int pendingVerseNumber = -1;
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -268,6 +270,8 @@ public class MushafPageActivity extends Activity {
                 String value = ayahNumber.getText().toString().trim();
                 if (value.isEmpty()) {
                     pendingAyahMessage = "";
+                status.setClickable(false);
+                status.setOnClickListener(null);
                     showPage(SURAH_PAGES[surah - 1]);
                     return;
                 }
@@ -313,6 +317,8 @@ public class MushafPageActivity extends Activity {
                 runOnUiThread(() -> {
                     busy = false;
                     pendingAyahMessage = message + "\n" + verseText;
+                    pendingSurahNumber = surah;
+                    pendingVerseNumber = verse;
                     showPage(targetPage);
                 });
             } catch (Exception error) {
@@ -341,6 +347,16 @@ public class MushafPageActivity extends Activity {
         status.setGravity(Gravity.CENTER);
         status.setPadding(dp(12), dp(12), dp(12), dp(12));
         status.setBackground(shape(Color.rgb(255, 253, 244), 12, Color.rgb(177, 157, 112)));
+        status.setText(message + "\n\nاضغط هنا لفتح الآية في عرض النص وتكبيرها");
+        status.setClickable(true);
+        status.setOnClickListener(v -> {
+            if (pendingSurahNumber < 1 || pendingVerseNumber < 1) return;
+            Intent open = new Intent(this, QuranTextActivity.class);
+            open.putExtra("page_number", page);
+            open.putExtra("surah_number", pendingSurahNumber);
+            open.putExtra("target_ayah", pendingVerseNumber);
+            startActivity(open);
+        });
     }
 
     private File pageFile(int number) {
@@ -405,6 +421,8 @@ public class MushafPageActivity extends Activity {
                         if (pendingAyahMessage.isEmpty()) status.setText("تم تحميل الصفحة وحفظها على الهاتف");
                         else showSearchVerseResult(pendingAyahMessage);
                         pendingAyahMessage = "";
+                        status.setClickable(false);
+                        status.setOnClickListener(null);
                     }
                 });
             } catch (Exception error) {
