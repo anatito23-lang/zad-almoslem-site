@@ -61,8 +61,12 @@ public final class AppTabs {
         outer.setOrientation(LinearLayout.HORIZONTAL);
         outer.setGravity(Gravity.CENTER_VERTICAL);
         outer.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-        outer.setBackgroundColor(AppThemeColors.nav(a));
-        outer.setPadding(dp(a,5),dp(a,4),dp(a,5),0);
+        GradientDrawable barBg=new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+            new int[]{Color.rgb(24,39,37),Color.rgb(13,27,26)});
+        barBg.setCornerRadii(new float[]{dp(a,18),dp(a,18),dp(a,18),dp(a,18),0,0,0,0});
+        outer.setBackground(barBg);
+        outer.setElevation(dp(a,8));
+        outer.setPadding(dp(a,6),dp(a,5),dp(a,6),0);
         LinearLayout homeSlot=new LinearLayout(a);
         homeSlot.setGravity(Gravity.CENTER);
         outer.addView(homeSlot,new LinearLayout.LayoutParams(dp(a,68),dp(a,60)));
@@ -78,6 +82,9 @@ public final class AppTabs {
         dock.setPadding(dp(a,1),dp(a,1),dp(a,1),dp(a,1));
         dockScroll.addView(dock,new HorizontalScrollView.LayoutParams(-2,-1));
         outer.addView(dockScroll,new LinearLayout.LayoutParams(0,dp(a,60),1f));
+        LinearLayout moreSlot=new LinearLayout(a);
+        moreSlot.setGravity(Gravity.CENTER);
+        outer.addView(moreSlot,new LinearLayout.LayoutParams(dp(a,68),dp(a,60)));
         render(a,active,outer,readCached(a));
         return outer;
     }
@@ -110,12 +117,13 @@ public final class AppTabs {
     }
 
     private static void render(Activity a,String active,LinearLayout outer,JSONArray config) {
-        if(outer==null||outer.getChildCount()<2)return;
+        if(outer==null||outer.getChildCount()<3)return;
         LinearLayout homeSlot=(LinearLayout)outer.getChildAt(0);
         HorizontalScrollView dockScroll=(HorizontalScrollView)outer.getChildAt(1);
+        LinearLayout moreSlot=(LinearLayout)outer.getChildAt(2);
         if(dockScroll.getChildCount()==0||!(dockScroll.getChildAt(0) instanceof LinearLayout))return;
         LinearLayout dock=(LinearLayout)dockScroll.getChildAt(0);
-        homeSlot.removeAllViews();dock.removeAllViews();
+        homeSlot.removeAllViews();dock.removeAllViews();moreSlot.removeAllViews();
         String lang=a.getSharedPreferences("zad_settings",Activity.MODE_PRIVATE).getString("app_language","ar");
         int li="en".equals(lang)?1:"fr".equals(lang)?2:"ur".equals(lang)?3:"tr".equals(lang)?4:0;
         if("prayer".equals(active)||"library".equals(active)||"settings".equals(active))active="more";
@@ -128,13 +136,19 @@ public final class AppTabs {
                 String label=row.optString("label","").trim().replace("ـ","");
                 String normalizedKey=key.toLowerCase(java.util.Locale.ROOT);
                 String normalizedLabel=label.replaceAll("\\s+","");
-                boolean contentSection="hadith".equals(normalizedKey)||"hadiths".equals(normalizedKey)||"khutbah".equals(normalizedKey)||"khutbas".equals(normalizedKey)||"sermons".equals(normalizedKey)||"sahaba".equals(normalizedKey)||"companions".equals(normalizedKey)||"stories_sahaba".equals(normalizedKey)||"home".equals(normalizedKey)||normalizedLabel.contains("حديث")||normalizedLabel.contains("خطب")||normalizedLabel.contains("قصصصحاب")||normalizedLabel.contains("قصةصحاب");
+                boolean companionStory=normalizedKey.matches(".*(sahab|sahabi|sahaba|companion).*")
+                    || normalizedLabel.contains("صحاب") || normalizedLabel.contains("الصحابه")
+                    || normalizedLabel.contains("قصصصح") || normalizedLabel.contains("قصهصح");
+                boolean contentSection="hadith".equals(normalizedKey)||"hadiths".equals(normalizedKey)||"khutbah".equals(normalizedKey)||"khutbas".equals(normalizedKey)||"sermons".equals(normalizedKey)||"sahaba".equals(normalizedKey)||"companions".equals(normalizedKey)||"stories_sahaba".equals(normalizedKey)||"home".equals(normalizedKey)||"more".equals(normalizedKey)||normalizedLabel.contains("حديث")||normalizedLabel.contains("خطب")||companionStory;
                 if(!contentSection&&key.matches("[A-Za-z][A-Za-z0-9_-]{0,59}"))rows.add(row);
             }
         }
         JSONObject home=new JSONObject();
         try{home.put("key","home");home.put("label","الرئيسية");home.put("icon","⌂");home.put("visible",true);}catch(Exception ignored){}
         homeSlot.addView(makeTabItem(a,home,active,li),new LinearLayout.LayoutParams(-1,-1));
+        JSONObject more=new JSONObject();
+        try{more.put("key","more");more.put("label","المزيد");more.put("icon","☰");more.put("visible",true);}catch(Exception ignored){}
+        moreSlot.addView(makeTabItem(a,more,active,li),new LinearLayout.LayoutParams(-1,-1));
         for(JSONObject row:rows){
             String key=row.optString("key","");
             int index=indexOf(key);
@@ -163,9 +177,9 @@ public final class AppTabs {
         final String clickLabel=labelText,clickIcon=iconText;
         LinearLayout item=new LinearLayout(a);item.setOrientation(1);item.setGravity(Gravity.CENTER);
         item.setClickable(!selected);item.setFocusable(!selected);
-        item.setPadding(dp(a,1),dp(a,3),dp(a,1),dp(a,2));
-        if(selected){GradientDrawable selectedBg=new GradientDrawable();selectedBg.setColor(AppThemeColors.primary(a));selectedBg.setCornerRadius(dp(a,13));selectedBg.setStroke(dp(a,1),Color.rgb(190,158,91));item.setBackground(selectedBg);}
-        else item.setBackgroundResource(android.R.drawable.list_selector_background);
+        item.setPadding(dp(a,2),dp(a,4),dp(a,2),dp(a,3));
+        if(selected){GradientDrawable selectedBg=new GradientDrawable();selectedBg.setColor(Color.rgb(48,75,66));selectedBg.setCornerRadius(dp(a,15));selectedBg.setStroke(dp(a,1),Color.rgb(207,174,112));item.setBackground(selectedBg);}
+        else {GradientDrawable idleBg=new GradientDrawable();idleBg.setColor(Color.TRANSPARENT);idleBg.setCornerRadius(dp(a,15));item.setBackground(idleBg);}
         TextView icon=new TextView(a);icon.setText(iconText);icon.setTextSize(18);icon.setGravity(Gravity.CENTER);
         icon.setTextColor(selected?Color.rgb(235,205,139):AppThemeColors.accent(a));icon.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
         item.addView(icon,new LinearLayout.LayoutParams(-1,dp(a,27)));
