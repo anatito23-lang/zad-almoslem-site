@@ -114,7 +114,7 @@ public class MushafPageActivity extends Activity {
         // Put the controls above the page and let the page consume all remaining
         // available height. A fixed pixel-derived height left a large blank area
         // on phones with different density and navigation-bar sizes.
-        root.addView(toolbar, new LinearLayout.LayoutParams(-1, dp(38)));
+        root.addView(toolbar, new LinearLayout.LayoutParams(-1, dp(34)));
 
         offlineRow = new LinearLayout(this);
         offlineRow.setOrientation(LinearLayout.VERTICAL);
@@ -123,8 +123,8 @@ public class MushafPageActivity extends Activity {
         downloadAll.setText("تحميل المصحف كاملًا للعمل دون إنترنت");
         downloadAll.setAllCaps(false);
         TextView offlineStatus = label("يمكنك تنزيل الصفحات الـ 604 مرة واحدة والقراءة دون اتصال.", 11, AppThemeColors.muted(this), false);
-        offlineRow.addView(downloadAll, new LinearLayout.LayoutParams(-1, dp(44)));
-        offlineRow.addView(offlineStatus, new LinearLayout.LayoutParams(-1, dp(24)));
+        offlineRow.addView(downloadAll, new LinearLayout.LayoutParams(-1, dp(38)));
+        offlineRow.addView(offlineStatus, new LinearLayout.LayoutParams(-1, dp(18)));
         root.addView(offlineRow, new LinearLayout.LayoutParams(-1, -2));
         downloadAll.setOnClickListener(v -> downloadAllPages(downloadAll, offlineStatus));
 
