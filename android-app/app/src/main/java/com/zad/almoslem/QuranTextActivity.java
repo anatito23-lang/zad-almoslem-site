@@ -25,6 +25,8 @@ public class QuranTextActivity extends Activity {
     private boolean busy=false, pageMode=false, autoAdvance=false;
     private Spinner reciterPicker;
     private TextView status, heading;
+    private ScrollView contentScroll;
+    private int targetAyah = -1;
     private LinearLayout verses;
     private final ArrayList<JSONObject> ayahs=new ArrayList<>();
     private MediaPlayer player;
@@ -34,6 +36,7 @@ public class QuranTextActivity extends Activity {
         getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);
         pageMode=getIntent().hasExtra("page_number");
         pageNumber=getIntent().getIntExtra("page_number",1);
+        targetAyah=getIntent().getIntExtra("target_ayah",-1);
         surahNumber=Math.max(1,Math.min(114,getIntent().getIntExtra("surah_number",1)));
         build();
         loadContent();
@@ -42,7 +45,7 @@ public class QuranTextActivity extends Activity {
     private GradientDrawable bg(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));return d;}
     private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.RIGHT);t.setTextDirection(View.TEXT_DIRECTION_RTL);if(bold)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
     private void build(){
-        ScrollView scroll=new ScrollView(this);
+        contentScroll=new ScrollView(this);
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(14),dp(14),dp(14),dp(28));root.setBackgroundColor(Color.rgb(244,247,243));scroll.addView(root);
         heading=label(pageMode?"القراءة والتصحيح — صفحة "+pageNumber:"القراءة والتصحيح",22,green,true);heading.setGravity(Gravity.CENTER);root.addView(heading);
         TextView hint=label("اختر القارئ، ثم اضغط على الآية لسماعها. بعد انتهاء الآية ينتقل التشغيل تلقائيًا إلى الآية التالية. اضغط الآية مرة أخرى لإعادتها.",13,Color.DKGRAY,false);hint.setPadding(0,dp(10),0,dp(10));root.addView(hint);
@@ -73,7 +76,7 @@ public class QuranTextActivity extends Activity {
         repeat.setOnClickListener(v->{if(currentIndex>=0)playAyah(currentIndex,false);});
         status=label("جارٍ تحميل الآيات...",12,Color.DKGRAY,false);status.setPadding(0,dp(8),0,dp(8));root.addView(status);
         verses=new LinearLayout(this);verses.setOrientation(LinearLayout.VERTICAL);root.addView(verses);
-        setContentView(AppTabs.wrap(this,scroll,"mushaf"));
+        setContentView(AppTabs.wrap(this,contentScroll,"mushaf"));
     }
     private void loadContent(){
         if(busy)return;busy=true;status.setText("جارٍ تحميل نص الآيات...");
@@ -110,6 +113,17 @@ public class QuranTextActivity extends Activity {
             verse.setBackground(bg(Color.WHITE,12));
             LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(7);verses.addView(verse,lp);
             verse.setOnClickListener(v->{currentIndex=index;playAyah(index,true);});
+        }
+        if(targetAyah > 0 && !ayahs.isEmpty()) {
+            final int targetIndex = Math.max(0, Math.min(ayahs.size() - 1, targetAyah - 1));
+            verses.post(() -> {
+                View target = verses.getChildAt(targetIndex);
+                if (target != null) {
+                    target.setBackground(bg(Color.rgb(235, 243, 231), 12));
+                    contentScroll.post(() -> contentScroll.smoothScrollTo(0, target.getTop()));
+                }
+            });
+            targetAyah = -1;
         }
     }
     private void playAyah(int index,boolean continueAfter){
