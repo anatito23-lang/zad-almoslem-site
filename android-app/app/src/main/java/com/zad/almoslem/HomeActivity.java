@@ -6,7 +6,23 @@ String[] prayers={"الفجر","الظهر","العصر","المغرب","الع�
 GradientDrawable shape(int c,int r){GradientDrawable d=new GradientDrawable();d.setColor(c);d.setCornerRadius(dp(r));return d;}
 TextView label(String s,int z,int c,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(z);t.setTextColor(c);t.setGravity(Gravity.CENTER);if(bold)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
 void open(Class<?> c){startActivity(new Intent(this,c));}
-@Override public void onCreate(Bundle b){super.onCreate(b);try{AppThemeColors.apply(this);}catch(Exception e){android.util.Log.e("ZadStartup","Theme initialization failed",e);}try{ReminderReceiver.ensureDefaultDailyReminders(this);}catch(Exception e){android.util.Log.e("ZadStartup","Default reminder setup failed",e);}if(Build.VERSION.SDK_INT>=33&&checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},2401);try{build();}catch(Exception e){android.util.Log.e("ZadStartup","Home screen initialization failed",e);showStartupFallback(e);}}
+@Override public void onCreate(Bundle b){super.onCreate(b);try{AppThemeColors.apply(this);}catch(Exception e){android.util.Log.e("ZadStartup","Theme initialization failed",e);}try{ReminderReceiver.ensureDefaultDailyReminders(this);}catch(Exception e){android.util.Log.e("ZadStartup","Default reminder setup failed",e);}if(Build.VERSION.SDK_INT>=33&&checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED)requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS},2401);try{build();}catch(Exception e){android.util.Log.e("ZadStartup","Home screen initialization failed",e);showStartupFallback(e);}if(Build.VERSION.SDK_INT<33||checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED)new Handler(Looper.getMainLooper()).postDelayed(this::promptFullScreenAdhanPermission,650);}
+void promptFullScreenAdhanPermission(){
+if(Build.VERSION.SDK_INT<34)return;
+android.app.NotificationManager manager=(android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+if(manager==null||manager.canUseFullScreenIntent())return;
+android.content.SharedPreferences p=getSharedPreferences("zad_reminders",MODE_PRIVATE);
+if(p.getBoolean("full_screen_permission_prompted",false))return;
+p.edit().putBoolean("full_screen_permission_prompted",true).apply();
+new android.app.AlertDialog.Builder(this)
+.setTitle("إظهار الأذان على شاشة الهاتف")
+.setMessage("حتى تظهر خلفية الأذان كاملة على شاشة الهاتف عند قفل الجهاز، اسمح لزاد المسلم بإشعارات الشاشة الكاملة من إعدادات الهاتف.")
+.setPositiveButton("فتح الإعدادات",(dialog,which)->{
+try{startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,android.net.Uri.parse("package:"+getPackageName())));}
+catch(Exception error){android.util.Log.e("ZadStartup","Could not open full-screen notification settings",error);}
+})
+.setNegativeButton("لاحقًا",null).show();
+}
 void showStartupFallback(Exception error){LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setGravity(Gravity.CENTER);root.setPadding(dp(24),dp(24),dp(24),dp(24));root.setBackgroundColor(Color.rgb(244,247,243));TextView title=label("زاد وطمأنينة",25,Color.rgb(8,48,40),true);TextView message=label("حدث تعذر أثناء تحميل بعض مكونات التطبيق.",15,Color.rgb(65,80,70),false);TextView details=label((error==null?"سبب غير محدد":error.getClass().getSimpleName()+": "+String.valueOf(error.getMessage())),13,Color.rgb(120,45,35),false);details.setTextIsSelectable(true);Button retry=new Button(this);retry.setText("إعادة المحاولة");retry.setOnClickListener(v->{try{build();}catch(Exception e){android.util.Log.e("ZadStartup","Retry failed",e);showStartupFallback(e);}});root.addView(title);root.addView(message);root.addView(details);root.addView(retry);setContentView(root);}
 void build(){ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(14),dp(14),dp(14),dp(22));root.setBackgroundColor(AppThemeColors.bg(this));scroll.addView(root);
 TextView heading=label("زاد وطمأنينة",25,Color.WHITE,true);TextView ayah=label("﴿ أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ ﴾",14,Color.rgb(232,211,158),true);TextView ref=label("سورة الرعد • الآية ٢٨",11,Color.rgb(222,239,229),false);TextClock clock=new TextClock(this);clock.setFormat12Hour("hh:mm a");clock.setFormat24Hour("HH:mm");clock.setTextSize(27);clock.setTextColor(Color.WHITE);clock.setGravity(Gravity.CENTER);clock.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
