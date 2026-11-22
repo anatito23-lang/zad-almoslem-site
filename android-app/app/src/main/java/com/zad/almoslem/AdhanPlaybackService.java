@@ -121,7 +121,7 @@ public class AdhanPlaybackService extends Service {
             builder.setStyle(new Notification.BigPictureStyle()
                     .bigPicture(mosqueImage)
                     .bigLargeIcon((Bitmap) null)
-                    .setSummaryText("زاد المسلم — تقبّل الله صلاتكم"));
+                    .setSummaryText("زاد وطمأنينة — تقبّل الله صلاتكم"));
         }
         Notification notification = builder.build();
         try {
