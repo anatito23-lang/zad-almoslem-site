@@ -71,7 +71,11 @@ public final class AppTabs {
         homeSlot.setGravity(Gravity.CENTER);
         outer.addView(homeSlot,new LinearLayout.LayoutParams(dp(a,50),dp(a,50)));
         HorizontalScrollView dockScroll=new HorizontalScrollView(a);
-        dockScroll.setHorizontalScrollBarEnabled(false);\n        dockScroll.setHorizontalFadingEdgeEnabled(true);\n        dockScroll.setFadingEdgeLength(dp(a,18));\n        dockScroll.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);\n        if(Build.VERSION.SDK_INT>=21)dockScroll.setEdgeEffectColor(Color.rgb(207,174,112));
+        dockScroll.setHorizontalScrollBarEnabled(false);
+        dockScroll.setHorizontalFadingEdgeEnabled(true);
+        dockScroll.setFadingEdgeLength(dp(a,18));
+        dockScroll.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
+        if(Build.VERSION.SDK_INT>=21)dockScroll.setEdgeEffectColor(Color.rgb(207,174,112));
         dockScroll.setFillViewport(false);
         dockScroll.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         LinearLayout dock=new LinearLayout(a);
@@ -81,10 +85,12 @@ public final class AppTabs {
         GradientDrawable bg=new GradientDrawable();bg.setColor(AppThemeColors.nav(a));dock.setBackground(bg);
         dock.setPadding(dp(a,1),dp(a,1),dp(a,1),dp(a,1));
         dockScroll.addView(dock,new HorizontalScrollView.LayoutParams(-2,-1));
-        outer.addView(dockScroll,new LinearLayout.LayoutParams(0,dp(a,50),1f));
         LinearLayout moreSlot=new LinearLayout(a);
         moreSlot.setGravity(Gravity.CENTER);
-        outer.addView(moreSlot,new LinearLayout.LayoutParams(dp(a,50),dp(a,50)));\n        // In LTR container order, More stays left and Home is always at the far right.\n        outer.removeView(homeSlot);\n        outer.addView(homeSlot,new LinearLayout.LayoutParams(dp(a,50),dp(a,50)));
+        // LTR order: More on the left, scrollable tabs in the middle, Home on the right.
+        outer.addView(moreSlot,new LinearLayout.LayoutParams(dp(a,50),dp(a,50)));
+        outer.addView(dockScroll,new LinearLayout.LayoutParams(0,dp(a,50),1f));
+        outer.addView(homeSlot,new LinearLayout.LayoutParams(dp(a,50),dp(a,50)));
         render(a,active,outer,readCached(a));
         return outer;
     }
