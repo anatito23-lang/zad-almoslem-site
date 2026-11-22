@@ -1,0 +1,83 @@
+name: Build Zad Almoslem Admin App
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'admin-app/**'
+      - '.github/workflows/build-admin-app.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Android SDK 36
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Build debug APK
+        working-directory: admin-app
+        run: gradle assembleDebug
+      - name: Prepare release signing key when configured
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEYSTORE_PASSWORD" ] && [ -n "$ANDROID_KEY_ALIAS" ] && [ -n "$ANDROID_KEY_PASSWORD" ]; then
+            printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > admin-app/app/release-key.jks
+            keytool -list -keystore admin-app/app/release-key.jks -storepass "$ANDROID_KEYSTORE_PASSWORD" >/dev/null
+            echo "SIGNING_READY=true" >> "$GITHUB_ENV"
+          else
+            echo "SIGNING_READY=false" >> "$GITHUB_ENV"
+            echo "Release signing secrets are unavailable; debug APK will still be produced."
+          fi
+      - name: Build release APK
+        if: env.SIGNING_READY == 'true'
+        working-directory: admin-app
+        run: gradle assembleRelease
+      - name: Verify APK
+        if: env.SIGNING_READY == 'true'
+        run: |
+          set -euo pipefail
+          APK="admin-app/app/build/outputs/apk/release/app-release.apk"
+          test -s "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
+      - name: Remove temporary signing key
+        if: always()
+        run: rm -f admin-app/app/release-key.jks
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: zad-almoslem-admin-debug
+          path: admin-app/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload signed release APK
+        if: env.SIGNING_READY == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: zad-almoslem-admin-release
+          path: admin-app/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 90
