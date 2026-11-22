@@ -38,7 +38,7 @@ public final class AppTabs {
         LinearLayout shell=new LinearLayout(a); shell.setOrientation(1); shell.setBackgroundColor(AppThemeColors.bg(a));
         shell.addView(scroll,new LinearLayout.LayoutParams(-1,0,1f));
         LinearLayout bar=createBar(a,active);
-        shell.addView(bar,new LinearLayout.LayoutParams(-1,dp(a,68)));
+        shell.addView(bar,new LinearLayout.LayoutParams(-1,dp(a,58)));
         shell.setOnApplyWindowInsetsListener((v,insets)->{
             int bottom=0,top=0;
             if(Build.VERSION.SDK_INT>=30){
@@ -47,8 +47,8 @@ public final class AppTabs {
                 bottom=nav.bottom;top=status.top;
             } else { bottom=insets.getSystemWindowInsetBottom();top=insets.getSystemWindowInsetTop(); }
             int safe=Math.max(0,bottom);shell.setPadding(0,Math.max(0,top),0,0);
-            bar.setPadding(dp(a,7),dp(a,3),dp(a,7),safe);
-            LinearLayout.LayoutParams p=(LinearLayout.LayoutParams)bar.getLayoutParams();int h=dp(a,68)+safe;
+            bar.setPadding(dp(a,6),dp(a,2),dp(a,6),safe);
+            LinearLayout.LayoutParams p=(LinearLayout.LayoutParams)bar.getLayoutParams();int h=dp(a,58)+safe;
             if(p.height!=h){p.height=h;bar.setLayoutParams(p);}return insets;
         });
         shell.setFitsSystemWindows(false);shell.requestApplyInsets();
@@ -60,7 +60,7 @@ public final class AppTabs {
         LinearLayout outer=new LinearLayout(a);
         outer.setOrientation(LinearLayout.HORIZONTAL);
         outer.setGravity(Gravity.CENTER_VERTICAL);
-        outer.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+        outer.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         GradientDrawable barBg=new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
             new int[]{Color.rgb(24,39,37),Color.rgb(13,27,26)});
         barBg.setCornerRadii(new float[]{dp(a,18),dp(a,18),dp(a,18),dp(a,18),0,0,0,0});
@@ -69,9 +69,9 @@ public final class AppTabs {
         outer.setPadding(dp(a,6),dp(a,5),dp(a,6),0);
         LinearLayout homeSlot=new LinearLayout(a);
         homeSlot.setGravity(Gravity.CENTER);
-        outer.addView(homeSlot,new LinearLayout.LayoutParams(dp(a,68),dp(a,60)));
+        outer.addView(homeSlot,new LinearLayout.LayoutParams(dp(a,50),dp(a,50)));
         HorizontalScrollView dockScroll=new HorizontalScrollView(a);
-        dockScroll.setHorizontalScrollBarEnabled(false);
+        dockScroll.setHorizontalScrollBarEnabled(false);\n        dockScroll.setHorizontalFadingEdgeEnabled(true);\n        dockScroll.setFadingEdgeLength(dp(a,18));\n        dockScroll.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);\n        if(Build.VERSION.SDK_INT>=21)dockScroll.setEdgeEffectColor(Color.rgb(207,174,112));
         dockScroll.setFillViewport(false);
         dockScroll.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         LinearLayout dock=new LinearLayout(a);
@@ -81,10 +81,10 @@ public final class AppTabs {
         GradientDrawable bg=new GradientDrawable();bg.setColor(AppThemeColors.nav(a));dock.setBackground(bg);
         dock.setPadding(dp(a,1),dp(a,1),dp(a,1),dp(a,1));
         dockScroll.addView(dock,new HorizontalScrollView.LayoutParams(-2,-1));
-        outer.addView(dockScroll,new LinearLayout.LayoutParams(0,dp(a,60),1f));
+        outer.addView(dockScroll,new LinearLayout.LayoutParams(0,dp(a,50),1f));
         LinearLayout moreSlot=new LinearLayout(a);
         moreSlot.setGravity(Gravity.CENTER);
-        outer.addView(moreSlot,new LinearLayout.LayoutParams(dp(a,68),dp(a,60)));
+        outer.addView(moreSlot,new LinearLayout.LayoutParams(dp(a,50),dp(a,50)));\n        // In LTR container order, More stays left and Home is always at the far right.\n        outer.removeView(homeSlot);\n        outer.addView(homeSlot,new LinearLayout.LayoutParams(dp(a,50),dp(a,50)));
         render(a,active,outer,readCached(a));
         return outer;
     }
@@ -152,7 +152,7 @@ public final class AppTabs {
         for(JSONObject row:rows){
             String key=row.optString("key","");
             int index=indexOf(key);
-            dock.addView(makeTabItem(a,row,active,li),new LinearLayout.LayoutParams(dp(a,66),-1));
+            dock.addView(makeTabItem(a,row,active,li),new LinearLayout.LayoutParams(dp(a,58),-1));
         }
         final String activeKey=active;
         dockScroll.post(()->{
@@ -177,15 +177,15 @@ public final class AppTabs {
         final String clickLabel=labelText,clickIcon=iconText;
         LinearLayout item=new LinearLayout(a);item.setOrientation(1);item.setGravity(Gravity.CENTER);
         item.setClickable(!selected);item.setFocusable(!selected);
-        item.setPadding(dp(a,2),dp(a,4),dp(a,2),dp(a,3));
-        if(selected){GradientDrawable selectedBg=new GradientDrawable();selectedBg.setColor(Color.rgb(48,75,66));selectedBg.setCornerRadius(dp(a,15));selectedBg.setStroke(dp(a,1),Color.rgb(207,174,112));item.setBackground(selectedBg);}
-        else {GradientDrawable idleBg=new GradientDrawable();idleBg.setColor(Color.TRANSPARENT);idleBg.setCornerRadius(dp(a,15));item.setBackground(idleBg);}
-        TextView icon=new TextView(a);icon.setText(iconText);icon.setTextSize(18);icon.setGravity(Gravity.CENTER);
+        item.setPadding(dp(a,2),dp(a,1),dp(a,2),dp(a,1));
+        if(selected){GradientDrawable selectedBg=new GradientDrawable();selectedBg.setColor(Color.rgb(48,75,66));selectedBg.setCornerRadius(dp(a,12));selectedBg.setStroke(dp(a,1),Color.rgb(207,174,112));item.setBackground(selectedBg);}
+        else {GradientDrawable idleBg=new GradientDrawable();idleBg.setColor(Color.TRANSPARENT);idleBg.setCornerRadius(dp(a,12));item.setBackground(idleBg);}
+        TextView icon=new TextView(a);icon.setText(iconText);icon.setTextSize(19);icon.setGravity(Gravity.CENTER);
         icon.setTextColor(selected?Color.rgb(235,205,139):AppThemeColors.accent(a));icon.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
-        item.addView(icon,new LinearLayout.LayoutParams(-1,dp(a,27)));
+        item.addView(icon,new LinearLayout.LayoutParams(-1,dp(a,25)));
         TextView label=new TextView(a);label.setText(labelText);label.setTextSize(8);label.setSingleLine(true);label.setGravity(Gravity.CENTER);
         label.setTextColor(selected?Color.WHITE:Color.rgb(195,204,199));label.setTypeface(Typeface.DEFAULT,selected?Typeface.BOLD:Typeface.NORMAL);
-        item.addView(label,new LinearLayout.LayoutParams(-1,dp(a,17)));
+        item.addView(label,new LinearLayout.LayoutParams(-1,dp(a,15)));
         item.setOnClickListener(v->{
             Intent in=new Intent(a,target);
             if(index<0){in.putExtra("tab_id",key);in.putExtra("tab_title",clickLabel);in.putExtra("tab_icon",clickIcon);}
