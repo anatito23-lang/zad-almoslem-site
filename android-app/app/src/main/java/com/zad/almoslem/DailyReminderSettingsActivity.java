@@ -153,7 +153,7 @@ public class DailyReminderSettingsActivity extends Activity {
   card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
   LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(card,lp);
   card.addView(label("السماح بإشعارات الهاتف",18,green,true));
-  TextView desc=label("تحكم في وصول تنبيهات زاد المسلم إلى هاتفك. عند التشغيل سيطلب أندرويد الإذن، وعند الإيقاف نفتح إعدادات التطبيق لتتمكن من منع الإشعارات.",12,Color.GRAY,false);
+  TextView desc=label("تحكم في وصول تنبيهات زاد وطمأنينة إلى هاتفك. عند التشغيل سيطلب أندرويد الإذن، وعند الإيقاف نفتح إعدادات التطبيق لتتمكن من منع الإشعارات.",12,Color.GRAY,false);
   desc.setPadding(0,dp(5),0,dp(8));card.addView(desc);
   notificationSwitch=new Switch(this);notificationSwitch.setText("تشغيل إشعارات الهاتف");
   notificationSwitch.setChecked(notificationsAllowed());card.addView(notificationSwitch);
@@ -164,7 +164,7 @@ public class DailyReminderSettingsActivity extends Activity {
     }else if(!notificationsAllowed()){
      openNotificationSettings();
     }else{
-     Toast.makeText(this,"إشعارات زاد المسلم مفعّلة",Toast.LENGTH_SHORT).show();
+     Toast.makeText(this,"إشعارات زاد وطمأنينة مفعّلة",Toast.LENGTH_SHORT).show();
     }
    }else{
     Toast.makeText(this,"لإيقاف الإشعارات استخدم مفتاح السماح في إعدادات الهاتف",Toast.LENGTH_LONG).show();
@@ -214,7 +214,7 @@ public class DailyReminderSettingsActivity extends Activity {
    if(manager.canScheduleExactAlarms()){
     for(String key:new String[]{"morning","evening","qiyam"}){
      if(prefs.getBoolean(key+"_enabled",false))
-      ReminderReceiver.scheduleDaily(this,key,prefs.getInt(key+"_hour",7),prefs.getInt(key+"_minute",0),prefs.getString(key+"_title","تذكير من زاد المسلم"));
+      ReminderReceiver.scheduleDaily(this,key,prefs.getInt(key+"_hour",7),prefs.getInt(key+"_minute",0),prefs.getString(key+"_title","تذكير من زاد وطمأنينة"));
     }
     ReminderReceiver.rescheduleApproachAlerts(this);
     if(prefs.getBoolean("gentle_enabled",false))ReminderReceiver.scheduleGentleReminder(this);
