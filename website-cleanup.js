@@ -16,7 +16,7 @@ function clean(){
  document.querySelectorAll('a[href]').forEach(a=>{
   const href=a.getAttribute('href')||'';
   const label=(a.textContent||'').trim();
-  if(linkPattern.test(href)||/^(الأذكار اليومية|الأذكار|السبحة الإلكترونية|السبحة|بوصلة القبلة|القبلة|متتبع الصلاة|إعدادات الأذان)$/.test(label))a.remove();
+  if(linkPattern.test(href)||/^(السبحة الإلكترونية|السبحة|بوصلة القبلة|القبلة|متتبع الصلاة|إعدادات الأذان)$/.test(label))a.remove();
  });
  const countdown=document.querySelector('#nextPrayerCountdown .next-prayer-clock .next-prayer-kicker');
  if(countdown)countdown.textContent='متبقي على الصلاة';
