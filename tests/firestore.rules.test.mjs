@@ -22,6 +22,11 @@ before(async () => {
     await setDoc(doc(db, "azkar", "draft"), { published: false, text: "private" });
     await setDoc(doc(db, "waqafat", "custom_tabs_config"), { tabs: [{ id: "hidden", visible: false }] });
     await setDoc(doc(db, "waqafat", "custom_tabs_public"), { tabs: [{ id: "visible", visible: true }] });
+    await setDoc(doc(db, "waqafat", "__app_navigation__"), { tabs: [{ key: "custom-app", visible: true }] });
+    await setDoc(doc(db, "site_custom_tabs", "site_custom_tabs_config"), { tabs: [{ id: "site-only", visible: true }] });
+    await setDoc(doc(db, "site_custom_tabs", "site_custom_tabs_public"), { tabs: [{ id: "site-only", visible: true }] });
+    await setDoc(doc(db, "site_custom_content", "site-published"), { sectionId: "site-only", published: true, title: "website only" });
+    await setDoc(doc(db, "site_custom_content", "site-draft"), { sectionId: "site-only", published: false, title: "website draft" });
     await setDoc(doc(db, "waqafat", "custom-published"), { tabId: "visible", published: true, title: "public" });
     await setDoc(doc(db, "waqafat", "custom-draft"), { tabId: "visible", published: false, title: "draft" });
     await setDoc(doc(db, "future-content", "published"), { published: true, title: "compatible" });
@@ -37,6 +42,9 @@ test("anonymous users can read only the public tab projection", async () => {
   const db = env.unauthenticatedContext().firestore();
   await assertSucceeds(getDoc(doc(db, "waqafat", "custom_tabs_public")));
   await assertFails(getDoc(doc(db, "waqafat", "custom_tabs_config")));
+  await assertSucceeds(getDoc(doc(db, "waqafat", "__app_navigation__")));
+  await assertSucceeds(getDoc(doc(db, "site_custom_tabs", "site_custom_tabs_public")));
+  await assertFails(getDoc(doc(db, "site_custom_tabs", "site_custom_tabs_config")));
 });
 
 test("anonymous users can read documents published with current and legacy flags", async () => {
@@ -58,6 +66,16 @@ test("public list queries must explicitly filter to a publication flag", async (
     where("tabId", "==", "visible"),
     where("published", "==", true)
   )));
+});
+
+test("website-managed tabs and content stay in website-only collections", async () => {
+  const publicDb = env.unauthenticatedContext().firestore();
+  await assertSucceeds(getDoc(doc(publicDb, "site_custom_content", "site-published")));
+  await assertFails(getDoc(doc(publicDb, "site_custom_content", "site-draft")));
+  await assertFails(setDoc(doc(publicDb, "site_custom_content", "attacker"), { sectionId: "site-only", published: true }));
+  const adminDb = env.authenticatedContext(ADMIN_UID).firestore();
+  await assertSucceeds(setDoc(doc(adminDb, "site_custom_tabs", "site_custom_tabs_config"), { tabs: [{ id: "admin-site" }] }));
+  await assertSucceeds(setDoc(doc(adminDb, "site_custom_content", "admin-site-item"), { sectionId: "admin-site", published: true }));
 });
 
 test("anonymous users cannot create, edit, or delete content", async () => {
