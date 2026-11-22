@@ -44,7 +44,7 @@ public final class RemoteContentRepository {
                     .addOnSuccessListener(snapshot -> {
                         synchronized (merged) {
                             for (QueryDocumentSnapshot doc : snapshot) {
-                                if ("waqafat".equals(collection) && "__app_navigation__".equals(doc.getId())) continue;
+                                if ("waqafat".equals(collection) && "app_navigation_config".equals(doc.getId())) continue;
                                 JSONObject row = merged.get(doc.getId());
                                 if (row == null) row = new JSONObject();
                                 try {
