@@ -125,7 +125,11 @@ public final class AppTabs {
                 JSONObject row=config.optJSONObject(i);
                 if(row==null||!row.optBoolean("visible",true))continue;
                 String key=row.optString("key","");
-                if(key.matches("[A-Za-z][A-Za-z0-9_-]{0,59}")&&!"home".equals(key))rows.add(row);
+                String label=row.optString("label","").trim().replace("ـ","");
+                String normalizedKey=key.toLowerCase(java.util.Locale.ROOT);
+                String normalizedLabel=label.replaceAll("\\s+","");
+                boolean contentSection="hadith".equals(normalizedKey)||"hadiths".equals(normalizedKey)||"khutbah".equals(normalizedKey)||"khutbas".equals(normalizedKey)||"sermons".equals(normalizedKey)||"sahaba".equals(normalizedKey)||"companions".equals(normalizedKey)||"stories_sahaba".equals(normalizedKey)||"home".equals(normalizedKey)||normalizedLabel.contains("حديث")||normalizedLabel.contains("خطب")||normalizedLabel.contains("قصصصحاب")||normalizedLabel.contains("قصةصحاب");
+                if(!contentSection&&key.matches("[A-Za-z][A-Za-z0-9_-]{0,59}"))rows.add(row);
             }
         }
         if(rows.isEmpty())for(int i=0;i<KEYS.length;i++)if(!"home".equals(KEYS[i])){
