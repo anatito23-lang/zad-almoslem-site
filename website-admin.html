@@ -71,7 +71,8 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <div class="actions"><button id="websiteSettingsSave" type="submit">حفظ إعدادات الموقع</button><button class="secondary" id="websiteSettingsReload" type="button">إعادة تحميل الإعدادات</button></div>
 </form>
 <div id="websiteSettingsMessage" class="notice hidden" role="status"></div>
-</section>\n<section class="card hidden" id="siteContentCard">
+</section>
+<section class="card hidden" id="siteContentCard">
 <h2>إدارة جميع تبويبات الموقع</h2>
 <p class="small">أضف منشورات ومواد وروابط داخل أي قسم ظاهر بالموقع، مع إمكانية تعديلها أو إخفائها أو حذفها. المحتوى الأصلي والأدوات التفاعلية تظل كما هي.</p>
 <form id="siteContentForm">
@@ -282,10 +283,13 @@ $("siteContentRefresh").addEventListener("click",loadSiteContent);
 
 
 const BOOK_COLLECTION="library_books";
-const BOOK_MAX_BYTES=50*1024*1024;\nconst COVER_MAX_BYTES=5*1024*1024;
+const BOOK_MAX_BYTES=50*1024*1024;
+const COVER_MAX_BYTES=5*1024*1024;
 const BOOK_TYPES={".pdf":"application/pdf",".doc":"application/msword",".docx":"application/vnd.openxmlformats-officedocument.wordprocessingml.document",".epub":"application/epub+zip",".txt":"text/plain",".rtf":"application/rtf"};
 function bookMsg(v,error=false){const el=$("libraryBookMessage");el.textContent=v;el.classList.remove("hidden","error");if(error)el.classList.add("error")}
-function resetBookForm(){ $("bookAdminForm").reset();$("libraryBookId").value="";$("libraryBookPublished").checked=false;$("libraryBookSave").textContent="حفظ الكتاب";$("libraryBookFile").required=true;$("libraryBookPreview").innerHTML="<strong>معاينة بيانات الكتاب</strong><p class=\"small\">اكتب العنوان والمؤلف واختر صورة الغلاف لعرض المعاينة هنا.</p>"}\nfunction updateBookPreview(){const box=$("libraryBookPreview"),title=$("libraryBookTitle").value.trim()||"عنوان الكتاب",author=$("libraryBookAuthor").value.trim()||"اسم المؤلف",summary=$("libraryBookSummary").value.trim(),cover=$("libraryBookCover").files[0];box.replaceChildren();const h=document.createElement("strong");h.textContent="معاينة قبل النشر";box.append(h);if(cover&&cover.type.startsWith("image/")){const img=document.createElement("img");img.src=URL.createObjectURL(cover);img.alt="غلاف الكتاب";img.style.cssText="max-width:130px;max-height:180px;display:block;margin:10px auto;object-fit:contain";box.append(img)}const t=document.createElement("h3");t.textContent=title;box.append(t);const au=document.createElement("p");au.className="small";au.textContent=author;box.append(au);if(summary){const p=document.createElement("p");p.textContent=summary;box.append(p)}const f=$("libraryBookFile").files[0];if(f){const p=document.createElement("p");p.className="small";p.textContent="الملف المحدد: "+f.name;box.append(p)}}\n["libraryBookTitle","libraryBookAuthor","libraryBookSummary","libraryBookFile","libraryBookCover"].forEach(id=>$(id).addEventListener("input",updateBookPreview));
+function resetBookForm(){ $("bookAdminForm").reset();$("libraryBookId").value="";$("libraryBookPublished").checked=false;$("libraryBookSave").textContent="حفظ الكتاب";$("libraryBookFile").required=true;$("libraryBookPreview").innerHTML="<strong>معاينة بيانات الكتاب</strong><p class=\"small\">اكتب العنوان والمؤلف واختر صورة الغلاف لعرض المعاينة هنا.</p>"}
+function updateBookPreview(){const box=$("libraryBookPreview"),title=$("libraryBookTitle").value.trim()||"عنوان الكتاب",author=$("libraryBookAuthor").value.trim()||"اسم المؤلف",summary=$("libraryBookSummary").value.trim(),cover=$("libraryBookCover").files[0];box.replaceChildren();const h=document.createElement("strong");h.textContent="معاينة قبل النشر";box.append(h);if(cover&&cover.type.startsWith("image/")){const img=document.createElement("img");img.src=URL.createObjectURL(cover);img.alt="غلاف الكتاب";img.style.cssText="max-width:130px;max-height:180px;display:block;margin:10px auto;object-fit:contain";box.append(img)}const t=document.createElement("h3");t.textContent=title;box.append(t);const au=document.createElement("p");au.className="small";au.textContent=author;box.append(au);if(summary){const p=document.createElement("p");p.textContent=summary;box.append(p)}const f=$("libraryBookFile").files[0];if(f){const p=document.createElement("p");p.className="small";p.textContent="الملف المحدد: "+f.name;box.append(p)}}
+["libraryBookTitle","libraryBookAuthor","libraryBookSummary","libraryBookFile","libraryBookCover"].forEach(id=>$(id).addEventListener("input",updateBookPreview));
 async function loadLibraryBooksAdmin(){
  if(auth.currentUser?.uid!==ADMIN_UID)return;
  $("libraryBooksAdminList").innerHTML='<p class="small">جارٍ تحميل الكتب…</p>';
@@ -302,6 +306,7 @@ $("bookAdminForm").addEventListener("submit",async e=>{
  e.preventDefault();if(auth.currentUser?.uid!==ADMIN_UID)return;
  const file=$("libraryBookFile").files[0],cover=$("libraryBookCover").files[0],id=$("libraryBookId").value;
  if(!id&&!file){bookMsg("اختر ملف الكتاب أولًا.",true);return}
+ if(cover&&(!["image/jpeg","image/png","image/webp"].includes(cover.type)||cover.size>COVER_MAX_BYTES)){bookMsg("الغلاف يجب أن يكون JPG أو PNG أو WEBP وبحجم لا يتجاوز 5 ميجابايت.",true);return}
  if(file){
   const ext="."+file.name.split(".").pop().toLowerCase(),expected=BOOK_TYPES[ext];
   if(!expected){bookMsg("صيغة الملف غير مدعومة. الصيغ المتاحة: PDF وWord وEPUB وTXT وRTF.",true);return}
@@ -320,6 +325,7 @@ $("bookAdminForm").addEventListener("submit",async e=>{
    await uploadBytes(objectRef,file,{contentType:BOOK_TYPES["."+file.name.split(".").pop().toLowerCase()],customMetadata:{uploadedBy:auth.currentUser.uid}});
    data.fileUrl=await getDownloadURL(objectRef);data.storagePath=path;data.fileName=file.name;data.fileType=BOOK_TYPES["."+file.name.split(".").pop().toLowerCase()];data.fileSize=file.size;
   }
+  if(cover){const coverPath="library-books/covers/"+Date.now()+"_"+cover.name.replace(/[^\\p{L}\\p{N}._-]+/gu,"_").slice(-80),coverRef=storageRef(storageDb,coverPath);await uploadBytes(coverRef,cover,{contentType:cover.type,customMetadata:{uploadedBy:auth.currentUser.uid}});data.coverUrl=await getDownloadURL(coverRef);data.coverPath=coverPath;}
   if(bookId){await updateDoc(doc(db,BOOK_COLLECTION,bookId),data)}else{data.createdAt=serverTimestamp();const created=await addDoc(collection(db,BOOK_COLLECTION),data);bookId=created.id}
   resetBookForm();bookMsg("تم حفظ بيانات الكتاب ورفعه بنجاح. "+(data.published?"الكتاب منشور للزوار.":"الكتاب محفوظ كمسودة."));
   await loadLibraryBooksAdmin();
