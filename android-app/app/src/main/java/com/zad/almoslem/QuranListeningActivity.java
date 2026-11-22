@@ -41,6 +41,17 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
          Button stop=new Button(this);stop.setText("■  إيقاف التلاوة");styleAction(stop,0xFF76514B);card.addView(stop,matchWrap());
         stop.setOnClickListener(v->{Intent stopIntent=new Intent(this,RadioPlaybackService.class);stopIntent.setAction(RadioPlaybackService.ACTION_STOP);try{startService(stopIntent);Toast.makeText(this,"تم إيقاف التلاوة",Toast.LENGTH_SHORT).show();}catch(Exception e){Toast.makeText(this,"تعذر إيقاف التلاوة",Toast.LENGTH_SHORT).show();}});
         Button download=new Button(this);download.setText("تنزيل السورة للاستماع دون إنترنت");styleAction(download,0xFF496B62);card.addView(download,matchWrap());
+        Button downloadReciter=new Button(this);downloadReciter.setText("تنزيل تلاوات القارئ كاملة للعمل دون إنترنت");styleAction(downloadReciter,0xFF315F51);card.addView(downloadReciter,matchWrap());
+        downloadReciter.setOnClickListener(v->{
+            int ri=reciterSpinner.getSelectedItemPosition();
+            if(ri<0||ri>=reciters.size()){state.setText("انتظر حتى تكتمل قائمة القراء.");return;}
+            org.json.JSONObject selected=reciters.get(ri);
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("تنزيل تلاوات القارئ")
+                .setMessage("سيتم تنزيل جميع السور المتاحة لهذا القارئ وحفظها على الهاتف. قد يستهلك ذلك مساحة كبيرة من التخزين وباقة الإنترنت؛ يُفضّل استخدام Wi-Fi.")
+                .setPositiveButton("ابدأ التنزيل",(dialog,which)->downloadFullReciter(selected,downloadReciter,quranProgress,state))
+                .setNegativeButton("إلغاء",null).show();
+        });
         ProgressBar quranProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);quranProgress.setMax(100);card.addView(quranProgress,matchWrap());
         TextView state=text("جارٍ تحميل قائمة القراء من مكتبة التسجيلات.",12,Color.rgb(80,100,90),false);card.addView(state);
         TextView libraryNote=text("المكتبة الداخلية تعرض القراء والتسجيلات المتاحة في مصدر القرآن. اختر القارئ والسورة ثم استمع أو نزّل الملف ليُحفظ داخل التطبيق. لا توجد روابط لمواقع خارجية في هذه الصفحة.",12,AppThemeColors.muted(this),false);
@@ -153,6 +164,84 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         });
     }
 
+
+
+    private void downloadFullReciter(org.json.JSONObject reciter, Button button, ProgressBar progress, TextView state) {
+        if (reciter == null) return;
+        String reciterName = reciter.optString("name", "القارئ");
+        String key = reciterStorageKey(reciter);
+        button.setEnabled(false);
+        progress.setProgress(0);
+        state.setText("جارٍ تجهيز تنزيل تلاوات " + reciterName + "...");
+        new Thread(() -> {
+            int available = 0, saved = 0, failed = -1;
+            File dir = new File(getFilesDir(), "quran");
+            if (!dir.exists() && !dir.mkdirs()) failed = 0;
+            for (int surah = 1; surah <= 114 && failed < 0; surah++) {
+                HttpURLConnection connection = null;
+                File temp = null;
+                try {
+                    String url = resolveQuranAudioUrl(reciter, surah);
+                    if (url == null) continue;
+                    available++;
+                    File target = new File(dir, "reciter_" + key + "_surah_" + surah + ".mp3");
+                    if (target.isFile() && target.length() > 10000) {
+                        saved++;
+                    } else {
+                        temp = new File(dir, target.getName() + ".part");
+                        connection = (HttpURLConnection) new URL(url).openConnection();
+                        connection.setConnectTimeout(20000);
+                        connection.setReadTimeout(120000);
+                        connection.setInstanceFollowRedirects(true);
+                        if (connection.getResponseCode() != 200) throw new IOException("مصدر السورة غير متاح");
+                        long got = 0;
+                        try (InputStream in = connection.getInputStream(); FileOutputStream out = new FileOutputStream(temp)) {
+                            byte[] buffer = new byte[16384];
+                            int n;
+                            while ((n = in.read(buffer)) != -1) {
+                                got += n;
+                                if (got > 100L * 1024 * 1024) throw new IOException("حجم الملف أكبر من الحد المسموح");
+                                out.write(buffer, 0, n);
+                            }
+                            out.getFD().sync();
+                        }
+                        if (temp.length() < 10000) throw new IOException("ملف السورة غير مكتمل");
+                        try (FileInputStream in = new FileInputStream(temp)) {
+                            byte[] h = new byte[3]; int n = in.read(h);
+                            if (!(n >= 3 && h[0] == 'I' && h[1] == 'D' && h[2] == '3') &&
+                                !(n >= 2 && (h[0] & 255) == 255 && (h[1] & 224) == 224))
+                                throw new IOException("ملف صوت غير صالح");
+                        }
+                        if (target.exists() && !target.delete()) throw new IOException("تعذر استبدال الملف السابق");
+                        if (!temp.renameTo(target)) throw new IOException("تعذر حفظ ملف السورة");
+                        saved++;
+                    }
+                    final int done = saved, total = available;
+                    runOnUiThread(() -> {
+                        progress.setProgress((int) (done * 100f / 114f));
+                        state.setText("تم حفظ " + done + " سورة من تلاوات " + reciterName + "...");
+                    });
+                } catch (Exception error) {
+                    failed = surah;
+                } finally {
+                    if (connection != null) connection.disconnect();
+                    if (temp != null && temp.exists()) temp.delete();
+                }
+            }
+            final int done = saved, totalAvailable = available, failedSurah = failed;
+            runOnUiThread(() -> {
+                button.setEnabled(true);
+                if (failedSurah < 0) {
+                    progress.setProgress(100);
+                    state.setText("اكتمل تنزيل " + done + " سورة متاحة للقارئ " + reciterName + ". أصبحت الملفات المحفوظة تعمل دون إنترنت.");
+                } else if (failedSurah == 0) {
+                    state.setText("تعذر إنشاء مساحة حفظ التلاوات على الهاتف.");
+                } else {
+                    state.setText("تم حفظ " + done + " سورة. تعذر تنزيل السورة رقم " + failedSurah + "؛ اضغط مجددًا لاستكمال الباقي.");
+                }
+            });
+        }).start();
+    }
 
     private String reciterStorageKey(org.json.JSONObject reciter){
         String id=reciter==null?"":reciter.optString("id","").trim();
