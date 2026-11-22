@@ -47,7 +47,7 @@ public class QuranTextActivity extends Activity {
     private void build(){
         contentScroll=new ScrollView(this);
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(14),dp(14),dp(14),dp(28));root.setBackgroundColor(Color.rgb(244,247,243));contentScroll.addView(root);
-        heading=label(pageMode?"القراءة والتصحيح — صفحة "+pageNumber:"القراءة والتصحيح",22,green,true);heading.setGravity(Gravity.CENTER);root.addView(heading);
+        heading=label(pageMode?"القراءة والتصحيح — صفحة "+pageNumber:(targetAyah>0?"سورة "+names[surahNumber-1]+" — الآية "+targetAyah:"سورة "+names[surahNumber-1]),22,green,true);heading.setGravity(Gravity.CENTER);root.addView(heading);
         TextView hint=label("اختر القارئ، ثم اضغط على الآية لسماعها. بعد انتهاء الآية ينتقل التشغيل تلقائيًا إلى الآية التالية. اضغط الآية مرة أخرى لإعادتها.",13,Color.DKGRAY,false);hint.setPadding(0,dp(10),0,dp(10));root.addView(hint);
         root.addView(label("القارئ",13,green,true));
         reciterPicker=new Spinner(this);
@@ -106,23 +106,33 @@ public class QuranTextActivity extends Activity {
             final int index=i;JSONObject a=ayahs.get(i);
             int surah=a.optJSONObject("surah")==null?surahNumber:a.optJSONObject("surah").optInt("number",surahNumber);
             int local=a.optInt("numberInSurah",i+1);
-            Button verse=new Button(this);
-            verse.setAllCaps(false);verse.setTextDirection(View.TEXT_DIRECTION_RTL);verse.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);
+            TextView verse=new TextView(this);
+            verse.setTextDirection(View.TEXT_DIRECTION_RTL);verse.setGravity(Gravity.RIGHT|Gravity.CENTER_VERTICAL);
             verse.setText(a.optString("text","")+"  ۞ "+local);
-            verse.setTextSize(20);verse.setPadding(dp(12),dp(12),dp(12),dp(12));
+            verse.setTextSize(21);verse.setTextColor(Color.rgb(31,75,59));
+            verse.setTypeface(Typeface.create("serif",Typeface.NORMAL));
+            verse.setTextIsSelectable(false);verse.setLongClickable(false);verse.setFocusable(false);
+            verse.setPadding(dp(14),dp(14),dp(14),dp(14));
             verse.setBackground(bg(Color.WHITE,12));
             LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(7);verses.addView(verse,lp);
             verse.setOnClickListener(v->{currentIndex=index;playAyah(index,true);});
         }
         if(targetAyah > 0 && !ayahs.isEmpty()) {
-            final int targetIndex = Math.max(0, Math.min(ayahs.size() - 1, targetAyah - 1));
-            verses.post(() -> {
-                View target = verses.getChildAt(targetIndex);
-                if (target != null) {
-                    target.setBackground(bg(Color.rgb(235, 243, 231), 12));
-                    contentScroll.post(() -> contentScroll.smoothScrollTo(0, verses.getTop() + target.getTop()));
-                }
-            });
+            int found = -1;
+            for(int i=0;i<ayahs.size();i++) if(ayahs.get(i).optInt("numberInSurah",-1)==targetAyah){found=i;break;}
+            if(found >= 0) {
+                final int targetIndex = found;
+                verses.post(() -> {
+                    View target = verses.getChildAt(targetIndex);
+                    if (target != null) {
+                        target.setBackground(bg(Color.rgb(226, 240, 224), 14));
+                        ((TextView)target).setTextColor(Color.rgb(8, 65, 43));
+                        ((TextView)target).setTypeface(Typeface.create("serif",Typeface.BOLD));
+                        status.setText("هذه هي الآية "+targetAyah+" من سورة "+names[surahNumber-1]);
+                        contentScroll.post(() -> contentScroll.smoothScrollTo(0, verses.getTop() + target.getTop()));
+                    }
+                });
+            }
             targetAyah = -1;
         }
     }
