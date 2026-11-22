@@ -24,7 +24,6 @@ function clean(){
 const style=document.createElement('style');
 style.id='zad-website-hard-cleanup';
 style.textContent=`
-body.zad-public-website .azkar-ticker,
 body.zad-public-website #daily-reminder-settings,
 body.zad-public-website .prayer-tracker,
 body.zad-public-website .adhan-settings,
