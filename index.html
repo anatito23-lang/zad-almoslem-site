@@ -2629,56 +2629,73 @@ html{scroll-padding-top:14px}
 <script id="zad-website-managed-tabs-20261122">
 (function(){
  if(location.hostname!=="anatito23-lang.github.io")return;
- const main=document.querySelector("main.wrap");
- if(!main)return;
- const safe=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ const main=document.querySelector("main.wrap");if(!main)return;
  const kindNames={articles:"خواطر ومقالات",stories:"قصص",biographies:"سير وتراجم",hadith:"أحاديث نبوية",azkar:"أذكار وأدعية",khutbah:"خطب ومواعظ",quran:"آيات وتدبر",general:"محتوى إيماني"};
- async function load(){
+ const sectionTargets={hadith:"hadith-dua",azkar:"azkar",khutbah:"khutbahs",quran:"quran"};
+ let db=null,tabByTarget=new Map(),loading=new Set(),loaded=new Set();
+ const getDb=async()=>{
+  if(db)return db;
+  const [{initializeApp,getApps},{getFirestore}]=await Promise.all([
+   import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+   import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")
+  ]);
+  const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
+  db=getFirestore(getApps().length?getApps()[0]:initializeApp(cfg));return db;
+ };
+ async function loadContent(tab,targetId){
+  if(loaded.has(tab.id)||loading.has(tab.id))return;
+  loading.add(tab.id);
+  const section=document.getElementById(targetId);if(!section){loading.delete(tab.id);return;}
+  let status=section.querySelector('[data-zad-tab-status="'+tab.id+'"]');
+  if(!status){status=document.createElement("p");status.className="small muted";status.dataset.zadTabStatus=tab.id;status.textContent="جارٍ تحميل المحتوى...";section.append(status);}
   try{
-   const [{initializeApp,getApps},{getFirestore,doc,getDoc,collection,getDocs,query,where}]=await Promise.all([
-    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
-    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")
-   ]);
-   const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
-   const app=getApps().length?getApps()[0]:initializeApp(cfg),db=getFirestore(app);
-   const snap=await getDoc(doc(db,"waqafat","custom_tabs_public"));
+   const [{collection,getDocs,query,where}]=await Promise.all([import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")]);
+   const database=await getDb();
+   const q=query(collection(database,"waqafat"),where("tabId","==",tab.id),where("published","==",true));
+   const snap=await getDocs(q);
+   const records=snap.docs.map(d=>d.data()).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+   status.remove();
+   if(!records.length){const empty=document.createElement("p");empty.className="small muted";empty.textContent="لا يوجد محتوى منشور في هذا القسم حاليًا.";section.append(empty);}
+   records.forEach(item=>{
+    const card=document.createElement("article");card.className="card";card.style.margin="12px 0";
+    const h=document.createElement("h3");h.textContent=item.title||tab.title;
+    const body=document.createElement("p");body.textContent=item.body||"";body.style.whiteSpace="pre-wrap";body.style.lineHeight="2";
+    card.append(h,body);
+    if(item.source){const source=document.createElement("p");source.className="small";source.style.marginTop="10px";source.textContent="المصدر: "+item.source;card.append(source);}
+    section.append(card);
+   });
+   loaded.add(tab.id);
+  }catch(error){status.textContent="تعذر تحميل المحتوى. تحقق من الاتصال ثم اضغط على القسم مرة أخرى.";console.warn("Zad tab content load failed",error);}
+  finally{loading.delete(tab.id);}
+ }
+ async function init(){
+  try{
+   const [{getFirestore,doc,getDoc}]=await Promise.all([import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")]);
+   const database=await getDb(),snap=await getDoc(doc(database,"waqafat","custom_tabs_public"));
    if(!snap.exists())return;
-   const tabs=(Array.isArray(snap.data().tabs)?snap.data().tabs:[])
-    .filter(t=>t&&/^[A-Za-z][A-Za-z0-9_-]{0,59}$/.test(t.id||"")&&t.title&&t.visible!==false)
-    .sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
-   const results=await Promise.all(tabs.map(async tab=>{
-    const sectionTargets={hadith:"hadith-dua",azkar:"azkar",khutbah:"khutbahs",quran:"quran"};
-    const targetId=sectionTargets[tab.kind]||tab.id;
-    const existing=document.getElementById(targetId);
-    const q=query(collection(db,"waqafat"),where("tabId","==",tab.id),where("published","==",true));
-    const content=await getDocs(q);
-    return {tab,targetId,existing,records:content.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0))};
-   }));
+   const tabs=(Array.isArray(snap.data().tabs)?snap.data().tabs:[]).filter(t=>t&&/^[A-Za-z][A-Za-z0-9_-]{0,59}$/.test(t.id||"")&&t.title&&t.visible!==false).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
    const nav=document.querySelector(".top nav"),shortcuts=document.querySelector(".zad-web-shortcuts");
-   results.filter(Boolean).forEach(({tab,targetId,existing,records})=>{
-    const section=existing||document.createElement("section");
-    if(!existing){section.className="section";section.id=targetId;
-     const heading=document.createElement("div");heading.className="section-head";
+   tabs.forEach(tab=>{
+    const targetId=sectionTargets[tab.kind]||tab.id;let section=document.getElementById(targetId);
+    if(!section){section=document.createElement("section");section.className="section";section.id=targetId;
+     const heading=document.createElement("div");heading.className="section-head";const wrap=document.createElement("div");
      const title=document.createElement("h2");title.textContent=(tab.icon||"✨")+" "+tab.title;
      const subtitle=document.createElement("p");subtitle.textContent=kindNames[tab.kind]||"";
-     const titleWrap=document.createElement("div");titleWrap.append(title,subtitle);heading.append(titleWrap);section.append(heading);
+     wrap.append(title,subtitle);heading.append(wrap);section.append(heading);main.append(section);
     }
-    if(!records.length&&!existing){const empty=document.createElement("p");empty.className="small muted";empty.textContent="لا يوجد محتوى منشور في هذا القسم حاليًا.";section.append(empty);}
-    records.forEach(item=>{
-     const card=document.createElement("article");card.className="card";card.style.margin="12px 0";
-     const h=document.createElement("h3");h.textContent=item.title||tab.title;
-     const body=document.createElement("p");body.textContent=item.body||"";body.style.whiteSpace="pre-wrap";body.style.lineHeight="2";
-     card.append(h,body);
-     if(item.source){const source=document.createElement("p");source.className="small";source.style.marginTop="10px";source.textContent="المصدر: "+item.source;card.append(source);}
-     section.append(card);
-    });
-    if(!existing)main.append(section);
+    tabByTarget.set(targetId,tab);
     if(nav&&!nav.querySelector('a[href="#'+targetId+'"]')){const a=document.createElement("a");a.href="#"+targetId;a.textContent=tab.title;nav.append(a);}
     if(shortcuts&&!shortcuts.querySelector('a[href="#'+targetId+'"]')){const a=document.createElement("a");a.href="#"+targetId;const icon=document.createElement("span");icon.textContent=tab.icon||"✨";const label=document.createElement("b");label.textContent=tab.title;a.append(icon,label);shortcuts.append(a);}
    });
-  }catch(error){console.warn("تعذر تحميل محتوى الأقسام المنشور",error);}
+  }catch(error){console.warn("تعذر تحميل قائمة الأقسام المنشورة",error);}
  }
- if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",load,{once:true});else load();
+ document.addEventListener("click",event=>{
+  const link=event.target&&event.target.closest?event.target.closest('.top nav a[href^="#"],.zad-web-shortcuts a[href^="#"]'):null;
+  if(!link)return;const targetId=(link.getAttribute("href")||"").slice(1),tab=tabByTarget.get(targetId);
+  if(tab)loadContent(tab,targetId);
+ },true);
+ const start=()=>{if("requestIdleCallback"in window)requestIdleCallback(init,{timeout:5000});else setTimeout(init,1800);};
+ if(document.readyState==="complete")start();else window.addEventListener("load",start,{once:true});
 })();
 </script>
 </body>
