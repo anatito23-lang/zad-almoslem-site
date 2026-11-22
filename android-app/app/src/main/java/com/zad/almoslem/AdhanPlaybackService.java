@@ -35,6 +35,24 @@ public class AdhanPlaybackService extends Service {
     private boolean playDuaAfterCompletion;
     private boolean deferBackgroundAudioResume;
     private String activePrayer;
+    public static volatile long uiPositionMs = 0L;
+    public static volatile long uiDurationMs = 0L;
+    public static volatile String uiVoiceKey = "";
+    public static volatile boolean uiTakbeerOnly = false;
+    private final android.os.Handler uiProgressHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable uiProgressTicker = new Runnable() {
+        @Override public void run() {
+            ExoPlayer current = player;
+            if (current != null) {
+                try {
+                    uiPositionMs = Math.max(0L, current.getCurrentPosition());
+                    long duration = current.getDuration();
+                    uiDurationMs = duration > 0L && duration < Long.MAX_VALUE ? duration : 0L;
+                } catch (Exception ignored) {}
+                uiProgressHandler.postDelayed(this, 100L);
+            }
+        }
+    };
 
     @Override public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent != null && ACTION_SET_PRAYER_VOLUME.equals(intent.getAction())) {
@@ -54,10 +72,17 @@ public class AdhanPlaybackService extends Service {
         }
         playDuaAfterCompletion = intent != null && intent.getBooleanExtra("play_dua_after", false);
         String prayer = intent == null ? "الصلاة" : intent.getStringExtra("prayer");
+        String selectedVoice = intent == null ? "basit" : intent.getStringExtra("voice");
         activePrayer = prayer;
+        uiPositionMs = 0L;
+        uiDurationMs = 0L;
+        uiVoiceKey = selectedVoice == null ? "basit" : selectedVoice;
+        uiTakbeerOnly = getSharedPreferences("zad_reminders", MODE_PRIVATE)
+                .getString("adhan_mode", "adhan").equals("takbeer");
         createChannel();
         Intent screen = new Intent(this, AdhanFullScreenActivity.class);
         screen.putExtra("prayer", prayer);
+        screen.putExtra("voice", uiVoiceKey);
         screen.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent fullScreen = PendingIntent.getActivity(this, 7313, screen,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
@@ -129,8 +154,7 @@ public class AdhanPlaybackService extends Service {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             if (notificationManager != null) notificationManager.notify(NOTIFICATION_ID, notification);
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().remove("adhan_last_start_error").remove("adhan_last_playback_error").putBoolean("adhan_playback_started", false).apply();
-            String voice = intent == null ? "basit" : intent.getStringExtra("voice");
-            playAdhan(voice, prayer);
+            playAdhan(selectedVoice, prayer);
         } catch (Exception error) {
             String detail = error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage();
             android.util.Log.e("ZadAlmoslem", "Adhan foreground playback startup failed", error);
@@ -185,6 +209,9 @@ public class AdhanPlaybackService extends Service {
             int savedVolume = prefs.getInt("adhan_volume_" + volumePrayerKey, prefs.getInt("adhan_volume", 100));
             player.setVolume(Math.max(0, Math.min(100, savedVolume)) / 100f);
             String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"rifaat".equals(voice)||"haram".equals(voice)||"doha".equals(voice)||"fajr_cairo".equals(voice)||"fajr_haram".equals(voice)) ? voice : "doha";
+            uiVoiceKey = safeVoice;
+            uiPositionMs = 0L;
+            uiDurationMs = 0L;
             File audioDir = new File(getFilesDir(), "adhan");
             if ("doha".equals(safeVoice)) {
                 String prayerKey = "dhuhr";
@@ -249,6 +276,8 @@ public class AdhanPlaybackService extends Service {
             player.setMediaItem(mediaBuilder.build());
             player.prepare();
             player.play();
+            uiProgressHandler.removeCallbacks(uiProgressTicker);
+            uiProgressHandler.post(uiProgressTicker);
         } catch (Exception e) {
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_playback_started", false).putString("adhan_last_playback_error", e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage()).apply();
             showPlaybackErrorNotification("تعذر تشغيل الأذان: " + (e.getMessage() == null ? "خطأ في ملف الصوت" : e.getMessage()));
@@ -374,6 +403,9 @@ public class AdhanPlaybackService extends Service {
     }
 
     private void stopPlayerOnly() {
+        uiProgressHandler.removeCallbacks(uiProgressTicker);
+        uiPositionMs = 0L;
+        uiDurationMs = 0L;
         if (player != null) {
             try { player.stop(); } catch (Exception ignored) {}
             try { player.release(); } catch (Exception ignored) {}
