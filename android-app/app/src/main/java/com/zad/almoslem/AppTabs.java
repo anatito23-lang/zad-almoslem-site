@@ -159,9 +159,11 @@ public final class AppTabs {
         JSONObject more=new JSONObject();
         try{more.put("key","more");more.put("label","المزيد");more.put("icon","⋯");more.put("visible",true);}catch(Exception ignored){}
         moreSlot.addView(makeTabItem(a,more,active,li),new LinearLayout.LayoutParams(-1,-1));
+        // A permanent website shortcut opens the public site in the user's external browser.
+        JSONObject website=new JSONObject();
+        try{website.put("key","website");website.put("label","الموقع");website.put("icon","🌐");website.put("visible",true);}catch(Exception ignored){}
+        dock.addView(makeTabItem(a,website,active,li),new LinearLayout.LayoutParams(dp(a,62),-1));
         for(JSONObject row:rows){
-            String key=row.optString("key","");
-            int index=indexOf(key);
             dock.addView(makeTabItem(a,row,active,li),new LinearLayout.LayoutParams(dp(a,62),-1));
         }
         final String activeKey=active;
@@ -200,6 +202,15 @@ public final class AppTabs {
         label.setTextColor(selected?Color.WHITE:Color.rgb(195,204,199));label.setTypeface(Typeface.DEFAULT,selected?Typeface.BOLD:Typeface.NORMAL);
         item.addView(label,new LinearLayout.LayoutParams(-1,dp(a,15)));
         item.setOnClickListener(v->{
+            if("website".equals(key)){
+                try{
+                    Intent browser=new Intent(Intent.ACTION_VIEW,android.net.Uri.parse("https://zad-almoslem.github.io/"));
+                    a.startActivity(browser);
+                }catch(Exception e){
+                    android.widget.Toast.makeText(a,"تعذر فتح الموقع في المتصفح",android.widget.Toast.LENGTH_SHORT).show();
+                }
+                return;
+            }
             Intent in=new Intent(a,target);
             if(index<0){in.putExtra("tab_id",key);in.putExtra("tab_title",clickLabel);in.putExtra("tab_icon",clickIcon);}
             in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);a.startActivity(in);
@@ -405,6 +416,7 @@ public final class AppTabs {
             case "calendar": return "📆";
             case "tasbeeh": case "sebha": return "📿";
             case "home": return "🏠";
+            case "website": return "🌐";
             case "more": return "⋯";
             default: return (fallback == null || fallback.trim().isEmpty()) ? "✨" : fallback;
         }
