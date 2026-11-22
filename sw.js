@@ -1,5 +1,5 @@
-const CACHE_NAME = "zad-almoslem-shell-v120";
-const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./daily-reminders.js?v=20261119native-diagnostics1", "./app-pages.js?v=20261122-all-tabs-admin-v1", "./website-cleanup.js?v=20261122-all-tabs-admin-v1"];
+const CACHE_NAME = "zad-almoslem-shell-v121";
+const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./daily-reminders.js?v=20261119native-diagnostics1", "./app-pages.js?v=20261122-full-site-admin-v1", "./website-cleanup.js?v=20261122-full-site-admin-v1"];
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
