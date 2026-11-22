@@ -41,7 +41,7 @@ public class AdhanWallpaperSettingsActivity extends Activity {
     Intent i=new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,Uri.parse("package:"+getPackageName()));startActivity(i);
    }else Toast.makeText(this,"صلاحية شاشة الأذان الكاملة مفعّلة بالفعل.",Toast.LENGTH_SHORT).show();
   }catch(Exception e){Toast.makeText(this,"افتح إعدادات التطبيق ثم فعّل إشعارات الشاشة الكاملة إن كانت متاحة.",Toast.LENGTH_LONG).show();}}
-  else Toast.makeText(this,"تأكد من تفعيل إشعارات زاد المسلم على الهاتف.",Toast.LENGTH_LONG).show();});
+  else Toast.makeText(this,"تأكد من تفعيل إشعارات زاد وطمأنينة على الهاتف.",Toast.LENGTH_LONG).show();});
   LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,-2);ap.topMargin=dp(14);root.addView(access,ap);
   TextView note=label("إذا لم تظهر الخلفية على شاشة الهاتف، فعّل صلاحية شاشة الأذان الكاملة من الزر أعلاه، وتأكد من السماح بإشعارات التطبيق. الصور مضمّنة وتعمل دون إنترنت.",12,Color.GRAY,false);note.setPadding(dp(4),dp(10),dp(4),0);root.addView(note);
   TextView credits=label("مصادر الصور: Wikimedia Commons. الجامع الأزهر: Mohamed Ouda (CC BY-SA 3.0)؛ الكعبة: MohmmadRjab (CC0)؛ المسجد النبوي: Aymanzaid2 (CC BY-SA 4.0)؛ الأقصى: جمان المحتسب (CC0)؛ المصحف: Ali139099 (CC0).",11,Color.DKGRAY,false);credits.setPadding(dp(4),dp(10),dp(4),0);root.addView(credits);setContentView(scroll);
