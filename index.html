@@ -2804,7 +2804,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   try{
    const [{collection,getDocs,query,where}]=await Promise.all([import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")]);
    const database=await getDb();
-   const q=query(collection(database,"waqafat"),where("tabId","==",tab.id),where("published","==",true));
+   const q=query(collection(database,"site_custom_content"),where("sectionId","==",tab.id),where("published","==",true));
    const snap=await getDocs(q);
    const records=snap.docs.map(d=>d.data()).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
    status.remove();
@@ -2824,7 +2824,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
  async function init(){
   try{
    const [{getFirestore,doc,getDoc}]=await Promise.all([import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")]);
-   const database=await getDb(),snap=await getDoc(doc(database,"waqafat","custom_tabs_public"));
+   const database=await getDb(),snap=await getDoc(doc(database,"site_custom_tabs","site_custom_tabs_public"));
    if(!snap.exists())return;
    const tabs=(Array.isArray(snap.data().tabs)?snap.data().tabs:[]).filter(t=>t&&/^[A-Za-z][A-Za-z0-9_-]{0,59}$/.test(t.id||"")&&t.title&&t.visible!==false).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
    const nav=document.querySelector(".top nav"),shortcuts=document.querySelector(".zad-web-shortcuts");
