@@ -312,11 +312,8 @@ public class MushafPageActivity extends Activity {
                 String message = "سورة " + surahName + " — الآية " + verse + " — صفحة " + targetPage;
                 runOnUiThread(() -> {
                     busy = false;
-                    pendingAyahMessage = message;
+                    pendingAyahMessage = message + "\\n" + verseText;
                     showPage(targetPage);
-                    new AlertDialog.Builder(this).setTitle(message).setMessage(verseText)
-                        .setPositiveButton("عرض موضعها في المصحف", (d, w) -> showPage(targetPage))
-                        .setNegativeButton("إغلاق", null).show();
                 });
             } catch (Exception error) {
                 runOnUiThread(() -> {
