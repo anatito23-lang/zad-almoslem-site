@@ -190,8 +190,12 @@ public final class AppTabs {
         item.setPadding(dp(a,2),dp(a,1),dp(a,2),dp(a,1));
         if(selected){GradientDrawable selectedBg=new GradientDrawable();selectedBg.setColor(Color.rgb(48,75,66));selectedBg.setCornerRadius(dp(a,12));selectedBg.setStroke(dp(a,1),Color.rgb(207,174,112));item.setBackground(selectedBg);}
         else {GradientDrawable idleBg=new GradientDrawable();idleBg.setColor(Color.TRANSPARENT);idleBg.setCornerRadius(dp(a,12));item.setBackground(idleBg);}
-        item.addView(new IllustratedTabIcon(a, key, selected),
-                new LinearLayout.LayoutParams(-1, dp(a,38)));
+        TextView emoji = new TextView(a);
+        emoji.setText(emojiForTab(key, iconText));
+        emoji.setTextSize(25);
+        emoji.setGravity(Gravity.CENTER);
+        emoji.setIncludeFontPadding(false);
+        item.addView(emoji, new LinearLayout.LayoutParams(-1, dp(a,38)));
         TextView label=new TextView(a);label.setText(labelText);label.setTextSize(9);label.setSingleLine(true);label.setGravity(Gravity.CENTER);
         label.setTextColor(selected?Color.WHITE:Color.rgb(195,204,199));label.setTypeface(Typeface.DEFAULT,selected?Typeface.BOLD:Typeface.NORMAL);
         item.addView(label,new LinearLayout.LayoutParams(-1,dp(a,15)));
@@ -389,6 +393,20 @@ public final class AppTabs {
             fill(c,ink);
             for(int row=0;row<2;row++)for(int col=0;col<3;col++)c.drawCircle(-5+col*5,1+row*5,1.05f,paint);
             fill(c,gold);c.drawCircle(5,6,1.2f,paint);
+        }
+    }
+
+    private static String emojiForTab(String key, String fallback) {
+        switch (key) {
+            case "mushaf": return "📖";
+            case "ramadan": return "🏮";
+            case "radio": return "🎙️";
+            case "quran": case "listening": case "listen": return "🎧";
+            case "calendar": return "📆";
+            case "tasbeeh": case "sebha": return "📿";
+            case "home": return "🏠";
+            case "more": return "⋯";
+            default: return (fallback == null || fallback.trim().isEmpty()) ? "✨" : fallback;
         }
     }
 
