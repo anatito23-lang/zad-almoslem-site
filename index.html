@@ -2897,5 +2897,54 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
 
 
 
+<style id="zad-azkar-ticker-continuous-v117">
+/* حركة مستمرة للشريط دون توقف أو انتظار دورة CSS */
+html body .azkar-ticker-track{
+ animation:none!important;-webkit-animation:none!important;
+ will-change:transform!important;transform:translate3d(0,0,0);
+}
+html body .azkar-ticker{overflow:hidden!important}
+@media(prefers-reduced-motion:reduce){
+ html body .azkar-ticker-track{animation:none!important;-webkit-animation:none!important}
+}
+</style>
+<script id="zad-azkar-ticker-raf-v117">
+(function(){
+ function startContinuousAzkar(){
+  const track=document.querySelector('.azkar-ticker-track');
+  if(!track || track.dataset.rafReady==='1')return;
+  const first=track.querySelector('.azkar-ticker-group');
+  if(!first)return;
+  if(track.children.length<2){
+   const clone=first.cloneNode(true);
+   clone.setAttribute('aria-hidden','true');
+   track.appendChild(clone);
+  }
+  track.style.animation='none';
+  track.style.webkitAnimation='none';
+  let distance=first.getBoundingClientRect().width;
+  let offset=0,last=0,frame=0;
+  const speed=42;
+  function measure(){distance=first.getBoundingClientRect().width||distance;}
+  function move(now){
+   if(!last)last=now;
+   const delta=Math.min((now-last)/1000,.05);
+   last=now;
+   if(distance>0){
+    offset=(offset+speed*delta)%distance;
+    track.style.transform='translate3d('+(-offset)+'px,0,0)';
+   }
+   frame=requestAnimationFrame(move);
+  }
+  track.dataset.rafReady='1';
+  if(window.ResizeObserver){new ResizeObserver(measure).observe(first);}
+  window.addEventListener('resize',measure,{passive:true});
+  if(frame)cancelAnimationFrame(frame);
+  requestAnimationFrame(move);
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',startContinuousAzkar,{once:true});
+ else startContinuousAzkar();
+})();
+</script>
 </body>
 </html>
