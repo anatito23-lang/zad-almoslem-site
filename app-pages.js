@@ -72,14 +72,14 @@ const prayerTitle=document.querySelector('#prayer .section-head p');if(prayerTit
  const reciterSearch=document.getElementById('reciterSearch');
  if(reciterSearch)reciterSearch.addEventListener('input',()=>{const term=reciterSearch.value.trim().toLocaleLowerCase('ar'),select=document.getElementById('reciter');if(!select)return;Array.from(select.options).forEach(o=>o.hidden=!!term&&!o.textContent.toLocaleLowerCase('ar').includes(term));const cur=select.selectedOptions[0];if(term&&cur&&cur.hidden){const first=Array.from(select.options).find(o=>!o.hidden);if(first)select.value=first.value;}});
 
- ['#azkar','#reminders','#daily-reminder-settings','#tasbeehFab','#qibla'].forEach(hash=>{
+ ['#reminders','#daily-reminder-settings','#tasbeehFab','#qibla'].forEach(hash=>{
   document.querySelectorAll('a[href="'+hash+'"]').forEach(link=>link.remove());
  });
  const webNav=document.querySelector('.top nav');
  if(webNav){
   webNav.querySelectorAll('a').forEach(link=>{
    const href=link.getAttribute('href')||'';
-   if(['#kids','#azkar','#reminders','#daily-reminder-settings','#qibla','#tasbeehFab'].includes(href))link.remove();
+   if(['#kids','#reminders','#daily-reminder-settings','#qibla','#tasbeehFab'].includes(href))link.remove();
   });
  }
  document.body.classList.add('zad-public-website');
