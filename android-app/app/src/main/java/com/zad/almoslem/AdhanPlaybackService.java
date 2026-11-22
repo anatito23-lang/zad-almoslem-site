@@ -34,6 +34,7 @@ public class AdhanPlaybackService extends Service {
     private ExoPlayer player;
     private boolean playDuaAfterCompletion;
     private boolean deferBackgroundAudioResume;
+    private volatile boolean audioDownloadInProgress;
     private String activePrayer;
     public static volatile long uiPositionMs = 0L;
     public static volatile long uiDurationMs = 0L;
@@ -70,8 +71,19 @@ public class AdhanPlaybackService extends Service {
             stopPlayback();
             return START_NOT_STICKY;
         }
-        playDuaAfterCompletion = intent != null && intent.getBooleanExtra("play_dua_after", false);
         String prayer = intent == null ? "الصلاة" : intent.getStringExtra("prayer");
+        // AlarmManager can deliver the same prayer alarm more than once on some devices.
+        // Do not reset an already-running recording when a duplicate start arrives.
+        if (intent != null && ACTION_PLAY.equals(intent.getAction())
+                && prayer != null && prayer.equals(activePrayer)
+                && (audioDownloadInProgress || (player != null &&
+                    (player.isPlaying()
+                     || player.getPlaybackState() == Player.STATE_BUFFERING
+                     || player.getPlaybackState() == Player.STATE_READY)))) {
+            android.util.Log.i("ZadAlmoslem", "Ignoring duplicate adhan start for " + prayer);
+            return START_NOT_STICKY;
+        }
+        playDuaAfterCompletion = intent != null && intent.getBooleanExtra("play_dua_after", false);
         String selectedVoice = intent == null ? "basit" : intent.getStringExtra("voice");
         activePrayer = prayer;
         uiPositionMs = 0L;
@@ -286,6 +298,7 @@ public class AdhanPlaybackService extends Service {
     }
 
     private void downloadMissingAudio(String safeVoice, String originalVoice, String prayer, File audioDir) {
+        audioDownloadInProgress = true;
         new Thread(() -> {
             HttpURLConnection connection = null;
             File target = new File(audioDir, safeVoice + ".mp3");
@@ -317,6 +330,7 @@ public class AdhanPlaybackService extends Service {
                 if (target.exists() && !target.delete()) throw new Exception("تعذر استبدال التسجيل القديم");
                 if (!temp.renameTo(target)) throw new Exception("تعذر حفظ التسجيل داخل التطبيق");
                 new android.os.Handler(getMainLooper()).post(() -> {
+                    audioDownloadInProgress = false;
                     getSharedPreferences("zad_reminders", MODE_PRIVATE).edit()
                             .remove("adhan_last_playback_error").putString("adhan_last_playback_error", "تم تنزيل التسجيل، جارٍ تشغيله").apply();
                     playAdhan(originalVoice, prayer);
@@ -327,6 +341,7 @@ public class AdhanPlaybackService extends Service {
                         .putBoolean("adhan_playback_started", false)
                         .putString("adhan_last_playback_error", "فشل تنزيل " + safeVoice + ": " + detail).apply();
                 new android.os.Handler(getMainLooper()).post(() -> {
+                    audioDownloadInProgress = false;
                     showPlaybackErrorNotification("تعذر تنزيل صوت الأذان: " + detail);
                     stopPlayback();
                 });
@@ -423,6 +438,7 @@ public class AdhanPlaybackService extends Service {
     }
 
     private void stopPlayback() {
+        audioDownloadInProgress = false;
         getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_active", false).apply();
         stopPlayerOnly();
         // Request radio/Quran resumption while this service is still foreground.
