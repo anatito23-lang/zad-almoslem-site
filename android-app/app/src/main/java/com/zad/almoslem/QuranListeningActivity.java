@@ -21,7 +21,7 @@ View headerGap=new View(this);root.addView(headerGap,new LinearLayout.LayoutPara
 AudioEqualizerView equalizer=new AudioEqualizerView(this,"quran");
 equalizer.setContentDescription("مؤشر متحرك أثناء تشغيل التلاوة");
 root.addView(equalizer,new LinearLayout.LayoutParams(-1,dp(42)));
-buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
+AdminTabContent.attach(this,root,"quran");buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
     private void buildPlayer(LinearLayout root) {
         TextView section=text("مشغل التلاوة",18,AppThemeColors.text(this),true);
         section.setPadding(0,dp(4),0,dp(8));root.addView(section);
