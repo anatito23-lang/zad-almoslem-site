@@ -42,6 +42,8 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
         stop.setOnClickListener(v->{Intent stopIntent=new Intent(this,RadioPlaybackService.class);stopIntent.setAction(RadioPlaybackService.ACTION_STOP);try{startService(stopIntent);Toast.makeText(this,"تم إيقاف التلاوة",Toast.LENGTH_SHORT).show();}catch(Exception e){Toast.makeText(this,"تعذر إيقاف التلاوة",Toast.LENGTH_SHORT).show();}});
         Button download=new Button(this);download.setText("تنزيل السورة للاستماع دون إنترنت");styleAction(download,0xFF496B62);card.addView(download,matchWrap());
         Button downloadReciter=new Button(this);downloadReciter.setText("تنزيل تلاوات القارئ كاملة للعمل دون إنترنت");styleAction(downloadReciter,0xFF315F51);card.addView(downloadReciter,matchWrap());
+        ProgressBar quranProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);quranProgress.setMax(100);card.addView(quranProgress,matchWrap());
+        TextView state=text("جارٍ تحميل قائمة القراء من مكتبة التسجيلات.",12,Color.rgb(80,100,90),false);card.addView(state);
         downloadReciter.setOnClickListener(v->{
             int ri=reciterSpinner.getSelectedItemPosition();
             if(ri<0||ri>=reciters.size()){state.setText("انتظر حتى تكتمل قائمة القراء.");return;}
@@ -52,8 +54,6 @@ buildPlayer(root);setContentView(AppTabs.wrap(this,scroll,"quran"));}
                 .setPositiveButton("ابدأ التنزيل",(dialog,which)->downloadFullReciter(selected,downloadReciter,quranProgress,state))
                 .setNegativeButton("إلغاء",null).show();
         });
-        ProgressBar quranProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);quranProgress.setMax(100);card.addView(quranProgress,matchWrap());
-        TextView state=text("جارٍ تحميل قائمة القراء من مكتبة التسجيلات.",12,Color.rgb(80,100,90),false);card.addView(state);
         TextView libraryNote=text("المكتبة الداخلية تعرض القراء والتسجيلات المتاحة في مصدر القرآن. اختر القارئ والسورة ثم استمع أو نزّل الملف ليُحفظ داخل التطبيق. لا توجد روابط لمواقع خارجية في هذه الصفحة.",12,AppThemeColors.muted(this),false);
         libraryNote.setPadding(0,dp(18),0,dp(6));card.addView(libraryNote);
         // Restore the last catalog first so previously downloaded recitations remain selectable offline.
