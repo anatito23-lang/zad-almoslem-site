@@ -2,6 +2,9 @@ package com.zad.almoslem;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkRequest;
 import android.util.Log;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.io.File;
@@ -16,7 +19,25 @@ import java.util.concurrent.Executors;
 public final class RemoteAudioAssets {
     private static final String TAG="ZadRemoteAudio";
     private static final ExecutorService WORKER=Executors.newSingleThreadExecutor();
+    private static volatile boolean callbackRegistered=false;
     private RemoteAudioAssets(){}
+    public static void watchConnectivity(Context context){
+        Context app=context.getApplicationContext();
+        refresh(app);
+        if(callbackRegistered)return;
+        synchronized(RemoteAudioAssets.class){
+            if(callbackRegistered)return;
+            ConnectivityManager manager=(ConnectivityManager)app.getSystemService(Context.CONNECTIVITY_SERVICE);
+            if(manager==null)return;
+            try{
+                NetworkRequest request=new NetworkRequest.Builder().addCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET).build();
+                manager.registerNetworkCallback(request,new ConnectivityManager.NetworkCallback(){
+                    @Override public void onAvailable(Network network){refresh(app);}
+                });
+                callbackRegistered=true;
+            }catch(Exception error){Log.w(TAG,"Could not register network callback",error);}
+        }
+    }
     public static void refresh(Context context){
         Context app=context.getApplicationContext();
         FirebaseFirestore.getInstance().collection("app_audio_assets").document("ramadan").get()
