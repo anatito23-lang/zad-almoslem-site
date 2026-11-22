@@ -129,7 +129,34 @@ const prayerTitle=document.querySelector('#prayer .section-head p');if(prayerTit
     const customRows=customSnap.docs.map(d=>({id:d.id,...d.data()}));
     customRows.forEach(item=>{if(!item.tabId)return;const section=document.getElementById(item.tabId);if(section)addCard(section,{title:item.title,body:item.body,source:item.source,url:item.url,urlLabel:item.urlLabel});});
    }
-   const contentSnap=await getDocs(query(collection(db,"site_content"),where("published","==",true)));
+   
+   // Apply owner-controlled website-wide presentation settings. Quran is intentionally untouched.
+   try{
+    const settingsSnap=await getDoc(doc(db,"site_settings","website"));
+    if(settingsSnap.exists()){
+     const settings=settingsSnap.data()||{},hero=document.querySelector(".hero-content");
+     if(settings.heroTitle&&hero?.querySelector("h1"))hero.querySelector("h1").textContent=settings.heroTitle;
+     if(settings.heroText&&hero?.querySelector(":scope > p"))hero.querySelector(":scope > p").textContent=settings.heroText;
+     if(settings.noticeEnabled&&settings.noticeText){
+      let notice=document.getElementById("zadWebsiteAnnouncement");
+      if(!notice){notice=document.createElement("div");notice.id="zadWebsiteAnnouncement";notice.setAttribute("role","status");notice.style.cssText="max-width:1160px;margin:16px auto;padding:14px 18px;border-radius:14px;background:#f6f0df;border:1px solid #dfcca0;color:#244638;font-weight:700;line-height:1.9";const heroHeader=document.querySelector("header.hero");if(heroHeader)heroHeader.insertAdjacentElement("afterend",notice);}
+      notice.textContent=settings.noticeText;
+     }else document.getElementById("zadWebsiteAnnouncement")?.remove();
+     const sectionSettings=settings.sections||{};
+     Object.entries(sectionSettings).forEach(([id,config])=>{
+      if(id==="quran")return;
+      const section=document.getElementById(id);if(!section)return;
+      const visible=config?.visible!==false;section.style.display=visible?"":"none";
+      const title=config?.title;
+      if(title){
+       const h=section.querySelector(".section-head h2");if(h)h.textContent=title;
+       document.querySelectorAll('a[href="#'+CSS.escape(id)+'"]').forEach(link=>{if(link.closest(".zad-web-shortcuts")){const b=link.querySelector("b");if(b)b.textContent=title;}else link.textContent=title;});
+      }
+      document.querySelectorAll('a[href="#'+CSS.escape(id)+'"]').forEach(link=>{link.style.display=visible?"":"none";});
+     });
+    }
+   }catch(settingsError){console.warn("تعذر تطبيق إعدادات الموقع",settingsError);}
+\n   const contentSnap=await getDocs(query(collection(db,"site_content"),where("published","==",true)));
    const rows=contentSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
    rows.forEach(item=>{if(item.sectionId==="quran")return;const section=document.getElementById(item.sectionId);if(section)addCard(section,item);});
   }catch(error){console.warn("تعذر تحميل محتوى لوحة إدارة الموقع",error);}
