@@ -132,7 +132,8 @@ function bindQuranFallback(){
  button.addEventListener('click',event=>{
   const key=document.getElementById('reciter')?.value;
   const edition=fallbackEditions[key];
-  if(!edition||window.zadReciterData?.[key])return;
+  if(window.zadReciterData?.[key]){const existingAudio=document.getElementById('audio');if(existingAudio)delete existingAudio.dataset.zadFallbackTried;return;}
+  if(!edition)return;
   const surah=Number(document.getElementById('surahSelect')?.value);
   if(!surah)return;
   event.preventDefault();event.stopImmediatePropagation();
