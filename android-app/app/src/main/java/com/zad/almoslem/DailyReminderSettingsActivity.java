@@ -97,6 +97,13 @@ public class DailyReminderSettingsActivity extends Activity {
    startTime.setText(formatTime(hour,minute));
    if(enabled.isChecked())ReminderReceiver.scheduleGentleReminder(this);
   },prefs.getInt("gentle_start_hour",9),prefs.getInt("gentle_start_minute",0),false).show());
+  TextView volumeLabel=label("مستوى صوت التذكير: "+prefs.getInt("gentle_audio_volume",75)+"%",14,green,true);volumeLabel.setPadding(0,dp(10),0,dp(2));card.addView(volumeLabel);
+  SeekBar volume=new SeekBar(this);volume.setMax(100);volume.setProgress(Math.max(0,Math.min(100,prefs.getInt("gentle_audio_volume",75))));card.addView(volume);
+  volume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+   public void onProgressChanged(SeekBar bar,int progress,boolean fromUser){volumeLabel.setText("مستوى صوت التذكير: "+progress+"%");if(fromUser)prefs.edit().putInt("gentle_audio_volume",progress).apply();}
+   public void onStartTrackingTouch(SeekBar bar){}
+   public void onStopTrackingTouch(SeekBar bar){}
+  });
   TextView value=label("التكرار كل "+prefs.getInt("gentle_interval_hours",3)+" ساعات",14,green,false);card.addView(value);
   SeekBar interval=new SeekBar(this);interval.setMax(5);interval.setProgress(Math.max(1,Math.min(6,prefs.getInt("gentle_interval_hours",3)))-1);card.addView(interval);
   enabled.setOnCheckedChangeListener((button,checked)->ReminderReceiver.setGentleRemindersEnabled(this,checked));
