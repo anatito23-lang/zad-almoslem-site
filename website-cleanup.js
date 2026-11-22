@@ -4,7 +4,7 @@ if(!['anatito23-lang.github.io','zad-almoslem.github.io'].includes(location.host
 document.documentElement.classList.add('zad-public-website');
 document.body.classList.add('zad-public-website');
 const selectors=[
- '.azkar-ticker','#daily-reminder-settings',
+ '#daily-reminder-settings',
  '.prayer-tracker','.adhan-settings','#zadAudioSettingsSlot',
  '.tasbeeh-float','#tasbeehPanel','#tasbeehFab','#zad-page-tasbeeh',
  '#qibla','#zad-page-qibla','.bottom-nav','.zad-bottom-nav',
