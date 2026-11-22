@@ -92,7 +92,7 @@ public final class AppTabs {
         LinearLayout moreSlot=new LinearLayout(a);
         moreSlot.setGravity(Gravity.CENTER);
         // LTR order: More on the left, scrollable tabs in the middle, Home on the right.
-        outer.addView(moreSlot,new LinearLayout.LayoutParams(dp(a,50),dp(a,50)));
+        outer.addView(moreSlot,new LinearLayout.LayoutParams(dp(a,58),dp(a,50)));
         outer.addView(dockScroll,new LinearLayout.LayoutParams(0,dp(a,50),1f));
         outer.addView(homeSlot,new LinearLayout.LayoutParams(dp(a,50),dp(a,50)));
         render(a,active,outer,readCached(a));
@@ -190,15 +190,9 @@ public final class AppTabs {
         item.setPadding(dp(a,2),dp(a,1),dp(a,2),dp(a,1));
         if(selected){GradientDrawable selectedBg=new GradientDrawable();selectedBg.setColor(Color.rgb(48,75,66));selectedBg.setCornerRadius(dp(a,12));selectedBg.setStroke(dp(a,1),Color.rgb(207,174,112));item.setBackground(selectedBg);}
         else {GradientDrawable idleBg=new GradientDrawable();idleBg.setColor(Color.TRANSPARENT);idleBg.setCornerRadius(dp(a,12));item.setBackground(idleBg);}
-        if ("mushaf".equals(key) || "radio".equals(key) || "calendar".equals(key)) {
-            item.addView(new IllustratedTabIcon(a, key, selected),
-                    new LinearLayout.LayoutParams(-1, dp(a,24)));
-        } else {
-            TextView icon=new TextView(a);icon.setText(iconText);icon.setTextSize(20);icon.setGravity(Gravity.CENTER);
-            icon.setTextColor(selected?Color.rgb(235,205,139):AppThemeColors.accent(a));icon.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
-            item.addView(icon,new LinearLayout.LayoutParams(-1,dp(a,25)));
-        }
-        TextView label=new TextView(a);label.setText(labelText);label.setTextSize(8);label.setSingleLine(true);label.setGravity(Gravity.CENTER);
+        item.addView(new IllustratedTabIcon(a, key, selected),
+                new LinearLayout.LayoutParams(-1, dp(a,25)));
+        TextView label=new TextView(a);label.setText(labelText);label.setTextSize(9);label.setSingleLine(true);label.setGravity(Gravity.CENTER);
         label.setTextColor(selected?Color.WHITE:Color.rgb(195,204,199));label.setTypeface(Typeface.DEFAULT,selected?Typeface.BOLD:Typeface.NORMAL);
         item.addView(label,new LinearLayout.LayoutParams(-1,dp(a,15)));
         item.setOnClickListener(v->{
@@ -233,6 +227,34 @@ public final class AppTabs {
             else if ("radio".equals(kind)) drawMicrophone(canvas);
             else { canvas.save(); canvas.scale(1.12f,1.12f); drawCalendar(canvas); canvas.restore(); }
             canvas.restore();
+        }
+        private void drawRamadan(Canvas c) {
+            line(gold,1.7f); c.drawArc(new RectF(-9,-10,9,10),-55,290,false,paint);
+            fill(c,gold); c.drawCircle(5,-6,1.2f,paint); c.drawCircle(9,-10,1f,paint);
+            fill(c,page); c.drawCircle(-2,0,7,paint);
+            fill(c,ink); c.drawCircle(1,-3,7,paint);
+            fill(c,gold); c.drawCircle(-8,9,1.2f,paint); c.drawCircle(0,12,1f,paint); c.drawCircle(8,9,1.2f,paint);
+        }
+        private void drawTasbeeh(Canvas c) {
+            line(gold,1.2f); c.drawArc(new RectF(-10,-10,10,10),-205,230,false,paint);
+            for(int i=0;i<11;i++){ double a=Math.toRadians(-205+i*23); float x=(float)Math.cos(a)*9.5f,y=(float)Math.sin(a)*9.5f; fill(c,(i%2==0)?page:gold); c.drawCircle(x,y,1.65f,paint); }
+            fill(c,gold); c.drawCircle(0,-12,2,paint); c.drawLine(0,-10,0,-7,paint);
+        }
+        private void drawListening(Canvas c) {
+            fill(c,0xFF173F34); c.drawRoundRect(new RectF(-10,-10,10,10),3,3,paint);
+            line(gold,1f); c.drawRoundRect(new RectF(-10,-10,10,10),3,3,paint);
+            line(page,1.1f); c.drawLine(-5,-5,-5,5,paint); c.drawLine(-5,-5,1,-5,paint); c.drawLine(-5,0,0,0,paint);
+            fill(c,gold); Path p=new Path(); p.moveTo(2,-4);p.lineTo(8,0);p.lineTo(2,4);p.close();c.drawPath(p,paint);
+        }
+        private void drawHome(Canvas c) {
+            Path roof=new Path(); roof.moveTo(-12,-1);roof.lineTo(0,-11);roof.lineTo(12,-1);roof.close();
+            fill(c,gold);c.drawPath(roof,paint);
+            fill(c,page);c.drawRoundRect(new RectF(-9,-1,9,11),2,2,paint);
+            fill(c,ink);c.drawRoundRect(new RectF(-2,3,2,11),1,1,paint);
+            fill(c,gold);c.drawRect(-11,-1,-9,1,paint);c.drawRect(9,-1,11,1,paint);
+        }
+        private void drawMore(Canvas c) {
+            fill(c,gold); c.drawCircle(-7,0,2.2f,paint);c.drawCircle(0,0,2.2f,paint);c.drawCircle(7,0,2.2f,paint);
         }
         private void drawMushaf(Canvas c) {
             RectF cover=new RectF(-10,-10,10,10);
