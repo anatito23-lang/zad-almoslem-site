@@ -101,7 +101,7 @@ public class MushafPageActivity extends Activity {
         Button index = new Button(this);
         index.setText("☰ فهرس السور");
         index.setTextSize(13);
-        toolbar.addView(index, new LinearLayout.LayoutParams(0, dp(38), 1));
+        toolbar.addView(index, new LinearLayout.LayoutParams(0, dp(34), 1));
         index.setOnClickListener(v -> showSurahIndex());
 
         pageLabel = label("", 15, AppThemeColors.text(this), true);
@@ -222,6 +222,14 @@ public class MushafPageActivity extends Activity {
             pageFrame.setLayoutParams(new LinearLayout.LayoutParams(-1, 0, 1f));
             setContentView(AppTabs.wrap(this, root, "mushaf"));
         }
+    }
+
+    @Override public void onBackPressed() {
+        if (fullScreen) {
+            toggleFullScreen();
+            return;
+        }
+        super.onBackPressed();
     }
 
     @Override public void onWindowFocusChanged(boolean hasFocus) {
