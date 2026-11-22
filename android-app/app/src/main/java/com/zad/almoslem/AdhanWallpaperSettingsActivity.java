@@ -32,9 +32,18 @@ public class AdhanWallpaperSettingsActivity extends Activity {
    card.setOnClickListener(v->{getSharedPreferences("zad_reminders",MODE_PRIVATE).edit().putInt("adhan_wallpaper",index).apply();Toast.makeText(this,"تم اختيار خلفية "+names[index],Toast.LENGTH_SHORT).show();build();});
    LinearLayout.LayoutParams cp=new LinearLayout.LayoutParams(-1,-2);cp.topMargin=dp(12);root.addView(card,cp);
   }
-  Button access=new Button(this);access.setText("السماح بعرض شاشة الأذان فوق شاشة القفل");access.setOnClickListener(v->{if(Build.VERSION.SDK_INT>=34){try{Intent i=new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,Uri.parse("package:"+getPackageName()));startActivity(i);}catch(Exception e){Toast.makeText(this,"افتح إعدادات التطبيق ثم فعّل إشعارات الشاشة الكاملة إن كانت متاحة.",Toast.LENGTH_LONG).show();}}else Toast.makeText(this,"يمكن لأندرويد عرض شاشة الأذان الكاملة عند توفر صلاحية الإشعارات.",Toast.LENGTH_LONG).show();});
+  Button access=new Button(this);
+  boolean fullScreenAllowed=Build.VERSION.SDK_INT<34 || ((android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE)).canUseFullScreenIntent();
+  access.setText(fullScreenAllowed?"صلاحية شاشة الأذان الكاملة مفعّلة ✓":"تفعيل صلاحية شاشة الأذان الكاملة");
+  access.setOnClickListener(v->{if(Build.VERSION.SDK_INT>=34){try{
+   android.app.NotificationManager manager=(android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+   if(manager!=null&&!manager.canUseFullScreenIntent()){
+    Intent i=new Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,Uri.parse("package:"+getPackageName()));startActivity(i);
+   }else Toast.makeText(this,"صلاحية شاشة الأذان الكاملة مفعّلة بالفعل.",Toast.LENGTH_SHORT).show();
+  }catch(Exception e){Toast.makeText(this,"افتح إعدادات التطبيق ثم فعّل إشعارات الشاشة الكاملة إن كانت متاحة.",Toast.LENGTH_LONG).show();}}
+  else Toast.makeText(this,"تأكد من تفعيل إشعارات زاد المسلم على الهاتف.",Toast.LENGTH_LONG).show();});
   LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,-2);ap.topMargin=dp(14);root.addView(access,ap);
-  TextView note=label("الصور الفوتوغرافية مضمّنة داخل التطبيق وتعمل دون إنترنت.",12,Color.GRAY,false);note.setPadding(dp(4),dp(10),dp(4),0);root.addView(note);
+  TextView note=label("إذا لم تظهر الخلفية على شاشة الهاتف، فعّل صلاحية شاشة الأذان الكاملة من الزر أعلاه، وتأكد من السماح بإشعارات التطبيق. الصور مضمّنة وتعمل دون إنترنت.",12,Color.GRAY,false);note.setPadding(dp(4),dp(10),dp(4),0);root.addView(note);
   TextView credits=label("مصادر الصور: Wikimedia Commons. الجامع الأزهر: Mohamed Ouda (CC BY-SA 3.0)؛ الكعبة: MohmmadRjab (CC0)؛ المسجد النبوي: Aymanzaid2 (CC BY-SA 4.0)؛ الأقصى: جمان المحتسب (CC0)؛ المصحف: Ali139099 (CC0).",11,Color.DKGRAY,false);credits.setPadding(dp(4),dp(10),dp(4),0);root.addView(credits);setContentView(scroll);
  }
 }
