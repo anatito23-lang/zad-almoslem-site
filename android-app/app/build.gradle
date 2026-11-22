@@ -23,7 +23,7 @@ android {
         applicationId 'com.zad.almoslem'
         minSdk 23
         targetSdk 36
-        versionCode 17
+        versionCode 18
         versionName '3.3.5'
     }
 
