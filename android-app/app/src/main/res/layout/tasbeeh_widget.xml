@@ -6,14 +6,20 @@
     android:orientation="vertical"
     android:gravity="center"
     android:padding="12dp"
-    android:background="@drawable/quran_widget_bg">
+    android:background="@drawable/tasbeeh_widget_bg">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="سبحة زاد المسلم"
+        android:text="۞  زاد وطمأنينة  ۞"
         android:textColor="#F4E6C4"
         android:textStyle="bold"
-        android:textSize="15sp" />
+        android:textSize="14sp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="●  ●  ●  ◉  ●  ●  ●"
+        android:textColor="#D7B66A"
+        android:textSize="13sp" />
     <TextView
         android:id="@+id/tasbeeh_widget_phrase"
         android:layout_width="match_parent"
@@ -22,7 +28,7 @@
         android:paddingTop="7dp"
         android:paddingBottom="4dp"
         android:text="سبحان الله"
-        android:textColor="#FFFFFF"
+        android:textColor="#F7F1E4"
         android:textSize="15sp" />
     <TextView
         android:id="@+id/tasbeeh_widget_count"
@@ -31,11 +37,16 @@
         android:text="0 / 33"
         android:textColor="#F4E6C4"
         android:textStyle="bold"
-        android:textSize="21sp" />
+        android:textSize="25sp"
     <Button
         android:id="@+id/tasbeeh_widget_button"
-        android:layout_width="match_parent"
-        android:layout_height="42dp"
+        android:layout_width="wrap_content"
+        android:layout_height="38dp"
+        android:minWidth="116dp"
+        android:layout_marginTop="5dp"
+        android:backgroundTint="#D7B66A"
         android:text="سبّح +١"
+        android:textColor="#083028"
+        android:textStyle="bold"
         android:textAllCaps="false" />
 </LinearLayout>
