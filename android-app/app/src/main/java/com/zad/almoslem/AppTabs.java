@@ -126,6 +126,7 @@ public final class AppTabs {
             final Class<?> target=index>=0?SCREENS[index]:CustomTabActivity.class;boolean selected=key.equals(active);
             String labelText=row.optString("label",index>=0?LABELS[index]:"قسم جديد");String iconText=row.optString("icon",index>=0?ICONS[index]:"✨");
             if(li>0 && index>=0 && LABELS[index].equals(labelText))labelText=localizedLabel(index,li,labelText);
+            final String clickLabel=labelText;final String clickIcon=iconText;
             LinearLayout item=new LinearLayout(a);item.setOrientation(1);item.setGravity(Gravity.CENTER);
             item.setClickable(!selected);item.setFocusable(!selected);item.setPadding(dp(a,1),dp(a,3),dp(a,1),dp(a,2));
             if(selected){GradientDrawable s=new GradientDrawable();s.setColor(AppThemeColors.primary(a));s.setCornerRadius(dp(a,13));s.setStroke(dp(a,1),Color.rgb(190,158,91));item.setBackground(s);}
@@ -136,7 +137,7 @@ public final class AppTabs {
             TextView label=new TextView(a);label.setText(labelText);label.setTextSize(8);label.setSingleLine(true);label.setGravity(Gravity.CENTER);
             label.setTextColor(selected?Color.WHITE:Color.rgb(195,204,199));label.setTypeface(Typeface.DEFAULT,selected?Typeface.BOLD:Typeface.NORMAL);
             item.addView(label,new LinearLayout.LayoutParams(-1,dp(a,17)));
-            item.setOnClickListener(v->{Intent in=new Intent(a,target);if(index<0){in.putExtra("tab_id",key);in.putExtra("tab_title",labelText);in.putExtra("tab_icon",iconText);}in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);a.startActivity(in);});
+            item.setOnClickListener(v->{Intent in=new Intent(a,target);if(index<0){in.putExtra("tab_id",key);in.putExtra("tab_title",clickLabel);in.putExtra("tab_icon",clickIcon);}in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);a.startActivity(in);});
             dock.addView(item,new LinearLayout.LayoutParams(0,-1,1f));
         }
     }
