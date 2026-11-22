@@ -2647,15 +2647,17 @@ html{scroll-padding-top:14px}
     .filter(t=>t&&/^[A-Za-z][A-Za-z0-9_-]{0,59}$/.test(t.id||"")&&t.title&&t.visible!==false)
     .sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
    const results=await Promise.all(tabs.map(async tab=>{
-    const existing=document.getElementById(tab.id);
+    const sectionTargets={hadith:"hadith-dua",azkar:"azkar",khutbah:"khutbahs",quran:"quran"};
+    const targetId=sectionTargets[tab.kind]||tab.id;
+    const existing=document.getElementById(targetId);
     const q=query(collection(db,"waqafat"),where("tabId","==",tab.id),where("published","==",true));
     const content=await getDocs(q);
-    return {tab,existing,records:content.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0))};
+    return {tab,targetId,existing,records:content.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0))};
    }));
    const nav=document.querySelector(".top nav"),shortcuts=document.querySelector(".zad-web-shortcuts");
-   results.filter(Boolean).forEach(({tab,existing,records})=>{
+   results.filter(Boolean).forEach(({tab,targetId,existing,records})=>{
     const section=existing||document.createElement("section");
-    if(!existing){section.className="section";section.id=tab.id;
+    if(!existing){section.className="section";section.id=targetId;
      const heading=document.createElement("div");heading.className="section-head";
      const title=document.createElement("h2");title.textContent=(tab.icon||"✨")+" "+tab.title;
      const subtitle=document.createElement("p");subtitle.textContent=kindNames[tab.kind]||"";
@@ -2671,8 +2673,8 @@ html{scroll-padding-top:14px}
      section.append(card);
     });
     if(!existing)main.append(section);
-    if(nav&&!nav.querySelector('a[href="#'+tab.id+'"]')){const a=document.createElement("a");a.href="#"+tab.id;a.textContent=tab.title;nav.append(a);}
-    if(shortcuts&&!shortcuts.querySelector('a[href="#'+tab.id+'"]')){const a=document.createElement("a");a.href="#"+tab.id;const icon=document.createElement("span");icon.textContent=tab.icon||"✨";const label=document.createElement("b");label.textContent=tab.title;a.append(icon,label);shortcuts.append(a);}
+    if(nav&&!nav.querySelector('a[href="#'+targetId+'"]')){const a=document.createElement("a");a.href="#"+targetId;a.textContent=tab.title;nav.append(a);}
+    if(shortcuts&&!shortcuts.querySelector('a[href="#'+targetId+'"]')){const a=document.createElement("a");a.href="#"+targetId;const icon=document.createElement("span");icon.textContent=tab.icon||"✨";const label=document.createElement("b");label.textContent=tab.title;a.append(icon,label);shortcuts.append(a);}
    });
   }catch(error){console.warn("تعذر تحميل محتوى الأقسام المنشور",error);}
  }
