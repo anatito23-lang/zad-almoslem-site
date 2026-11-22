@@ -153,7 +153,7 @@ $("customContentCancel").addEventListener("click",()=>{$("customContentForm").re
 
 // إدارة المنشورات الإضافية داخل جميع أقسام الموقع
 const SITE_SECTIONS=[
- ["prayer","مواقيت الصلاة"],["calendar","التقويم الشهري"],["quran","استماع القرآن الكريم"],
+ ["prayer","مواقيت الصلاة"],["calendar","التقويم الشهري"],
  ["nasheed","الإنشاد الديني والابتهالات"],["mushaf","المصحف الشريف"],["ruqyah","الرقية الشرعية"],
  ["radio-egypt","إذاعة القرآن الكريم"],["azkar","الأذكار اليومية"],["books-library","مكتبة الكتب الإسلامية"],
  ["hadith-dua","الحديث الشريف"],["duas","الأدعية"],["daily-wird","وردي اليومي"],
@@ -175,7 +175,7 @@ async function loadSiteContent(){
  $("siteContentList").innerHTML='<p class="small">جارٍ تحميل المنشورات…</p>';
  try{
   const snap=await getDocs(collection(db,"site_content"));
-  const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  const rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.sectionId!=="quran").sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
   if(!rows.length){$("siteContentList").innerHTML='<p class="small">لا توجد منشورات إضافية حتى الآن.</p>';return}
   const sectionName=id=>SITE_SECTIONS.find(x=>x[0]===id)?.[1]||customTabs.find(t=>t.id===id)?.title||id;
   $("siteContentList").innerHTML=rows.map(x=>'<article class="item"><div class="row"><strong>'+escapeHtml(x.title||"بدون عنوان")+'</strong><span class="tag">'+(isPublished(x)?"منشور":"مسودة")+'</span></div><p class="small">القسم: '+escapeHtml(sectionName(x.sectionId))+' · الترتيب: '+escapeHtml(String(x.order??0))+'</p><p>'+escapeHtml((x.body||"").slice(0,240))+'</p>'+(x.url?'<p class="small">'+escapeHtml(x.url)+'</p>':'')+'<div class="actions"><button type="button" class="secondary" data-site-edit="'+escapeHtml(x.id)+'">تعديل</button><button type="button" class="gold" data-site-toggle="'+escapeHtml(x.id)+'" data-published="'+isPublished(x)+'">'+(isPublished(x)?"إلغاء النشر":"نشر")+'</button><button type="button" class="danger" data-site-delete="'+escapeHtml(x.id)+'">حذف</button></div></article>').join("");
