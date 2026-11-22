@@ -81,7 +81,7 @@ public class ReminderAudioService extends Service {
         PendingIntent stopAction = PendingIntent.getService(this, 7521, stopIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-                .setContentTitle("زاد المسلم")
+                .setContentTitle("زاد وطمأنينة")
                 .setContentText("يتم تشغيل " + title)
                 .setOngoing(true)
                 .addAction(android.R.drawable.ic_media_pause,
