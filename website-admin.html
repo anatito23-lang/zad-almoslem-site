@@ -209,7 +209,8 @@ $("websiteSettingsForm").addEventListener("submit",async e=>{
  catch(e){websiteSettingsMessage("تعذر حفظ الإعدادات: "+e.message,true);}
 });
 $("websiteSettingsReload").addEventListener("click",async()=>{try{await loadWebsiteSettings();websiteSettingsMessage("تم تحميل الإعدادات الحالية.");}catch(e){websiteSettingsMessage("تعذر تحميل الإعدادات: "+e.message,true);}});
-\nconst SITE_SECTIONS=[
+
+const SITE_SECTIONS=[
  ["prayer","مواقيت الصلاة"],["calendar","التقويم الشهري"],
  ["nasheed","الإنشاد الديني والابتهالات"],["mushaf","المصحف الشريف"],["ruqyah","الرقية الشرعية"],
  ["radio-egypt","إذاعة القرآن الكريم"],["azkar","الأذكار اليومية"],["books-library","مكتبة الكتب الإسلامية"],
