@@ -367,6 +367,12 @@ public class MushafPageActivity extends Activity {
 
     private void showPage(int number) {
         if (number < 1 || number > 604 || busy) return;
+        if (pendingAyahMessage.isEmpty()) {
+            status.setClickable(false);
+            status.setOnClickListener(null);
+            pendingSurahNumber = -1;
+            pendingVerseNumber = -1;
+        }
         page = number;
         getSharedPreferences("zad_mushaf", MODE_PRIVATE).edit().putInt("last_page", page).apply();
         pageLabel.setText("صفحة " + page + " من 604");
