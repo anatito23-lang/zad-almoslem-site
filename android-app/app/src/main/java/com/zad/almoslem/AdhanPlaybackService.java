@@ -368,7 +368,7 @@ public class AdhanPlaybackService extends Service {
                 ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this);
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle("ملف الأذان غير موجود")
-                .setContentText("افتح زاد المسلم واتصل بالإنترنت لتحميل صوت الأذان مرة واحدة.")
+                .setContentText("افتح زاد وطمأنينة واتصل بالإنترنت لتحميل صوت الأذان مرة واحدة.")
                 .setAutoCancel(true);
         nm.notify(NOTIFICATION_ID + 1, b.build());
     }
