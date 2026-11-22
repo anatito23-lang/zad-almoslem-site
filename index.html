@@ -2616,7 +2616,7 @@ html{scroll-padding-top:14px}
  if(location.hostname!=='anatito23-lang.github.io')return;
  const links=()=>Array.from(document.querySelectorAll('.top nav a[href^="#"],.zad-web-shortcuts a[href^="#"]'));
  function markActive(){const id=decodeURIComponent(location.hash.slice(1));links().forEach(a=>{if(a.getAttribute('href')==='#'+id){a.setAttribute('aria-current','location');a.classList.add('is-current-tab');}else{a.removeAttribute('aria-current');a.classList.remove('is-current-tab');}});}
- document.addEventListener('click',function(event){const link=event.target.closest('.top nav a[href^="#"],.zad-web-shortcuts a[href^="#"]');if(!link)return;const id=decodeURIComponent((link.getAttribute('href')||'').slice(1)),target=document.getElementById(id);if(!target)return;event.preventDefault();history.pushState(null,'','#'+id);target.scrollIntoView({behavior:'smooth',block:'start'});markActive();},true);
+ document.addEventListener('click',function(event){const origin=event.target;const link=origin&&typeof origin.closest==='function'?origin.closest('.top nav a[href^="#"],.zad-web-shortcuts a[href^="#"]'):null;if(!link)return;const id=decodeURIComponent((link.getAttribute('href')||'').slice(1)),target=document.getElementById(id);if(!target)return;event.preventDefault();if(location.hash!=='#'+id)history.pushState({section:id},'','#'+id);const root=document.documentElement;const oldBehavior=root.style.scrollBehavior;root.style.scrollBehavior='auto';const top=Math.max(0,target.getBoundingClientRect().top+window.scrollY-12);window.scrollTo(0,top);root.style.scrollBehavior=oldBehavior;markActive();},true);
  window.addEventListener('hashchange',markActive);window.addEventListener('popstate',markActive);markActive();
 })();
 </script>
