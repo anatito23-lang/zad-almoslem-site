@@ -2356,42 +2356,45 @@ if(new Date().getDay()===5){$('fridayBadge').textContent='اليوم يوم ال
  
 
  
- // الكتب التي يضيفها المسؤول من لوحة إدارة الموقع
- (async()=>{
-  const grid=document.getElementById("bookLibraryGrid"),status=document.getElementById("dynamicLibraryStatus");
-  if(!grid)return;
-  try{
-   const [{initializeApp,getApps},{getFirestore,collection,getDocs,query,where,orderBy},{getStorage,ref,getDownloadURL}]=await Promise.all([
-    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
-    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
-    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js")
-   ]);
-   const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
-   const app=getApps().length?getApps()[0]:initializeApp(cfg),db=getFirestore(app),storage=getStorage(app);
-   const snap=await getDocs(query(collection(db,"library_books"),where("published","==",true)));
-   const books=snap.docs.map(d=>({id:d.id,...d.data()}));
-   const labels={aqeedah:"العقيدة",tafsir:"التفسير",hadith:"الحديث",fiqh:"الفقه",seerah:"السيرة",akhlaq:"الأخلاق والآداب",other:"كتب متنوعة"};
-   for(const b of books){
-    if(!b.fileUrl&&!b.storagePath)continue;
-    const url=b.fileUrl||(b.storagePath?await getDownloadURL(ref(storage,b.storagePath)):"");
-    const card=document.createElement("article");card.className="card book-card";card.dataset.bookCategory=b.category||"other";
-    const icon=document.createElement("div");icon.className="icon";icon.textContent="📚";card.append(icon);
-    if(b.coverUrl){const cover=document.createElement("img");cover.src=b.coverUrl;cover.alt="غلاف "+(b.title||"الكتاب");cover.loading="lazy";cover.style.cssText="width:110px;height:150px;object-fit:contain;display:block;margin:0 auto 12px";card.append(cover)}const h=document.createElement("h3");h.textContent=b.title||"كتاب إسلامي";card.append(h);
-    const author=document.createElement("div");author.className="book-author";author.textContent=b.author||"";card.append(author);
-    if(b.summary){const p=document.createElement("p");p.textContent=b.summary;card.append(p)}
-    const meta=document.createElement("div");meta.className="book-level";meta.textContent=[labels[b.category]||"كتب متنوعة",b.publisher,b.edition].filter(Boolean).join(" · ");card.append(meta);
-    const source=document.createElement("p");source.className="small";source.textContent="المصدر: "+(b.source||"بيانات النشر غير مضافة");card.append(source);
-    if((b.fileType||"").includes("pdf")){
-     const open=document.createElement("button");open.type="button";open.className="btn green";open.textContent="اقرأ داخل الموقع";open.addEventListener("click",()=>{const modal=document.getElementById("bookReaderModal"),frame=document.getElementById("bookReaderFrame"),title=document.getElementById("bookReaderTitle");if(modal&&frame){title.textContent=b.title||"قارئ الكتب";frame.src=url;modal.classList.add("active");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden"}});card.append(open);
-    }
-    const download=document.createElement("a");download.className="btn light";download.href=url;download.target="_blank";download.rel="noopener";download.textContent="فتح / تحميل الكتاب";download.style.display="inline-block";download.style.marginTop="8px";card.append(download);
-    grid.append(card);
+ // الكتب التي يضيفها المسؤول من لوحة إدارة الموقع — ملفات Supabase Storage
+(async()=>{
+ const grid=document.getElementById("bookLibraryGrid"),status=document.getElementById("dynamicLibraryStatus");
+ if(!grid)return;
+ try{
+  const [{initializeApp,getApps},{getFirestore,collection,getDocs,query,where},{createClient}]=await Promise.all([
+   import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+   import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+   import("https://esm.sh/@supabase/supabase-js@2")
+  ]);
+  const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
+  const app=getApps().length?getApps()[0]:initializeApp(cfg),db=getFirestore(app);
+  const supabase=createClient("https://gjgrnnxkthrbpabpwiqk.supabase.co","sb_publishable_ChZfzdbq9uEacXNFatrLzQ_Uf8L3my6");
+  const snap=await getDocs(query(collection(db,"library_books"),where("published","==",true)));
+  const books=snap.docs.map(d=>({id:d.id,...d.data()}));
+  const labels={aqeedah:"العقيدة",tafsir:"التفسير",hadith:"الحديث",fiqh:"الفقه",seerah:"السيرة",akhlaq:"الأخلاق والآداب",other:"كتب متنوعة"};
+  for(const b of books){
+   let url=b.fileUrl||"";
+   if(!url&&b.storageProvider==="supabase"&&b.storagePath)url=supabase.storage.from("library-books").getPublicUrl(b.storagePath).data.publicUrl;
+   if(!url)continue;
+   const card=document.createElement("article");card.className="card book-card";card.dataset.bookCategory=b.category||"other";
+   const icon=document.createElement("div");icon.className="icon";icon.textContent="📚";card.append(icon);
+   if(b.coverUrl){const cover=document.createElement("img");cover.src=b.coverUrl;cover.alt="غلاف "+(b.title||"الكتاب");cover.loading="lazy";cover.style.cssText="width:110px;height:150px;object-fit:contain;display:block;margin:0 auto 12px";card.append(cover)}
+   const h=document.createElement("h3");h.textContent=b.title||"كتاب إسلامي";card.append(h);
+   const author=document.createElement("div");author.className="book-author";author.textContent=b.author||"";card.append(author);
+   if(b.summary){const p=document.createElement("p");p.textContent=b.summary;card.append(p)}
+   const meta=document.createElement("div");meta.className="book-level";meta.textContent=[labels[b.category]||"كتب متنوعة",b.publisher,b.edition].filter(Boolean).join(" · ");card.append(meta);
+   const source=document.createElement("p");source.className="small";source.textContent="المصدر: "+(b.source||"بيانات النشر غير مضافة");card.append(source);
+   if((b.fileType||"").includes("pdf")){
+    const open=document.createElement("button");open.type="button";open.className="btn green";open.textContent="اقرأ داخل الموقع";open.addEventListener("click",()=>{const modal=document.getElementById("bookReaderModal"),frame=document.getElementById("bookReaderFrame"),title=document.getElementById("bookReaderTitle");if(modal&&frame){title.textContent=b.title||"قارئ الكتب";frame.src=url;modal.classList.add("active");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden"}});card.append(open);
    }
-   if(status)status.textContent=books.length?"الكتب المضافة من لوحة الإدارة: "+books.length:"لا توجد كتب جديدة منشورة حاليًا.";
-   const filters=[...document.querySelectorAll("[data-book-filter]")];
-   filters.forEach(btn=>btn.addEventListener("click",()=>{const category=btn.dataset.bookFilter;grid.querySelectorAll(".book-card").forEach(card=>{card.hidden=category!=="all"&&card.dataset.bookCategory!==category})}));
-  }catch(e){if(status)status.textContent="تعذر تحميل الكتب الجديدة حاليًا."}
- })();
+   const download=document.createElement("a");download.className="btn light";download.href=url;download.target="_blank";download.rel="noopener";download.textContent="فتح / تحميل الكتاب";download.style.display="inline-block";download.style.marginTop="8px";card.append(download);
+   grid.append(card);
+  }
+  if(status)status.textContent=books.length?"الكتب المضافة من لوحة الإدارة: "+books.length:"لا توجد كتب جديدة منشورة حاليًا.";
+  const filters=[...document.querySelectorAll("[data-book-filter]")];
+  filters.forEach(btn=>btn.addEventListener("click",()=>{const category=btn.dataset.bookFilter;grid.querySelectorAll(".book-card").forEach(card=>{card.hidden=category!=="all"&&card.dataset.bookCategory!==category})}));
+ }catch(e){if(status)status.textContent="تعذر تحميل الكتب الجديدة حاليًا."}
+})();
 
 // تصفية مكتبة الكتب وفتح القارئ داخل الموقع
 const bookFilterButtons=[...document.querySelectorAll('[data-book-filter]')];
