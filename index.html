@@ -2240,7 +2240,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261121-website-clean-v4"></script>
+<script src="./app-pages.js?v=20261122-navfix1"></script>
 <script id="zad-public-site-final-guard">
 (function(){
  if(location.hostname!=='anatito23-lang.github.io')return;
@@ -2462,21 +2462,24 @@ body{background:#f3f1e9!important;background-image:radial-gradient(#b99a5d12 1px
  const audio=document.getElementById('saudiQuranRadio'),status=document.getElementById('saudiRadioStatus');
  if(!audio)return;
  const stream='https://live.kwikmotion.com/sbrksaquranradiolive/srpksaquranradio/playlist.m3u8';
+ let loading=false,started=false;
+ audio.preload='none';audio.src=stream;
  function setStatus(message){if(status)status.textContent=message;}
- function attachHls(){
-  if(window.Hls&&window.Hls.isSupported()){
+ function loadHlsAfterNativeFailure(){
+  if(loading||started||audio.canPlayType('application/vnd.apple.mpegurl'))return;
+  loading=true;setStatus('جارٍ تجهيز مشغل البث...');
+  const attach=()=>{
+   if(!window.Hls||!window.Hls.isSupported()){setStatus('تعذر تشغيل البث في هذا المتصفح؛ استخدم رابط الإذاعة الرسمي أدناه.');return;}
+   started=true;audio.pause();audio.removeAttribute('src');audio.load();
    const hls=new window.Hls({enableWorker:true});hls.loadSource(stream);hls.attachMedia(audio);
-   hls.on(window.Hls.Events.ERROR,(_,data)=>{if(data.fatal)setStatus('تعذر تشغيل البث داخل المشغل؛ جرّب فتح المصدر الرسمي أدناه.');});
-   audio.addEventListener('play',()=>setStatus('إذاعة القرآن الكريم من السعودية تعمل الآن.'),{once:true});
-   return;
-  }
-  if(audio.canPlayType('application/vnd.apple.mpegurl')){audio.src=stream;return;}
-  setStatus('هذا المتصفح لا يدعم البث المباشر هنا؛ استخدم رابط الإذاعة الرسمي أدناه.');
+   hls.on(window.Hls.Events.ERROR,(_,data)=>{if(data.fatal)setStatus('تعذر تشغيل البث؛ جرّب فتح المصدر الرسمي أدناه.');});
+   hls.on(window.Hls.Events.MANIFEST_PARSED,()=>audio.play().catch(()=>setStatus('اضغط تشغيل لبدء إذاعة القرآن الكريم.')));
+  };
+  if(window.Hls){attach();return;}
+  const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js';script.onload=attach;script.onerror=()=>setStatus('تعذر تحميل مشغل البث؛ استخدم رابط الإذاعة الرسمي أدناه.');document.head.append(script);
  }
- if(window.Hls){attachHls();return;}
- const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js';script.onload=attachHls;script.onerror=()=>{if(audio.canPlayType('application/vnd.apple.mpegurl'))audio.src=stream;else setStatus('تعذر تحميل مشغل البث؛ استخدم رابط الإذاعة الرسمي أدناه.');};document.head.append(script);
  audio.addEventListener('playing',()=>setStatus('إذاعة القرآن الكريم من السعودية تعمل الآن.'));
- audio.addEventListener('error',()=>setStatus('قد يكون البث غير متاح مؤقتًا؛ استخدم المصدر الرسمي أدناه.'));
+ audio.addEventListener('error',loadHlsAfterNativeFailure);
 })();
 </script>
 
@@ -2595,5 +2598,24 @@ footer:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.
 @media(max-width:700px){.azhar-architecture-art{height:185px;opacity:.28}.hero .hero-content{position:relative}.hero .hero-editorial-card{backdrop-filter:blur(4px)}}
 </style>
 
+<style id="zad-mobile-performance-nav-20261122">
+@media(max-width:700px){.top,.hero-editorial-card{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}.section{scroll-margin-top:18px}}
+html{scroll-padding-top:14px}
+</style>
+<script id="zad-web-tabs-repair-20261122">
+(function(){
+ if(location.hostname!=='anatito23-lang.github.io')return;
+ document.addEventListener('click',function(event){
+  const link=event.target.closest('.top nav a[href^="#"],.zad-web-shortcuts a[href^="#"]');
+  if(!link)return;
+  const id=decodeURIComponent((link.getAttribute('href')||'').slice(1));
+  const target=document.getElementById(id);
+  if(!target)return;
+  event.preventDefault();
+  history.replaceState(null,'','#'+id);
+  target.scrollIntoView({behavior:'smooth',block:'start'});
+ },true);
+})();
+</script>
 </body>
 </html>
