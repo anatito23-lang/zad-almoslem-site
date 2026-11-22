@@ -94,7 +94,7 @@ public class MushafPageActivity extends Activity {
     private void build() {
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(3), dp(3), dp(3), dp(4));
+        root.setPadding(dp(6), dp(2), dp(6), dp(2));
         root.setBackgroundColor(AppThemeColors.bg(this));
 
         toolbar = new LinearLayout(this);
@@ -121,28 +121,28 @@ public class MushafPageActivity extends Activity {
 
         offlineRow = new LinearLayout(this);
         offlineRow.setOrientation(LinearLayout.VERTICAL);
-        offlineRow.setPadding(dp(4), dp(3), dp(4), dp(3));
+        offlineRow.setPadding(dp(4), dp(1), dp(4), dp(1));
         Button downloadAll = new Button(this);
         downloadAll.setText("تحميل المصحف كاملًا للعمل دون إنترنت");
         downloadAll.setAllCaps(false);
         TextView offlineStatus = label("يمكنك تنزيل الصفحات الـ 604 مرة واحدة والقراءة دون اتصال.", 11, AppThemeColors.muted(this), false);
-        offlineRow.addView(downloadAll, new LinearLayout.LayoutParams(-1, dp(38)));
-        offlineRow.addView(offlineStatus, new LinearLayout.LayoutParams(-1, dp(18)));
+        offlineRow.addView(downloadAll, new LinearLayout.LayoutParams(-1, dp(34)));
+        offlineRow.addView(offlineStatus, new LinearLayout.LayoutParams(-1, dp(14)));
         root.addView(offlineRow, new LinearLayout.LayoutParams(-1, -2));
         downloadAll.setOnClickListener(v -> downloadAllPages(downloadAll, offlineStatus));
 
         pageFrame = new LinearLayout(this);
         pageFrame.setOrientation(LinearLayout.VERTICAL);
         pageFrame.setGravity(Gravity.CENTER);
-        pageFrame.setPadding(dp(1), dp(1), dp(1), dp(1));
+        pageFrame.setPadding(dp(2), dp(2), dp(2), dp(2));
         pageFrame.setBackground(shape(Color.rgb(255,253,244), 5, Color.rgb(177,157,112)));
         pageImage = new ImageView(this);
         pageImage.setAdjustViewBounds(false);
         pageImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
         pageFrame.addView(pageImage, new LinearLayout.LayoutParams(-1, -1));
         LinearLayout.LayoutParams imageLp = new LinearLayout.LayoutParams(-1, 0, 1f);
-        imageLp.topMargin = dp(2);
-        imageLp.bottomMargin = dp(2);
+        imageLp.topMargin = dp(1);
+        imageLp.bottomMargin = dp(1);
         root.addView(pageFrame, imageLp);
 
         gesture = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -214,13 +214,13 @@ public class MushafPageActivity extends Activity {
         } else {
             getWindow().getDecorView().setSystemUiVisibility(0);
             AppThemeColors.apply(this);
-            root.setPadding(dp(3), dp(3), dp(3), dp(4));
+            root.setPadding(dp(6), dp(2), dp(6), dp(2));
             toolbar.setVisibility(View.VISIBLE);
             offlineRow.setVisibility(View.VISIBLE);
             status.setVisibility(View.VISIBLE);
             attribution.setVisibility(View.VISIBLE);
             nav.setVisibility(View.VISIBLE);
-            pageFrame.setPadding(dp(1), dp(1), dp(1), dp(1));
+            pageFrame.setPadding(dp(2), dp(2), dp(2), dp(2));
             pageFrame.setBackground(shape(Color.rgb(255,253,244), 5, Color.rgb(177,157,112)));
             pageFrame.setLayoutParams(new LinearLayout.LayoutParams(-1, 0, 1f));
             if (root.getParent() instanceof ViewGroup) ((ViewGroup) root.getParent()).removeView(root);
