@@ -56,6 +56,7 @@ public class MushafPageActivity extends Activity {
     private ProgressBar progress;
     private GestureDetector gesture;
     private int green;
+    private String pendingAyahMessage = "";
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
@@ -266,23 +267,68 @@ public class MushafPageActivity extends Activity {
                 int surah = surahPicker.getSelectedItemPosition() + 1;
                 String value = ayahNumber.getText().toString().trim();
                 if (value.isEmpty()) {
-                    // Selecting a surah alone jumps to its opening Mushaf page.
+                    pendingAyahMessage = "";
                     showPage(SURAH_PAGES[surah - 1]);
                     return;
                 }
                 try {
                     int verse = Integer.parseInt(value);
                     if (verse < 1) throw new NumberFormatException();
-                    Intent open = new Intent(this, QuranTextActivity.class);
-                    open.putExtra("surah_number", surah);
-                    open.putExtra("target_ayah", verse);
-                    startActivity(open);
+                    findAyahPage(surah, verse);
                 } catch (NumberFormatException ignored) {
                     Toast.makeText(this, "اكتب رقم آية صحيحًا", Toast.LENGTH_SHORT).show();
                 }
             })
             .setNegativeButton("إلغاء", null)
             .show();
+    }
+
+    private void findAyahPage(int surah, int verse) {
+        if (busy) return;
+        busy = true;
+        status.setText("جارٍ البحث عن الآية وموضعها في صفحات المصحف...");
+        progress.setVisibility(View.VISIBLE);
+        new Thread(() -> {
+            HttpURLConnection connection = null;
+            try {
+                URL url = new URL("https://api.alquran.cloud/v1/ayah/" + surah + ":" + verse + "/quran-uthmani");
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setConnectTimeout(15000);
+                connection.setReadTimeout(20000);
+                connection.setRequestProperty("User-Agent", "ZadAlmoslem-Android");
+                if (connection.getResponseCode() != 200) throw new IOException("تعذر العثور على الآية");
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                try (InputStream in = connection.getInputStream()) {
+                    byte[] buffer = new byte[4096]; int count;
+                    while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
+                }
+                org.json.JSONObject response = new org.json.JSONObject(new String(out.toByteArray(), java.nio.charset.StandardCharsets.UTF_8));
+                if (response.optInt("code") != 200) throw new IOException("رقم الآية غير صحيح في هذه السورة");
+                org.json.JSONObject data = response.getJSONObject("data");
+                int targetPage = data.optInt("page", 0);
+                if (targetPage < 1 || targetPage > 604) throw new IOException("تعذر تحديد صفحة الآية");
+                String verseText = data.optString("text", "");
+                String surahName = SURAHS[surah - 1];
+                String message = "سورة " + surahName + " — الآية " + verse + " — صفحة " + targetPage;
+                runOnUiThread(() -> {
+                    busy = false;
+                    pendingAyahMessage = message;
+                    showPage(targetPage);
+                    new AlertDialog.Builder(this).setTitle(message).setMessage(verseText)
+                        .setPositiveButton("عرض موضعها في المصحف", (d, w) -> showPage(targetPage))
+                        .setNegativeButton("إغلاق", null).show();
+                });
+            } catch (Exception error) {
+                runOnUiThread(() -> {
+                    busy = false;
+                    progress.setVisibility(View.GONE);
+                    status.setText(error.getMessage() == null ? "تعذر البحث عن الآية. تحقق من الإنترنت." : error.getMessage());
+                    Toast.makeText(this, "لم يتم العثور على الآية. راجع السورة ورقم الآية.", Toast.LENGTH_LONG).show();
+                });
+            } finally {
+                if (connection != null) connection.disconnect();
+            }
+        }).start();
     }
 
     private void openInteractivePage() {
@@ -313,7 +359,8 @@ public class MushafPageActivity extends Activity {
             Bitmap bitmap = BitmapFactory.decodeFile(cached.getAbsolutePath());
             if (bitmap != null) {
                 pageImage.setImageBitmap(bitmap);
-                status.setText("صفحة محفوظة على الهاتف — يمكنك القراءة دون إنترنت");
+                status.setText(pendingAyahMessage.isEmpty() ? "صفحة محفوظة على الهاتف — يمكنك القراءة دون إنترنت" : pendingAyahMessage + " — الصفحة محفوظة على الهاتف");
+                pendingAyahMessage = "";
                 progress.setVisibility(View.GONE);
                 return;
             }
@@ -348,7 +395,8 @@ public class MushafPageActivity extends Activity {
                 runOnUiThread(() -> {
                     if (page == number) {
                         pageImage.setImageBitmap(bitmap);
-                        status.setText("تم تحميل الصفحة وحفظها على الهاتف");
+                        status.setText(pendingAyahMessage.isEmpty() ? "تم تحميل الصفحة وحفظها على الهاتف" : pendingAyahMessage);
+                        pendingAyahMessage = "";
                     }
                 });
             } catch (Exception error) {
