@@ -13,10 +13,10 @@ import java.util.Calendar;
 
 public class ReminderReceiver extends BroadcastReceiver {
     public static final String CHANNEL_ID = "zad_reminders";
-    private static final String PRAYER_CHANNEL_ID = "zad_prayer_alerts_v2";
+    private static final String PRAYER_CHANNEL_ID = "zad_prayer_alerts_v3";
     private static final String PRAYER_TONE_CHANNEL_ID = "zad_prayer_tone";
-    private static final String GENTLE_CHANNEL_ID = "zad_gentle_reminders_v2";
-    private static final String AUDIO_FALLBACK_CHANNEL_ID = "zad_reminder_audio_fallback_v2";
+    private static final String GENTLE_CHANNEL_ID = "zad_gentle_reminders_v3";
+    private static final String AUDIO_FALLBACK_CHANNEL_ID = "zad_reminder_audio_fallback_v3";
 
     public static void scheduleDaily(Context context, String key, int hour, int minute, String title) {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders", Context.MODE_PRIVATE);
@@ -60,7 +60,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
         long at=next.getTimeInMillis();
         p.edit().putLong("gentle_next_at",at).apply();
-        schedule(context,"gentle_reminder",at,"تذكير لطيف من زاد المسلم",false);
+        schedule(context,"gentle_reminder",at,"تذكير لطيف من زاد وطمأنينة",false);
     }
 
     public static void ensureDefaultDailyReminders(Context context) {
@@ -78,7 +78,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         for(String key:new String[]{"morning","evening","qiyam"}) {
             if(p.getBoolean(key+"_enabled",false)) {
                 scheduleDaily(context,key,p.getInt(key+"_hour",7),p.getInt(key+"_minute",0),
-                        p.getString(key+"_title","تذكير من زاد المسلم"));
+                        p.getString(key+"_title","تذكير من زاد وطمأنينة"));
             }
         }
         if(p.getBoolean("gentle_enabled",false)) scheduleGentleReminder(context);
@@ -284,7 +284,7 @@ public class ReminderReceiver extends BroadcastReceiver {
                 // If exact alarms are unavailable, Android may reject the background
                 // audio foreground-service launch. Use a distinct audible notification
                 // channel so the reminder is not silently lost.
-                ch=new NotificationChannel(AUDIO_FALLBACK_CHANNEL_ID,"تنبيهات صوتية احتياطية من زاد المسلم",NotificationManager.IMPORTANCE_DEFAULT);
+                ch=new NotificationChannel(AUDIO_FALLBACK_CHANNEL_ID,"تنبيهات صوتية احتياطية من زاد وطمأنينة",NotificationManager.IMPORTANCE_DEFAULT);
                 ch.setDescription("صوت إشعار بديل للتذكيرات عند عدم توفر إذن تشغيل الصوت في الخلفية");
                 ch.setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI,
                         new android.media.AudioAttributes.Builder()
@@ -298,7 +298,7 @@ public class ReminderReceiver extends BroadcastReceiver {
                 ch.setSound(null,null);
                 ch.enableVibration(false);
             } else {
-                ch=new NotificationChannel(CHANNEL_ID,"تنبيهات زاد المسلم",NotificationManager.IMPORTANCE_HIGH);
+                ch=new NotificationChannel(CHANNEL_ID,"تنبيهات زاد وطمأنينة",NotificationManager.IMPORTANCE_HIGH);
                 ch.setDescription("تنبيهات الأذكار وقيام الليل");
             }
             nm.createNotificationChannel(ch);
@@ -315,9 +315,9 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
         Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,channelId):new Notification.Builder(context);
         String startError = prayer ? prefs.getString("adhan_last_start_error", "") : "";
-        String notificationText = title==null?"تذكير من زاد المسلم":title;
+        String notificationText = title==null?"تذكير من زاد وطمأنينة":title;
         if (!startError.isEmpty()) notificationText = "تعذر بدء الأذان: " + startError;
-        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle(gentle?"تذكير لطيف من زاد المسلم":"قلبي اطمأن – زاد المسلم").setContentText(notificationText).setAutoCancel(true).setContentIntent(content);
+        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle(gentle?"تذكير لطيف من زاد وطمأنينة":"قلبي اطمأن – زاد وطمأنينة").setContentText(notificationText).setAutoCancel(true).setContentIntent(content);
         if(prayer) {
             b.setCategory(Notification.CATEGORY_ALARM)
              .setVisibility(Notification.VISIBILITY_PUBLIC)
@@ -331,7 +331,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         if(!prayer || (adhanEnabled && thisPrayerEnabled && !"off".equals(adhanMode))) nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
             String k=key.replace("daily_","");
-            if(prefs.getBoolean(k+"_enabled",false)) scheduleDaily(context,k,prefs.getInt(k+"_hour",7),prefs.getInt(k+"_minute",0),prefs.getString(k+"_title","تذكير من زاد المسلم"));
+            if(prefs.getBoolean(k+"_enabled",false)) scheduleDaily(context,k,prefs.getInt(k+"_hour",7),prefs.getInt(k+"_minute",0),prefs.getString(k+"_title","تذكير من زاد وطمأنينة"));
         }
     }
 }
