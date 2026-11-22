@@ -38,10 +38,10 @@ if(!nativeApp || publicWebsite){
  ['#daily-reminder-settings','.azkar-ticker','.prayer-tracker','.adhan-settings','.tasbeeh-float','#tasbeehPanel','.bottom-nav','#qibla'].forEach(selector=>document.querySelectorAll(selector).forEach(node=>node.remove()));
  const prayerSettings=document.querySelector('.prayer-location-settings');
  if(prayerSettings){
-  prayerSettings.style.cssText='display:grid;grid-template-columns:minmax(180px,260px) auto;gap:10px;align-items:end;width:100%;margin-top:12px';
-  ['#prayerCountry','#otherCountryWrap','#otherCityWrap','#prayerMethod','#prayerSchool'].forEach(sel=>{const el=prayerSettings.querySelector(sel);if(el)(el.closest('label')||el).style.display='none';});
+  prayerSettings.style.cssText='display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;align-items:end;width:100%;margin-top:12px';
+  ['#prayerCountry','#prayerMethod','#prayerSchool'].forEach(sel=>{const el=prayerSettings.querySelector(sel);if(el)(el.closest('label')||el).style.display='grid';});
   const gov=prayerSettings.querySelector('#egyptGovernorateWrap');if(gov){gov.style.display='grid';gov.firstChild.textContent='اختر المحافظة';}
-  const actions=prayerSettings.querySelector('.row');if(actions){actions.style.cssText='display:flex;gap:8px;align-items:end';actions.querySelector('#useMyLocation')?.remove();}
+  const actions=prayerSettings.querySelector('.row');if(actions)actions.style.cssText='display:flex;gap:8px;align-items:end;flex-wrap:wrap';
  }
  // Remove any legacy tasbeeh UI and add a Ramadan-only website section.
  document.querySelectorAll('.tasbeeh-float,#tasbeehPanel,#tasbeehFab,.bottom-nav,#zad-page-tasbeeh,a[href*="tasbeeh"]').forEach(node=>node.remove());
@@ -55,7 +55,7 @@ if(!nativeApp || publicWebsite){
  }
 const prayerTitle=document.querySelector('#prayer .section-head p');if(prayerTitle)prayerTitle.textContent='مواقيت الصلوات الخمس والوقت المتبقي للصلاة القادمة';
  const quick=document.createElement('nav');quick.className='zad-web-shortcuts';quick.setAttribute('aria-label','اختصارات الموقع');
- quick.innerHTML=[['#prayer','🕌','مواقيت الصلاة'],['#quran','📖','استماع القرآن'],['#hadith','ﷺ','الحديث الشريف'],['#ramadan','🌙','رمضان'],['#mushaf','۞','المصحف'],['#radio-egypt','📻','الإذاعة'],['#ruqyah','🤲','الرقية'],['#books-library','📚','المكتبة'],['#khutbahs','🎙️','الخطب']].map(([href,ico,label])=>'<a href="'+href+'"><span>'+ico+'</span><b>'+label+'</b></a>').join('');
+ quick.innerHTML=[['#prayer','🕌','مواقيت الصلاة'],['#quran','📖','استماع القرآن'],['#hadith-dua','ﷺ','الحديث الشريف'],['#azkar','☀️','الأذكار'],['#mushaf','۞','المصحف'],['#radio-egypt','📻','الإذاعة'],['#ruqyah','🤲','الرقية'],['#books-library','📚','المكتبة'],['#khutbahs','🎙️','الخطب']].map(([href,ico,label])=>'<a href="'+href+'"><span>'+ico+'</span><b>'+label+'</b></a>').join('');
  if(header&&!document.querySelector('.zad-web-shortcuts'))header.insertAdjacentElement('afterend',quick);
  const topNav=document.querySelector('.top nav');
  if(topNav){topNav.querySelectorAll('a').forEach(link=>{if(['#kids','#reminders','#daily-reminder-settings','#qibla','#tasbeehFab'].includes(link.getAttribute('href')))link.remove();});if(!topNav.querySelector('a[href="#hadith"]')){const l=document.createElement('a');l.href='#hadith';l.textContent='الحديث الشريف';topNav.append(l);}}
