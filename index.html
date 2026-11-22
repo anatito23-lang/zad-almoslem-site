@@ -1606,7 +1606,7 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
 <section class="section" id="khutbahs">
     <div class="section-head">
       <div><h2>خطب الجمعة</h2><p>خطب مكتوبة ومسموعة من إعداد صاحب الموقع</p></div>
-      <a class="btn light" href="./content-admin.html">لوحة إدارة الموقع بالكامل</a>
+      <a class="btn light" href="./website-admin.html">لوحة إدارة الموقع بالكامل</a>
     </div>
     <div class="card ministry-khutbah-link" style="margin:0 0 16px">
       <span class="topic-tag">المصدر الرسمي · وزارة الأوقاف المصرية</span>
@@ -2683,7 +2683,7 @@ nasheedAudio.addEventListener('error',()=>{
 })();
 </script>
 <script>
-if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261122-all-tabs-admin-v1", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261122-full-site-admin-v1", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
 </script>
 
 
@@ -2692,7 +2692,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261122-all-tabs-admin-v1"></script>
+<script src="./app-pages.js?v=20261122-full-site-admin-v1"></script>
 <script id="zad-public-site-final-guard">
 (function(){
  if(!['anatito23-lang.github.io','zad-almoslem.github.io'].includes(location.hostname))return;
