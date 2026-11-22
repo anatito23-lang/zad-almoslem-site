@@ -4,6 +4,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.RectF;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.view.Gravity;
@@ -186,9 +190,14 @@ public final class AppTabs {
         item.setPadding(dp(a,2),dp(a,1),dp(a,2),dp(a,1));
         if(selected){GradientDrawable selectedBg=new GradientDrawable();selectedBg.setColor(Color.rgb(48,75,66));selectedBg.setCornerRadius(dp(a,12));selectedBg.setStroke(dp(a,1),Color.rgb(207,174,112));item.setBackground(selectedBg);}
         else {GradientDrawable idleBg=new GradientDrawable();idleBg.setColor(Color.TRANSPARENT);idleBg.setCornerRadius(dp(a,12));item.setBackground(idleBg);}
-        TextView icon=new TextView(a);icon.setText(iconText);icon.setTextSize(20);icon.setGravity(Gravity.CENTER);
-        icon.setTextColor(selected?Color.rgb(235,205,139):AppThemeColors.accent(a));icon.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
-        item.addView(icon,new LinearLayout.LayoutParams(-1,dp(a,25)));
+        if ("mushaf".equals(key) || "radio".equals(key) || "calendar".equals(key)) {
+            item.addView(new IllustratedTabIcon(a, key, selected),
+                    new LinearLayout.LayoutParams(-1, dp(a,27)));
+        } else {
+            TextView icon=new TextView(a);icon.setText(iconText);icon.setTextSize(20);icon.setGravity(Gravity.CENTER);
+            icon.setTextColor(selected?Color.rgb(235,205,139):AppThemeColors.accent(a));icon.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
+            item.addView(icon,new LinearLayout.LayoutParams(-1,dp(a,25)));
+        }
         TextView label=new TextView(a);label.setText(labelText);label.setTextSize(8);label.setSingleLine(true);label.setGravity(Gravity.CENTER);
         label.setTextColor(selected?Color.WHITE:Color.rgb(195,204,199));label.setTypeface(Typeface.DEFAULT,selected?Typeface.BOLD:Typeface.NORMAL);
         item.addView(label,new LinearLayout.LayoutParams(-1,dp(a,15)));
@@ -198,6 +207,62 @@ public final class AppTabs {
             in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);a.startActivity(in);
         });
         return item;
+    }
+
+    private static final class IllustratedTabIcon extends View {
+        private final String kind;
+        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        private final int gold = Color.rgb(235, 199, 126);
+        private final int page = Color.rgb(248, 239, 214);
+        private final int ink = Color.rgb(27, 76, 61);
+        IllustratedTabIcon(Activity activity, String kind, boolean selected) {
+            super(activity);
+            this.kind = kind;
+            setAlpha(selected ? 1f : .92f);
+        }
+        private float d(float value) { return value * getResources().getDisplayMetrics().density; }
+        private void fill(Canvas c, int color) { paint.setColor(color); paint.setStyle(Paint.Style.FILL); }
+        private void line(int color, float width) { paint.setColor(color); paint.setStyle(Paint.Style.STROKE); paint.setStrokeWidth(d(width)); paint.setStrokeCap(Paint.Cap.ROUND); paint.setStrokeJoin(Paint.Join.ROUND); }
+        @Override protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            float cx=getWidth()/2f, cy=getHeight()/2f;
+            canvas.save();
+            canvas.translate(cx,cy);
+            canvas.scale(d(1),d(1));
+            if ("mushaf".equals(kind)) drawMushaf(canvas);
+            else if ("radio".equals(kind)) drawMicrophone(canvas);
+            else drawCalendar(canvas);
+            canvas.restore();
+        }
+        private void drawMushaf(Canvas c) {
+            RectF cover=new RectF(-10,-10,10,10);
+            fill(c,0xFF173F34);c.drawRoundRect(cover,3,3,paint);
+            line(gold,1.1f);c.drawRoundRect(cover,3,3,paint);
+            fill(c,page);c.drawRoundRect(new RectF(-8,-8,8,8),2,2,paint);
+            Path left=new Path();left.moveTo(0,-6);left.quadTo(-4,-8,-7,-6);left.lineTo(-7,6);left.quadTo(-3,4,0,7);left.close();
+            Path right=new Path();right.moveTo(0,-6);right.quadTo(4,-8,7,-6);right.lineTo(7,6);right.quadTo(3,4,0,7);right.close();
+            fill(c,page);c.drawPath(left,paint);c.drawPath(right,paint);
+            line(ink,.7f);c.drawPath(left,paint);c.drawPath(right,paint);c.drawLine(0,-6,0,7,paint);
+            line(gold,.7f);c.drawLine(-5,-2,-1,-2,paint);c.drawLine(1,-2,5,-2,paint);c.drawLine(-5,1,-1,1,paint);c.drawLine(1,1,5,1,paint);
+            fill(c,gold);c.drawCircle(0,-11.5f,1.4f,paint);
+        }
+        private void drawMicrophone(Canvas c) {
+            fill(c,0xFF173D50);c.drawRoundRect(new RectF(-5,-11,5,5),5,5,paint);
+            line(gold,1);c.drawRoundRect(new RectF(-5,-11,5,5),5,5,paint);
+            line(page,.65f);for(int x=-2;x<=2;x+=2)c.drawLine(x,-7,x,-1,paint);
+            line(gold,1.3f);c.drawArc(new RectF(-9,-7,9,10),0,180,false,paint);
+            c.drawLine(0,10,0,13,paint);c.drawLine(-5,13,5,13,paint);
+            line(0x99EBC77E,.8f);c.drawArc(new RectF(-12,-13,12,14),205,130,false,paint);
+        }
+        private void drawCalendar(Canvas c) {
+            fill(c,page);c.drawRoundRect(new RectF(-10,-10,10,10),2,2,paint);
+            line(gold,1.1f);c.drawRoundRect(new RectF(-10,-10,10,10),2,2,paint);
+            fill(c,0xFF1B5948);c.drawRoundRect(new RectF(-9,-9,9,-3),1.5f,1.5f,paint);
+            line(gold,1.2f);c.drawLine(-5,-12,-5,-7,paint);c.drawLine(5,-12,5,-7,paint);
+            fill(c,ink);
+            for(int row=0;row<2;row++)for(int col=0;col<3;col++)c.drawCircle(-5+col*5,1+row*5,1.05f,paint);
+            fill(c,gold);c.drawCircle(5,6,1.2f,paint);
+        }
     }
 
     private static String localizedLabel(int index,int lang,String fallback) {
