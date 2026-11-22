@@ -132,11 +132,6 @@ public final class AppTabs {
                 if(!contentSection&&key.matches("[A-Za-z][A-Za-z0-9_-]{0,59}"))rows.add(row);
             }
         }
-        if(rows.isEmpty())for(int i=0;i<KEYS.length;i++)if(!"home".equals(KEYS[i])){
-            JSONObject row=new JSONObject();
-            try{row.put("key",KEYS[i]);row.put("label",LABELS[i]);row.put("icon",ICONS[i]);row.put("visible",true);}catch(Exception ignored){}
-            rows.add(row);
-        }
         JSONObject home=new JSONObject();
         try{home.put("key","home");home.put("label","الرئيسية");home.put("icon","⌂");home.put("visible",true);}catch(Exception ignored){}
         homeSlot.addView(makeTabItem(a,home,active,li),new LinearLayout.LayoutParams(-1,-1));
@@ -145,9 +140,10 @@ public final class AppTabs {
             int index=indexOf(key);
             dock.addView(makeTabItem(a,row,active,li),new LinearLayout.LayoutParams(dp(a,66),-1));
         }
+        final String activeKey=active;
         dockScroll.post(()->{
             for(int i=0;i<rows.size();i++){
-                if(active.equals(rows.get(i).optString("key",""))){
+                if(activeKey.equals(rows.get(i).optString("key",""))){
                     View selected=dock.getChildAt(i);
                     if(selected!=null)dockScroll.smoothScrollTo(Math.max(0,selected.getLeft()-dp(a,70)),0);
                     break;
