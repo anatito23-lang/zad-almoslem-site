@@ -254,6 +254,7 @@ public class TasbeehActivity extends Activity {
         hint.setPadding(dp(8), dp(14), dp(8), 0);
         root.addView(hint);
 
+        AdminTabContent.attach(this,root,"tasbeeh");
         setContentView(AppTabs.wrap(this, scroll, "tasbeeh"));
         render();
     }
