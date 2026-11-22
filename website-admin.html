@@ -204,7 +204,7 @@ $("websiteSettingsForm").addEventListener("submit",async e=>{
   const title=$("websiteSectionsEditor").querySelector('[data-section-title="'+CSS.escape(id)+'"]')?.value.trim()||id;
   sections[id]={visible,title};
  });
- const next={heroTitle:$("websiteHeroTitle").value.trim(),heroText:$("websiteHeroText").value.trim(),noticeEnabled:$("websiteNoticeEnabled").checked,noticeText:$("websiteNoticeText").value.trim(),sections,updatedAt:serverTimestamp()};
+ const next={heroTitle:$("websiteHeroTitle").value.trim(),heroText:$("websiteHeroText").value.trim(),noticeEnabled:$("websiteNoticeEnabled").checked,noticeText:$("websiteNoticeText").value.trim(),sections,published:true,updatedAt:serverTimestamp()};
  try{await setDoc(doc(db,"site_settings","website"),next,{merge:true});websiteSettings=next;websiteSettingsMessage("تم حفظ إعدادات الموقع. ستظهر التغييرات للزوار بعد تحديث الصفحة.");}
  catch(e){websiteSettingsMessage("تعذر حفظ الإعدادات: "+e.message,true);}
 });
