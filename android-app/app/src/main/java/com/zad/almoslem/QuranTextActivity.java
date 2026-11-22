@@ -132,6 +132,9 @@ public class QuranTextActivity extends Activity {
                         contentScroll.post(() -> contentScroll.smoothScrollTo(0, verses.getTop() + target.getTop()));
                     }
                 });
+            } else {
+                status.setText("رقم الآية "+targetAyah+" غير موجود في سورة "+names[surahNumber-1]+". راجع رقم الآية وحاول مرة أخرى.");
+                Toast.makeText(this,"رقم الآية غير صحيح لهذه السورة",Toast.LENGTH_LONG).show();
             }
             targetAyah = -1;
         }
