@@ -210,10 +210,10 @@ public class TasbeehActivity extends Activity {
                     manager.requestPinAppWidget(provider, null, null);
                     Toast.makeText(this, "اتبع رسالة الهاتف لإضافة السبحة إلى الشاشة الرئيسية.", Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(this, "افتح قائمة الأدوات في الشاشة الرئيسية واختر «سبحة زاد المسلم».", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "افتح قائمة الأدوات في الشاشة الرئيسية واختر «سبحة زاد وطمأنينة».", Toast.LENGTH_LONG).show();
                 }
             } else {
-                Toast.makeText(this, "افتح قائمة الأدوات في الشاشة الرئيسية واختر «سبحة زاد المسلم».", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "افتح قائمة الأدوات في الشاشة الرئيسية واختر «سبحة زاد وطمأنينة».", Toast.LENGTH_LONG).show();
             }
         });
 
