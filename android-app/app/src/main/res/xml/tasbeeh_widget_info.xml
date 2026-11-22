@@ -6,4 +6,4 @@
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="0"
     android:widgetCategory="home_screen"
-    android:label="سبحة زاد المسلم" />
+    android:description="@string/tasbeeh_widget_description" />
