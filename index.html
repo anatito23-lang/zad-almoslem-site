@@ -1676,18 +1676,25 @@ function showShuaishaTracks(){
 }
 function showEzzatTracks(){
  const tracks=[
-  ['الأحزاب','18:03','https://tilawah.net/audios/aazt-alsyd-rashd-alahzab-38807'],
-  ['الحج','19:32','https://tilawah.net/audios/aazt-alsyd-rashd-alhg-38810'],
-  ['الدخان','13:23','https://tilawah.net/audios/aazt-alsyd-rashd-aldkhan-38811'],
-  ['الفرقان','18:43','https://tilawah.net/audios/aazt-alsyd-rashd-alfrkan-38812'],
-  ['مريم وطه','20:51','https://tilawah.net/audios/aazt-alsyd-rashd-mrym-oth-38815']
+  ['الأحزاب','18:03','https://tilawah.net/audios/aazt-alsyd-rashd-alahzab-38807/download?original=1'],
+  ['الحج','19:32','https://tilawah.net/audios/aazt-alsyd-rashd-alhg-38810/download?original=1'],
+  ['الدخان','13:23','https://tilawah.net/audios/aazt-alsyd-rashd-aldkhan-38811/download?original=1'],
+  ['الفرقان','18:43','https://tilawah.net/audios/aazt-alsyd-rashd-alfrkan-38812/download?original=1'],
+  ['مريم وطه','20:51','https://tilawah.net/audios/aazt-alsyd-rashd-mrym-oth-38815/download?original=1']
  ];
  const player=$('audio');
  player.pause();player.removeAttribute('src');player.load();player.classList.add('hidden');
  $('surahSelect').classList.add('hidden');$('showSurah').classList.add('hidden');
  $('reciter').value='ezzat';
- $('quranStatus').textContent='اختر التلاوة؛ ستُفتح صفحة الاستماع الخارجية في تبويب جديد.';
- $('shuaishaTracks').innerHTML=tracks.map(([name,duration,url])=>'<a class="surah-item" href="'+url+'" target="_blank" rel="noopener noreferrer"><span><b>سورة '+name+'</b><span class="small" style="display:block">المدة: '+duration+'</span></span><strong>استمع ↗</strong></a>').join('');
+ $('quranStatus').textContent='اختر التلاوة وسيعمل الصوت داخل مشغّل زاد المسلم مباشرة.';
+ $('shuaishaTracks').innerHTML=tracks.map(([name,duration,url])=>'<div class="surah-item"><span><b>سورة '+name+'</b><span class="small" style="display:block">المدة: '+duration+'</span></span><button type="button" class="ezzat-play" data-title="'+name+'" data-src="'+url+'">استمع</button></div>').join('');
+ $('shuaishaTracks').querySelectorAll('.ezzat-play').forEach(button=>{
+  button.addEventListener('click',()=>{
+   player.pause();player.src=button.dataset.src;player.classList.remove('hidden');player.load();
+   $('quranStatus').textContent='تعمل الآن تلاوة الشيخ عزت السيد راشد: '+button.dataset.title;
+   player.play().catch(()=>{$('quranStatus').textContent='اضغط زر التشغيل في مشغّل الصوت لبدء التلاوة.';});
+  });
+ });
  $('shuaishaTracks').classList.remove('hidden');
 }
 function resetQuranPlayer(){
