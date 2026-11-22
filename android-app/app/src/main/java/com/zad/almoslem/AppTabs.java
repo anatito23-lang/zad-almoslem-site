@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.HorizontalScrollView;
 import android.widget.TextView;
 import com.google.firebase.firestore.FirebaseFirestore;
 import org.json.JSONArray;
@@ -58,11 +59,14 @@ public final class AppTabs {
     private static LinearLayout createBar(Activity a,String active) {
         LinearLayout outer=new LinearLayout(a);outer.setOrientation(1);outer.setGravity(Gravity.CENTER);
         outer.setBackgroundColor(AppThemeColors.nav(a));outer.setPadding(dp(a,5),dp(a,4),dp(a,5),0);
+        HorizontalScrollView dockScroll=new HorizontalScrollView(a);dockScroll.setHorizontalScrollBarEnabled(false);dockScroll.setFillViewport(true);
+        dockScroll.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         LinearLayout dock=new LinearLayout(a);dock.setOrientation(LinearLayout.HORIZONTAL);dock.setGravity(Gravity.CENTER);
         dock.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         GradientDrawable bg=new GradientDrawable();bg.setColor(AppThemeColors.nav(a));dock.setBackground(bg);
         dock.setPadding(dp(a,1),dp(a,1),dp(a,1),dp(a,1));
-        outer.addView(dock,new LinearLayout.LayoutParams(-1,dp(a,60)));
+        dockScroll.addView(dock,new HorizontalScrollView.LayoutParams(-2,-1));
+        outer.addView(dockScroll,new LinearLayout.LayoutParams(-1,dp(a,60)));
         render(a,active,outer,readCached(a));
         return outer;
     }
@@ -95,8 +99,10 @@ public final class AppTabs {
     }
 
     private static void render(Activity a,String active,LinearLayout outer,JSONArray config) {
-        if (outer == null || outer.getChildCount() == 0 || !(outer.getChildAt(0) instanceof LinearLayout)) return;
-        LinearLayout dock=(LinearLayout)outer.getChildAt(0);
+        if (outer == null || outer.getChildCount() == 0 || !(outer.getChildAt(0) instanceof HorizontalScrollView)) return;
+        HorizontalScrollView dockScroll=(HorizontalScrollView)outer.getChildAt(0);
+        if(dockScroll.getChildCount()==0||!(dockScroll.getChildAt(0) instanceof LinearLayout))return;
+        LinearLayout dock=(LinearLayout)dockScroll.getChildAt(0);
         dock.removeAllViews();
         String lang=a.getSharedPreferences("zad_settings",Activity.MODE_PRIVATE).getString("app_language","ar");
         int li="en".equals(lang)?1:"fr".equals(lang)?2:"ur".equals(lang)?3:"tr".equals(lang)?4:0;
@@ -138,8 +144,16 @@ public final class AppTabs {
             label.setTextColor(selected?Color.WHITE:Color.rgb(195,204,199));label.setTypeface(Typeface.DEFAULT,selected?Typeface.BOLD:Typeface.NORMAL);
             item.addView(label,new LinearLayout.LayoutParams(-1,dp(a,17)));
             item.setOnClickListener(v->{Intent in=new Intent(a,target);if(index<0){in.putExtra("tab_id",key);in.putExtra("tab_title",clickLabel);in.putExtra("tab_icon",clickIcon);}in.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);a.startActivity(in);});
-            dock.addView(item,new LinearLayout.LayoutParams(0,-1,1f));
+            LinearLayout.LayoutParams itemParams=rows.size()<=6
+                ?new LinearLayout.LayoutParams(0,-1,1f)
+                :new LinearLayout.LayoutParams(dp(a,64),-1);
+            dock.addView(item,itemParams);
         }
+        dockScroll.post(()->{
+            int selectedIndex=-1;
+            for(int i=0;i<rows.size();i++)if(active.equals(rows.get(i).optString("key",""))){selectedIndex=i;break;}
+            if(selectedIndex>=0&&rows.size()>6)dockScroll.smoothScrollTo(Math.max(0,selectedIndex*dp(a,64)-dp(a,100)),0);
+        });
     }
 
     private static String localizedLabel(int index,int lang,String fallback) {
