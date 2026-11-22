@@ -265,19 +265,21 @@ public class MushafPageActivity extends Activity {
             .setPositiveButton("فتح", (dialog, which) -> {
                 int surah = surahPicker.getSelectedItemPosition() + 1;
                 String value = ayahNumber.getText().toString().trim();
-                Intent open = new Intent(this, QuranTextActivity.class);
-                open.putExtra("surah_number", surah);
-                if (!value.isEmpty()) {
-                    try {
-                        int verse = Integer.parseInt(value);
-                        if (verse < 1) throw new NumberFormatException();
-                        open.putExtra("target_ayah", verse);
-                    } catch (NumberFormatException ignored) {
-                        Toast.makeText(this, "اكتب رقم آية صحيحًا", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                if (value.isEmpty()) {
+                    // Selecting a surah alone jumps to its opening Mushaf page.
+                    showPage(SURAH_PAGES[surah - 1]);
+                    return;
                 }
-                startActivity(open);
+                try {
+                    int verse = Integer.parseInt(value);
+                    if (verse < 1) throw new NumberFormatException();
+                    Intent open = new Intent(this, QuranTextActivity.class);
+                    open.putExtra("surah_number", surah);
+                    open.putExtra("target_ayah", verse);
+                    startActivity(open);
+                } catch (NumberFormatException ignored) {
+                    Toast.makeText(this, "اكتب رقم آية صحيحًا", Toast.LENGTH_SHORT).show();
+                }
             })
             .setNegativeButton("إلغاء", null)
             .show();
