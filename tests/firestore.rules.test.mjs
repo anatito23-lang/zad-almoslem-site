@@ -22,7 +22,7 @@ before(async () => {
     await setDoc(doc(db, "azkar", "draft"), { published: false, text: "private" });
     await setDoc(doc(db, "waqafat", "custom_tabs_config"), { tabs: [{ id: "hidden", visible: false }] });
     await setDoc(doc(db, "waqafat", "custom_tabs_public"), { tabs: [{ id: "visible", visible: true }] });
-    await setDoc(doc(db, "waqafat", "__app_navigation__"), { tabs: [{ key: "custom-app", visible: true }] });
+    await setDoc(doc(db, "waqafat", "app_navigation_config"), { tabs: [{ key: "custom-app", visible: true }] });
     await setDoc(doc(db, "site_custom_tabs", "site_custom_tabs_config"), { tabs: [{ id: "site-only", visible: true }] });
     await setDoc(doc(db, "site_custom_tabs", "site_custom_tabs_public"), { tabs: [{ id: "site-only", visible: true }] });
     await setDoc(doc(db, "site_custom_content", "site-published"), { sectionId: "site-only", published: true, title: "website only" });
@@ -42,7 +42,7 @@ test("anonymous users can read only the public tab projection", async () => {
   const db = env.unauthenticatedContext().firestore();
   await assertSucceeds(getDoc(doc(db, "waqafat", "custom_tabs_public")));
   await assertFails(getDoc(doc(db, "waqafat", "custom_tabs_config")));
-  await assertSucceeds(getDoc(doc(db, "waqafat", "__app_navigation__")));
+  await assertSucceeds(getDoc(doc(db, "waqafat", "app_navigation_config")));
   await assertSucceeds(getDoc(doc(db, "site_custom_tabs", "site_custom_tabs_public")));
   await assertFails(getDoc(doc(db, "site_custom_tabs", "site_custom_tabs_config")));
 });
