@@ -144,7 +144,7 @@ const prayerTitle=document.querySelector('#prayer .section-head p');if(prayerTit
      }else document.getElementById("zadWebsiteAnnouncement")?.remove();
      const sectionSettings=settings.sections||{};
      Object.entries(sectionSettings).forEach(([id,config])=>{
-      if(id==="quran")return;
+      if(id==="quran"||id==="mushaf")return;
       const section=document.getElementById(id);if(!section)return;
       const visible=config?.visible!==false;section.style.display=visible?"":"none";
       const title=config?.title;
@@ -159,7 +159,7 @@ const prayerTitle=document.querySelector('#prayer .section-head p');if(prayerTit
 
    const contentSnap=await getDocs(query(collection(db,"site_content"),where("published","==",true)));
    const rows=contentSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-   rows.forEach(item=>{if(item.sectionId==="quran")return;const section=document.getElementById(item.sectionId);if(section)addCard(section,item);});
+   rows.forEach(item=>{if(item.sectionId==="quran"||item.sectionId==="mushaf")return;const section=document.getElementById(item.sectionId);if(section)addCard(section,item);});
   }catch(error){console.warn("تعذر تحميل محتوى لوحة إدارة الموقع",error);}
  })();
 
