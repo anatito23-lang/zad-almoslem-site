@@ -42,6 +42,10 @@
         <activity android:name=".DailyReminderSettingsActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" android:configChanges="orientation|screenSize|keyboardHidden" />
         <service android:name=".RadioTileService" android:label="إذاعة القرآن" android:icon="@drawable/ic_launcher_round" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:exported="true"><intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter></service>
+        <receiver android:name=".TasbeehWidget" android:label="سبحة زاد المسلم" android:exported="false">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /><action android:name="com.zad.almoslem.TASBEEH_WIDGET_INCREMENT" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/tasbeeh_widget_info" />
+        </receiver>
         <receiver android:name=".QuranHomeWidget" android:exported="true">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <intent-filter><action android:name="com.zad.almoslem.WIDGET_QURAN_TOGGLE" /><action android:name="com.zad.almoslem.WIDGET_QURAN_NEXT" /><action android:name="com.zad.almoslem.WIDGET_QURAN_PREVIOUS" /></intent-filter>
