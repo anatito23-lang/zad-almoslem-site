@@ -117,24 +117,38 @@ public class QuranTextActivity extends Activity {
             verse.setHighlightColor(Color.TRANSPARENT);
             verse.setPadding(dp(14),dp(14),dp(14),dp(14));
             verse.setBackground(bg(Color.WHITE,12));
-            // Consume long-press explicitly so Android cannot enter text-selection/
-            // contextual-action mode or leave a dimmed pressed/selected appearance.
-            verse.setOnLongClickListener(v -> {
-                v.cancelLongPress();
-                v.setPressed(false);
-                ((TextView)v).setTextColor(Color.rgb(31,75,59));
-                return true;
-            });
+            // Handle touch ourselves: never let Android apply a pressed/long-press
+            // state to Quran text. A short tap still plays the ayah; a long press
+            // is deliberately consumed without changing the text appearance.
+            verse.setClickable(false);
+            verse.setLongClickable(false);
+            final long[] touchStart = {-1L};
             verse.setOnTouchListener((v,event) -> {
-                int action=event.getActionMasked();
-                if(action==android.view.MotionEvent.ACTION_UP || action==android.view.MotionEvent.ACTION_CANCEL){
-                    v.setPressed(false);
-                    ((TextView)v).setTextColor(Color.rgb(31,75,59));
+                switch(event.getActionMasked()) {
+                    case android.view.MotionEvent.ACTION_DOWN:
+                        touchStart[0] = event.getEventTime();
+                        v.getParent().requestDisallowInterceptTouchEvent(true);
+                        return true;
+                    case android.view.MotionEvent.ACTION_MOVE:
+                        return true;
+                    case android.view.MotionEvent.ACTION_UP:
+                        long elapsed = touchStart[0] < 0 ? 0 : event.getEventTime() - touchStart[0];
+                        touchStart[0] = -1L;
+                        v.setPressed(false);
+                        if(elapsed < 500) {
+                            currentIndex = index;
+                            playAyah(index,true);
+                        }
+                        return true;
+                    case android.view.MotionEvent.ACTION_CANCEL:
+                        touchStart[0] = -1L;
+                        v.setPressed(false);
+                        return true;
+                    default:
+                        return true;
                 }
-                return false;
             });
             LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(7);verses.addView(verse,lp);
-            verse.setOnClickListener(v->{currentIndex=index;playAyah(index,true);});
         }
         if(targetAyah > 0 && !ayahs.isEmpty()) {
             int found = -1;
