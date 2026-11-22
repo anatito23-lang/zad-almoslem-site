@@ -128,7 +128,7 @@ async function saveCustomTabs(){
  batch.set(doc(db,"waqafat",CUSTOM_TABS_PUBLIC_DOC),{tabs:customTabs.filter(t=>t.visible!==false),updatedAt},{merge:true});
  const fixed=[["more","المزيد","☰"],["ramadan","رمضان","🌙"],["tasbeeh","السبحة","۞"],["calendar","التقويم","▦"],["radio","الإذاعة","◉"],["quran","استماع","♫"],["mushaf","المصحف","▤"],["home","الرئيسية","⌂"]];
  const navigation=[...fixed.map(([key,label,icon])=>({key,label,icon,visible:true})),...customTabs.filter(t=>t&&t.id&&t.title&&t.visible!==false).map(t=>({key:t.id,label:t.title,icon:t.icon||"✨",visible:true,custom:true}))];
- batch.set(doc(db,"waqafat","__app_navigation__"),{tabs:navigation,published:true,updatedAt},{merge:true});
+ batch.set(doc(db,"waqafat","app_navigation_config"),{tabs:navigation,published:true,updatedAt},{merge:true});
  await batch.commit();renderCustomTabs()
 }
 function renderCustomTabs(){
