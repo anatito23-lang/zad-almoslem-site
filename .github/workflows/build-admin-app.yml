@@ -9,7 +9,7 @@ on:
       - '.github/workflows/build-admin-app.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -81,3 +81,17 @@ jobs:
           path: admin-app/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 90
+      - name: Prepare stable admin download
+        if: env.SIGNING_READY == 'true'
+        run: cp admin-app/app/build/outputs/apk/release/app-release.apk zad-almoslem-admin.apk
+      - name: Publish separate admin release
+        if: env.SIGNING_READY == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: admin-latest
+          name: إدارة زاد المسلم - أحدث إصدار
+          target_commitish: main
+          make_latest: false
+          prerelease: false
+          files: zad-almoslem-admin.apk
+          overwrite_files: true
