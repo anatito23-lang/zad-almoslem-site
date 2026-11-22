@@ -196,6 +196,26 @@ public class TasbeehActivity extends Activity {
         LinearLayout.LayoutParams actionsLp = new LinearLayout.LayoutParams(-1, dp(50));
         actionsLp.topMargin = dp(9);
         root.addView(actions, actionsLp);
+        Button addHomeWidget = new Button(this);
+        addHomeWidget.setText("إضافة السبحة إلى الشاشة الرئيسية");
+        addHomeWidget.setAllCaps(false);
+        LinearLayout.LayoutParams widgetLp = new LinearLayout.LayoutParams(-1, dp(48));
+        widgetLp.topMargin = dp(10);
+        root.addView(addHomeWidget, widgetLp);
+        addHomeWidget.setOnClickListener(v -> {
+            if (android.os.Build.VERSION.SDK_INT >= 26) {
+                android.appwidget.AppWidgetManager manager = android.appwidget.AppWidgetManager.getInstance(this);
+                android.content.ComponentName provider = new android.content.ComponentName(this, TasbeehWidget.class);
+                if (manager.isRequestPinAppWidgetSupported()) {
+                    manager.requestPinAppWidget(provider, null, null);
+                    Toast.makeText(this, "اتبع رسالة الهاتف لإضافة السبحة إلى الشاشة الرئيسية.", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, "افتح قائمة الأدوات في الشاشة الرئيسية واختر «سبحة زاد المسلم».", Toast.LENGTH_LONG).show();
+                }
+            } else {
+                Toast.makeText(this, "افتح قائمة الأدوات في الشاشة الرئيسية واختر «سبحة زاد المسلم».", Toast.LENGTH_LONG).show();
+            }
+        });
 
         undoButton = new Button(this);
         undoButton.setText("تراجع");
