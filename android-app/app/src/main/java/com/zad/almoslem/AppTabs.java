@@ -238,6 +238,19 @@ public final class AppTabs {
             canvas.restore();
         }
         private void drawMushaf3D(Canvas c) {
+            // A small carved wooden rehal remains visible beneath the open mushaf.
+            canvasShadow(c,0xAA000000,1.8f,.7f,1.4f);
+            fill(c,0xFF70401F);
+            Path standLeft=new Path();standLeft.moveTo(-8,5);standLeft.lineTo(-1,9);standLeft.lineTo(-4,14);standLeft.lineTo(-10,10);standLeft.close();
+            Path standRight=new Path();standRight.moveTo(8,5);standRight.lineTo(1,9);standRight.lineTo(4,14);standRight.lineTo(10,10);standRight.close();
+            c.drawPath(standLeft,paint);c.drawPath(standRight,paint);
+            paint.clearShadowLayer();
+            fill(c,0xFFC18445);
+            Path standLight=new Path();standLight.moveTo(-7,6);standLight.lineTo(-2,9);standLight.lineTo(-4,11);standLight.close();
+            c.drawPath(standLight,paint);
+            Path standLight2=new Path();standLight2.moveTo(7,6);standLight2.lineTo(2,9);standLight2.lineTo(4,11);standLight2.close();
+            c.drawPath(standLight2,paint);
+            line(0xFF5A321B,.7f);c.drawLine(-8,7,-4,10,paint);c.drawLine(8,7,4,10,paint);
             canvasShadow(c, 0x99000000, 2.2f, 1.2f, 1.8f);
             fill(c, 0xFF075A3D); c.drawRoundRect(new RectF(-11,-10,11,10),3,3,paint);
             paint.clearShadowLayer();
