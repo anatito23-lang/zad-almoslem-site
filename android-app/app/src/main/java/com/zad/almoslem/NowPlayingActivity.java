@@ -41,7 +41,7 @@ public class NowPlayingActivity extends Activity {
         String kind = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", "quran");
         String photoTitle = "radio".equals(kind) ? "إذاعة القرآن الكريم" :
                 "ruqyah".equals(kind) ? "الرقية الشرعية" :
-                "quran".equals(kind) ? "استماع القرآن الكريم" : "زاد المسلم";
+                "quran".equals(kind) ? "استماع القرآن الكريم" : "زاد وطمأنينة";
         String photoSubtitle = "radio".equals(kind) ? "بث مباشر" :
                 "ruqyah".equals(kind) ? "سكينة وطمأنينة" : "أنصت بقلبك";
         PhotoHeaderView photo = new PhotoHeaderView(this, kind, photoTitle, photoSubtitle);
