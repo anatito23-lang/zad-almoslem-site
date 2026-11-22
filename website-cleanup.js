@@ -44,6 +44,7 @@ display:none!important;visibility:hidden!important;pointer-events:none!important
 `;
 document.head.append(style);
 clean();
-const observer=new MutationObserver(()=>clean());
-observer.observe(document.body,{childList:true,subtree:true});
+// All website-only controls are present by the time this footer script runs.
+// A document-wide observer only repeats full-page scans during content updates.
+
 })();
