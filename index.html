@@ -439,7 +439,6 @@ body.zad-public-website .tasbeeh-float,
 body.zad-public-website #tasbeehPanel,
 body.zad-public-website #tasbeehFab,
 body.zad-public-website #zad-page-tasbeeh,
-body.zad-public-website .azkar-ticker,
 body.zad-public-website #daily-reminder-settings,
 body.zad-public-website .bottom-nav,
 body.zad-public-website #qibla,
@@ -838,6 +837,76 @@ header.hero .hero-actions .btn{background:#315f43!important;color:#fff!important
 header.hero .hero-actions .btn.ghost{background:#fffefa!important;color:#214b34!important;border:1px solid #b9cbb8!important}
 header.hero .hero-actions .btn.facebook{background:#315f9a!important;color:#fff!important}
 </style>
+
+<style id="zad-hero-readable-and-azkar-ticker-v115">
+/* وضوح اسم الموقع والعنوان والوصف */
+html body header.hero .top .brand,
+html body header.hero .top .brand > span,
+html body header.hero .top .brand > span:last-child{
+  display:inline-flex!important;align-items:center!important;
+  color:#173f2d!important;opacity:1!important;visibility:visible!important;
+  font-size:22px!important;font-weight:900!important;text-shadow:none!important;
+}
+html body header.hero .top .brand > span:last-child{
+  display:inline!important;color:#173f2d!important;
+  -webkit-text-fill-color:#173f2d!important;
+}
+html body header.hero .hero-content h1{
+  color:#173e2b!important;-webkit-text-fill-color:#173e2b!important;
+  opacity:1!important;visibility:visible!important;font-weight:900!important;
+  text-shadow:none!important;
+}
+html body header.hero .hero-content > p{
+  color:#304d3a!important;-webkit-text-fill-color:#304d3a!important;
+  opacity:1!important;visibility:visible!important;font-weight:700!important;
+  text-shadow:none!important;
+}
+html body header.hero .hero-card-note{
+  color:#304b39!important;-webkit-text-fill-color:#304b39!important;
+  opacity:1!important;font-weight:700!important;
+}
+/* شريط أذكار بطابع إسلامي هادئ */
+html body.zad-public-website{padding-top:60px!important}
+html body .azkar-ticker{
+  display:block!important;visibility:visible!important;opacity:1!important;
+  position:fixed!important;top:0!important;left:0!important;right:0!important;
+  z-index:100000!important;width:100%!important;min-height:54px!important;
+  height:auto!important;overflow:hidden!important;box-sizing:border-box!important;
+  background:linear-gradient(105deg,#173f32 0%,#285b45 48%,#173f32 100%)!important;
+  color:#fff!important;border-top:2px solid #c5a66a!important;
+  border-bottom:2px solid #c5a66a!important;
+  box-shadow:0 3px 15px #17372926!important;direction:ltr!important;
+}
+html body .azkar-ticker-track{
+  display:flex!important;flex-wrap:nowrap!important;flex-direction:row!important;
+  align-items:center!important;width:max-content!important;min-width:max-content!important;
+  animation:azkarTickerMove 110s linear infinite!important;
+  -webkit-animation:azkarTickerMove 110s linear infinite!important;
+}
+html body .azkar-ticker-group{
+  display:flex!important;flex:0 0 auto!important;flex-direction:row!important;
+  direction:rtl!important;align-items:center!important;gap:30px!important;
+  padding:13px 20px!important;white-space:nowrap!important;
+  color:#fff!important;font-size:14px!important;line-height:1.8!important;
+  font-weight:800!important;text-shadow:none!important;
+}
+html body .azkar-ticker-group span{
+  color:#fff!important;opacity:1!important;-webkit-text-fill-color:#fff!important;
+}
+html body .azkar-ticker-group span:before{
+  content:"۞"!important;color:#e8d19a!important;margin-left:10px!important;
+}
+@media(max-width:600px){
+ html body.zad-public-website{padding-top:54px!important}
+ html body .azkar-ticker{min-height:50px!important}
+ html body .azkar-ticker-group{gap:22px!important;padding:11px 15px!important;font-size:13px!important}
+ html body header.hero .top .brand,html body header.hero .top .brand>span{font-size:20px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ html body .azkar-ticker-track{animation:none!important;-webkit-animation:none!important}
+}
+</style>
+
 </head>
 <body>
 <div class="azkar-ticker" role="region" aria-label="أذكار متحركة"><div class="azkar-ticker-track"><div class="azkar-ticker-group"><span>سبحان الله وبحمده، سبحان الله العظيم</span><span>لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير</span><span>أستغفر الله العظيم وأتوب إليه</span><span>اللهم صل وسلم وبارك على نبينا محمد</span><span>لا حول ولا قوة إلا بالله</span><span>سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر</span><span>رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا</span><span>حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم</span><span>اللهم إنك عفو تحب العفو فاعف عني</span><span>رب اغفر لي وتب علي إنك أنت التواب الرحيم</span><span>اللهم أعني على ذكرك وشكرك وحسن عبادتك</span><span>يا مقلب القلوب ثبت قلبي على دينك</span><span>اللهم إني أسألك العفو والعافية في الدنيا والآخرة</span><span>اللهم إني أسألك الهدى والتقى والعفاف والغنى</span><span>ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار</span><span>سبحان الله وبحمده عدد خلقه ورضا نفسه وزنة عرشه ومداد كلماته</span><span>أعوذ بكلمات الله التامات من شر ما خلق</span><span>بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم</span><span>اللهم إني أعوذ بك من الهم والحزن والعجز والكسل</span><span>رب اشرح لي صدري ويسر لي أمري</span><span>لا إله إلا أنت سبحانك إني كنت من الظالمين</span><span>اللهم اجعل القرآن ربيع قلبي ونور صدري</span><span>أصبحنا وأصبح الملك لله والحمد لله</span><span>أمسينا وأمسى الملك لله والحمد لله</span><span>اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت وإليك النشور</span><span>اللهم أنت ربي لا إله إلا أنت خلقتني وأنا عبدك</span><span>اللهم ما أصبح بي من نعمة فمنك وحدك لا شريك لك فلك الحمد ولك الشكر</span><span>اللهم إني أسألك خير هذا اليوم وخير ما بعده</span><span>اللهم إني أعوذ بك من شر هذا اليوم وشر ما بعده</span><span>اللهم عافني في بدني، اللهم عافني في سمعي، اللهم عافني في بصري</span><span>اللهم استر عوراتي وآمن روعاتي</span><span>يا حي يا قيوم برحمتك أستغيث أصلح لي شأني كله</span><span>اللهم رحمتك أرجو فلا تكلني إلى نفسي طرفة عين</span><span>اللهم إني أعوذ بك من زوال نعمتك وتحول عافيتك وفجاءة نقمتك وجميع سخطك</span><span>ربنا لا تزغ قلوبنا بعد إذ هديتنا وهب لنا من لدنك رحمة</span><span>رب اغفر وارحم وأنت خير الراحمين</span><span>اللهم إني أسألك الجنة وأعوذ بك من النار</span><span>اللهم إني أعوذ بك من عذاب القبر ومن فتنة المحيا والممات</span><span>اللهم مصرف القلوب صرف قلوبنا على طاعتك</span><span>اللهم اغفر لي وارحمني واهدني وعافني وارزقني</span><span>ربنا ظلمنا أنفسنا وإن لم تغفر لنا وترحمنا لنكونن من الخاسرين</span><span>اللهم ارزقني قلبًا سليمًا ولسانًا صادقًا</span><span>اللهم اجعلني لك شاكرًا، لك ذاكرًا، لك مطواعًا</span><span>اللهم بارك لنا فيما رزقتنا وقنا عذاب النار</span><span>اللهم إني أسألك علمًا نافعًا ورزقًا طيبًا وعملًا متقبلًا</span><span>اللهم إني أعوذ بك من علم لا ينفع ومن قلب لا يخشع</span><span>اللهم آتنا نفوسنا تقواها وزكها أنت خير من زكاها</span><span>اللهم اغفر لي ذنبي كله دقه وجله وأوله وآخره وعلانيته وسره</span><span>سبحانك اللهم وبحمدك، أشهد أن لا إله إلا أنت، أستغفرك وأتوب إليك</span><span>اللهم إني ظلمت نفسي ظلمًا كثيرًا فاغفر لي مغفرة من عندك وارحمني</span><span>اللهم إني أسألك الثبات في الأمر والعزيمة على الرشد</span><span>اللهم إني أسألك موجبات رحمتك وعزائم مغفرتك</span><span>اللهم إني أسألك شكر نعمتك وحسن عبادتك</span><span>اللهم إني أسألك قلبًا خاشعًا ولسانًا ذاكرًا</span><span>اللهم أصلح لي ديني الذي هو عصمة أمري وأصلح لي دنياي التي فيها معاشي</span><span>اللهم اجعل الحياة زيادة لي في كل خير واجعل الموت راحة لي من كل شر</span><span>اللهم إني أعوذ بك من شر سمعي ومن شر بصري ومن شر لساني ومن شر قلبي</span><span>اللهم إني أعوذ بك من غلبة الدين وقهر الرجال</span><span>اللهم إني أعوذ بك من منكرات الأخلاق والأعمال والأهواء</span><span>اللهم اهدني وسددني</span><span>اللهم إني أسألك العفو والعافية والمعافاة الدائمة في ديني ودنياي وأهلي ومالي</span><span>اللهم احفظني من بين يدي ومن خلفي وعن يميني وعن شمالي ومن فوقي</span><span>اللهم اجعل خير عمري آخره وخير عملي خواتمه وخير أيامي يوم ألقاك</span><span>اللهم إني أسألك حسن الخاتمة</span><span>اللهم توفنا وأنت راض عنا</span><span>اللهم ارزقنا توبة نصوحًا قبل الموت</span><span>اللهم أعنا على حسن ذكرك وحسن شكرك وحسن عبادتك</span><span>اللهم اجعلنا من التوابين واجعلنا من المتطهرين</span><span>اللهم طهر قلوبنا من النفاق وأعمالنا من الرياء وألسنتنا من الكذب</span><span>اللهم ألف بين قلوبنا وأصلح ذات بيننا واهدنا سبل السلام</span><span>اللهم اشف مرضانا وارحم موتانا وفك كرب المكروبين</span><span>اللهم اقض عنا الدين وأغننا من الفقر</span><span>اللهم ارزقنا رزقًا حلالًا طيبًا مباركًا فيه</span><span>اللهم لا تجعل الدنيا أكبر همنا ولا مبلغ علمنا</span><span>اللهم إنا نسألك رضاك والجنة ونعوذ بك من سخطك والنار</span></div><div class="azkar-ticker-group" aria-hidden="true"><span>سبحان الله وبحمده، سبحان الله العظيم</span><span>لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير</span><span>أستغفر الله العظيم وأتوب إليه</span><span>اللهم صل وسلم وبارك على نبينا محمد</span><span>لا حول ولا قوة إلا بالله</span><span>سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر</span><span>رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا</span><span>حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم</span><span>اللهم إنك عفو تحب العفو فاعف عني</span><span>رب اغفر لي وتب علي إنك أنت التواب الرحيم</span><span>اللهم أعني على ذكرك وشكرك وحسن عبادتك</span><span>يا مقلب القلوب ثبت قلبي على دينك</span><span>اللهم إني أسألك العفو والعافية في الدنيا والآخرة</span><span>اللهم إني أسألك الهدى والتقى والعفاف والغنى</span><span>ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار</span><span>سبحان الله وبحمده عدد خلقه ورضا نفسه وزنة عرشه ومداد كلماته</span><span>أعوذ بكلمات الله التامات من شر ما خلق</span><span>بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم</span><span>اللهم إني أعوذ بك من الهم والحزن والعجز والكسل</span><span>رب اشرح لي صدري ويسر لي أمري</span><span>لا إله إلا أنت سبحانك إني كنت من الظالمين</span><span>اللهم اجعل القرآن ربيع قلبي ونور صدري</span><span>أصبحنا وأصبح الملك لله والحمد لله</span><span>أمسينا وأمسى الملك لله والحمد لله</span><span>اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت وإليك النشور</span><span>اللهم أنت ربي لا إله إلا أنت خلقتني وأنا عبدك</span><span>اللهم ما أصبح بي من نعمة فمنك وحدك لا شريك لك فلك الحمد ولك الشكر</span><span>اللهم إني أسألك خير هذا اليوم وخير ما بعده</span><span>اللهم إني أعوذ بك من شر هذا اليوم وشر ما بعده</span><span>اللهم عافني في بدني، اللهم عافني في سمعي، اللهم عافني في بصري</span><span>اللهم استر عوراتي وآمن روعاتي</span><span>يا حي يا قيوم برحمتك أستغيث أصلح لي شأني كله</span><span>اللهم رحمتك أرجو فلا تكلني إلى نفسي طرفة عين</span><span>اللهم إني أعوذ بك من زوال نعمتك وتحول عافيتك وفجاءة نقمتك وجميع سخطك</span><span>ربنا لا تزغ قلوبنا بعد إذ هديتنا وهب لنا من لدنك رحمة</span><span>رب اغفر وارحم وأنت خير الراحمين</span><span>اللهم إني أسألك الجنة وأعوذ بك من النار</span><span>اللهم إني أعوذ بك من عذاب القبر ومن فتنة المحيا والممات</span><span>اللهم مصرف القلوب صرف قلوبنا على طاعتك</span><span>اللهم اغفر لي وارحمني واهدني وعافني وارزقني</span><span>ربنا ظلمنا أنفسنا وإن لم تغفر لنا وترحمنا لنكونن من الخاسرين</span><span>اللهم ارزقني قلبًا سليمًا ولسانًا صادقًا</span><span>اللهم اجعلني لك شاكرًا، لك ذاكرًا، لك مطواعًا</span><span>اللهم بارك لنا فيما رزقتنا وقنا عذاب النار</span><span>اللهم إني أسألك علمًا نافعًا ورزقًا طيبًا وعملًا متقبلًا</span><span>اللهم إني أعوذ بك من علم لا ينفع ومن قلب لا يخشع</span><span>اللهم آتنا نفوسنا تقواها وزكها أنت خير من زكاها</span><span>اللهم اغفر لي ذنبي كله دقه وجله وأوله وآخره وعلانيته وسره</span><span>سبحانك اللهم وبحمدك، أشهد أن لا إله إلا أنت، أستغفرك وأتوب إليك</span><span>اللهم إني ظلمت نفسي ظلمًا كثيرًا فاغفر لي مغفرة من عندك وارحمني</span><span>اللهم إني أسألك الثبات في الأمر والعزيمة على الرشد</span><span>اللهم إني أسألك موجبات رحمتك وعزائم مغفرتك</span><span>اللهم إني أسألك شكر نعمتك وحسن عبادتك</span><span>اللهم إني أسألك قلبًا خاشعًا ولسانًا ذاكرًا</span><span>اللهم أصلح لي ديني الذي هو عصمة أمري وأصلح لي دنياي التي فيها معاشي</span><span>اللهم اجعل الحياة زيادة لي في كل خير واجعل الموت راحة لي من كل شر</span><span>اللهم إني أعوذ بك من شر سمعي ومن شر بصري ومن شر لساني ومن شر قلبي</span><span>اللهم إني أعوذ بك من غلبة الدين وقهر الرجال</span><span>اللهم إني أعوذ بك من منكرات الأخلاق والأعمال والأهواء</span><span>اللهم اهدني وسددني</span><span>اللهم إني أسألك العفو والعافية والمعافاة الدائمة في ديني ودنياي وأهلي ومالي</span><span>اللهم احفظني من بين يدي ومن خلفي وعن يميني وعن شمالي ومن فوقي</span><span>اللهم اجعل خير عمري آخره وخير عملي خواتمه وخير أيامي يوم ألقاك</span><span>اللهم إني أسألك حسن الخاتمة</span><span>اللهم توفنا وأنت راض عنا</span><span>اللهم ارزقنا توبة نصوحًا قبل الموت</span><span>اللهم أعنا على حسن ذكرك وحسن شكرك وحسن عبادتك</span><span>اللهم اجعلنا من التوابين واجعلنا من المتطهرين</span><span>اللهم طهر قلوبنا من النفاق وأعمالنا من الرياء وألسنتنا من الكذب</span><span>اللهم ألف بين قلوبنا وأصلح ذات بيننا واهدنا سبل السلام</span><span>اللهم اشف مرضانا وارحم موتانا وفك كرب المكروبين</span><span>اللهم اقض عنا الدين وأغننا من الفقر</span><span>اللهم ارزقنا رزقًا حلالًا طيبًا مباركًا فيه</span><span>اللهم لا تجعل الدنيا أكبر همنا ولا مبلغ علمنا</span><span>اللهم إنا نسألك رضاك والجنة ونعوذ بك من سخطك والنار</span></div></div></div>
@@ -2653,7 +2722,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
  document.body.classList.add('zad-public-website');
  const removeSelectors=[
   '.adhan-settings','.prayer-tracker',
-  '#zad-page-tasbeeh','.azkar-ticker','#daily-reminder-settings',
+  '#zad-page-tasbeeh','#daily-reminder-settings',
   '.bottom-nav','#qibla','#adhan-settings','#adhan'
  ];
  function clean(){
