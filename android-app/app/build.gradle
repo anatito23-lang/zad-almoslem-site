@@ -23,8 +23,8 @@ android {
         applicationId 'com.zad.almoslem'
         minSdk 23
         targetSdk 36
-        versionCode 16
-        versionName '3.3.4'
+        versionCode 17
+        versionName '3.3.5'
     }
 
     signingConfigs {
