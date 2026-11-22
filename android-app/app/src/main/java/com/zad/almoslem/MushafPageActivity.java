@@ -281,6 +281,15 @@ public class MushafPageActivity extends Activity {
     }
 
 
+
+    private boolean isValidMushafPage(File file) {
+        if (file == null || !file.isFile() || file.length() < 10000) return false;
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+        return options.outWidth > 0 && options.outHeight > 0;
+    }
+
     private void downloadAllPages(Button button, TextView message) {
         if (busy) return;
         File dir = new File(getFilesDir(), "mushaf_images");
@@ -296,7 +305,7 @@ public class MushafPageActivity extends Activity {
             int failedPage = -1;
             for (int number = 1; number <= 604; number++) {
                 File target = new File(dir, number + ".png");
-                if (target.isFile() && target.length() > 10000) {
+                if (isValidMushafPage(target)) {
                     completed++;
                 } else {
                     HttpURLConnection connection = null;
