@@ -312,7 +312,7 @@ public class MushafPageActivity extends Activity {
                 String message = "سورة " + surahName + " — الآية " + verse + " — صفحة " + targetPage;
                 runOnUiThread(() -> {
                     busy = false;
-                    pendingAyahMessage = message + "\\n" + verseText;
+                    pendingAyahMessage = message + "\n" + verseText;
                     showPage(targetPage);
                 });
             } catch (Exception error) {
