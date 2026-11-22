@@ -140,7 +140,7 @@ async function readCustomTabs(){const snap=await getDoc(doc(db,"site_custom_tabs
 async function saveCustomTabs(){
  const batch=writeBatch(db),updatedAt=serverTimestamp();
  batch.set(doc(db,"site_custom_tabs",CUSTOM_TABS_DOC),{tabs:customTabs,updatedAt},{merge:true});
- batch.set(doc(db,"site_custom_tabs",CUSTOM_TABS_PUBLIC_DOC),{tabs:customTabs.filter(t=>t.visible!==false),updatedAt},{merge:true});
+ batch.set(doc(db,"site_custom_tabs",CUSTOM_TABS_PUBLIC_DOC),{tabs:customTabs.filter(t=>t.visible!==false),published:true,updatedAt},{merge:true});
  await batch.commit();renderCustomTabs()
 }
 function renderCustomTabs(){
