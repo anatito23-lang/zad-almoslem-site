@@ -162,7 +162,7 @@ public final class AppTabs {
         for(JSONObject row:rows){
             String key=row.optString("key","");
             int index=indexOf(key);
-            dock.addView(makeTabItem(a,row,active,li),new LinearLayout.LayoutParams(dp(a,58),-1));
+            dock.addView(makeTabItem(a,row,active,li),new LinearLayout.LayoutParams(dp(a,62),-1));
         }
         final String activeKey=active;
         dockScroll.post(()->{
@@ -191,7 +191,7 @@ public final class AppTabs {
         if(selected){GradientDrawable selectedBg=new GradientDrawable();selectedBg.setColor(Color.rgb(48,75,66));selectedBg.setCornerRadius(dp(a,12));selectedBg.setStroke(dp(a,1),Color.rgb(207,174,112));item.setBackground(selectedBg);}
         else {GradientDrawable idleBg=new GradientDrawable();idleBg.setColor(Color.TRANSPARENT);idleBg.setCornerRadius(dp(a,12));item.setBackground(idleBg);}
         item.addView(new IllustratedTabIcon(a, key, selected),
-                new LinearLayout.LayoutParams(-1, dp(a,34)));
+                new LinearLayout.LayoutParams(-1, dp(a,38)));
         TextView label=new TextView(a);label.setText(labelText);label.setTextSize(9);label.setSingleLine(true);label.setGravity(Gravity.CENTER);
         label.setTextColor(selected?Color.WHITE:Color.rgb(195,204,199));label.setTypeface(Typeface.DEFAULT,selected?Typeface.BOLD:Typeface.NORMAL);
         item.addView(label,new LinearLayout.LayoutParams(-1,dp(a,15)));
@@ -213,7 +213,7 @@ public final class AppTabs {
             super(activity);
             this.kind = kind;
             setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-            setAlpha(selected ? 1f : .92f);
+            setAlpha(selected ? 1f : .98f);
         }
         private float d(float value) { return value * getResources().getDisplayMetrics().density; }
         private void fill(Canvas c, int color) { paint.setColor(color); paint.setStyle(Paint.Style.FILL); }
@@ -223,7 +223,7 @@ public final class AppTabs {
             float cx=getWidth()/2f, cy=getHeight()/2f;
             canvas.save();
             canvas.translate(cx,cy);
-            canvas.scale(1.02f,1.02f);
+            canvas.scale(1.18f,1.18f);
             switch (kind) {
                 case "mushaf": drawMushaf3D(canvas); break;
                 case "radio": drawMicrophone3D(canvas); break;
