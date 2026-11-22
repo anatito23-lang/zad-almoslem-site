@@ -29,7 +29,7 @@ public class AdhanPlaybackService extends Service {
     public static final String ACTION_STOP = "com.zad.almoslem.STOP_ADHAN";
     public static final String ACTION_SET_VOLUME = "com.zad.almoslem.SET_ADHAN_VOLUME";
     public static final String ACTION_SET_PRAYER_VOLUME = "com.zad.almoslem.SET_PRAYER_ADHAN_VOLUME";
-    private static final String CHANNEL_ID = "zad_adhan_playback_v2";
+    private static final String CHANNEL_ID = "zad_adhan_playback_v3";
     private static final int NOTIFICATION_ID = 7310;
     private ExoPlayer player;
     private boolean playDuaAfterCompletion;
