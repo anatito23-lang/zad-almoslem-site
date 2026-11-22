@@ -384,6 +384,460 @@ body.zad-public-website #nextPrayerRemaining{font-size:clamp(22px,5vw,30px)}
  body.zad-public-website .prayer .ptime{font-size:15px}
 }
 </style>
+
+<style>
+    .monthly-calendar-toolbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-bottom:14px}
+    .monthly-calendar-toolbar strong{text-align:center;color:var(--green);font-size:17px}
+    .monthly-calendar-toolbar button{padding:8px 11px;font-size:12px}
+    .monthly-calendar-legend{display:flex;gap:16px;justify-content:center;margin:8px 0 12px;color:var(--muted);font-size:12px}
+    .monthly-calendar-legend span{display:flex;align-items:center;gap:5px}
+    .calendar-greg-dot,.calendar-hijri-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green)}
+    .calendar-hijri-dot{background:var(--gold)}
+    .monthly-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+    .monthly-calendar-weekday{text-align:center;padding:7px 1px;color:var(--muted);font-size:11px;font-weight:800}
+    .monthly-calendar-day{min-width:0;min-height:78px;padding:7px 3px;border:1px solid var(--line);border-radius:10px;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center}
+    .monthly-calendar-day.empty{visibility:hidden}
+    .monthly-calendar-day.today{border:2px solid var(--gold);background:var(--soft)}
+    .monthly-calendar-day .greg{font-size:17px;font-weight:900;color:var(--green);line-height:1.2}
+    .monthly-calendar-day .hijri{font-size:10px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
+    .monthly-calendar-day.today .greg{color:var(--green2)}
+    .monthly-calendar-note{margin:13px 0 0;text-align:center;line-height:1.7}
+    @media(max-width:420px){.monthly-calendar-grid{gap:3px}.monthly-calendar-day{min-height:68px;padding:5px 1px;border-radius:8px}.monthly-calendar-day .greg{font-size:15px}.monthly-calendar-day .hijri{font-size:9px}.monthly-calendar-weekday{font-size:10px}}
+  </style>
+<style>
+#zadLanguagePicker{
+ appearance:none!important;-webkit-appearance:none!important;
+ position:static!important;top:auto!important;right:auto!important;left:auto!important;
+ transform:none!important;z-index:5!important;
+ display:inline-block!important;visibility:visible!important;opacity:1!important;
+ flex:0 0 76px!important;width:76px!important;min-width:76px!important;height:34px!important;
+ margin-inline-start:8px!important;padding:4px 5px!important;
+ border:1px solid #c9a45c!important;border-radius:9px!important;
+ background:#f4eedf!important;color:#315548!important;font:700 11px/1.3 Tahoma,Arial,sans-serif!important;
+ text-align:center!important;box-shadow:0 2px 7px #0002!important;cursor:pointer!important;
+}
+.brand #zadLanguagePicker{align-self:center}
+.brand{flex-wrap:wrap}
+#zadLanguagePicker option{color:#18332d;background:#fff}
+#google_translate_element{position:fixed!important;left:-9999px!important;top:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+.goog-te-banner-frame,.skiptranslate iframe{display:none!important}
+body{top:0!important}
+html[dir="ltr"] body{direction:ltr}
+html[dir="ltr"] .article{border-right:0;border-left:3px solid var(--gold)}
+html[dir="ltr"] .section h2:before{margin-left:0;margin-right:10px}
+html[dir="ltr"] .kid-steps{padding-right:0;padding-left:22px}
+html[dir="ltr"] .mushaf-text{direction:rtl}
+@media(max-width:800px){#zadLanguagePicker{flex-basis:70px!important;width:70px!important;min-width:70px!important;height:33px!important}}
+</style>
+<style id="hide-floating-shortcuts">
+  #mushafFloatingButton, .tasbeeh-float, #tasbeehFab { display:none !important; visibility:hidden !important; pointer-events:none !important; }
+</style>
+<style id="zad-public-site-final-guard-style">
+body.zad-public-website .adhan-settings,
+body.zad-public-website .prayer-tracker,
+body.zad-public-website .tasbeeh-float,
+body.zad-public-website #tasbeehPanel,
+body.zad-public-website #tasbeehFab,
+body.zad-public-website #zad-page-tasbeeh,
+body.zad-public-website .azkar-ticker,
+body.zad-public-website #daily-reminder-settings,
+body.zad-public-website .bottom-nav,
+body.zad-public-website #qibla,
+body.zad-public-website #adhan,
+body.zad-public-website #adhan-settings {display:none!important;visibility:hidden!important;pointer-events:none!important}
+</style>
+<style id="website-cleanup-20261121">
+/* إخفاء أدوات الأذان والسبحة والبوصلة من واجهة الموقع فقط */
+#qibla, #tasbeeh,
+a[href="#qibla"], a[href="#tasbeeh"],
+.tasbeeh-float, #tasbeehFab, #mushafFloatingButton, .mushaf-floating-button {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+</style>
+<style id="zad-professional-website-home-20261121">
+/* هوية موقع ويب تحريرية احترافية */
+:root{
+ --bg:#f6f7f4;--paper:#fff;--ink:#18332d;--muted:#71817b;
+ --green:#0b3b30;--green2:#176149;--gold:#c9a45c;
+ --line:#e4e9e2;--soft:#edf3ee;
+}
+body{background:#f6f7f4;color:#203a32}
+.hero{
+ padding:22px max(22px,calc((100vw - 1240px)/2)) 78px;
+ background:
+ radial-gradient(ellipse at 82% 18%,#d4b87520 0,transparent 32%),
+ radial-gradient(ellipse at 12% 92%,#2d75542b 0,transparent 34%),
+ linear-gradient(125deg,#062820 0%,#0c3c30 52%,#155440 100%);
+}
+.hero:after{right:-100px;bottom:-180px;width:470px;height:470px;border-color:#ffffff12;box-shadow:0 0 0 55px #ffffff08,0 0 0 110px #ffffff05}
+.top{
+ max-width:1240px;margin:auto;padding:13px 18px;
+ display:flex;flex-direction:row;align-items:center;justify-content:space-between;
+ gap:24px;border:1px solid #ffffff24;border-radius:18px;
+ background:#ffffff0c;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.brand{font-size:22px;letter-spacing:-.4px;white-space:nowrap}
+.brand-mark{width:46px;height:46px;border-radius:15px;background:#ffffff12;color:#f3d99e}
+.top nav{
+ flex:1;justify-content:flex-end;align-items:center;gap:5px;
+ flex-wrap:wrap;overflow:visible;width:auto;padding:0;
+}
+.top nav a{font-size:13px;padding:7px 10px;border:1px solid transparent;background:transparent;color:#e5eee8;border-radius:9px}
+.top nav a:hover{border-color:#ffffff2b;background:#ffffff12;color:#f5dfad}
+.hero-content{
+ max-width:1240px;min-height:390px;margin:0 auto;padding:65px 12px 12px;
+ display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.8fr);
+ grid-template-rows:auto auto auto 1fr;column-gap:clamp(30px,7vw,100px);align-content:center;
+}
+.hero-content .eyebrow{grid-column:1;grid-row:1;display:inline-flex;align-items:center;gap:9px;width:max-content;padding:7px 13px;border:1px solid #e7d19e55;border-radius:99px;background:#ffffff0b;color:#f0dba9;font-size:13px}
+.hero-content .eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:#d9b66b;box-shadow:0 0 0 4px #d9b66b20}
+.hero h1{grid-column:1;grid-row:2;max-width:700px;margin:17px 0 13px;font-size:clamp(35px,4.8vw,60px);line-height:1.28;letter-spacing:-1.2px}
+.hero-content>p{grid-column:1;grid-row:3;max-width:650px;font-size:16px;line-height:2.05;color:#d9e7df;margin:0 0 23px}
+.hero-actions{grid-column:1;grid-row:4;display:flex;gap:10px;flex-wrap:wrap;align-self:start}
+.hero-actions .btn{padding:12px 19px;border-radius:11px;font-size:14px}
+.hero-actions .btn.ghost{background:#ffffff0d;border-color:#ffffff40}
+.hero-editorial-card{
+ grid-column:2;grid-row:1 / 5;align-self:center;justify-self:stretch;
+ min-height:290px;padding:30px;display:flex;flex-direction:column;justify-content:center;
+ position:relative;overflow:hidden;border:1px solid #ffffff35;border-radius:26px;
+ background:linear-gradient(145deg,#ffffff18,#ffffff08);
+ box-shadow:0 25px 70px #001b1538;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.hero-editorial-card:before,.hero-editorial-card:after{content:"";position:absolute;border:1px solid #e7d19e28;border-radius:50%;pointer-events:none}
+.hero-editorial-card:before{width:230px;height:230px;right:-90px;top:-115px;box-shadow:0 0 0 24px #e7d19e08,0 0 0 48px #e7d19e06}
+.hero-editorial-card:after{width:160px;height:160px;left:-85px;bottom:-90px}
+.hero-card-kicker{color:#e7d19e;font-size:13px;font-weight:700;letter-spacing:.5px}
+.hero-card-ayah{position:relative;margin:24px 0 12px;color:#fff8e9;font-family:"Traditional Arabic","Noto Naskh Arabic",serif;font-size:clamp(27px,3vw,39px);line-height:1.9;text-align:center}
+.hero-card-ref{color:#e7d19e;font-size:13px;text-align:center}
+.hero-card-rule{width:55px;height:2px;margin:24px auto;background:linear-gradient(90deg,transparent,#d9b66b,transparent)}
+.hero-card-note{max-width:300px;margin:0 auto;color:#e2ece5;font-size:14px;line-height:1.9;text-align:center}
+.wrap{max-width:1240px;margin:-30px auto 70px;padding:0 22px}
+.date-strip{border-radius:16px;padding:18px 22px;box-shadow:0 12px 32px #18382b0c}
+.section{margin:42px 0}
+.section-head{margin-bottom:18px;padding-bottom:13px}
+.section h2{font-size:25px}
+.grid,.book-grid{gap:18px}
+.card{border-radius:17px;padding:22px}
+.card:hover{transform:translateY(-3px);box-shadow:0 15px 35px #12372b12}
+footer{padding:38px 20px}
+@media(max-width:1050px){
+ .top{align-items:flex-start;flex-direction:column;gap:12px}
+ .top nav{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;width:100%;padding:4px 0 8px}
+ .top nav a{flex:0 0 auto}
+ .hero-content{padding-top:48px;column-gap:30px}
+}
+@media(max-width:700px){
+ .hero{padding:13px 14px 62px}
+ .top{padding:12px;border-radius:15px}
+ .brand{font-size:20px}
+ .hero-content{display:flex;flex-direction:column;align-items:stretch;min-height:0;margin-top:0;padding:40px 5px 5px;gap:0}
+ .hero h1{font-size:clamp(34px,9vw,46px);margin:15px 0 10px}
+ .hero-content>p{font-size:14px;line-height:1.95;margin-bottom:20px}
+ .hero-editorial-card{min-height:225px;margin:25px 0 18px;padding:22px}
+ .hero-card-ayah{font-size:29px;margin:14px 0 6px}
+ .hero-card-rule{margin:13px auto}
+ .hero-actions{gap:8px}
+ .hero-actions .btn{flex:1 1 calc(50% - 8px);text-align:center;padding:11px 10px}
+ .wrap{padding:0 14px;margin-top:-25px}
+ .section{margin:32px 0}
+ .section h2{font-size:22px}
+ .card{padding:18px}
+}
+</style>
+<style id="zad-calm-contrast-final-v2">
+/* تنسيق ثابت للموقع، لا يعتمد على تشغيل JavaScript أو اكتشاف وضع التطبيق */
+:root{color-scheme:light!important;--bg:#f4f6f2!important;--paper:#fff!important;--ink:#263a32!important;--muted:#65766e!important;--green:#285747!important;--green2:#376b56!important;--gold:#b89a60!important;--line:#e2e8e0!important;--soft:#edf2ec!important}
+html,body{background:#f4f6f2!important;color:#263a32!important}
+body{padding-bottom:24px!important}
+body .hero{background:linear-gradient(135deg,#294d40 0%,#37634f 58%,#55745d 100%)!important;color:#fff!important}
+body .hero h1,body .hero .brand,body .hero .brand-mark,body .hero .hero-actions{color:#fff!important}
+body .hero p{color:#edf3ed!important}
+body .hero .eyebrow{color:#f0dfb7!important}
+body .top nav a{color:#f5f7f2!important;background:#ffffff12!important;border-color:#ffffff30!important}
+body main,body .wrap{background:transparent!important;color:#263a32!important}
+body .date-strip,body .prayer,body .card,body .surah-item,body .zikr-item,body .book-card,body .khutbah-card{background:#fff!important;color:#263a32!important;border-color:#e2e8e0!important}
+body .section h2,body .card h3,body .prayer .ptime,body .surah-item,body .compass-label,body .khutbah-card summary{color:#285747!important}
+body .section-head p,body .card p,body .date-strip span,body .small,body .muted,body .prayer .pname,body .book-author{color:#65766e!important}
+body input,body select,body textarea{background:#fff!important;color:#263a32!important;border:1px solid #dce4dc!important}
+body input::placeholder,body textarea::placeholder{color:#78877f!important;opacity:1}
+body .btn{background:#376b56!important;color:#fff!important;border-color:#376b56!important}
+body .btn.light,body .surah-item button{background:#edf2ec!important;color:#285747!important;border-color:#dce6dc!important}
+body .btn.ghost{background:#ffffff18!important;color:#fff!important;border-color:#ffffff65!important}
+body .next-prayer-card,body .ramadan-hero{background:linear-gradient(120deg,#315846,#426b55)!important;color:#fff!important}
+body .next-prayer-card *,body .ramadan-hero{color:#fff!important}
+body .next-prayer-clock strong,body .ramadan-hero h3,body .ramadan-hero strong{color:#fff1c9!important}
+body .next-prayer-copy .small,body .next-prayer-clock .small,body .ramadan-hero p,body .ramadan-hero small{color:#edf3ed!important}
+body .ramadan-steps span{background:#edf2ec!important;color:#40594b!important}
+body .ramadan-steps b{color:#285747!important}
+body .ayah,body .mushaf-text,body .hadith-feature{background:#fffdf8!important;color:#30483d!important;border-color:#e8e1d2!important}
+body .ayah-text,body .mushaf-text,body .hadith-text{color:#30483d!important}
+body .ayah-ref,body .hadith-source{color:#806b43!important}
+body footer{background:#294d40!important;color:#f1f5ef!important}
+body footer p,body footer a{color:#f1f5ef!important}
+body .zad-web-shortcuts a{background:#fff!important;color:#285747!important;border-color:#e2e8e0!important}
+body .zad-web-shortcuts a b{color:#285747!important}
+body .zad-web-shortcuts a span{color:#9a7c48!important}
+body .notice{background:#f7f1e4!important;color:#6d5832!important;border:1px solid #eadfc8!important}
+body .article p{color:#65766e!important}
+body .section h2:before{background:#b89a60!important}
+@media(max-width:700px){body .hero{padding-bottom:54px!important}body .wrap{margin-top:-24px}}
+</style>
+<style id="zad-azhar-website-redesign-20261122">
+:root{--bg:#f3f1e9!important;--paper:#fffefa!important;--ink:#233b32!important;--muted:#68776c!important;--green:#173f33!important;--green2:#245c49!important;--gold:#b99a5d!important;--line:#e7e0d0!important;--soft:#f0eee5!important}
+html{scroll-behavior:smooth}
+body{background:#f3f1e9!important;background-image:radial-gradient(#b99a5d12 1px,transparent 1px)!important;background-size:22px 22px!important}
+.hero{position:relative;isolation:isolate;background:linear-gradient(125deg,#102f28 0%,#194839 55%,#315d48 100%)!important;border-bottom:5px solid #b99a5d}
+.hero:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.13;background-image:repeating-linear-gradient(45deg,transparent 0 32px,#e8d4a5 33px,#e8d4a5 34px,transparent 35px 68px);mask-image:linear-gradient(90deg,#000,transparent 55%)}
+.hero-editorial-card{background:linear-gradient(145deg,#ffffff1c,#ffffff08)!important;border-color:#e7d19e55!important}
+.hero-azhar-photo{width:min(100%,570px);margin:18px auto 0;overflow:hidden;border:1px solid #d9c18b;border-radius:18px;background:#102f28;box-shadow:0 12px 30px #001b1533}.hero-azhar-photo img{display:block;width:100%;height:230px;object-fit:cover;object-position:center 52%}.hero-azhar-photo figcaption{padding:8px 12px;color:#f3e8ca;font-size:11px;text-align:center}.hero-azhar-photo figcaption a{color:#f3d99e;text-decoration:underline;margin-inline-start:8px}
+.brand-mark{border-radius:50%!important;border:1px solid #d9bb7b!important}
+.top{border-color:#d8c18d55!important}
+.top nav a{border-radius:30px!important}
+.wrap{max-width:1280px!important}
+.date-strip,.card{background:var(--paper)!important;border-color:var(--line)!important;box-shadow:0 12px 34px #253d2d0a!important}
+.section{scroll-margin-top:18px}
+.section-head{border-bottom:1px solid #e5dece!important}
+.section h2{font-family:Tahoma,Arial,sans-serif!important;font-weight:800}
+.section h2:before{height:25px!important;border-radius:2px!important}
+.card{border-radius:18px!important}
+.knowledge-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.knowledge-card{position:relative;overflow:hidden;min-height:235px;padding:23px!important}
+.knowledge-card:after{content:"۞";position:absolute;left:14px;bottom:-25px;font-size:92px;color:#b99a5d10;pointer-events:none}
+.knowledge-number{display:inline-block;color:#987b48;font-size:12px;font-weight:800;letter-spacing:.5px;margin-bottom:9px}
+.knowledge-card h3{font-size:19px;margin:0 0 10px}
+.knowledge-card p{font-size:14px;line-height:2;margin:0 0 8px}
+.knowledge-card .knowledge-verse{font-family:"Traditional Arabic","Noto Naskh Arabic",serif;font-size:23px;line-height:1.8;color:#28523f!important;margin:5px 0 10px}
+.knowledge-card small{color:#9a8050}
+.knowledge-more{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px}
+.saudi-radio-card{margin-top:16px;border:1px solid #e4d7b8!important;background:linear-gradient(145deg,#fffefa,#f6f1e5)!important}
+.radio-heading{display:flex;align-items:center;gap:13px}
+.radio-emblem{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:#eaf1e9;font-size:25px}
+.radio-heading h3{margin:0}
+.official-radio-link{display:inline-block;margin-top:8px;color:#315e49;font-weight:700;text-decoration:none}
+.official-radio-link:hover{text-decoration:underline}
+@media(max-width:850px){.knowledge-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.knowledge-grid{grid-template-columns:1fr}.knowledge-card{min-height:0}.hero-azhar-photo img{height:170px}.knowledge-more>*{width:100%;text-align:center}}
+</style>
+<style id="zad-soft-light-palette-20261122">
+/* ألوان هادئة ومريحة للعين */
+:root{
+ --bg:#f5f7f2!important;--paper:#fffefa!important;--ink:#30443a!important;
+ --muted:#718076!important;--green:#416b55!important;--green2:#62866c!important;
+ --gold:#b99b65!important;--line:#e5e9df!important;--soft:#edf3ec!important;
+}
+html,body{background:#f5f7f2!important;color:#30443a!important}
+body{background-image:radial-gradient(#a8b99b12 1px,transparent 1px)!important;background-size:24px 24px!important}
+body .hero{
+ background:linear-gradient(125deg,#e8f0e8 0%,#dce9df 58%,#e9eee2 100%)!important;
+ color:#30483a!important;border-bottom:3px solid #c5ae7d!important;
+}
+body .hero:before{opacity:.055!important}
+body .hero:after{border-color:#66846a30!important;box-shadow:0 0 0 35px #66846a0a,0 0 0 70px #66846a08!important}
+body .top{background:#ffffffa8!important;border:1px solid #dce6da!important;box-shadow:0 8px 24px #314d3710!important}
+body .brand,body .brand-mark{color:#416b55!important}
+body .brand-mark{background:#edf3ec!important;border-color:#c9d8c8!important}
+body .top nav a{color:#466650!important;background:#ffffffa8!important;border-color:#dce6da!important}
+body .top nav a:hover{background:#e9f1e8!important;color:#294b38!important;border-color:#c5ae7d!important}
+body .hero-content .eyebrow{color:#8a7040!important;background:#fffdf5b8!important;border-color:#d7c69f!important}
+body .hero-content .eyebrow:before{background:#b99b65!important;box-shadow:0 0 0 4px #b99b6520!important}
+body .hero h1{color:#294b39!important;text-shadow:none!important}
+body .hero-content>p{color:#536c5a!important}
+body .hero-editorial-card{background:linear-gradient(145deg,#ffffffed,#f7f8f0ed)!important;border:1px solid #d9dfcf!important;box-shadow:0 18px 45px #344d3714!important}
+body .hero-editorial-card:before,body .hero-editorial-card:after{border-color:#b99b6530!important}
+body .hero-card-kicker,body .hero-card-ref{color:#927747!important}
+body .hero-card-ayah{color:#345440!important;text-shadow:none!important}
+body .hero-card-note{color:#617467!important}
+body .hero-card-rule{background:linear-gradient(90deg,transparent,#b99b65,transparent)!important}
+body .hero-azhar-photo{border-color:#d7c69f!important;background:#fff!important;box-shadow:0 8px 24px #344d3718!important}
+body .hero-azhar-photo figcaption{background:#476b55!important;color:#fff!important}
+body .hero-actions .btn{background:#52775d!important;color:#fff!important;box-shadow:0 5px 14px #344d3715!important}
+body .hero-actions .btn.ghost{background:#ffffffc9!important;color:#416b55!important;border:1px solid #cbd9c9!important}
+body .hero-actions .btn.facebook{background:#4779b9!important;color:#fff!important}
+body .date-strip,body .card,body .prayer,body .surah-item,body .zikr-item{background:#fffefa!important;border-color:#e5e9df!important;box-shadow:0 8px 24px #344d3709!important}
+body .section h2,body .card h3,body .prayer .ptime,body .surah-item,body .compass-label{color:#416b55!important}
+body .section-head{border-color:#e4e9df!important}
+body .icon{background:#edf3ec!important;color:#52775d!important}
+body .btn.green,body .btn:not(.ghost):not(.facebook){background:#52775d!important;color:#fff!important}
+body .btn.light,body .surah-item button{background:#edf3ec!important;color:#416b55!important;border-color:#dce7da!important}
+body .next-prayer-card{background:linear-gradient(120deg,#e5eee4,#dce9dd)!important;border:1px solid #d2dfd0!important;box-shadow:0 8px 24px #344d370b!important;color:#34513d!important}
+body .next-prayer-copy strong,body .next-prayer-clock strong{color:#416b55!important}
+body .next-prayer-kicker,body .next-prayer-copy .small,body .next-prayer-clock .small{color:#667a69!important;opacity:1!important}
+body .next-prayer-clock{background:#ffffff9c!important;border-color:#d2dfd0!important}
+body .ayah,body .mushaf-text,body .hadith-feature{background:#fffefa!important;border-color:#e8e3d5!important}
+body .knowledge-card:after{color:#b99b6510!important}
+body .saudi-radio-card{background:#fffefa!important}
+body footer{background:#e4ece2!important;color:#48604e!important;border-top:1px solid #d6e1d4!important}
+body footer p,body footer a{color:#48604e!important}
+body .zad-web-shortcuts a{background:#fffefa!important;border-color:#e1e8dd!important;color:#416b55!important;box-shadow:0 6px 18px #344d370b!important}
+body .zad-web-shortcuts a span{color:#a88b55!important}
+body .ramadan-hero{background:linear-gradient(120deg,#e5eee4,#dce9dd)!important;color:#34513d!important;border:1px solid #d2dfd0!important}
+body .ramadan-hero h3,body .ramadan-hero strong{color:#416b55!important}
+body .ramadan-hero p,body .ramadan-hero small{color:#617467!important}
+body .ramadan-steps span{background:#f0f4ed!important;color:#536c5a!important}
+body .ramadan-steps b{color:#416b55!important}
+body .prayer-tracker,body .tracker-items,body .tracker-head{display:none!important}
+@media(max-width:700px){body .hero{padding-bottom:58px!important}body .hero-content{padding-top:32px!important}}
+</style>
+<style id="zad-azhar-vector-identity-20261122">
+/* هوية بصرية معمارية مستوحاة من زخارف وعمارة الجامع الأزهر */
+.hero{position:relative!important;isolation:isolate!important;overflow:hidden!important;background:linear-gradient(135deg,#f1f3e9 0%,#e6eee5 48%,#f5f0e4 100%)!important;border-bottom:4px solid #b99a5d!important;color:#294b3b!important}
+.hero:before{content:""!important;position:absolute!important;inset:0!important;z-index:-1!important;opacity:.30!important;background:
+ repeating-linear-gradient(45deg,transparent 0 27px,#b99a5d18 28px,#b99a5d18 29px,transparent 30px 56px),
+ repeating-linear-gradient(-45deg,transparent 0 27px,#6b8b7012 28px,#6b8b7012 29px,transparent 30px 56px)!important;
+ mask-image:linear-gradient(90deg,#000,transparent 78%)!important}
+.azhar-architecture-art{position:absolute;z-index:-1;inset:auto 0 0;width:100%;height:min(350px,58%);pointer-events:none;opacity:.42;overflow:hidden}
+.azhar-architecture-art svg{display:block;width:min(100%,1050px);height:100%;margin:auto;object-fit:contain}
+.hero .top,.hero .hero-content{position:relative;z-index:2}
+.hero .top{background:#ffffffc9!important;border:1px solid #d9e2d5!important;box-shadow:0 8px 25px #263f3010!important;backdrop-filter:blur(10px)}
+.hero .brand,.hero .brand-mark{color:#315a45!important}
+.hero .brand-mark{background:#f8f6ed!important;border-color:#cbb783!important}
+.hero .top nav a{color:#456650!important;background:#ffffffb8!important;border-color:#dbe4d8!important}
+.hero .top nav a:hover{background:#e8efe5!important;border-color:#b99a5d!important}
+.hero .hero-content .eyebrow{color:#846d3f!important;background:#fffdf4d9!important;border:1px solid #ddcda9!important}
+.hero .hero-content h1{color:#244b39!important;text-shadow:none!important}
+.hero .hero-content>p{color:#536b5a!important}
+.hero .hero-editorial-card{position:relative;overflow:hidden;background:linear-gradient(145deg,#fffefaed,#f7f5e9ed)!important;border:1px solid #d9c99f!important;box-shadow:0 18px 44px #294a3512!important}
+.hero .hero-editorial-card:before{content:"۞"!important;position:absolute;right:15px;top:4px;font-size:58px;color:#b99a5d18!important;border:0!important;pointer-events:none}
+.hero .hero-editorial-card:after{content:"۞"!important;position:absolute;left:15px;bottom:0;font-size:58px;color:#b99a5d18!important;border:0!important;pointer-events:none}
+.hero .hero-card-ayah{color:#315640!important;text-shadow:none!important}
+.hero .hero-card-kicker,.hero .hero-card-ref{color:#907646!important}
+.hero .hero-card-rule{background:linear-gradient(90deg,transparent,#b99a5d,transparent)!important}
+.hero .hero-actions .btn{background:#426c53!important;color:#fff!important}
+.hero .hero-actions .btn.ghost{background:#fffefa!important;color:#42664e!important;border:1px solid #d5dfd2!important}
+.hero .hero-actions .btn.facebook{background:#4779b9!important;color:#fff!important}
+/* لمسات زخرفية خفيفة داخل بطاقات وأقسام الصفحة */
+main.wrap{position:relative}
+main.wrap:before{content:"۞  ۞  ۞";display:block;text-align:center;letter-spacing:20px;color:#b99a5d70;font-size:18px;padding:3px 0 10px}
+.section h2{color:#315b45!important}
+.section h2:before{background:linear-gradient(#b99a5d,#d6c18d)!important}
+.section-head{border-bottom-color:#e1d9c8!important}
+.card{border:1px solid #e6e2d6!important;box-shadow:0 9px 26px #263f3009!important}
+.card:focus-within,.card:hover{border-color:#d2c092!important}
+.knowledge-card:after{content:"۞"!important;color:#b99a5d14!important}
+footer{position:relative;overflow:hidden}
+footer:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.12;background:repeating-linear-gradient(45deg,transparent 0 18px,#d7c18d 19px,#d7c18d 20px,transparent 21px 36px)}
+@media(max-width:700px){.azhar-architecture-art{height:185px;opacity:.28}.hero .hero-content{position:relative}.hero .hero-editorial-card{backdrop-filter:blur(4px)}}
+</style>
+<style id="zad-mobile-performance-nav-20261122">
+@media(max-width:700px){.top,.hero-editorial-card{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}.section{scroll-margin-top:18px}}
+html{scroll-padding-top:14px}
+</style>
+<style id="zad-tabs-active-style-20261122">
+.top nav a.is-current-tab{background:#e8f0e7!important;border-color:#b99b65!important;color:#294b39!important}
+.zad-web-shortcuts a.is-current-tab{border-color:#b99b65!important;box-shadow:0 0 0 2px #b99b6522!important}
+.prayer-location-settings label{min-width:0}
+.prayer-location-settings select,.prayer-location-settings input{width:100%;min-width:0;box-sizing:border-box}
+</style>
+<style id="zad-strong-readable-text-v109">
+/* رفع تباين النصوص في جميع أقسام الموقع */
+body.zad-public-website{
+ --ink:#172d25!important;--muted:#405349!important;
+ color:#172d25!important;
+}
+body.zad-public-website main,
+body.zad-public-website main p,
+body.zad-public-website main li,
+body.zad-public-website main label,
+body.zad-public-website main .small,
+body.zad-public-website main .muted,
+body.zad-public-website main .description,
+body.zad-public-website main .card p,
+body.zad-public-website main .section-head p,
+body.zad-public-website main .book-author,
+body.zad-public-website main .prayer .pname,
+body.zad-public-website main .monthly-calendar-legend,
+body.zad-public-website main .monthly-calendar-weekday,
+body.zad-public-website main .monthly-calendar-day .hijri{
+ color:#405349!important;opacity:1!important;
+}
+body.zad-public-website main h2,
+body.zad-public-website main h3,
+body.zad-public-website main h4,
+body.zad-public-website main strong,
+body.zad-public-website main .knowledge-card .knowledge-verse,
+body.zad-public-website main .hadith-text,
+body.zad-public-website main .ayah-text{
+ color:#183d2e!important;opacity:1!important;
+}
+body.zad-public-website main a:not(.btn):not(.top nav a),
+body.zad-public-website main a:not(.btn):not(.top nav a) b{
+ color:#24563f!important;opacity:1!important;
+}
+body.zad-public-website main small,
+body.zad-public-website main .knowledge-card small,
+body.zad-public-website main .ayah-ref,
+body.zad-public-website main .hadith-source,
+body.zad-public-website main .knowledge-number{
+ color:#68532d!important;opacity:1!important;
+}
+body.zad-public-website input::placeholder,
+body.zad-public-website textarea::placeholder{color:#59685e!important;opacity:1!important}
+body.zad-public-website footer,
+body.zad-public-website footer p,
+body.zad-public-website footer a{color:#304b3b!important;opacity:1!important}
+body.zad-public-website .hero,
+body.zad-public-website .hero *{text-shadow:none}
+body.zad-public-website .hero .hero-content>p{color:#405c4a!important}
+body.zad-public-website .hero .hero-card-note{color:#405c4a!important}
+body.zad-public-website .hero .hero-card-ayah{color:#234b37!important}
+body.zad-public-website .hero .hero-card-kicker,
+body.zad-public-website .hero .hero-card-ref{color:#70572d!important}
+</style>
+<style id="zad-readable-text-final-v110">
+/* معالجة نهائية للتباين: تطبق مباشرة على الصفحة دون الاعتماد على كلاس غير موجود */
+html,body{color:#20372c!important}
+main.wrap,main.wrap section,main.wrap article,main.wrap .card{color:#263d31!important}
+main.wrap p,main.wrap li,main.wrap label,main.wrap span:not(.icon),main.wrap small,
+main.wrap summary,main.wrap .small,main.wrap .muted,main.wrap .description,
+main.wrap .section-head p,main.wrap .card p,main.wrap .book-author,
+main.wrap .book-level,main.wrap .hadith-note,main.wrap .hadith-source,
+main.wrap .knowledge-card small,main.wrap .date-strip span,
+main.wrap .prayer .pname,main.wrap .monthly-calendar-legend,
+main.wrap .monthly-calendar-weekday,main.wrap .monthly-calendar-day .hijri,
+main.wrap .article p,main.wrap .radio-heading p{
+ color:#354b3e!important;opacity:1!important;text-shadow:none!important
+}
+main.wrap h1,main.wrap h2,main.wrap h3,main.wrap h4,
+main.wrap strong,main.wrap b,main.wrap .prayer .ptime,
+main.wrap .knowledge-card .knowledge-verse,main.wrap .hadith-text,
+main.wrap .ayah-text,main.wrap .mushaf-text{
+ color:#183d2e!important;opacity:1!important;text-shadow:none!important
+}
+main.wrap a:not(.btn),main.wrap a:not(.btn) b,
+main.wrap .official-radio-link{color:#20583d!important;opacity:1!important}
+main.wrap .knowledge-number,main.wrap .ayah-ref,
+main.wrap .hadith-source,main.wrap .book-level{
+ color:#66502b!important;opacity:1!important
+}
+main.wrap input::placeholder,main.wrap textarea::placeholder{color:#536459!important;opacity:1!important}
+main.wrap .notice{color:#5c4827!important}
+footer,footer p,footer a{color:#304b3b!important;opacity:1!important}
+.hero .hero-content>p{color:#405c4a!important}
+.hero .hero-card-note{color:#405c4a!important}
+.hero .hero-card-ayah{color:#234b37!important}
+.hero .hero-card-kicker,.hero .hero-card-ref{color:#70572d!important}
+</style>
+<style id="zad-hero-top-contrast-v113">
+/* تقوية وضوح الجزء العلوي من الصفحة فقط */
+header.hero{color:#193b2c!important}
+header.hero .top{background:#fffefa!important;border:1px solid #c8d6c7!important}
+header.hero .brand,header.hero .brand>span:last-child{color:#183f2d!important;font-weight:900!important}
+header.hero .brand-mark{color:#315b3e!important;background:#f3f5eb!important;border-color:#b99a5d!important}
+header.hero .top nav a{color:#1d4933!important;background:#fffefa!important;border:1px solid #d1ddce!important;font-weight:700!important;text-shadow:none!important}
+header.hero .top nav a:hover,header.hero .top nav a:focus{color:#102f21!important;background:#e5eee3!important;border-color:#a88a4f!important}
+header.hero .hero-content .eyebrow{color:#62491e!important;background:#fffdf2!important;border:1px solid #cdb77f!important;font-weight:800!important}
+header.hero .hero-content h1{color:#173e2b!important;font-weight:900!important;text-shadow:none!important}
+header.hero .hero-content>p{color:#2e4938!important;font-weight:600!important}
+header.hero .hero-editorial-card{background:#fffefa!important;border:1px solid #cdbb8d!important}
+header.hero .hero-card-kicker,header.hero .hero-card-ref{color:#654d23!important;font-weight:800!important}
+header.hero .hero-card-ayah{color:#173f2c!important;font-weight:800!important}
+header.hero .hero-card-note{color:#304b39!important;font-weight:600!important}
+header.hero .hero-actions .btn{background:#315f43!important;color:#fff!important;font-weight:800!important;border:1px solid #315f43!important}
+header.hero .hero-actions .btn.ghost{background:#fffefa!important;color:#214b34!important;border:1px solid #b9cbb8!important}
+header.hero .hero-actions .btn.facebook{background:#315f9a!important;color:#fff!important}
+</style>
 </head>
 <body>
 <div class="azkar-ticker" role="region" aria-label="أذكار متحركة"><div class="azkar-ticker-track"><div class="azkar-ticker-group"><span>سبحان الله وبحمده، سبحان الله العظيم</span><span>لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير</span><span>أستغفر الله العظيم وأتوب إليه</span><span>اللهم صل وسلم وبارك على نبينا محمد</span><span>لا حول ولا قوة إلا بالله</span><span>سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر</span><span>رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا</span><span>حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم</span><span>اللهم إنك عفو تحب العفو فاعف عني</span><span>رب اغفر لي وتب علي إنك أنت التواب الرحيم</span><span>اللهم أعني على ذكرك وشكرك وحسن عبادتك</span><span>يا مقلب القلوب ثبت قلبي على دينك</span><span>اللهم إني أسألك العفو والعافية في الدنيا والآخرة</span><span>اللهم إني أسألك الهدى والتقى والعفاف والغنى</span><span>ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار</span><span>سبحان الله وبحمده عدد خلقه ورضا نفسه وزنة عرشه ومداد كلماته</span><span>أعوذ بكلمات الله التامات من شر ما خلق</span><span>بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم</span><span>اللهم إني أعوذ بك من الهم والحزن والعجز والكسل</span><span>رب اشرح لي صدري ويسر لي أمري</span><span>لا إله إلا أنت سبحانك إني كنت من الظالمين</span><span>اللهم اجعل القرآن ربيع قلبي ونور صدري</span><span>أصبحنا وأصبح الملك لله والحمد لله</span><span>أمسينا وأمسى الملك لله والحمد لله</span><span>اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت وإليك النشور</span><span>اللهم أنت ربي لا إله إلا أنت خلقتني وأنا عبدك</span><span>اللهم ما أصبح بي من نعمة فمنك وحدك لا شريك لك فلك الحمد ولك الشكر</span><span>اللهم إني أسألك خير هذا اليوم وخير ما بعده</span><span>اللهم إني أعوذ بك من شر هذا اليوم وشر ما بعده</span><span>اللهم عافني في بدني، اللهم عافني في سمعي، اللهم عافني في بصري</span><span>اللهم استر عوراتي وآمن روعاتي</span><span>يا حي يا قيوم برحمتك أستغيث أصلح لي شأني كله</span><span>اللهم رحمتك أرجو فلا تكلني إلى نفسي طرفة عين</span><span>اللهم إني أعوذ بك من زوال نعمتك وتحول عافيتك وفجاءة نقمتك وجميع سخطك</span><span>ربنا لا تزغ قلوبنا بعد إذ هديتنا وهب لنا من لدنك رحمة</span><span>رب اغفر وارحم وأنت خير الراحمين</span><span>اللهم إني أسألك الجنة وأعوذ بك من النار</span><span>اللهم إني أعوذ بك من عذاب القبر ومن فتنة المحيا والممات</span><span>اللهم مصرف القلوب صرف قلوبنا على طاعتك</span><span>اللهم اغفر لي وارحمني واهدني وعافني وارزقني</span><span>ربنا ظلمنا أنفسنا وإن لم تغفر لنا وترحمنا لنكونن من الخاسرين</span><span>اللهم ارزقني قلبًا سليمًا ولسانًا صادقًا</span><span>اللهم اجعلني لك شاكرًا، لك ذاكرًا، لك مطواعًا</span><span>اللهم بارك لنا فيما رزقتنا وقنا عذاب النار</span><span>اللهم إني أسألك علمًا نافعًا ورزقًا طيبًا وعملًا متقبلًا</span><span>اللهم إني أعوذ بك من علم لا ينفع ومن قلب لا يخشع</span><span>اللهم آتنا نفوسنا تقواها وزكها أنت خير من زكاها</span><span>اللهم اغفر لي ذنبي كله دقه وجله وأوله وآخره وعلانيته وسره</span><span>سبحانك اللهم وبحمدك، أشهد أن لا إله إلا أنت، أستغفرك وأتوب إليك</span><span>اللهم إني ظلمت نفسي ظلمًا كثيرًا فاغفر لي مغفرة من عندك وارحمني</span><span>اللهم إني أسألك الثبات في الأمر والعزيمة على الرشد</span><span>اللهم إني أسألك موجبات رحمتك وعزائم مغفرتك</span><span>اللهم إني أسألك شكر نعمتك وحسن عبادتك</span><span>اللهم إني أسألك قلبًا خاشعًا ولسانًا ذاكرًا</span><span>اللهم أصلح لي ديني الذي هو عصمة أمري وأصلح لي دنياي التي فيها معاشي</span><span>اللهم اجعل الحياة زيادة لي في كل خير واجعل الموت راحة لي من كل شر</span><span>اللهم إني أعوذ بك من شر سمعي ومن شر بصري ومن شر لساني ومن شر قلبي</span><span>اللهم إني أعوذ بك من غلبة الدين وقهر الرجال</span><span>اللهم إني أعوذ بك من منكرات الأخلاق والأعمال والأهواء</span><span>اللهم اهدني وسددني</span><span>اللهم إني أسألك العفو والعافية والمعافاة الدائمة في ديني ودنياي وأهلي ومالي</span><span>اللهم احفظني من بين يدي ومن خلفي وعن يميني وعن شمالي ومن فوقي</span><span>اللهم اجعل خير عمري آخره وخير عملي خواتمه وخير أيامي يوم ألقاك</span><span>اللهم إني أسألك حسن الخاتمة</span><span>اللهم توفنا وأنت راض عنا</span><span>اللهم ارزقنا توبة نصوحًا قبل الموت</span><span>اللهم أعنا على حسن ذكرك وحسن شكرك وحسن عبادتك</span><span>اللهم اجعلنا من التوابين واجعلنا من المتطهرين</span><span>اللهم طهر قلوبنا من النفاق وأعمالنا من الرياء وألسنتنا من الكذب</span><span>اللهم ألف بين قلوبنا وأصلح ذات بيننا واهدنا سبل السلام</span><span>اللهم اشف مرضانا وارحم موتانا وفك كرب المكروبين</span><span>اللهم اقض عنا الدين وأغننا من الفقر</span><span>اللهم ارزقنا رزقًا حلالًا طيبًا مباركًا فيه</span><span>اللهم لا تجعل الدنيا أكبر همنا ولا مبلغ علمنا</span><span>اللهم إنا نسألك رضاك والجنة ونعوذ بك من سخطك والنار</span></div><div class="azkar-ticker-group" aria-hidden="true"><span>سبحان الله وبحمده، سبحان الله العظيم</span><span>لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير</span><span>أستغفر الله العظيم وأتوب إليه</span><span>اللهم صل وسلم وبارك على نبينا محمد</span><span>لا حول ولا قوة إلا بالله</span><span>سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر</span><span>رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا</span><span>حسبي الله لا إله إلا هو عليه توكلت وهو رب العرش العظيم</span><span>اللهم إنك عفو تحب العفو فاعف عني</span><span>رب اغفر لي وتب علي إنك أنت التواب الرحيم</span><span>اللهم أعني على ذكرك وشكرك وحسن عبادتك</span><span>يا مقلب القلوب ثبت قلبي على دينك</span><span>اللهم إني أسألك العفو والعافية في الدنيا والآخرة</span><span>اللهم إني أسألك الهدى والتقى والعفاف والغنى</span><span>ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار</span><span>سبحان الله وبحمده عدد خلقه ورضا نفسه وزنة عرشه ومداد كلماته</span><span>أعوذ بكلمات الله التامات من شر ما خلق</span><span>بسم الله الذي لا يضر مع اسمه شيء في الأرض ولا في السماء وهو السميع العليم</span><span>اللهم إني أعوذ بك من الهم والحزن والعجز والكسل</span><span>رب اشرح لي صدري ويسر لي أمري</span><span>لا إله إلا أنت سبحانك إني كنت من الظالمين</span><span>اللهم اجعل القرآن ربيع قلبي ونور صدري</span><span>أصبحنا وأصبح الملك لله والحمد لله</span><span>أمسينا وأمسى الملك لله والحمد لله</span><span>اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت وإليك النشور</span><span>اللهم أنت ربي لا إله إلا أنت خلقتني وأنا عبدك</span><span>اللهم ما أصبح بي من نعمة فمنك وحدك لا شريك لك فلك الحمد ولك الشكر</span><span>اللهم إني أسألك خير هذا اليوم وخير ما بعده</span><span>اللهم إني أعوذ بك من شر هذا اليوم وشر ما بعده</span><span>اللهم عافني في بدني، اللهم عافني في سمعي، اللهم عافني في بصري</span><span>اللهم استر عوراتي وآمن روعاتي</span><span>يا حي يا قيوم برحمتك أستغيث أصلح لي شأني كله</span><span>اللهم رحمتك أرجو فلا تكلني إلى نفسي طرفة عين</span><span>اللهم إني أعوذ بك من زوال نعمتك وتحول عافيتك وفجاءة نقمتك وجميع سخطك</span><span>ربنا لا تزغ قلوبنا بعد إذ هديتنا وهب لنا من لدنك رحمة</span><span>رب اغفر وارحم وأنت خير الراحمين</span><span>اللهم إني أسألك الجنة وأعوذ بك من النار</span><span>اللهم إني أعوذ بك من عذاب القبر ومن فتنة المحيا والممات</span><span>اللهم مصرف القلوب صرف قلوبنا على طاعتك</span><span>اللهم اغفر لي وارحمني واهدني وعافني وارزقني</span><span>ربنا ظلمنا أنفسنا وإن لم تغفر لنا وترحمنا لنكونن من الخاسرين</span><span>اللهم ارزقني قلبًا سليمًا ولسانًا صادقًا</span><span>اللهم اجعلني لك شاكرًا، لك ذاكرًا، لك مطواعًا</span><span>اللهم بارك لنا فيما رزقتنا وقنا عذاب النار</span><span>اللهم إني أسألك علمًا نافعًا ورزقًا طيبًا وعملًا متقبلًا</span><span>اللهم إني أعوذ بك من علم لا ينفع ومن قلب لا يخشع</span><span>اللهم آتنا نفوسنا تقواها وزكها أنت خير من زكاها</span><span>اللهم اغفر لي ذنبي كله دقه وجله وأوله وآخره وعلانيته وسره</span><span>سبحانك اللهم وبحمدك، أشهد أن لا إله إلا أنت، أستغفرك وأتوب إليك</span><span>اللهم إني ظلمت نفسي ظلمًا كثيرًا فاغفر لي مغفرة من عندك وارحمني</span><span>اللهم إني أسألك الثبات في الأمر والعزيمة على الرشد</span><span>اللهم إني أسألك موجبات رحمتك وعزائم مغفرتك</span><span>اللهم إني أسألك شكر نعمتك وحسن عبادتك</span><span>اللهم إني أسألك قلبًا خاشعًا ولسانًا ذاكرًا</span><span>اللهم أصلح لي ديني الذي هو عصمة أمري وأصلح لي دنياي التي فيها معاشي</span><span>اللهم اجعل الحياة زيادة لي في كل خير واجعل الموت راحة لي من كل شر</span><span>اللهم إني أعوذ بك من شر سمعي ومن شر بصري ومن شر لساني ومن شر قلبي</span><span>اللهم إني أعوذ بك من غلبة الدين وقهر الرجال</span><span>اللهم إني أعوذ بك من منكرات الأخلاق والأعمال والأهواء</span><span>اللهم اهدني وسددني</span><span>اللهم إني أسألك العفو والعافية والمعافاة الدائمة في ديني ودنياي وأهلي ومالي</span><span>اللهم احفظني من بين يدي ومن خلفي وعن يميني وعن شمالي ومن فوقي</span><span>اللهم اجعل خير عمري آخره وخير عملي خواتمه وخير أيامي يوم ألقاك</span><span>اللهم إني أسألك حسن الخاتمة</span><span>اللهم توفنا وأنت راض عنا</span><span>اللهم ارزقنا توبة نصوحًا قبل الموت</span><span>اللهم أعنا على حسن ذكرك وحسن شكرك وحسن عبادتك</span><span>اللهم اجعلنا من التوابين واجعلنا من المتطهرين</span><span>اللهم طهر قلوبنا من النفاق وأعمالنا من الرياء وألسنتنا من الكذب</span><span>اللهم ألف بين قلوبنا وأصلح ذات بيننا واهدنا سبل السلام</span><span>اللهم اشف مرضانا وارحم موتانا وفك كرب المكروبين</span><span>اللهم اقض عنا الدين وأغننا من الفقر</span><span>اللهم ارزقنا رزقًا حلالًا طيبًا مباركًا فيه</span><span>اللهم لا تجعل الدنيا أكبر همنا ولا مبلغ علمنا</span><span>اللهم إنا نسألك رضاك والجنة ونعوذ بك من سخطك والنار</span></div></div></div>
@@ -509,25 +963,7 @@ remove-prayer-tracker    <div class="small">المواقيت تُجلب عبر �
       <p class="small monthly-calendar-note">التاريخ الهجري محسوب بتقويم أم القرى على الجهاز، وقد يختلف يومًا عن إعلان الرؤية الشرعية في بعض البلدان.</p>
     </div>
   </section>
-  <style>
-    .monthly-calendar-toolbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-bottom:14px}
-    .monthly-calendar-toolbar strong{text-align:center;color:var(--green);font-size:17px}
-    .monthly-calendar-toolbar button{padding:8px 11px;font-size:12px}
-    .monthly-calendar-legend{display:flex;gap:16px;justify-content:center;margin:8px 0 12px;color:var(--muted);font-size:12px}
-    .monthly-calendar-legend span{display:flex;align-items:center;gap:5px}
-    .calendar-greg-dot,.calendar-hijri-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green)}
-    .calendar-hijri-dot{background:var(--gold)}
-    .monthly-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
-    .monthly-calendar-weekday{text-align:center;padding:7px 1px;color:var(--muted);font-size:11px;font-weight:800}
-    .monthly-calendar-day{min-width:0;min-height:78px;padding:7px 3px;border:1px solid var(--line);border-radius:10px;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;text-align:center}
-    .monthly-calendar-day.empty{visibility:hidden}
-    .monthly-calendar-day.today{border:2px solid var(--gold);background:var(--soft)}
-    .monthly-calendar-day .greg{font-size:17px;font-weight:900;color:var(--green);line-height:1.2}
-    .monthly-calendar-day .hijri{font-size:10px;line-height:1.35;color:var(--muted);overflow-wrap:anywhere}
-    .monthly-calendar-day.today .greg{color:var(--green2)}
-    .monthly-calendar-note{margin:13px 0 0;text-align:center;line-height:1.7}
-    @media(max-width:420px){.monthly-calendar-grid{gap:3px}.monthly-calendar-day{min-height:68px;padding:5px 1px;border-radius:8px}.monthly-calendar-day .greg{font-size:15px}.monthly-calendar-day .hijri{font-size:9px}.monthly-calendar-weekday{font-size:10px}}
-  </style>
+  
   <script>
   (function(){
     const grid=document.getElementById('monthlyCalendarGrid');
@@ -1990,31 +2426,7 @@ nasheedAudio.addEventListener('error',()=>{
 
 </script>
 
-<style>
-#zadLanguagePicker{
- appearance:none!important;-webkit-appearance:none!important;
- position:static!important;top:auto!important;right:auto!important;left:auto!important;
- transform:none!important;z-index:5!important;
- display:inline-block!important;visibility:visible!important;opacity:1!important;
- flex:0 0 76px!important;width:76px!important;min-width:76px!important;height:34px!important;
- margin-inline-start:8px!important;padding:4px 5px!important;
- border:1px solid #c9a45c!important;border-radius:9px!important;
- background:#f4eedf!important;color:#315548!important;font:700 11px/1.3 Tahoma,Arial,sans-serif!important;
- text-align:center!important;box-shadow:0 2px 7px #0002!important;cursor:pointer!important;
-}
-.brand #zadLanguagePicker{align-self:center}
-.brand{flex-wrap:wrap}
-#zadLanguagePicker option{color:#18332d;background:#fff}
-#google_translate_element{position:fixed!important;left:-9999px!important;top:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
-.goog-te-banner-frame,.skiptranslate iframe{display:none!important}
-body{top:0!important}
-html[dir="ltr"] body{direction:ltr}
-html[dir="ltr"] .article{border-right:0;border-left:3px solid var(--gold)}
-html[dir="ltr"] .section h2:before{margin-left:0;margin-right:10px}
-html[dir="ltr"] .kid-steps{padding-right:0;padding-left:22px}
-html[dir="ltr"] .mushaf-text{direction:rtl}
-@media(max-width:800px){#zadLanguagePicker{flex-basis:70px!important;width:70px!important;min-width:70px!important;height:33px!important}}
-</style>
+
 <script>
 (function(){
  const languages=[
@@ -2224,12 +2636,10 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
 })();
 </script>
 <script>
-if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261122-prayer-web-v9", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261122-no-flash-v10", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
 </script>
 
-<style id="hide-floating-shortcuts">
-  #mushafFloatingButton, .tasbeeh-float, #tasbeehFab { display:none !important; visibility:hidden !important; pointer-events:none !important; }
-</style>
+
 <script>
   // Keep the Quran and tasbeeh sections available inside the page, but remove their floating shortcuts.
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
@@ -2256,202 +2666,19 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',clean,{once:true});
 })();
 </script>
-<style id="zad-public-site-final-guard-style">
-body.zad-public-website .adhan-settings,
-body.zad-public-website .prayer-tracker,
-body.zad-public-website .tasbeeh-float,
-body.zad-public-website #tasbeehPanel,
-body.zad-public-website #tasbeehFab,
-body.zad-public-website #zad-page-tasbeeh,
-body.zad-public-website .azkar-ticker,
-body.zad-public-website #daily-reminder-settings,
-body.zad-public-website .bottom-nav,
-body.zad-public-website #qibla,
-body.zad-public-website #adhan,
-body.zad-public-website #adhan-settings {display:none!important;visibility:hidden!important;pointer-events:none!important}
-</style>
-
-<style id="website-cleanup-20261121">
-/* إخفاء أدوات الأذان والسبحة والبوصلة من واجهة الموقع فقط */
-#qibla, #tasbeeh,
-a[href="#qibla"], a[href="#tasbeeh"],
-.tasbeeh-float, #tasbeehFab, #mushafFloatingButton, .mushaf-floating-button {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-</style>
 
 
-<style id="zad-professional-website-home-20261121">
-/* هوية موقع ويب تحريرية احترافية */
-:root{
- --bg:#f6f7f4;--paper:#fff;--ink:#18332d;--muted:#71817b;
- --green:#0b3b30;--green2:#176149;--gold:#c9a45c;
- --line:#e4e9e2;--soft:#edf3ee;
-}
-body{background:#f6f7f4;color:#203a32}
-.hero{
- padding:22px max(22px,calc((100vw - 1240px)/2)) 78px;
- background:
- radial-gradient(ellipse at 82% 18%,#d4b87520 0,transparent 32%),
- radial-gradient(ellipse at 12% 92%,#2d75542b 0,transparent 34%),
- linear-gradient(125deg,#062820 0%,#0c3c30 52%,#155440 100%);
-}
-.hero:after{right:-100px;bottom:-180px;width:470px;height:470px;border-color:#ffffff12;box-shadow:0 0 0 55px #ffffff08,0 0 0 110px #ffffff05}
-.top{
- max-width:1240px;margin:auto;padding:13px 18px;
- display:flex;flex-direction:row;align-items:center;justify-content:space-between;
- gap:24px;border:1px solid #ffffff24;border-radius:18px;
- background:#ffffff0c;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-}
-.brand{font-size:22px;letter-spacing:-.4px;white-space:nowrap}
-.brand-mark{width:46px;height:46px;border-radius:15px;background:#ffffff12;color:#f3d99e}
-.top nav{
- flex:1;justify-content:flex-end;align-items:center;gap:5px;
- flex-wrap:wrap;overflow:visible;width:auto;padding:0;
-}
-.top nav a{font-size:13px;padding:7px 10px;border:1px solid transparent;background:transparent;color:#e5eee8;border-radius:9px}
-.top nav a:hover{border-color:#ffffff2b;background:#ffffff12;color:#f5dfad}
-.hero-content{
- max-width:1240px;min-height:390px;margin:0 auto;padding:65px 12px 12px;
- display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.8fr);
- grid-template-rows:auto auto auto 1fr;column-gap:clamp(30px,7vw,100px);align-content:center;
-}
-.hero-content .eyebrow{grid-column:1;grid-row:1;display:inline-flex;align-items:center;gap:9px;width:max-content;padding:7px 13px;border:1px solid #e7d19e55;border-radius:99px;background:#ffffff0b;color:#f0dba9;font-size:13px}
-.hero-content .eyebrow:before{content:"";width:7px;height:7px;border-radius:50%;background:#d9b66b;box-shadow:0 0 0 4px #d9b66b20}
-.hero h1{grid-column:1;grid-row:2;max-width:700px;margin:17px 0 13px;font-size:clamp(35px,4.8vw,60px);line-height:1.28;letter-spacing:-1.2px}
-.hero-content>p{grid-column:1;grid-row:3;max-width:650px;font-size:16px;line-height:2.05;color:#d9e7df;margin:0 0 23px}
-.hero-actions{grid-column:1;grid-row:4;display:flex;gap:10px;flex-wrap:wrap;align-self:start}
-.hero-actions .btn{padding:12px 19px;border-radius:11px;font-size:14px}
-.hero-actions .btn.ghost{background:#ffffff0d;border-color:#ffffff40}
-.hero-editorial-card{
- grid-column:2;grid-row:1 / 5;align-self:center;justify-self:stretch;
- min-height:290px;padding:30px;display:flex;flex-direction:column;justify-content:center;
- position:relative;overflow:hidden;border:1px solid #ffffff35;border-radius:26px;
- background:linear-gradient(145deg,#ffffff18,#ffffff08);
- box-shadow:0 25px 70px #001b1538;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-}
-.hero-editorial-card:before,.hero-editorial-card:after{content:"";position:absolute;border:1px solid #e7d19e28;border-radius:50%;pointer-events:none}
-.hero-editorial-card:before{width:230px;height:230px;right:-90px;top:-115px;box-shadow:0 0 0 24px #e7d19e08,0 0 0 48px #e7d19e06}
-.hero-editorial-card:after{width:160px;height:160px;left:-85px;bottom:-90px}
-.hero-card-kicker{color:#e7d19e;font-size:13px;font-weight:700;letter-spacing:.5px}
-.hero-card-ayah{position:relative;margin:24px 0 12px;color:#fff8e9;font-family:"Traditional Arabic","Noto Naskh Arabic",serif;font-size:clamp(27px,3vw,39px);line-height:1.9;text-align:center}
-.hero-card-ref{color:#e7d19e;font-size:13px;text-align:center}
-.hero-card-rule{width:55px;height:2px;margin:24px auto;background:linear-gradient(90deg,transparent,#d9b66b,transparent)}
-.hero-card-note{max-width:300px;margin:0 auto;color:#e2ece5;font-size:14px;line-height:1.9;text-align:center}
-.wrap{max-width:1240px;margin:-30px auto 70px;padding:0 22px}
-.date-strip{border-radius:16px;padding:18px 22px;box-shadow:0 12px 32px #18382b0c}
-.section{margin:42px 0}
-.section-head{margin-bottom:18px;padding-bottom:13px}
-.section h2{font-size:25px}
-.grid,.book-grid{gap:18px}
-.card{border-radius:17px;padding:22px}
-.card:hover{transform:translateY(-3px);box-shadow:0 15px 35px #12372b12}
-footer{padding:38px 20px}
-@media(max-width:1050px){
- .top{align-items:flex-start;flex-direction:column;gap:12px}
- .top nav{justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;width:100%;padding:4px 0 8px}
- .top nav a{flex:0 0 auto}
- .hero-content{padding-top:48px;column-gap:30px}
-}
-@media(max-width:700px){
- .hero{padding:13px 14px 62px}
- .top{padding:12px;border-radius:15px}
- .brand{font-size:20px}
- .hero-content{display:flex;flex-direction:column;align-items:stretch;min-height:0;margin-top:0;padding:40px 5px 5px;gap:0}
- .hero h1{font-size:clamp(34px,9vw,46px);margin:15px 0 10px}
- .hero-content>p{font-size:14px;line-height:1.95;margin-bottom:20px}
- .hero-editorial-card{min-height:225px;margin:25px 0 18px;padding:22px}
- .hero-card-ayah{font-size:29px;margin:14px 0 6px}
- .hero-card-rule{margin:13px auto}
- .hero-actions{gap:8px}
- .hero-actions .btn{flex:1 1 calc(50% - 8px);text-align:center;padding:11px 10px}
- .wrap{padding:0 14px;margin-top:-25px}
- .section{margin:32px 0}
- .section h2{font-size:22px}
- .card{padding:18px}
-}
-</style>
 
 
-<style id="zad-calm-contrast-final-v2">
-/* تنسيق ثابت للموقع، لا يعتمد على تشغيل JavaScript أو اكتشاف وضع التطبيق */
-:root{color-scheme:light!important;--bg:#f4f6f2!important;--paper:#fff!important;--ink:#263a32!important;--muted:#65766e!important;--green:#285747!important;--green2:#376b56!important;--gold:#b89a60!important;--line:#e2e8e0!important;--soft:#edf2ec!important}
-html,body{background:#f4f6f2!important;color:#263a32!important}
-body{padding-bottom:24px!important}
-body .hero{background:linear-gradient(135deg,#294d40 0%,#37634f 58%,#55745d 100%)!important;color:#fff!important}
-body .hero h1,body .hero .brand,body .hero .brand-mark,body .hero .hero-actions{color:#fff!important}
-body .hero p{color:#edf3ed!important}
-body .hero .eyebrow{color:#f0dfb7!important}
-body .top nav a{color:#f5f7f2!important;background:#ffffff12!important;border-color:#ffffff30!important}
-body main,body .wrap{background:transparent!important;color:#263a32!important}
-body .date-strip,body .prayer,body .card,body .surah-item,body .zikr-item,body .book-card,body .khutbah-card{background:#fff!important;color:#263a32!important;border-color:#e2e8e0!important}
-body .section h2,body .card h3,body .prayer .ptime,body .surah-item,body .compass-label,body .khutbah-card summary{color:#285747!important}
-body .section-head p,body .card p,body .date-strip span,body .small,body .muted,body .prayer .pname,body .book-author{color:#65766e!important}
-body input,body select,body textarea{background:#fff!important;color:#263a32!important;border:1px solid #dce4dc!important}
-body input::placeholder,body textarea::placeholder{color:#78877f!important;opacity:1}
-body .btn{background:#376b56!important;color:#fff!important;border-color:#376b56!important}
-body .btn.light,body .surah-item button{background:#edf2ec!important;color:#285747!important;border-color:#dce6dc!important}
-body .btn.ghost{background:#ffffff18!important;color:#fff!important;border-color:#ffffff65!important}
-body .next-prayer-card,body .ramadan-hero{background:linear-gradient(120deg,#315846,#426b55)!important;color:#fff!important}
-body .next-prayer-card *,body .ramadan-hero{color:#fff!important}
-body .next-prayer-clock strong,body .ramadan-hero h3,body .ramadan-hero strong{color:#fff1c9!important}
-body .next-prayer-copy .small,body .next-prayer-clock .small,body .ramadan-hero p,body .ramadan-hero small{color:#edf3ed!important}
-body .ramadan-steps span{background:#edf2ec!important;color:#40594b!important}
-body .ramadan-steps b{color:#285747!important}
-body .ayah,body .mushaf-text,body .hadith-feature{background:#fffdf8!important;color:#30483d!important;border-color:#e8e1d2!important}
-body .ayah-text,body .mushaf-text,body .hadith-text{color:#30483d!important}
-body .ayah-ref,body .hadith-source{color:#806b43!important}
-body footer{background:#294d40!important;color:#f1f5ef!important}
-body footer p,body footer a{color:#f1f5ef!important}
-body .zad-web-shortcuts a{background:#fff!important;color:#285747!important;border-color:#e2e8e0!important}
-body .zad-web-shortcuts a b{color:#285747!important}
-body .zad-web-shortcuts a span{color:#9a7c48!important}
-body .notice{background:#f7f1e4!important;color:#6d5832!important;border:1px solid #eadfc8!important}
-body .article p{color:#65766e!important}
-body .section h2:before{background:#b89a60!important}
-@media(max-width:700px){body .hero{padding-bottom:54px!important}body .wrap{margin-top:-24px}}
-</style>
+
+
+
+
+
 
 <script src="./website-cleanup.js?v=20261122-once1"></script>
 
-<style id="zad-azhar-website-redesign-20261122">
-:root{--bg:#f3f1e9!important;--paper:#fffefa!important;--ink:#233b32!important;--muted:#68776c!important;--green:#173f33!important;--green2:#245c49!important;--gold:#b99a5d!important;--line:#e7e0d0!important;--soft:#f0eee5!important}
-html{scroll-behavior:smooth}
-body{background:#f3f1e9!important;background-image:radial-gradient(#b99a5d12 1px,transparent 1px)!important;background-size:22px 22px!important}
-.hero{position:relative;isolation:isolate;background:linear-gradient(125deg,#102f28 0%,#194839 55%,#315d48 100%)!important;border-bottom:5px solid #b99a5d}
-.hero:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.13;background-image:repeating-linear-gradient(45deg,transparent 0 32px,#e8d4a5 33px,#e8d4a5 34px,transparent 35px 68px);mask-image:linear-gradient(90deg,#000,transparent 55%)}
-.hero-editorial-card{background:linear-gradient(145deg,#ffffff1c,#ffffff08)!important;border-color:#e7d19e55!important}
-.hero-azhar-photo{width:min(100%,570px);margin:18px auto 0;overflow:hidden;border:1px solid #d9c18b;border-radius:18px;background:#102f28;box-shadow:0 12px 30px #001b1533}.hero-azhar-photo img{display:block;width:100%;height:230px;object-fit:cover;object-position:center 52%}.hero-azhar-photo figcaption{padding:8px 12px;color:#f3e8ca;font-size:11px;text-align:center}.hero-azhar-photo figcaption a{color:#f3d99e;text-decoration:underline;margin-inline-start:8px}
-.brand-mark{border-radius:50%!important;border:1px solid #d9bb7b!important}
-.top{border-color:#d8c18d55!important}
-.top nav a{border-radius:30px!important}
-.wrap{max-width:1280px!important}
-.date-strip,.card{background:var(--paper)!important;border-color:var(--line)!important;box-shadow:0 12px 34px #253d2d0a!important}
-.section{scroll-margin-top:18px}
-.section-head{border-bottom:1px solid #e5dece!important}
-.section h2{font-family:Tahoma,Arial,sans-serif!important;font-weight:800}
-.section h2:before{height:25px!important;border-radius:2px!important}
-.card{border-radius:18px!important}
-.knowledge-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-.knowledge-card{position:relative;overflow:hidden;min-height:235px;padding:23px!important}
-.knowledge-card:after{content:"۞";position:absolute;left:14px;bottom:-25px;font-size:92px;color:#b99a5d10;pointer-events:none}
-.knowledge-number{display:inline-block;color:#987b48;font-size:12px;font-weight:800;letter-spacing:.5px;margin-bottom:9px}
-.knowledge-card h3{font-size:19px;margin:0 0 10px}
-.knowledge-card p{font-size:14px;line-height:2;margin:0 0 8px}
-.knowledge-card .knowledge-verse{font-family:"Traditional Arabic","Noto Naskh Arabic",serif;font-size:23px;line-height:1.8;color:#28523f!important;margin:5px 0 10px}
-.knowledge-card small{color:#9a8050}
-.knowledge-more{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:18px}
-.saudi-radio-card{margin-top:16px;border:1px solid #e4d7b8!important;background:linear-gradient(145deg,#fffefa,#f6f1e5)!important}
-.radio-heading{display:flex;align-items:center;gap:13px}
-.radio-emblem{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:#eaf1e9;font-size:25px}
-.radio-heading h3{margin:0}
-.official-radio-link{display:inline-block;margin-top:8px;color:#315e49;font-weight:700;text-decoration:none}
-.official-radio-link:hover{text-decoration:underline}
-@media(max-width:850px){.knowledge-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:560px){.knowledge-grid{grid-template-columns:1fr}.knowledge-card{min-height:0}.hero-azhar-photo img{height:170px}.knowledge-more>*{width:100%;text-align:center}}
-</style>
+
 <script id="zad-saudi-radio-player-20261122">
 (function(){
  const audio=document.getElementById('saudiQuranRadio'),status=document.getElementById('saudiRadioStatus');
@@ -2479,66 +2706,7 @@ body{background:#f3f1e9!important;background-image:radial-gradient(#b99a5d12 1px
 </script>
 
 
-<style id="zad-soft-light-palette-20261122">
-/* ألوان هادئة ومريحة للعين */
-:root{
- --bg:#f5f7f2!important;--paper:#fffefa!important;--ink:#30443a!important;
- --muted:#718076!important;--green:#416b55!important;--green2:#62866c!important;
- --gold:#b99b65!important;--line:#e5e9df!important;--soft:#edf3ec!important;
-}
-html,body{background:#f5f7f2!important;color:#30443a!important}
-body{background-image:radial-gradient(#a8b99b12 1px,transparent 1px)!important;background-size:24px 24px!important}
-body .hero{
- background:linear-gradient(125deg,#e8f0e8 0%,#dce9df 58%,#e9eee2 100%)!important;
- color:#30483a!important;border-bottom:3px solid #c5ae7d!important;
-}
-body .hero:before{opacity:.055!important}
-body .hero:after{border-color:#66846a30!important;box-shadow:0 0 0 35px #66846a0a,0 0 0 70px #66846a08!important}
-body .top{background:#ffffffa8!important;border:1px solid #dce6da!important;box-shadow:0 8px 24px #314d3710!important}
-body .brand,body .brand-mark{color:#416b55!important}
-body .brand-mark{background:#edf3ec!important;border-color:#c9d8c8!important}
-body .top nav a{color:#466650!important;background:#ffffffa8!important;border-color:#dce6da!important}
-body .top nav a:hover{background:#e9f1e8!important;color:#294b38!important;border-color:#c5ae7d!important}
-body .hero-content .eyebrow{color:#8a7040!important;background:#fffdf5b8!important;border-color:#d7c69f!important}
-body .hero-content .eyebrow:before{background:#b99b65!important;box-shadow:0 0 0 4px #b99b6520!important}
-body .hero h1{color:#294b39!important;text-shadow:none!important}
-body .hero-content>p{color:#536c5a!important}
-body .hero-editorial-card{background:linear-gradient(145deg,#ffffffed,#f7f8f0ed)!important;border:1px solid #d9dfcf!important;box-shadow:0 18px 45px #344d3714!important}
-body .hero-editorial-card:before,body .hero-editorial-card:after{border-color:#b99b6530!important}
-body .hero-card-kicker,body .hero-card-ref{color:#927747!important}
-body .hero-card-ayah{color:#345440!important;text-shadow:none!important}
-body .hero-card-note{color:#617467!important}
-body .hero-card-rule{background:linear-gradient(90deg,transparent,#b99b65,transparent)!important}
-body .hero-azhar-photo{border-color:#d7c69f!important;background:#fff!important;box-shadow:0 8px 24px #344d3718!important}
-body .hero-azhar-photo figcaption{background:#476b55!important;color:#fff!important}
-body .hero-actions .btn{background:#52775d!important;color:#fff!important;box-shadow:0 5px 14px #344d3715!important}
-body .hero-actions .btn.ghost{background:#ffffffc9!important;color:#416b55!important;border:1px solid #cbd9c9!important}
-body .hero-actions .btn.facebook{background:#4779b9!important;color:#fff!important}
-body .date-strip,body .card,body .prayer,body .surah-item,body .zikr-item{background:#fffefa!important;border-color:#e5e9df!important;box-shadow:0 8px 24px #344d3709!important}
-body .section h2,body .card h3,body .prayer .ptime,body .surah-item,body .compass-label{color:#416b55!important}
-body .section-head{border-color:#e4e9df!important}
-body .icon{background:#edf3ec!important;color:#52775d!important}
-body .btn.green,body .btn:not(.ghost):not(.facebook){background:#52775d!important;color:#fff!important}
-body .btn.light,body .surah-item button{background:#edf3ec!important;color:#416b55!important;border-color:#dce7da!important}
-body .next-prayer-card{background:linear-gradient(120deg,#e5eee4,#dce9dd)!important;border:1px solid #d2dfd0!important;box-shadow:0 8px 24px #344d370b!important;color:#34513d!important}
-body .next-prayer-copy strong,body .next-prayer-clock strong{color:#416b55!important}
-body .next-prayer-kicker,body .next-prayer-copy .small,body .next-prayer-clock .small{color:#667a69!important;opacity:1!important}
-body .next-prayer-clock{background:#ffffff9c!important;border-color:#d2dfd0!important}
-body .ayah,body .mushaf-text,body .hadith-feature{background:#fffefa!important;border-color:#e8e3d5!important}
-body .knowledge-card:after{color:#b99b6510!important}
-body .saudi-radio-card{background:#fffefa!important}
-body footer{background:#e4ece2!important;color:#48604e!important;border-top:1px solid #d6e1d4!important}
-body footer p,body footer a{color:#48604e!important}
-body .zad-web-shortcuts a{background:#fffefa!important;border-color:#e1e8dd!important;color:#416b55!important;box-shadow:0 6px 18px #344d370b!important}
-body .zad-web-shortcuts a span{color:#a88b55!important}
-body .ramadan-hero{background:linear-gradient(120deg,#e5eee4,#dce9dd)!important;color:#34513d!important;border:1px solid #d2dfd0!important}
-body .ramadan-hero h3,body .ramadan-hero strong{color:#416b55!important}
-body .ramadan-hero p,body .ramadan-hero small{color:#617467!important}
-body .ramadan-steps span{background:#f0f4ed!important;color:#536c5a!important}
-body .ramadan-steps b{color:#416b55!important}
-body .prayer-tracker,body .tracker-items,body .tracker-head{display:none!important}
-@media(max-width:700px){body .hero{padding-bottom:58px!important}body .hero-content{padding-top:32px!important}}
-</style>
+
 <script id="zad-remove-prayer-tracker-20261122">
 (function(){
  function removeTracker(){
@@ -2551,51 +2719,9 @@ body .prayer-tracker,body .tracker-items,body .tracker-head{display:none!importa
 </script>
 
 
-<style id="zad-azhar-vector-identity-20261122">
-/* هوية بصرية معمارية مستوحاة من زخارف وعمارة الجامع الأزهر */
-.hero{position:relative!important;isolation:isolate!important;overflow:hidden!important;background:linear-gradient(135deg,#f1f3e9 0%,#e6eee5 48%,#f5f0e4 100%)!important;border-bottom:4px solid #b99a5d!important;color:#294b3b!important}
-.hero:before{content:""!important;position:absolute!important;inset:0!important;z-index:-1!important;opacity:.30!important;background:
- repeating-linear-gradient(45deg,transparent 0 27px,#b99a5d18 28px,#b99a5d18 29px,transparent 30px 56px),
- repeating-linear-gradient(-45deg,transparent 0 27px,#6b8b7012 28px,#6b8b7012 29px,transparent 30px 56px)!important;
- mask-image:linear-gradient(90deg,#000,transparent 78%)!important}
-.azhar-architecture-art{position:absolute;z-index:-1;inset:auto 0 0;width:100%;height:min(350px,58%);pointer-events:none;opacity:.42;overflow:hidden}
-.azhar-architecture-art svg{display:block;width:min(100%,1050px);height:100%;margin:auto;object-fit:contain}
-.hero .top,.hero .hero-content{position:relative;z-index:2}
-.hero .top{background:#ffffffc9!important;border:1px solid #d9e2d5!important;box-shadow:0 8px 25px #263f3010!important;backdrop-filter:blur(10px)}
-.hero .brand,.hero .brand-mark{color:#315a45!important}
-.hero .brand-mark{background:#f8f6ed!important;border-color:#cbb783!important}
-.hero .top nav a{color:#456650!important;background:#ffffffb8!important;border-color:#dbe4d8!important}
-.hero .top nav a:hover{background:#e8efe5!important;border-color:#b99a5d!important}
-.hero .hero-content .eyebrow{color:#846d3f!important;background:#fffdf4d9!important;border:1px solid #ddcda9!important}
-.hero .hero-content h1{color:#244b39!important;text-shadow:none!important}
-.hero .hero-content>p{color:#536b5a!important}
-.hero .hero-editorial-card{position:relative;overflow:hidden;background:linear-gradient(145deg,#fffefaed,#f7f5e9ed)!important;border:1px solid #d9c99f!important;box-shadow:0 18px 44px #294a3512!important}
-.hero .hero-editorial-card:before{content:"۞"!important;position:absolute;right:15px;top:4px;font-size:58px;color:#b99a5d18!important;border:0!important;pointer-events:none}
-.hero .hero-editorial-card:after{content:"۞"!important;position:absolute;left:15px;bottom:0;font-size:58px;color:#b99a5d18!important;border:0!important;pointer-events:none}
-.hero .hero-card-ayah{color:#315640!important;text-shadow:none!important}
-.hero .hero-card-kicker,.hero .hero-card-ref{color:#907646!important}
-.hero .hero-card-rule{background:linear-gradient(90deg,transparent,#b99a5d,transparent)!important}
-.hero .hero-actions .btn{background:#426c53!important;color:#fff!important}
-.hero .hero-actions .btn.ghost{background:#fffefa!important;color:#42664e!important;border:1px solid #d5dfd2!important}
-.hero .hero-actions .btn.facebook{background:#4779b9!important;color:#fff!important}
-/* لمسات زخرفية خفيفة داخل بطاقات وأقسام الصفحة */
-main.wrap{position:relative}
-main.wrap:before{content:"۞  ۞  ۞";display:block;text-align:center;letter-spacing:20px;color:#b99a5d70;font-size:18px;padding:3px 0 10px}
-.section h2{color:#315b45!important}
-.section h2:before{background:linear-gradient(#b99a5d,#d6c18d)!important}
-.section-head{border-bottom-color:#e1d9c8!important}
-.card{border:1px solid #e6e2d6!important;box-shadow:0 9px 26px #263f3009!important}
-.card:focus-within,.card:hover{border-color:#d2c092!important}
-.knowledge-card:after{content:"۞"!important;color:#b99a5d14!important}
-footer{position:relative;overflow:hidden}
-footer:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.12;background:repeating-linear-gradient(45deg,transparent 0 18px,#d7c18d 19px,#d7c18d 20px,transparent 21px 36px)}
-@media(max-width:700px){.azhar-architecture-art{height:185px;opacity:.28}.hero .hero-content{position:relative}.hero .hero-editorial-card{backdrop-filter:blur(4px)}}
-</style>
 
-<style id="zad-mobile-performance-nav-20261122">
-@media(max-width:700px){.top,.hero-editorial-card{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}.section{scroll-margin-top:18px}}
-html{scroll-padding-top:14px}
-</style>
+
+
 <script id="zad-web-tabs-repair-20261122">
 (function(){
  if(!['anatito23-lang.github.io','zad-almoslem.github.io'].includes(location.hostname))return;
@@ -2605,12 +2731,7 @@ html{scroll-padding-top:14px}
  window.addEventListener('hashchange',markActive);window.addEventListener('popstate',markActive);markActive();
 })();
 </script>
-<style id="zad-tabs-active-style-20261122">
-.top nav a.is-current-tab{background:#e8f0e7!important;border-color:#b99b65!important;color:#294b39!important}
-.zad-web-shortcuts a.is-current-tab{border-color:#b99b65!important;box-shadow:0 0 0 2px #b99b6522!important}
-.prayer-location-settings label{min-width:0}
-.prayer-location-settings select,.prayer-location-settings input{width:100%;min-width:0;box-sizing:border-box}
-</style>
+
 <script id="zad-website-managed-tabs-20261122">
 (function(){
  if(!['anatito23-lang.github.io','zad-almoslem.github.io'].includes(location.hostname))return;
@@ -2684,116 +2805,11 @@ html{scroll-padding-top:14px}
 })();
 </script>
 
-<style id="zad-strong-readable-text-v109">
-/* رفع تباين النصوص في جميع أقسام الموقع */
-body.zad-public-website{
- --ink:#172d25!important;--muted:#405349!important;
- color:#172d25!important;
-}
-body.zad-public-website main,
-body.zad-public-website main p,
-body.zad-public-website main li,
-body.zad-public-website main label,
-body.zad-public-website main .small,
-body.zad-public-website main .muted,
-body.zad-public-website main .description,
-body.zad-public-website main .card p,
-body.zad-public-website main .section-head p,
-body.zad-public-website main .book-author,
-body.zad-public-website main .prayer .pname,
-body.zad-public-website main .monthly-calendar-legend,
-body.zad-public-website main .monthly-calendar-weekday,
-body.zad-public-website main .monthly-calendar-day .hijri{
- color:#405349!important;opacity:1!important;
-}
-body.zad-public-website main h2,
-body.zad-public-website main h3,
-body.zad-public-website main h4,
-body.zad-public-website main strong,
-body.zad-public-website main .knowledge-card .knowledge-verse,
-body.zad-public-website main .hadith-text,
-body.zad-public-website main .ayah-text{
- color:#183d2e!important;opacity:1!important;
-}
-body.zad-public-website main a:not(.btn):not(.top nav a),
-body.zad-public-website main a:not(.btn):not(.top nav a) b{
- color:#24563f!important;opacity:1!important;
-}
-body.zad-public-website main small,
-body.zad-public-website main .knowledge-card small,
-body.zad-public-website main .ayah-ref,
-body.zad-public-website main .hadith-source,
-body.zad-public-website main .knowledge-number{
- color:#68532d!important;opacity:1!important;
-}
-body.zad-public-website input::placeholder,
-body.zad-public-website textarea::placeholder{color:#59685e!important;opacity:1!important}
-body.zad-public-website footer,
-body.zad-public-website footer p,
-body.zad-public-website footer a{color:#304b3b!important;opacity:1!important}
-body.zad-public-website .hero,
-body.zad-public-website .hero *{text-shadow:none}
-body.zad-public-website .hero .hero-content>p{color:#405c4a!important}
-body.zad-public-website .hero .hero-card-note{color:#405c4a!important}
-body.zad-public-website .hero .hero-card-ayah{color:#234b37!important}
-body.zad-public-website .hero .hero-card-kicker,
-body.zad-public-website .hero .hero-card-ref{color:#70572d!important}
-</style>
 
 
-<style id="zad-readable-text-final-v110">
-/* معالجة نهائية للتباين: تطبق مباشرة على الصفحة دون الاعتماد على كلاس غير موجود */
-html,body{color:#20372c!important}
-main.wrap,main.wrap section,main.wrap article,main.wrap .card{color:#263d31!important}
-main.wrap p,main.wrap li,main.wrap label,main.wrap span:not(.icon),main.wrap small,
-main.wrap summary,main.wrap .small,main.wrap .muted,main.wrap .description,
-main.wrap .section-head p,main.wrap .card p,main.wrap .book-author,
-main.wrap .book-level,main.wrap .hadith-note,main.wrap .hadith-source,
-main.wrap .knowledge-card small,main.wrap .date-strip span,
-main.wrap .prayer .pname,main.wrap .monthly-calendar-legend,
-main.wrap .monthly-calendar-weekday,main.wrap .monthly-calendar-day .hijri,
-main.wrap .article p,main.wrap .radio-heading p{
- color:#354b3e!important;opacity:1!important;text-shadow:none!important
-}
-main.wrap h1,main.wrap h2,main.wrap h3,main.wrap h4,
-main.wrap strong,main.wrap b,main.wrap .prayer .ptime,
-main.wrap .knowledge-card .knowledge-verse,main.wrap .hadith-text,
-main.wrap .ayah-text,main.wrap .mushaf-text{
- color:#183d2e!important;opacity:1!important;text-shadow:none!important
-}
-main.wrap a:not(.btn),main.wrap a:not(.btn) b,
-main.wrap .official-radio-link{color:#20583d!important;opacity:1!important}
-main.wrap .knowledge-number,main.wrap .ayah-ref,
-main.wrap .hadith-source,main.wrap .book-level{
- color:#66502b!important;opacity:1!important
-}
-main.wrap input::placeholder,main.wrap textarea::placeholder{color:#536459!important;opacity:1!important}
-main.wrap .notice{color:#5c4827!important}
-footer,footer p,footer a{color:#304b3b!important;opacity:1!important}
-.hero .hero-content>p{color:#405c4a!important}
-.hero .hero-card-note{color:#405c4a!important}
-.hero .hero-card-ayah{color:#234b37!important}
-.hero .hero-card-kicker,.hero .hero-card-ref{color:#70572d!important}
-</style>
 
-<style id="zad-hero-top-contrast-v113">
-/* تقوية وضوح الجزء العلوي من الصفحة فقط */
-header.hero{color:#193b2c!important}
-header.hero .top{background:#fffefa!important;border:1px solid #c8d6c7!important}
-header.hero .brand,header.hero .brand>span:last-child{color:#183f2d!important;font-weight:900!important}
-header.hero .brand-mark{color:#315b3e!important;background:#f3f5eb!important;border-color:#b99a5d!important}
-header.hero .top nav a{color:#1d4933!important;background:#fffefa!important;border:1px solid #d1ddce!important;font-weight:700!important;text-shadow:none!important}
-header.hero .top nav a:hover,header.hero .top nav a:focus{color:#102f21!important;background:#e5eee3!important;border-color:#a88a4f!important}
-header.hero .hero-content .eyebrow{color:#62491e!important;background:#fffdf2!important;border:1px solid #cdb77f!important;font-weight:800!important}
-header.hero .hero-content h1{color:#173e2b!important;font-weight:900!important;text-shadow:none!important}
-header.hero .hero-content>p{color:#2e4938!important;font-weight:600!important}
-header.hero .hero-editorial-card{background:#fffefa!important;border:1px solid #cdbb8d!important}
-header.hero .hero-card-kicker,header.hero .hero-card-ref{color:#654d23!important;font-weight:800!important}
-header.hero .hero-card-ayah{color:#173f2c!important;font-weight:800!important}
-header.hero .hero-card-note{color:#304b39!important;font-weight:600!important}
-header.hero .hero-actions .btn{background:#315f43!important;color:#fff!important;font-weight:800!important;border:1px solid #315f43!important}
-header.hero .hero-actions .btn.ghost{background:#fffefa!important;color:#214b34!important;border:1px solid #b9cbb8!important}
-header.hero .hero-actions .btn.facebook{background:#315f9a!important;color:#fff!important}
-</style>
+
+
+
 </body>
 </html>
