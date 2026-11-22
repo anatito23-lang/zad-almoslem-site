@@ -154,7 +154,13 @@ public class ReminderAudioService extends Service {
                 finishPlayback();
                 return true;
             });
-            player.setOnPreparedListener(MediaPlayer::start);
+            player.setOnPreparedListener(mp -> {
+                if ("gentle".equals(kind)) {
+                    int level=reminderPrefs.getInt("gentle_audio_volume",75);
+                    mp.setVolume(level/100f,level/100f);
+                }
+                mp.start();
+            });
             if (file.isFile() && file.length() >= 10000) player.setDataSource(file.getAbsolutePath());
             else player.setDataSource(remoteUrl);
             player.prepareAsync();
