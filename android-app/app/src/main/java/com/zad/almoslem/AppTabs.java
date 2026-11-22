@@ -21,7 +21,7 @@ public final class AppTabs {
     private static final String PREFS = "zad_app_navigation";
     private static final String[] KEYS = {"more","ramadan","tasbeeh","calendar","radio","quran","mushaf","home"};
     private static final String[] LABELS = {"المزيد","رمضان","السبحة","التقويم","الإذاعة","استماع","المصحف","الرئيسية"};
-    private static final String[] ICONS = {"☰","🌙","۞","▦","◉","♫","▤","⌂"};
+    private static final String[] ICONS = {"⋯","☾","۞","▦","◉","♫","📖","⌂"};
     private static final Class<?>[] SCREENS = {MoreActivity.class,RamadanActivity.class,TasbeehActivity.class,CalendarActivity.class,RadioActivity.class,QuranListeningActivity.class,MushafPageActivity.class,HomeActivity.class};
     private AppTabs() {}
 
@@ -153,7 +153,7 @@ public final class AppTabs {
         try{home.put("key","home");home.put("label","الرئيسية");home.put("icon","⌂");home.put("visible",true);}catch(Exception ignored){}
         homeSlot.addView(makeTabItem(a,home,active,li),new LinearLayout.LayoutParams(-1,-1));
         JSONObject more=new JSONObject();
-        try{more.put("key","more");more.put("label","المزيد");more.put("icon","☰");more.put("visible",true);}catch(Exception ignored){}
+        try{more.put("key","more");more.put("label","المزيد");more.put("icon","⋯");more.put("visible",true);}catch(Exception ignored){}
         moreSlot.addView(makeTabItem(a,more,active,li),new LinearLayout.LayoutParams(-1,-1));
         for(JSONObject row:rows){
             String key=row.optString("key","");
@@ -186,7 +186,7 @@ public final class AppTabs {
         item.setPadding(dp(a,2),dp(a,1),dp(a,2),dp(a,1));
         if(selected){GradientDrawable selectedBg=new GradientDrawable();selectedBg.setColor(Color.rgb(48,75,66));selectedBg.setCornerRadius(dp(a,12));selectedBg.setStroke(dp(a,1),Color.rgb(207,174,112));item.setBackground(selectedBg);}
         else {GradientDrawable idleBg=new GradientDrawable();idleBg.setColor(Color.TRANSPARENT);idleBg.setCornerRadius(dp(a,12));item.setBackground(idleBg);}
-        TextView icon=new TextView(a);icon.setText(iconText);icon.setTextSize(19);icon.setGravity(Gravity.CENTER);
+        TextView icon=new TextView(a);icon.setText(iconText);icon.setTextSize(20);icon.setGravity(Gravity.CENTER);
         icon.setTextColor(selected?Color.rgb(235,205,139):AppThemeColors.accent(a));icon.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
         item.addView(icon,new LinearLayout.LayoutParams(-1,dp(a,25)));
         TextView label=new TextView(a);label.setText(labelText);label.setTextSize(8);label.setSingleLine(true);label.setGravity(Gravity.CENTER);
