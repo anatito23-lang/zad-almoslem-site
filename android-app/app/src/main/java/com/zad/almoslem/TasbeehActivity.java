@@ -258,6 +258,17 @@ public class TasbeehActivity extends Activity {
         render();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (prefs != null && number != null) {
+            count = Math.max(0, prefs.getInt("native_tasbeeh_count", 0));
+            goal = prefs.getInt("native_tasbeeh_goal", 33);
+            index = Math.floorMod(prefs.getInt("native_tasbeeh_dhikr", 0), dhikr.length);
+            render();
+        }
+    }
+
     private void save() {
         prefs.edit()
                 .putInt("native_tasbeeh_goal", goal)
