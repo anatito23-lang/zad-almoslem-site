@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0c3b32"><title>لوحة إدارة المحتوى | زاد المسلم</title>
+<meta name="theme-color" content="#0c3b32"><link rel="manifest" href="./admin.webmanifest"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="إدارة زاد المسلم"><title>لوحة إدارة المحتوى | زاد المسلم</title>
 <style>
 :root{--green:#0c3b32;--gold:#c9a45c;--bg:#f5f7f3;--line:#e5ebe5;--muted:#71817b;--red:#9b3030}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:#18332d;font:16px/1.8 Tahoma,Arial,sans-serif}
@@ -247,4 +247,5 @@ $("siteContentCancel").addEventListener("click",resetSiteForm);
 $("siteContentRefresh").addEventListener("click",loadSiteContent);
 
 onAuthStateChanged(auth,async user=>{if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");$("customTabsCard").classList.add("hidden");$("siteContentCard").classList.add("hidden");$("audioAssetsCard").classList.add("hidden");return}if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return}$("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("customTabsCard").classList.remove("hidden");$("siteContentCard").classList.add("hidden");$("audioAssetsCard").classList.remove("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";await loadItems();try{await readCustomTabs()}catch(e){customMessage("تعذر تحميل التبويبات: "+e.message,true)}});
-</script></body></html>
+</script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=20261122-admin-pwa",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));}</script>
+</body></html>
