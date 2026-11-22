@@ -120,7 +120,7 @@ public class QuranTextActivity extends Activity {
                 View target = verses.getChildAt(targetIndex);
                 if (target != null) {
                     target.setBackground(bg(Color.rgb(235, 243, 231), 12));
-                    contentScroll.post(() -> contentScroll.smoothScrollTo(0, target.getTop()));
+                    contentScroll.post(() -> contentScroll.smoothScrollTo(0, verses.getTop() + target.getTop()));
                 }
             });
             targetAyah = -1;
