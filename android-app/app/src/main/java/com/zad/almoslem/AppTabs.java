@@ -192,7 +192,7 @@ public final class AppTabs {
         else {GradientDrawable idleBg=new GradientDrawable();idleBg.setColor(Color.TRANSPARENT);idleBg.setCornerRadius(dp(a,12));item.setBackground(idleBg);}
         if ("mushaf".equals(key) || "radio".equals(key) || "calendar".equals(key)) {
             item.addView(new IllustratedTabIcon(a, key, selected),
-                    new LinearLayout.LayoutParams(-1, dp(a,27)));
+                    new LinearLayout.LayoutParams(-1, dp(a,24)));
         } else {
             TextView icon=new TextView(a);icon.setText(iconText);icon.setTextSize(20);icon.setGravity(Gravity.CENTER);
             icon.setTextColor(selected?Color.rgb(235,205,139):AppThemeColors.accent(a));icon.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
@@ -212,13 +212,13 @@ public final class AppTabs {
     private static final class IllustratedTabIcon extends View {
         private final String kind;
         private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final int gold = Color.rgb(235, 199, 126);
-        private final int page = Color.rgb(248, 239, 214);
+        private final int gold = Color.rgb(211, 185, 137);
+        private final int page = Color.rgb(241, 235, 219);
         private final int ink = Color.rgb(27, 76, 61);
         IllustratedTabIcon(Activity activity, String kind, boolean selected) {
             super(activity);
             this.kind = kind;
-            setAlpha(selected ? 1f : .92f);
+            setAlpha(selected ? .94f : .78f);
         }
         private float d(float value) { return value * getResources().getDisplayMetrics().density; }
         private void fill(Canvas c, int color) { paint.setColor(color); paint.setStyle(Paint.Style.FILL); }
@@ -228,7 +228,7 @@ public final class AppTabs {
             float cx=getWidth()/2f, cy=getHeight()/2f;
             canvas.save();
             canvas.translate(cx,cy);
-            canvas.scale(d(1),d(1));
+            canvas.scale(.72f,.72f);
             if ("mushaf".equals(kind)) drawMushaf(canvas);
             else if ("radio".equals(kind)) drawMicrophone(canvas);
             else drawCalendar(canvas);
