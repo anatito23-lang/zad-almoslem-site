@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://zad-almoslem.github.io/sitemap.xml
