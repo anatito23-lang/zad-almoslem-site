@@ -13,10 +13,10 @@ import java.util.Calendar;
 
 public class ReminderReceiver extends BroadcastReceiver {
     public static final String CHANNEL_ID = "zad_reminders";
-    private static final String PRAYER_CHANNEL_ID = "zad_prayer_alerts";
+    private static final String PRAYER_CHANNEL_ID = "zad_prayer_alerts_v2";
     private static final String PRAYER_TONE_CHANNEL_ID = "zad_prayer_tone";
-    private static final String GENTLE_CHANNEL_ID = "zad_gentle_reminders";
-    private static final String AUDIO_FALLBACK_CHANNEL_ID = "zad_reminder_audio_fallback";
+    private static final String GENTLE_CHANNEL_ID = "zad_gentle_reminders_v2";
+    private static final String AUDIO_FALLBACK_CHANNEL_ID = "zad_reminder_audio_fallback_v2";
 
     public static void scheduleDaily(Context context, String key, int hour, int minute, String title) {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders", Context.MODE_PRIVATE);
@@ -72,7 +72,17 @@ public class ReminderReceiver extends BroadcastReceiver {
         if(!p.contains("qiyam_enabled"))
             scheduleDaily(context,"qiyam",4,0,"حان وقت قيام الليل، قم إلى الصلاة والذكر.");
         if(!p.contains("gentle_enabled")) p.edit().putBoolean("gentle_enabled",true).putInt("gentle_interval_hours",3).putInt("gentle_start_hour",9).putInt("gentle_start_minute",0).apply();
-        if(p.getBoolean("gentle_enabled",false) && p.getLong("gentle_next_at",0L)<=System.currentTimeMillis()) scheduleGentleReminder(context);
+        // Rebuild saved alarms whenever the app is opened. Android removes alarms after
+        // force-stop/restart scenarios; checking only whether preferences exist leaves
+        // enabled reminders silently unscheduled.
+        for(String key:new String[]{"morning","evening","qiyam"}) {
+            if(p.getBoolean(key+"_enabled",false)) {
+                scheduleDaily(context,key,p.getInt(key+"_hour",7),p.getInt(key+"_minute",0),
+                        p.getString(key+"_title","تذكير من زاد المسلم"));
+            }
+        }
+        if(p.getBoolean("gentle_enabled",false)) scheduleGentleReminder(context);
+        rescheduleApproachAlerts(context);
     }
     private static void scheduleApproachAlert(Context context,String name,long prayerAt) {
         String alertKey="approach_"+name;
@@ -308,6 +318,11 @@ public class ReminderReceiver extends BroadcastReceiver {
         String notificationText = title==null?"تذكير من زاد المسلم":title;
         if (!startError.isEmpty()) notificationText = "تعذر بدء الأذان: " + startError;
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle(gentle?"تذكير لطيف من زاد المسلم":"قلبي اطمأن – زاد المسلم").setContentText(notificationText).setAutoCancel(true).setContentIntent(content);
+        if(prayer) {
+            b.setCategory(Notification.CATEGORY_ALARM)
+             .setVisibility(Notification.VISIBILITY_PUBLIC)
+             .setPriority(Notification.PRIORITY_MAX);
+        }
         if(fullScreen!=null) b.setFullScreenIntent(fullScreen,true);
         if(prayer && adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode)) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
         else if(prayer && adhanEnabled && thisPrayerEnabled && "off".equals(adhanMode)) { /* no alert */ }
