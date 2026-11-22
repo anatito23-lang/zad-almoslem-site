@@ -1336,7 +1336,6 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
 <script>
 const $=id=>document.getElementById(id);
 const cityNames={Cairo:"القاهرة",Zagazig:"الزقازيق",Alexandria:"الإسكندرية",Giza:"الجيزة",Mansoura:"المنصورة",Tanta:"طنطا",Ismailia:"الإسماعيلية",Suez:"السويس","Port Said":"بورسعيد",Asyut:"أسيوط",Luxor:"الأقصر",Aswan:"أسوان"};
-window.zadPrayerLocation=null;
 /* قائمة دول العالم: القيمة الإنجليزية لخدمة المواقيت والاسم الظاهر بالعربية. */
 (function populatePrayerCountries(){
  const select=document.getElementById('prayerCountry');if(!select||select.dataset.allCountriesReady)return;
@@ -1417,10 +1416,10 @@ async function loadPrayer(){
 }
 restorePrayerSettings();
 $('loadPrayer').addEventListener('click',loadPrayer);
-$('egyptGovernorate').addEventListener('change',()=>{syncPrayerPlaceControls();window.zadPrayerLocation=null;localStorage.removeItem('zad_prayer_coordinates');loadPrayer();});
-$('city').addEventListener('change',()=>{window.zadPrayerLocation=null;localStorage.removeItem('zad_prayer_coordinates');loadPrayer();});
+$('egyptGovernorate').addEventListener('change',()=>{syncPrayerPlaceControls();loadPrayer();});
+$('city').addEventListener('change',loadPrayer);
 $('prayerCountry').addEventListener('change',()=>{if($('prayerCountry').value==='Egypt')$('egyptGovernorate').value='Cairo';else $('city').value='';if($('prayerCountry').value==='Other')$('otherCountry').value='';syncPrayerPlaceControls();if($('prayerCountry').value==='Egypt')loadPrayer();else $('prayerStatus').textContent='اكتب اسم المدينة ثم اضغط عرض مواقيت الصلاة.';});
-$('otherCountry').addEventListener('change',()=>{window.zadPrayerLocation=null;localStorage.removeItem('zad_prayer_coordinates');$('prayerStatus').textContent='اكتب اسم المدينة ثم اضغط تحديث المواقيت.';});
+$('otherCountry').addEventListener('change',()=>$('prayerStatus').textContent='اكتب اسم المدينة ثم اضغط عرض مواقيت الصلاة.');
 
 loadPrayer();
 let countdownDayKey='';
@@ -2291,7 +2290,7 @@ html[dir="ltr"] .mushaf-text{direction:rtl}
 })();
 </script>
 <script>
-if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261122-prayer-compact-v7", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261122-prayer-compact-v8", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
 </script>
 
 <style id="hide-floating-shortcuts">
