@@ -44,6 +44,11 @@ service cloud.firestore {
     // Keep the existing app contract for every top-level content collection:
     // public reads are allowed only for published documents; writes are admin-only.
     // This avoids breaking any current or future collection used by the app.
+    match /app_audio_assets/{documentId} {
+      allow get: if true;
+      allow list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
     match /{collection}/{documentId} {
       allow read: if isAdmin() || isPublished();
       allow create, update, delete: if isAdmin();
