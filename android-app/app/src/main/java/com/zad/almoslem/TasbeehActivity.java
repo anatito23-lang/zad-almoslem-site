@@ -244,6 +244,7 @@ public class TasbeehActivity extends Activity {
                 .putInt("native_tasbeeh_count", count)
                 .putInt("native_tasbeeh_dhikr", index)
                 .apply();
+        TasbeehWidget.refreshAll(this);
     }
 
     private void render() {
