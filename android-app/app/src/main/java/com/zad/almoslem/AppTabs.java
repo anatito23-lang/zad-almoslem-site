@@ -124,9 +124,9 @@ public final class AppTabs {
 
     private static void render(Activity a,String active,LinearLayout outer,JSONArray config) {
         if(outer==null||outer.getChildCount()<3)return;
-        LinearLayout homeSlot=(LinearLayout)outer.getChildAt(0);
+        LinearLayout moreSlot=(LinearLayout)outer.getChildAt(0);
         HorizontalScrollView dockScroll=(HorizontalScrollView)outer.getChildAt(1);
-        LinearLayout moreSlot=(LinearLayout)outer.getChildAt(2);
+        LinearLayout homeSlot=(LinearLayout)outer.getChildAt(2);
         if(dockScroll.getChildCount()==0||!(dockScroll.getChildAt(0) instanceof LinearLayout))return;
         LinearLayout dock=(LinearLayout)dockScroll.getChildAt(0);
         homeSlot.removeAllViews();dock.removeAllViews();moreSlot.removeAllViews();
