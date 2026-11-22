@@ -2559,9 +2559,8 @@ body .prayer-tracker,body .tracker-items,body .tracker-head{display:none!importa
   document.querySelectorAll('.prayer-tracker,.tracker-items,.tracker-head,#prayerTrackerCount,.prayer-done').forEach(el=>el.remove());
   document.querySelectorAll('a[href="#prayer-tracker"]').forEach(el=>el.remove());
  }
- removeTracker();
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',removeTracker,{once:true});
- new MutationObserver(removeTracker).observe(document.body,{childList:true,subtree:true});
+ else removeTracker();
 })();
 </script>
 
