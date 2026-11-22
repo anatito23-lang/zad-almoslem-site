@@ -2442,5 +2442,78 @@ body{background:#f3f1e9!important;background-image:radial-gradient(#b99a5d12 1px
 })();
 </script>
 
+
+<style id="zad-soft-light-palette-20261122">
+/* ألوان هادئة ومريحة للعين */
+:root{
+ --bg:#f5f7f2!important;--paper:#fffefa!important;--ink:#30443a!important;
+ --muted:#718076!important;--green:#416b55!important;--green2:#62866c!important;
+ --gold:#b99b65!important;--line:#e5e9df!important;--soft:#edf3ec!important;
+}
+html,body{background:#f5f7f2!important;color:#30443a!important}
+body{background-image:radial-gradient(#a8b99b12 1px,transparent 1px)!important;background-size:24px 24px!important}
+body .hero{
+ background:linear-gradient(125deg,#e8f0e8 0%,#dce9df 58%,#e9eee2 100%)!important;
+ color:#30483a!important;border-bottom:3px solid #c5ae7d!important;
+}
+body .hero:before{opacity:.055!important}
+body .hero:after{border-color:#66846a30!important;box-shadow:0 0 0 35px #66846a0a,0 0 0 70px #66846a08!important}
+body .top{background:#ffffffa8!important;border:1px solid #dce6da!important;box-shadow:0 8px 24px #314d3710!important}
+body .brand,body .brand-mark{color:#416b55!important}
+body .brand-mark{background:#edf3ec!important;border-color:#c9d8c8!important}
+body .top nav a{color:#466650!important;background:#ffffffa8!important;border-color:#dce6da!important}
+body .top nav a:hover{background:#e9f1e8!important;color:#294b38!important;border-color:#c5ae7d!important}
+body .hero-content .eyebrow{color:#8a7040!important;background:#fffdf5b8!important;border-color:#d7c69f!important}
+body .hero-content .eyebrow:before{background:#b99b65!important;box-shadow:0 0 0 4px #b99b6520!important}
+body .hero h1{color:#294b39!important;text-shadow:none!important}
+body .hero-content>p{color:#536c5a!important}
+body .hero-editorial-card{background:linear-gradient(145deg,#ffffffed,#f7f8f0ed)!important;border:1px solid #d9dfcf!important;box-shadow:0 18px 45px #344d3714!important}
+body .hero-editorial-card:before,body .hero-editorial-card:after{border-color:#b99b6530!important}
+body .hero-card-kicker,body .hero-card-ref{color:#927747!important}
+body .hero-card-ayah{color:#345440!important;text-shadow:none!important}
+body .hero-card-note{color:#617467!important}
+body .hero-card-rule{background:linear-gradient(90deg,transparent,#b99b65,transparent)!important}
+body .hero-azhar-photo{border-color:#d7c69f!important;background:#fff!important;box-shadow:0 8px 24px #344d3718!important}
+body .hero-azhar-photo figcaption{background:#476b55!important;color:#fff!important}
+body .hero-actions .btn{background:#52775d!important;color:#fff!important;box-shadow:0 5px 14px #344d3715!important}
+body .hero-actions .btn.ghost{background:#ffffffc9!important;color:#416b55!important;border:1px solid #cbd9c9!important}
+body .hero-actions .btn.facebook{background:#4779b9!important;color:#fff!important}
+body .date-strip,body .card,body .prayer,body .surah-item,body .zikr-item{background:#fffefa!important;border-color:#e5e9df!important;box-shadow:0 8px 24px #344d3709!important}
+body .section h2,body .card h3,body .prayer .ptime,body .surah-item,body .compass-label{color:#416b55!important}
+body .section-head{border-color:#e4e9df!important}
+body .icon{background:#edf3ec!important;color:#52775d!important}
+body .btn.green,body .btn:not(.ghost):not(.facebook){background:#52775d!important;color:#fff!important}
+body .btn.light,body .surah-item button{background:#edf3ec!important;color:#416b55!important;border-color:#dce7da!important}
+body .next-prayer-card{background:linear-gradient(120deg,#e5eee4,#dce9dd)!important;border:1px solid #d2dfd0!important;box-shadow:0 8px 24px #344d370b!important;color:#34513d!important}
+body .next-prayer-copy strong,body .next-prayer-clock strong{color:#416b55!important}
+body .next-prayer-kicker,body .next-prayer-copy .small,body .next-prayer-clock .small{color:#667a69!important;opacity:1!important}
+body .next-prayer-clock{background:#ffffff9c!important;border-color:#d2dfd0!important}
+body .ayah,body .mushaf-text,body .hadith-feature{background:#fffefa!important;border-color:#e8e3d5!important}
+body .knowledge-card:after{color:#b99b6510!important}
+body .saudi-radio-card{background:#fffefa!important}
+body footer{background:#e4ece2!important;color:#48604e!important;border-top:1px solid #d6e1d4!important}
+body footer p,body footer a{color:#48604e!important}
+body .zad-web-shortcuts a{background:#fffefa!important;border-color:#e1e8dd!important;color:#416b55!important;box-shadow:0 6px 18px #344d370b!important}
+body .zad-web-shortcuts a span{color:#a88b55!important}
+body .ramadan-hero{background:linear-gradient(120deg,#e5eee4,#dce9dd)!important;color:#34513d!important;border:1px solid #d2dfd0!important}
+body .ramadan-hero h3,body .ramadan-hero strong{color:#416b55!important}
+body .ramadan-hero p,body .ramadan-hero small{color:#617467!important}
+body .ramadan-steps span{background:#f0f4ed!important;color:#536c5a!important}
+body .ramadan-steps b{color:#416b55!important}
+body .prayer-tracker,body .tracker-items,body .tracker-head{display:none!important}
+@media(max-width:700px){body .hero{padding-bottom:58px!important}body .hero-content{padding-top:32px!important}}
+</style>
+<script id="zad-remove-prayer-tracker-20261122">
+(function(){
+ function removeTracker(){
+  document.querySelectorAll('.prayer-tracker,.tracker-items,.tracker-head,#prayerTrackerCount,.prayer-done').forEach(el=>el.remove());
+  document.querySelectorAll('a[href="#prayer-tracker"]').forEach(el=>el.remove());
+ }
+ removeTracker();
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',removeTracker,{once:true});
+ new MutationObserver(removeTracker).observe(document.body,{childList:true,subtree:true});
+})();
+</script>
+
 </body>
 </html>
