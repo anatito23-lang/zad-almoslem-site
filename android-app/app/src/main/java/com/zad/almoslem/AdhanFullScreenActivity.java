@@ -147,7 +147,7 @@ public class AdhanFullScreenActivity extends Activity {
         content.setPadding(dp(24),dp(30),dp(24),dp(30));
 
         TextView brand=new TextView(this);
-        brand.setText("زاد وطمأنينة");
+        brand.setText("سكينة – أذان وصلاة وقرآن");
         brand.setTextColor(Color.WHITE);
         brand.setTextSize(19);
         brand.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
