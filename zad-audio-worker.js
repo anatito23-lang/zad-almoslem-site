@@ -116,8 +116,8 @@ async function uploadToGitHub(file, kind, env) {
   });
   const result = await response.json().catch(() => ({}));
   if (!response.ok) {
-    if (response.status === 401 || response.status === 403) throw new Error("تعذر الرفع إلى مستودع الملفات. راجع صلاحية إعداد الخادم.");
-    throw new Error(result.message || "فشل حفظ الملف في مستودع الموقع.");
+    const safeMessage = typeof result.message === "string" ? result.message.slice(0, 240) : "GitHub API returned an error.";
+    throw new Error("فشل رفع الملف إلى GitHub (HTTP " + response.status + "): " + safeMessage);
   }
   return "https://zad-almoslem.github.io/" + path;
 }
