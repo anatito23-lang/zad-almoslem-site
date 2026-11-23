@@ -287,8 +287,6 @@ public class IslamicReelsActivity extends Activity {
             Canvas canvas = new Canvas(mark);
             Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
             float margin = markWidth * 0.025f, bandHeight = Math.max(72f, markHeight * 0.075f);
-            canvas.drawRoundRect(margin, markHeight - bandHeight - margin, markWidth - margin, markHeight - margin,
-                    bandHeight * 0.18f, bandHeight * 0.18f, p);
             p.setColor(0xbb000000);
             canvas.drawRoundRect(margin, markHeight - bandHeight - margin, markWidth - margin, markHeight - margin,
                     bandHeight * 0.18f, bandHeight * 0.18f, p);
