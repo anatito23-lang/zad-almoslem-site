@@ -232,7 +232,10 @@ public class IslamicReelsActivity extends Activity {
         JSONObject r = current(); if (r == null) return;
         try {
             DownloadManager.Request req = new DownloadManager.Request(Uri.parse(r.optString("audioUrl")));
-            String name = safeName(r.optString("title", "zad-reel")) + ".mp3";
+            String audioUrl = r.optString("audioUrl");
+            String path = Uri.parse(audioUrl).getLastPathSegment();
+            String ext = path != null && path.matches("(?i).+\\.(mp3|m4a|wav|ogg)") ? path.substring(path.lastIndexOf('.')) : ".mp3";
+            String name = safeName(r.optString("title", "zad-reel")) + ext;
             req.setTitle("زاد المسلم - " + r.optString("title"));
             req.setDescription("تحميل صوت الريلز");
             req.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
@@ -265,14 +268,14 @@ public class IslamicReelsActivity extends Activity {
                 if (durationMs <= 0 || durationMs >= 60000) throw new Exception("مدة الصوت يجب أن تكون أقل من دقيقة.");
                 output = new File(getCacheDir(), "zad-reel-" + System.currentTimeMillis() + ".mp4");
                 File finalImg = img, finalAudio = audio, finalOutput = output;
-                runOnUiThread(() -> startExport(finalImg, finalAudio, finalOutput, titleText, shareAfter));
+                runOnUiThread(() -> startExport(finalImg, finalAudio, finalOutput, titleText, durationMs, shareAfter));
             } catch (Exception e) {
                 exporting = false; runOnUiThread(() -> { setActionsEnabled(true); status.setText("تعذر تجهيز الريلز: " + e.getMessage()); });
             }
         });
     }
 
-    private void startExport(File imageFile, File audioFile, File output, String reelTitle, boolean shareAfter) {
+    private void startExport(File imageFile, File audioFile, File output, String reelTitle, long durationMs, boolean shareAfter) {
         try {
             Bitmap mark = Bitmap.createBitmap(960, 160, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(mark);
@@ -281,7 +284,7 @@ public class IslamicReelsActivity extends Activity {
             p.setTextAlign(Paint.Align.CENTER); canvas.drawText("زاد المسلم  |  zad-almoslem.github.io", 480, 98, p);
             BitmapOverlay watermark = BitmapOverlay.createStaticBitmapOverlay(mark, new StaticOverlaySettings.Builder().build());
             OverlayEffect overlay = new OverlayEffect(Collections.singletonList(watermark));
-            MediaItem imageItem = new MediaItem.Builder().setUri(Uri.fromFile(imageFile)).setImageDurationMs(60000).build();
+            MediaItem imageItem = new MediaItem.Builder().setUri(Uri.fromFile(imageFile)).setImageDurationMs(durationMs).build();
             EditedMediaItem video = new EditedMediaItem.Builder(imageItem).setFrameRate(30)
                     .setRemoveAudio(true).setEffects(new Effects(Collections.emptyList(), Collections.singletonList(overlay))).build();
             EditedMediaItem audio = new EditedMediaItem.Builder(MediaItem.fromUri(Uri.fromFile(audioFile))).setRemoveVideo(true).build();
