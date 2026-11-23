@@ -62,7 +62,7 @@ public class IslamicReelsActivity extends Activity {
     private final ArrayList<JSONObject> reels = new ArrayList<>();
     private int index = 0;
     private float downY;
-    private MediaPlayer player;
+    private MediaPlayer player;\n    private boolean playerPrepared = false;
     private ImageView image;
     private TextView title, description, counter, status;
     private Button playButton, saveAudioButton, saveReelButton, shareButton;
@@ -210,17 +210,17 @@ public class IslamicReelsActivity extends Activity {
         try {
             if (player == null) {
                 player = new MediaPlayer();
-                player.setOnPreparedListener(mp -> { mp.start(); playButton.setText("Ⅱ إيقاف مؤقت"); status.setText("يعمل الصوت الآن"); });
+                player.setOnPreparedListener(mp -> { playerPrepared = true; mp.start(); playButton.setText("Ⅱ إيقاف مؤقت"); status.setText("يعمل الصوت الآن"); });
                 player.setOnCompletionListener(mp -> move(1));
                 player.setOnErrorListener((mp, what, extra) -> { status.setText("تعذر تشغيل التسجيل."); return true; });
                 player.setDataSource(r.optString("audioUrl")); player.prepareAsync();
                 status.setText("جارٍ تجهيز الصوت…");
-            } else { player.start(); playButton.setText("Ⅱ إيقاف مؤقت"); }
+            } else if (!playerPrepared) { status.setText("جارٍ تجهيز الصوت، انتظر لحظة…"); } else { player.start(); playButton.setText("Ⅱ إيقاف مؤقت"); }
         } catch (Exception e) { status.setText("تعذر تشغيل الصوت: " + e.getMessage()); }
     }
 
     private void stopPlayer() {
-        if (player != null) { try { player.stop(); } catch (Exception ignored) {} player.release(); player = null; }
+        if (player != null) { try { player.stop(); } catch (Exception ignored) {} player.release(); player = null; }\n        playerPrepared = false;
     }
 
     private void move(int direction) {
