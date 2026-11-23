@@ -155,10 +155,11 @@ public class ReminderAudioService extends Service {
                 return true;
             });
             player.setOnPreparedListener(mp -> {
-                if ("gentle".equals(kind)) {
-                    int level=reminderPrefs.getInt("gentle_audio_volume",75);
-                    mp.setVolume(level/100f,level/100f);
-                }
+                int level = "dua".equals(kind)
+                        ? reminderPrefs.getInt("dua_after_adhan_volume", 80)
+                        : ("gentle".equals(kind) ? reminderPrefs.getInt("gentle_audio_volume", 75) : 75);
+                if (reminderPrefs.getBoolean("power_saver_enabled", false)) level = Math.min(level, 20);
+                mp.setVolume(level / 100f, level / 100f);
                 mp.start();
             });
             if (file.isFile() && file.length() >= 10000) player.setDataSource(file.getAbsolutePath());
