@@ -198,7 +198,6 @@ public class MushafPageActivity extends Activity {
             root.setPadding(0, 0, 0, 0);
             toolbar.setVisibility(View.GONE);
             offlineRow.setVisibility(View.GONE);
-            pageLabel.setVisibility(View.GONE);
             status.setVisibility(View.GONE);
             attribution.setVisibility(View.GONE);
             progress.setVisibility(View.GONE);
