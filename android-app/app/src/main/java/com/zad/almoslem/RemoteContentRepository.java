@@ -55,8 +55,6 @@ public final class RemoteContentRepository {
                                         putIfPresent(row, "title", data.get("title"));
                                         putIfPresent(row, "description", data.get("description"));
                                         putIfPresent(row, "imageUrl", data.get("imageUrl"));
-                                        putIfPresent(row, "audioUrl", data.get("audioUrl"));
-                                        putIfPresent(row, "durationSeconds", data.get("durationSeconds"));
                                         putIfPresent(row, "order", data.get("order"));
                                         putIfPresent(row, "createdAt", data.get("createdAt"));
                                     } else if ("khutbahs".equals(collection) || "waqafat".equals(collection)) {
