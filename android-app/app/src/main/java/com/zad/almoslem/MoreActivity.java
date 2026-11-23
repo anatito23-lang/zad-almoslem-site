@@ -24,7 +24,7 @@ private void addPowerSaverQuickToggle(LinearLayout root){
 }
 @Override public void onCreate(Bundle b){super.onCreate(b);AppThemeColors.apply(this);build();}
 private void build(){ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(14),dp(14),dp(14),dp(24));root.setBackgroundColor(AppThemeColors.bg(this));scroll.addView(root);
-TextView title=label("المزيد من خدمات زاد وطمأنينة",23,AppThemeColors.text(this),true);title.setGravity(Gravity.CENTER);title.setPadding(0,0,0,dp(4));root.addView(title);
+TextView title=label("المزيد من خدمات سكينة",23,AppThemeColors.text(this),true);title.setGravity(Gravity.CENTER);title.setPadding(0,0,0,dp(4));root.addView(title);
 section(root,"🕌 الصلاة والأذان");
 add(root,"مواقيت الصلاة","عرض المواقيت وتحديثها واختيار المدينة",PrayerDashboardActivity.class);
 add(root,"إعدادات الأذان","اختيار صوت كل صلاة والتحكم في مستوى الصوت والتنزيل",MainActivity.class);
