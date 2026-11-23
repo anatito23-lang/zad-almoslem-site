@@ -37,10 +37,10 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <section class="card hidden" id="listCard"><h2>المحتوى المسجل</h2><div id="itemsList"><p class="small">جارٍ التحميل…</p></div></section>
 <section class="card hidden" id="audioAssetsCard">
 <h2>إدارة أصوات التطبيق</h2>
-<p class="small">ارفع تسجيلات المدفع والإفطار والسحور من هنا. عند نشر ملف جديد، سيصل رابطه للتطبيق عند اتصاله بالإنترنت، ثم يُحفظ على الجهاز للتشغيل دون اتصال. لا يحتاج تغيير التسجيل إلى إصدار APK جديد.</p>
-<div class="item"><strong>صوت مدفع الإفطار</strong><label for="audioCannon">ملف صوتي MP3 أو M4A أو WAV (حد أقصى 25 ميجابايت)</label><input id="audioCannon" type="file" accept="audio/*"><div class="actions"><button type="button" data-audio-upload="cannon">رفع ونشر صوت المدفع</button></div></div>
-<div class="item"><strong>صوت إعلان الإفطار</strong><label for="audioIftar">ملف صوتي للإفطار</label><input id="audioIftar" type="file" accept="audio/*"><div class="actions"><button type="button" data-audio-upload="iftar">رفع ونشر صوت الإفطار</button></div></div>
-<div class="item"><strong>صوت السحور</strong><label for="audioSuhoor">ملف صوتي للسحور</label><input id="audioSuhoor" type="file" accept="audio/*"><div class="actions"><button type="button" data-audio-upload="suhoor">رفع ونشر صوت السحور</button></div></div>
+<p class="small">ارفع ملفات الصوت أولًا إلى مستودع GitHub، ثم الصق رابط الملف المباشر هنا واضغط نشر الرابط. هذه الطريقة لا تستخدم Firebase Storage ولا تتطلب ترقية مدفوعة. يحتفظ التطبيق بمزامنة الروابط الحالية عبر Firestore.</p>
+<div class="item"><strong>صوت مدفع الإفطار</strong><label for="audioCannon">رابط ملف الصوت المباشر</label><input id="audioCannon" type="url" inputmode="url" placeholder="https://zad-almoslem.github.io/اسم-الملف.mp3"><div class="actions"><button type="button" data-audio-publish="cannon">نشر رابط صوت المدفع</button></div></div>
+<div class="item"><strong>صوت إعلان الإفطار</strong><label for="audioIftar">رابط ملف الصوت المباشر</label><input id="audioIftar" type="url" inputmode="url" placeholder="https://zad-almoslem.github.io/اسم-الملف.mp3"><div class="actions"><button type="button" data-audio-publish="iftar">نشر رابط صوت الإفطار</button></div></div>
+<div class="item"><strong>صوت السحور</strong><label for="audioSuhoor">رابط ملف الصوت المباشر</label><input id="audioSuhoor" type="url" inputmode="url" value="https://zad-almoslem.github.io/مسحراتي.mp3"><div class="actions"><button type="button" data-audio-publish="suhoor">نشر رابط صوت السحور</button></div></div>
 <div id="audioAssetsMessage" class="notice hidden" role="status"></div>
 </section>
 <section class="card hidden" id="customTabsCard">
@@ -90,9 +90,9 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,collection,getDocs,addDoc,updateDoc,deleteDoc,doc,serverTimestamp,getDoc,setDoc,writeBatch} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {getStorage,ref as storageRef,uploadBytesResumable,getDownloadURL} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
 const firebaseConfig={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
-const ADMIN_UID="5UkeBQyyGGZcICXULT9LUD0S4lt2",app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id);const storage=getStorage(app);
+const ADMIN_UID="5UkeBQyyGGZcICXULT9LUD0S4lt2",app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id);
 const names={azkar:"الأذكار",duas:"الأدعية",khutbahs:"الخطب",waqafat:"الوقفات الإيمانية"};
 const isPublished=item=>item.published===true||item["تم النشر"]===true||item["النشر"]===true;
 let customTabs=[];const CUSTOM_TABS_DOC="custom_tabs_config";const CUSTOM_TABS_PUBLIC_DOC="custom_tabs_public";let customContentRows=[];
@@ -183,31 +183,20 @@ $("customContentForm").addEventListener("submit",async e=>{e.preventDefault();if
 $("customContentCancel").addEventListener("click",()=>{$("customContentForm").reset();$("customContentId").value="";$("customContentPublished").checked=true});
 
 
-// رفع التسجيلات الصوتية التي يقرأها التطبيق من Firebase Storage.
+// نشر روابط ملفات الصوت المستضافة على GitHub Pages بدل Firebase Storage.
 const AUDIO_UPLOADS={cannon:{input:"audioCannon",field:"cannonUrl",name:"مدفع الإفطار"},iftar:{input:"audioIftar",field:"iftarVoiceUrl",name:"إعلان الإفطار"},suhoor:{input:"audioSuhoor",field:"suhoorVoiceUrl",name:"صوت السحور"}};
 function audioMessage(value,error=false){const el=$("audioAssetsMessage");el.textContent=value;el.classList.remove("hidden","error");if(error)el.classList.add("error");}
-document.querySelectorAll("[data-audio-upload]").forEach(button=>button.addEventListener("click",async()=>{
+document.querySelectorAll("[data-audio-publish]").forEach(button=>button.addEventListener("click",async()=>{
  if(auth.currentUser?.uid!==ADMIN_UID){audioMessage("غير مصرح بهذا الإجراء.",true);return;}
- const config=AUDIO_UPLOADS[button.dataset.audioUpload],input=$(config.input),file=input.files?.[0];
- if(!file){audioMessage("اختر ملفًا صوتيًا أولًا.",true);return;}
- if(!file.type.startsWith("audio/")||file.size>25*1024*1024){audioMessage("الملف يجب أن يكون صوتيًا وألا يتجاوز 25 ميجابايت.",true);return;}
- button.disabled=true;const old=button.textContent;button.textContent="جارٍ الرفع…";
- try{const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-90)||"audio";const path="app-audio/"+config.field.replace("Url","")+"/"+Date.now()+"-"+safeName;
-  const target=storageRef(storage,path);
-  audioMessage("بدأ رفع "+config.name+" إلى التخزين: 0٪");
-  const uploadTask=uploadBytesResumable(target,file,{contentType:file.type});
-  await new Promise((resolve,reject)=>{
-   uploadTask.on("state_changed",snapshot=>{
-    const percent=snapshot.totalBytes?Math.round(snapshot.bytesTransferred/snapshot.totalBytes*100):0;
-    audioMessage("جارٍ رفع "+config.name+" إلى التخزين: "+percent+"٪");
-   },reject,resolve);
-  });
-  audioMessage("اكتمل رفع الملف. جارٍ استخراج رابط التنزيل…");
-  const url=await getDownloadURL(target);
-  audioMessage("تم رفع الملف. جارٍ حفظ رابط النشر في قاعدة البيانات…");
+ const config=AUDIO_UPLOADS[button.dataset.audioPublish],input=$(config.input),url=input.value.trim();
+ if(!url){audioMessage("الصق رابط ملف الصوت أولًا.",true);return;}
+ let parsed;try{parsed=new URL(url)}catch(e){audioMessage("الرابط غير صحيح.",true);return;}
+ if(parsed.protocol!=="https:"||parsed.hostname!=="zad-almoslem.github.io"||! /\\.(mp3|m4a|wav|ogg)(\\?.*)?$/i.test(parsed.pathname+parsed.search)){audioMessage("استخدم رابط HTTPS مباشرًا لملف صوتي مستضاف على zad-almoslem.github.io.",true);return;}
+ button.disabled=true;const old=button.textContent;button.textContent="جارٍ نشر الرابط…";
+ try{
   await setDoc(doc(db,"app_audio_assets","ramadan"),{[config.field]:url,[config.field+"UpdatedAt"]:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true});
-  input.value="";audioMessage("تم رفع ونشر "+config.name+" بنجاح. سيزامن التطبيق الملف عند اتصاله بالإنترنت.");
- }catch(error){audioMessage("فشلت العملية أثناء الرفع أو النشر: "+(error?.code||"")+(error?.message?" — "+error.message:" تعذر تحديد السبب."),true);}
+  audioMessage("تم نشر رابط "+config.name+" بنجاح. سيزامن التطبيق الملف عند اتصاله بالإنترنت.");
+ }catch(error){audioMessage("تعذر نشر الرابط: "+(error?.code||"")+(error?.message?" — "+error.message:""),true);}
  finally{button.disabled=false;button.textContent=old;}
 }));
 // إدارة المنشورات الإضافية داخل جميع أقسام الموقع
