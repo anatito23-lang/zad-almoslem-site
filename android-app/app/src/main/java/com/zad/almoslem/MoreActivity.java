@@ -6,6 +6,22 @@ private void open(Class<?> c){startActivity(new Intent(this,c));}
 private TextView label(String s,int z,int c,boolean b){TextView t=new TextView(this);t.setText(s);t.setTextSize(z);t.setTextColor(c);t.setGravity(Gravity.RIGHT);if(b)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
 private void section(LinearLayout root,String title){TextView h=label(title,18,AppThemeColors.primary(this),true);h.setPadding(dp(3),dp(18),dp(3),dp(9));root.addView(h);}
 private void add(LinearLayout root,String title,String desc,Class<?> target){LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(15),dp(12),dp(15),dp(12));GradientDrawable bg=new GradientDrawable();bg.setColor(AppThemeColors.surface(this));bg.setCornerRadius(dp(15));card.setBackground(bg);card.addView(label(title,16,AppThemeColors.text(this),true));TextView d=label(desc,12,AppThemeColors.muted(this),false);d.setPadding(0,dp(4),0,0);card.addView(d);card.setOnClickListener(v->open(target));LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(9);root.addView(card,lp);}
+
+private void addPowerSaverQuickToggle(LinearLayout root){
+ LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(15),dp(12),dp(15),dp(12));
+ GradientDrawable bg=new GradientDrawable();bg.setColor(AppThemeColors.surface(this));bg.setCornerRadius(dp(15));card.setBackground(bg);
+ card.addView(label("وضع توفير الطاقة",16,AppThemeColors.text(this),true));
+ TextView desc=label("إيقاف أصوات التذكيرات وخفض صوت الأذان. يمكنك تشغيله أو إيقافه مباشرة من هنا.",12,AppThemeColors.muted(this),false);desc.setPadding(0,dp(4),0,dp(6));card.addView(desc);
+ Switch toggle=new Switch(this);toggle.setText("تفعيل وضع توفير الطاقة");
+ android.content.SharedPreferences prefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);
+ toggle.setChecked(prefs.getBoolean("power_saver_enabled",false));card.addView(toggle);
+ toggle.setOnCheckedChangeListener((button,enabled)->{
+  prefs.edit().putBoolean("power_saver_enabled",enabled).apply();
+  if(enabled)ReminderAudioService.stop(this);
+  Toast.makeText(this,enabled?"تم تفعيل وضع توفير الطاقة":"تم إيقاف وضع توفير الطاقة",Toast.LENGTH_SHORT).show();
+ });
+ LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(9);root.addView(card,lp);
+}
 @Override public void onCreate(Bundle b){super.onCreate(b);AppThemeColors.apply(this);build();}
 private void build(){ScrollView scroll=new ScrollView(this);LinearLayout root=new LinearLayout(this);root.setOrientation(1);root.setPadding(dp(14),dp(14),dp(14),dp(24));root.setBackgroundColor(AppThemeColors.bg(this));scroll.addView(root);
 TextView title=label("المزيد من خدمات زاد وطمأنينة",23,AppThemeColors.text(this),true);title.setGravity(Gravity.CENTER);title.setPadding(0,0,0,dp(4));root.addView(title);
@@ -14,6 +30,7 @@ add(root,"مواقيت الصلاة","عرض المواقيت وتحديثها �
 add(root,"إعدادات الأذان","اختيار صوت كل صلاة والتحكم في مستوى الصوت والتنزيل",MainActivity.class);
 add(root,"خلفيات شاشة الأذان","اختر صورة تظهر على الشاشة كاملة عند دخول وقت الصلاة",AdhanWallpaperSettingsActivity.class);
 add(root,"التنبيهات اليومية","إدارة التذكيرات والأذكار والتنبيهات",DailyReminderSettingsActivity.class);
+addPowerSaverQuickToggle(root);
 section(root,"📿 الرقية والابتهالات");
 add(root,"الرقية الشرعية","اختيار القارئ وتشغيل الرقية أو إيقافها",RuqyahActivity.class);
 add(root,"الابتهالات والإنشاد","تسجيلات الابتهالات الدينية",AudioLibraryActivity.class);
