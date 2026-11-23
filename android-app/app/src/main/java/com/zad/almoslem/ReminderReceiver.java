@@ -18,6 +18,7 @@ public class ReminderReceiver extends BroadcastReceiver {
     private static final String GENTLE_CHANNEL_ID = "zad_gentle_reminders_v3";
     private static final String AUDIO_FALLBACK_CHANNEL_ID = "zad_reminder_audio_fallback_v3";
     private static final String POWER_SAVER_CHANNEL_ID = "zad_power_saver_visual_v1";
+    private static final String POWER_SAVER_PRAYER_CHANNEL_ID = "zad_power_saver_prayer_visual_v1";
 
     public static void scheduleDaily(Context context, String key, int hour, int minute, String title) {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders", Context.MODE_PRIVATE);
@@ -267,13 +268,19 @@ public class ReminderReceiver extends BroadcastReceiver {
                 (gentle && gentleAudioEnabled)
                 || (approachAlert && prefs.getBoolean("approach_alert_enabled", true))
                 || (dailyAudioReminder && prefs.getBoolean(key + "_audio_enabled", true)));
-        String channelId=prayer?((adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode))?PRAYER_TONE_CHANNEL_ID:PRAYER_CHANNEL_ID):
+        String channelId=prayer?(powerSaverEnabled?POWER_SAVER_PRAYER_CHANNEL_ID:
+                ((adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode))?PRAYER_TONE_CHANNEL_ID:PRAYER_CHANNEL_ID)):
                 (powerSaverEnabled?POWER_SAVER_CHANNEL_ID:
                 (gentle?(fallbackAudioNotification?AUDIO_FALLBACK_CHANNEL_ID:GENTLE_CHANNEL_ID):
                 (fallbackAudioNotification?AUDIO_FALLBACK_CHANNEL_ID:CHANNEL_ID)));
         if(Build.VERSION.SDK_INT>=26){
             NotificationChannel ch;
-            if(prayer){
+            if(prayer && powerSaverEnabled) {
+                ch=new NotificationChannel(POWER_SAVER_PRAYER_CHANNEL_ID,"إشعارات الصلاة — توفير الطاقة",NotificationManager.IMPORTANCE_HIGH);
+                ch.setDescription("تنبيه مرئي عند دخول وقت الصلاة دون صوت أو اهتزاز");
+                ch.setSound(null,null);
+                ch.enableVibration(false);
+            } else if(prayer){
                 ch=new NotificationChannel(PRAYER_CHANNEL_ID,"إشعارات الصلاة الصامتة",NotificationManager.IMPORTANCE_HIGH);
                 ch.setDescription("إشعار دخول وقت الصلاة بدون صوت");
                 ch.setSound(null,null);
