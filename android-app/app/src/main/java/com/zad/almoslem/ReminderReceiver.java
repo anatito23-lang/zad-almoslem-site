@@ -62,7 +62,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
         long at=next.getTimeInMillis();
         p.edit().putLong("gentle_next_at",at).apply();
-        schedule(context,"gentle_reminder",at,"تذكير لطيف من زاد وطمأنينة",false);
+        schedule(context,"gentle_reminder",at,"تذكير لطيف من سكينة",false);
     }
 
     public static void ensureDefaultDailyReminders(Context context) {
@@ -80,7 +80,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         for(String key:new String[]{"morning","evening","qiyam"}) {
             if(p.getBoolean(key+"_enabled",false)) {
                 scheduleDaily(context,key,p.getInt(key+"_hour",7),p.getInt(key+"_minute",0),
-                        p.getString(key+"_title","تذكير من زاد وطمأنينة"));
+                        p.getString(key+"_title","تذكير من سكينة"));
             }
         }
         if(p.getBoolean("gentle_enabled",false)) scheduleGentleReminder(context);
@@ -330,9 +330,9 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
         Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,channelId):new Notification.Builder(context);
         String startError = prayer ? prefs.getString("adhan_last_start_error", "") : "";
-        String notificationText = title==null?"تذكير من زاد وطمأنينة":title;
+        String notificationText = title==null?"تذكير من سكينة":title;
         if (!startError.isEmpty()) notificationText = "تعذر بدء الأذان: " + startError;
-        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle(gentle?"تذكير لطيف من زاد وطمأنينة":"قلبي اطمأن – زاد وطمأنينة").setContentText(notificationText).setAutoCancel(true).setContentIntent(content);
+        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle(gentle?"تذكير لطيف من سكينة":"سكينة – أذان وصلاة وقرآن").setContentText(notificationText).setAutoCancel(true).setContentIntent(content);
         if(prayer) {
             b.setCategory(Notification.CATEGORY_ALARM)
              .setVisibility(Notification.VISIBILITY_PUBLIC)
@@ -346,7 +346,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         if(!prayer || (adhanEnabled && thisPrayerEnabled && !"off".equals(adhanMode))) nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
             String k=key.replace("daily_","");
-            if(prefs.getBoolean(k+"_enabled",false)) scheduleDaily(context,k,prefs.getInt(k+"_hour",7),prefs.getInt(k+"_minute",0),prefs.getString(k+"_title","تذكير من زاد وطمأنينة"));
+            if(prefs.getBoolean(k+"_enabled",false)) scheduleDaily(context,k,prefs.getInt(k+"_hour",7),prefs.getInt(k+"_minute",0),prefs.getString(k+"_title","تذكير من سكينة"));
         }
     }
 }
