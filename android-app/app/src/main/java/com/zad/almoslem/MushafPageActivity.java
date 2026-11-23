@@ -102,23 +102,16 @@ public class MushafPageActivity extends Activity {
         toolbar.setGravity(Gravity.CENTER_VERTICAL);
         toolbar.setOrientation(LinearLayout.HORIZONTAL);
 
-        Button index = new Button(this);
-        index.setText("☰ فهرس السور");
-        index.setTextSize(13);
-        toolbar.addView(index, new LinearLayout.LayoutParams(0, dp(34), 1));
-        index.setOnClickListener(v -> showSurahIndex());
-
-        pageLabel = label("", 15, AppThemeColors.text(this), true);
-        toolbar.addView(pageLabel, new LinearLayout.LayoutParams(0, dp(38), 1));
-        Button correction = new Button(this);
-        correction.setText("بحث سورة/آية");
-        correction.setTextSize(11);
-        toolbar.addView(correction, new LinearLayout.LayoutParams(0, dp(38), 1));
-        correction.setOnClickListener(v -> showAyahSearch());
+        Button tools = new Button(this);
+        tools.setText("☰ أدوات المصحف");
+        tools.setTextSize(14);
+        tools.setAllCaps(false);
+        toolbar.addView(tools, new LinearLayout.LayoutParams(-1, dp(40)));
+        tools.setOnClickListener(v -> showMushafTools());
         // Put the controls above the page and let the page consume all remaining
         // available height. A fixed pixel-derived height left a large blank area
         // on phones with different density and navigation-bar sizes.
-        root.addView(toolbar, new LinearLayout.LayoutParams(-1, dp(34)));
+        root.addView(toolbar, new LinearLayout.LayoutParams(-1, dp(42)));
 
         offlineRow = new LinearLayout(this);
         offlineRow.setVisibility(View.GONE);
@@ -188,7 +181,7 @@ public class MushafPageActivity extends Activity {
         previous.setOnClickListener(v -> { if (page > 1) showPage(page - 1); });
         next.setOnClickListener(v -> { if (page < 604) showPage(page + 1); });
 
-        setContentView(AppTabs.wrap(this, root, "mushaf"));
+        setContentView(root);
     }
 
     private void toggleFullScreen() {
@@ -250,6 +243,7 @@ public class MushafPageActivity extends Activity {
 
     private void showMushafTools() {
         String[] actions = {
+                "فهرس السور",
                 "البحث بالسورة والآية",
                 "البحث عن الآيات المتشابهة",
                 "تشغيل آيات الصفحة الحالية",
@@ -258,9 +252,10 @@ public class MushafPageActivity extends Activity {
         new AlertDialog.Builder(this)
                 .setTitle("أدوات المصحف")
                 .setItems(actions, (dialog, which) -> {
-                    if (which == 0) showAyahSearch();
-                    else if (which == 1) showMutashabihatSearch();
-                    else if (which == 2) openInteractivePage();
+                    if (which == 0) showSurahIndex();
+                    else if (which == 1) showAyahSearch();
+                    else if (which == 2) showMutashabihatSearch();
+                    else if (which == 3) openInteractivePage();
                     else showOfflineDownloadDialog();
                 })
                 .setNegativeButton("إغلاق", null)
