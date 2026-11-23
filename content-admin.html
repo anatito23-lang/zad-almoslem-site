@@ -43,6 +43,20 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <div class="item"><strong>صوت السحور</strong><label for="audioFileSuhoor">اختيار ملف صوت من الهاتف</label><input id="audioFileSuhoor" type="file" accept=".mp3,.m4a,.wav,.ogg,audio/*"><div class="actions"><button type="button" data-audio-upload="suhoor">رفع ملف صوت السحور</button></div><label for="audioSuhoor">رابط ملف الصوت</label><input id="audioSuhoor" type="url" inputmode="url" value="https://zad-almoslem.github.io/مسحراتي.mp3"><div class="actions"><button type="button" data-audio-publish="suhoor">نشر رابط صوت السحور</button></div></div>
 <div id="audioAssetsMessage" class="notice hidden" role="status"></div>
 </section>
+<section class="card hidden" id="reelsAdminCard">
+<h2>إدارة الريلز الصوتية</h2>
+<p class="small">أضف صورة ثابتة وملفًا صوتيًا قصيرًا (أقل من دقيقة). يُرفع الصوت والصورة إلى GitHub، وتُحفظ بيانات الريلز في Firestore.</p>
+<form id="reelForm">
+<input id="reelId" type="hidden"><input id="reelImageUrl" type="hidden"><input id="reelAudioUrl" type="hidden">
+<label for="reelTitle">عنوان الريلز *</label><input id="reelTitle" maxlength="150" required>
+<label for="reelDescription">وصف أو نص مختصر</label><textarea id="reelDescription" maxlength="1200" style="min-height:90px"></textarea>
+<label for="reelImageFile">صورة الريلز *</label><input id="reelImageFile" type="file" accept="image/jpeg,image/png,image/webp">
+<label for="reelAudioFile">الصوت (MP3 أو M4A أو WAV أو OGG) *</label><input id="reelAudioFile" type="file" accept=".mp3,.m4a,.wav,.ogg,audio/*">
+<div class="row"><div><label for="reelOrder">ترتيب الظهور</label><input id="reelOrder" type="number" min="0" max="9999" value="0"></div><div><label class="check" style="margin-top:38px"><input id="reelPublished" type="checkbox" checked> نشر الريلز</label></div></div>
+<div class="actions"><button id="reelSave" type="submit">حفظ الريلز</button><button class="secondary" id="reelCancel" type="button">إلغاء</button><button class="secondary" id="reelRefresh" type="button">تحديث القائمة</button></div>
+</form><div id="reelsMessage" class="notice hidden" role="status"></div>
+<hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h2>الريلز المسجلة</h2><div id="reelsList"><p class="small">جارٍ التحميل…</p></div>
+</section>
 <section class="card hidden" id="customTabsCard">
 <h2>إنشاء وإدارة التبويبات الجديدة</h2>
 <p class="small">أضف أقسامًا جديدة، أو انشر محتوى داخل الأقسام الأساسية: استماع القرآن ورمضان والسبحة. المحتوى يظهر داخل القسم المناسب بعد مزامنة التطبيق مع الإنترنت.</p>
@@ -183,6 +197,63 @@ $("customContentForm").addEventListener("submit",async e=>{e.preventDefault();if
 $("customContentCancel").addEventListener("click",()=>{$("customContentForm").reset();$("customContentId").value="";$("customContentPublished").checked=true});
 
 
+// إدارة الريلز: صورة ثابتة + ملف صوتي قصير، مع بقاء مسار رفع أصوات التطبيق كما هو.
+const REEL_WORKER_URL="https://ancient-mountain-76f0.ana-tito23.workers.dev";
+const $reel=id=>document.getElementById(id);
+function reelMsg(text,error=false){const el=$reel("reelsMessage");el.textContent=text;el.classList.remove("hidden","error");if(error)el.classList.add("error")}
+function clearReelForm(){$reel("reelForm").reset();$reel("reelId").value="";$reel("reelImageUrl").value="";$reel("reelAudioUrl").value="";$reel("reelOrder").value="0";$reel("reelPublished").checked=true;$reel("reelSave").textContent="حفظ الريلز";clearMessage("reelsMessage")}
+async function uploadReelAsset(file,field){
+ const token=await auth.currentUser.getIdToken(),form=new FormData();form.append(field,file,file.name);
+ const response=await fetch(REEL_WORKER_URL,{method:"POST",headers:{Authorization:"Bearer "+token},body:form});
+ const result=await response.json().catch(()=>({}));
+ if(!response.ok||!result.ok||!result.url)throw new Error(result.error||"تعذر رفع الملف.");
+ return result.url;
+}
+function audioDuration(file){return new Promise((resolve,reject)=>{const url=URL.createObjectURL(file),audio=new Audio();audio.preload="metadata";audio.onloadedmetadata=()=>{const d=audio.duration;URL.revokeObjectURL(url);if(Number.isFinite(d))resolve(d);else reject(new Error("تعذر قراءة مدة الملف الصوتي."))};audio.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("تعذر قراءة الملف الصوتي."))};audio.src=url})}
+async function loadReels(){
+ if(auth.currentUser?.uid!==ADMIN_UID)return;
+ const box=$reel("reelsList");box.innerHTML='<p class="small">جارٍ تحميل الريلز…</p>';
+ try{
+  const snap=await getDocs(collection(db,"reels"));
+  const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
+  if(!rows.length){box.innerHTML='<p class="small">لا توجد ريلز مسجلة حتى الآن.</p>';return}
+  box.innerHTML=rows.map(r=>'<div class="item"><strong>'+escapeHtml(r.title||"بدون عنوان")+'</strong> <span class="tag">'+(isPublished(r)?"منشور":"مخفي")+'</span><p>'+escapeHtml(r.description||"")+'</p><div class="small">الترتيب: '+(Number(r.order)||0)+' • '+(Number(r.durationSeconds)||0)+' ثانية</div><div class="actions"><button type="button" data-reel-edit="'+escapeHtml(r.id)+'">تعديل</button><button class="secondary" type="button" data-reel-toggle="'+escapeHtml(r.id)+'">'+(isPublished(r)?"إخفاء":"نشر")+'</button><button class="danger" type="button" data-reel-delete="'+escapeHtml(r.id)+'">حذف</button></div></div>').join("");
+  window.__zadReelsAdminRows=rows;
+ }catch(e){box.innerHTML='<p class="small">تعذر تحميل الريلز: '+escapeHtml(e.message)+'</p>'}
+}
+$reel("reelForm").addEventListener("submit",async e=>{
+ e.preventDefault();if(auth.currentUser?.uid!==ADMIN_UID){reelMsg("سجّل الدخول بحساب المسؤول أولًا.",true);return}
+ const title=$reel("reelTitle").value.trim(),imageFile=$reel("reelImageFile").files[0],audioFile=$reel("reelAudioFile").files[0],editing=$reel("reelId").value;
+ if(!title){reelMsg("اكتب عنوان الريلز.",true);return}
+ if(!editing&&(!imageFile||!audioFile)){reelMsg("اختر صورة وملفًا صوتيًا للريلز الجديد.",true);return}
+ if(imageFile&&!["image/jpeg","image/png","image/webp"].includes(imageFile.type)){reelMsg("الصورة يجب أن تكون JPG أو PNG أو WebP.",true);return}
+ if(audioFile&&![".mp3",".m4a",".wav",".ogg"].some(ext=>audioFile.name.toLowerCase().endsWith(ext))){reelMsg("الصوت يجب أن يكون MP3 أو M4A أو WAV أو OGG.",true);return}
+ const order=Number($reel("reelOrder").value);if(!Number.isInteger(order)||order<0||order>9999){reelMsg("أدخل ترتيبًا صحيحًا.",true);return}
+ const button=$reel("reelSave"),old=button.textContent;button.disabled=true;button.textContent="جارٍ الحفظ…";
+ try{
+  let imageUrl=$reel("reelImageUrl").value,audioUrl=$reel("reelAudioUrl").value,duration=0;
+  if(imageFile){if(imageFile.size>5*1024*1024)throw new Error("حجم الصورة أكبر من 5 ميجابايت.");imageUrl=await uploadReelAsset(imageFile,"image")}
+  if(audioFile){if(audioFile.size>8*1024*1024)throw new Error("حجم الصوت أكبر من 8 ميجابايت.");duration=await audioDuration(audioFile);if(duration>=60)throw new Error("مدة الريلز يجب أن تكون أقل من دقيقة.");audioUrl=await uploadReelAsset(audioFile,"audio")}
+  if(!imageUrl||!audioUrl)throw new Error("لازم يكون للريلز صورة وصوت محفوظان.");
+  const pub=$reel("reelPublished").checked,data={title,description:$reel("reelDescription").value.trim(),imageUrl,audioUrl,order,published:pub,"تم النشر":pub,"النشر":pub,updatedAt:serverTimestamp()};
+  if(duration>0)data.durationSeconds=Math.round(duration*10)/10;
+  if(editing)await updateDoc(doc(db,"reels",editing),data);else{data.createdAt=serverTimestamp();await addDoc(collection(db,"reels"),data)}
+  clearReelForm();reelMsg(editing?"تم تحديث الريلز.":"تمت إضافة الريلز بنجاح.");await loadReels();
+ }catch(error){reelMsg("تعذر حفظ الريلز: "+error.message,true)}
+ finally{button.disabled=false;button.textContent=old}
+});
+$reel("reelsList").addEventListener("click",async e=>{
+ const b=e.target.closest("button");if(!b||auth.currentUser?.uid!==ADMIN_UID)return;
+ const id=b.dataset.reelEdit||b.dataset.reelToggle||b.dataset.reelDelete,rows=window.__zadReelsAdminRows||[],row=rows.find(x=>x.id===id);if(!row)return;
+ try{
+  if(b.dataset.reelEdit){$reel("reelId").value=id;$reel("reelTitle").value=row.title||"";$reel("reelDescription").value=row.description||"";$reel("reelImageUrl").value=row.imageUrl||"";$reel("reelAudioUrl").value=row.audioUrl||"";$reel("reelOrder").value=Number(row.order)||0;$reel("reelPublished").checked=isPublished(row);$reel("reelSave").textContent="حفظ التعديلات";reelMsg("عدّل الحقول، ويمكنك اختيار صورة أو صوت جديد بدل الملف الحالي.")}
+  else if(b.dataset.reelToggle){const pub=!isPublished(row);await updateDoc(doc(db,"reels",id),{published:pub,"تم النشر":pub,"النشر":pub,updatedAt:serverTimestamp()});reelMsg(pub?"تم نشر الريلز.":"تم إخفاء الريلز.");await loadReels()}
+  else if(b.dataset.reelDelete){if(!confirm("هل تريد حذف هذا الريلز من قائمة المحتوى؟"))return;await deleteDoc(doc(db,"reels",id));reelMsg("تم حذف الريلز من Firestore.");await loadReels()}
+ }catch(error){reelMsg("تعذر تنفيذ العملية: "+error.message,true)}
+});
+$reel("reelCancel").addEventListener("click",clearReelForm);
+$reel("reelRefresh").addEventListener("click",loadReels);
+
 // نشر روابط ملفات الصوت المستضافة على GitHub Pages بدل Firebase Storage.
 const AUDIO_UPLOADS={cannon:{input:"audioCannon",field:"cannonUrl",name:"مدفع الإفطار"},iftar:{input:"audioIftar",field:"iftarVoiceUrl",name:"إعلان الإفطار"},suhoor:{input:"audioSuhoor",field:"suhoorVoiceUrl",name:"صوت السحور"}};
 function audioMessage(value,error=false){const el=$("audioAssetsMessage");el.textContent=value;el.classList.remove("hidden","error");if(error)el.classList.add("error");}
@@ -267,6 +338,6 @@ $("siteContentForm").addEventListener("submit",async e=>{
 $("siteContentCancel").addEventListener("click",resetSiteForm);
 $("siteContentRefresh").addEventListener("click",loadSiteContent);
 
-onAuthStateChanged(auth,async user=>{if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");$("customTabsCard").classList.add("hidden");$("siteContentCard").classList.add("hidden");$("audioAssetsCard").classList.add("hidden");return}if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return}$("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("customTabsCard").classList.remove("hidden");$("siteContentCard").classList.add("hidden");$("audioAssetsCard").classList.remove("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";await loadItems();try{await readCustomTabs()}catch(e){customMessage("تعذر تحميل التبويبات: "+e.message,true)}});
+onAuthStateChanged(auth,async user=>{if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");$("customTabsCard").classList.add("hidden");$("siteContentCard").classList.add("hidden");$("audioAssetsCard").classList.add("hidden");$("reelsAdminCard").classList.add("hidden");return}if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return}$("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("customTabsCard").classList.remove("hidden");$("siteContentCard").classList.add("hidden");$("audioAssetsCard").classList.remove("hidden");$("reelsAdminCard").classList.remove("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";await loadItems();await loadReels();try{await readCustomTabs()}catch(e){customMessage("تعذر تحميل التبويبات: "+e.message,true)}});
 </script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=20261122-admin-pwa",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));}</script>
 </body></html>
