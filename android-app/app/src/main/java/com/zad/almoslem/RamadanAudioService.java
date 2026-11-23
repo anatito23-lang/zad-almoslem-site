@@ -20,7 +20,7 @@ public class RamadanAudioService extends Service {
         volume=Math.max(0f,Math.min(1f,volume));
         createChannel();
         Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
-        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("زاد وطمأنينة — رمضان")
+        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("سكينة — رمضان")
           .setContentText("تذكير رمضاني").setOngoing(true);
         startForeground(ID,b.build());
         stopCurrent();
@@ -106,7 +106,7 @@ public class RamadanAudioService extends Service {
         try{
             Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
             b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-                    .setContentTitle("زاد وطمأنينة — تسجيل صوتي")
+                    .setContentTitle("سكينة — تسجيل صوتي")
                     .setContentText("أضف التسجيل الصوتي المطلوب من قسم أصوات رمضان لتشغيله هنا.")
                     .setOngoing(false).setAutoCancel(true);
             getSystemService(NotificationManager.class).notify(ID,b.build());
