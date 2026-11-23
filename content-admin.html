@@ -191,7 +191,7 @@ document.querySelectorAll("[data-audio-publish]").forEach(button=>button.addEven
  const config=AUDIO_UPLOADS[button.dataset.audioPublish],input=$(config.input),url=input.value.trim();
  if(!url){audioMessage("الصق رابط ملف الصوت أولًا.",true);return;}
  let parsed;try{parsed=new URL(url)}catch(e){audioMessage("الرابط غير صحيح.",true);return;}
- if(parsed.protocol!=="https:"||parsed.hostname!=="zad-almoslem.github.io"||! /\\.(mp3|m4a|wav|ogg)(\\?.*)?$/i.test(parsed.pathname+parsed.search)){audioMessage("استخدم رابط HTTPS مباشرًا لملف صوتي مستضاف على zad-almoslem.github.io.",true);return;}
+ if(parsed.protocol!=="https:"||parsed.hostname!=="zad-almoslem.github.io"||! /\.(mp3|m4a|wav|ogg)(\?.*)?$/i.test(parsed.pathname+parsed.search)){audioMessage("استخدم رابط HTTPS مباشرًا لملف صوتي مستضاف على zad-almoslem.github.io.",true);return;}
  button.disabled=true;const old=button.textContent;button.textContent="جارٍ نشر الرابط…";
  try{
   await setDoc(doc(db,"app_audio_assets","ramadan"),{[config.field]:url,[config.field+"UpdatedAt"]:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true});
