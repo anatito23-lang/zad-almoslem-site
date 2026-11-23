@@ -460,7 +460,7 @@ public class RadioPlaybackService extends Service {
         Notification.Builder b = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
         b.setSmallIcon(android.R.drawable.ic_media_play)
-                .setContentTitle(title == null ? "زاد وطمأنينة" : title)
+                .setContentTitle(title == null ? "سكينة – أذان وصلاة وقرآن" : title)
                 .setContentText(message == null ? "تشغيل صوتي في الخلفية" : message)
                 .setContentIntent(content).setOngoing(true).setOnlyAlertOnce(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
