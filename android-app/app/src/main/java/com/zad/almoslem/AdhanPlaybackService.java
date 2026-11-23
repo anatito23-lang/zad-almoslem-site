@@ -197,6 +197,8 @@ public class AdhanPlaybackService extends Service {
                     "تشغيل الأذان", NotificationManager.IMPORTANCE_HIGH);
             channel.setDescription("إظهار شاشة الأذان على شاشة الهاتف عند دخول وقت الصلاة");
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+            channel.setSound(null, null);
+            channel.enableVibration(false);
             channel.setBypassDnd(false);
             nm.createNotificationChannel(channel);
         }
