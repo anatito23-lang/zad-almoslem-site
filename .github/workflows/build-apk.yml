@@ -111,8 +111,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install --yes webp
+          dwebp android-app/app/src/main/res/drawable-nodpi/ic_launcher_sakina.webp -o /tmp/sakina-icon.png
           python3 -m pip install --disable-pip-version-check Pillow
-          python3 android-app/scripts/generate_launcher_icons.py
+          python3 android-app/scripts/generate_launcher_icons.py /tmp/sakina-icon.png
           for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
             test -s "android-app/app/src/main/res/mipmap-${density}/ic_launcher.png"
           done
