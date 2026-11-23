@@ -39,7 +39,13 @@ public class RamadanAudioService extends Service {
             File audio=new File(new File(getFilesDir(),"ramadan_audio"),fileName);
             if (audio.isFile() && audio.length()>1000) playFile(audio,volume);
             else {
-                String remoteUrl=getSharedPreferences("zad_ramadan",MODE_PRIVATE).getString("remote_"+key,"");
+                // Test buttons use *_test keys, while RemoteAudioAssets stores the
+                // matching production URL keys. Resolve both to the same saved asset.
+                String remoteKey=key;
+                if("ramadan_cannon_test".equals(key)) remoteKey="ramadan_iftar_cannon";
+                else if("ramadan_iftar_voice_test".equals(key)) remoteKey="ramadan_iftar_voice";
+                else if("ramadan_suhoor_voice_test".equals(key)) remoteKey="ramadan_suhoor";
+                String remoteUrl=prefs.getString("remote_"+remoteKey,"");
                 if(remoteUrl.startsWith("https://")) playRemote(remoteUrl,volume);
                 else showMissingRecording();
             }
