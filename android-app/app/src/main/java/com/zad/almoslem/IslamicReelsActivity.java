@@ -186,6 +186,7 @@ public class IslamicReelsActivity extends Activity {
                 else status.setText("تعذر تحميل الصورة. تحقق من الاتصال.");
             });
         });
+        togglePlayback();
     }
 
     private Bitmap downloadBitmap(String url) throws Exception {
