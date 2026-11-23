@@ -66,7 +66,7 @@ public final class AppTabs {
         outer.setGravity(Gravity.CENTER_VERTICAL);
         outer.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         GradientDrawable barBg=new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
-            new int[]{Color.rgb(24,39,37),Color.rgb(13,27,26)});
+            new int[]{Color.rgb(239,245,237),Color.rgb(225,236,225)});
         barBg.setCornerRadii(new float[]{dp(a,18),dp(a,18),dp(a,18),dp(a,18),0,0,0,0});
         outer.setBackground(barBg);
         outer.setElevation(dp(a,8));
@@ -86,7 +86,7 @@ public final class AppTabs {
         dock.setOrientation(LinearLayout.HORIZONTAL);
         dock.setGravity(Gravity.CENTER);
         dock.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
-        GradientDrawable bg=new GradientDrawable();bg.setColor(AppThemeColors.nav(a));dock.setBackground(bg);
+        GradientDrawable bg=new GradientDrawable();bg.setColor(Color.rgb(247,249,244));bg.setCornerRadius(dp(a,16));bg.setStroke(dp(a,1),Color.rgb(211,224,210));dock.setBackground(bg);
         dock.setPadding(dp(a,1),dp(a,1),dp(a,1),dp(a,1));
         dockScroll.addView(dock,new HorizontalScrollView.LayoutParams(-2,-1));
         LinearLayout moreSlot=new LinearLayout(a);
@@ -186,7 +186,7 @@ public final class AppTabs {
         LinearLayout item=new LinearLayout(a);item.setOrientation(1);item.setGravity(Gravity.CENTER);
         item.setClickable(!selected);item.setFocusable(!selected);
         item.setPadding(dp(a,2),dp(a,1),dp(a,2),dp(a,1));
-        if(selected){GradientDrawable selectedBg=new GradientDrawable();selectedBg.setColor(Color.rgb(48,75,66));selectedBg.setCornerRadius(dp(a,12));selectedBg.setStroke(dp(a,1),Color.rgb(207,174,112));item.setBackground(selectedBg);}
+        if(selected){GradientDrawable selectedBg=new GradientDrawable();selectedBg.setColor(Color.rgb(218,235,218));selectedBg.setCornerRadius(dp(a,12));selectedBg.setStroke(dp(a,1),Color.rgb(177,199,165));item.setBackground(selectedBg);item.setElevation(dp(a,2));}
         else {GradientDrawable idleBg=new GradientDrawable();idleBg.setColor(Color.TRANSPARENT);idleBg.setCornerRadius(dp(a,12));item.setBackground(idleBg);}
         TextView emoji = new TextView(a);
         emoji.setText(emojiForTab(key, iconText));
@@ -195,7 +195,7 @@ public final class AppTabs {
         emoji.setIncludeFontPadding(false);
         item.addView(emoji, new LinearLayout.LayoutParams(-1, dp(a,38)));
         TextView label=new TextView(a);label.setText(labelText);label.setTextSize(9);label.setSingleLine(true);label.setGravity(Gravity.CENTER);
-        label.setTextColor(selected?Color.WHITE:Color.rgb(195,204,199));label.setTypeface(Typeface.DEFAULT,selected?Typeface.BOLD:Typeface.NORMAL);
+        label.setTextColor(selected?Color.rgb(28,83,59):Color.rgb(91,111,96));label.setTypeface(Typeface.DEFAULT,selected?Typeface.BOLD:Typeface.NORMAL);
         item.addView(label,new LinearLayout.LayoutParams(-1,dp(a,15)));
         item.setOnClickListener(v->{
             if("website".equals(key)){
