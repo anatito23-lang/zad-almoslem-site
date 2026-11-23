@@ -173,6 +173,8 @@ public class ReminderReceiver extends BroadcastReceiver {
         if(key==null)return;
         boolean prayer=key.startsWith("prayer_");
         android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
+        prefs.edit().putString("diag_last_received_key",key).putLong("diag_last_received_at",System.currentTimeMillis()).apply();
+        if(prayer) prefs.edit().putLong("diag_fired_"+key,System.currentTimeMillis()).apply();
         if ("gentle_reminder".equals(key)) {
             if(!prefs.getBoolean("gentle_enabled",false)) return;
             String[] messages={
