@@ -948,9 +948,9 @@ public class MainActivity extends Activity {
             String key = "prayer_" + prayer;
             long at = reminderPrefs.getLong(key, 0L);
             Intent alarmIntent = new Intent(this, ReminderReceiver.class);
-            int flags = PendingIntent.FLAG_NO_CREATE;
-            if (Build.VERSION.SDK_INT >= 23) flags |= PendingIntent.FLAG_IMMUTABLE;
-            PendingIntent pending = PendingIntent.getBroadcast(this, key.hashCode(), alarmIntent, flags);
+            int flags = android.app.PendingIntent.FLAG_NO_CREATE;
+            if (Build.VERSION.SDK_INT >= 23) flags |= android.app.PendingIntent.FLAG_IMMUTABLE;
+            android.app.PendingIntent pending = android.app.PendingIntent.getBroadcast(this, key.hashCode(), alarmIntent, flags);
             boolean enabled = reminderPrefs.getBoolean("prayer_enabled_" + prayer, true);
             long fired = reminderPrefs.getLong("diag_fired_" + key, 0L);
             report.append(prayer).append(": ")
