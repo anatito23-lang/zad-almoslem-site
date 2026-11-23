@@ -62,7 +62,8 @@ public class IslamicReelsActivity extends Activity {
     private final ArrayList<JSONObject> reels = new ArrayList<>();
     private int index = 0;
     private float downY;
-    private MediaPlayer player;\n    private boolean playerPrepared = false;
+    private MediaPlayer player;
+    private boolean playerPrepared = false;
     private ImageView image;
     private TextView title, description, counter, status;
     private Button playButton, saveAudioButton, saveReelButton, shareButton;
@@ -220,7 +221,8 @@ public class IslamicReelsActivity extends Activity {
     }
 
     private void stopPlayer() {
-        if (player != null) { try { player.stop(); } catch (Exception ignored) {} player.release(); player = null; }\n        playerPrepared = false;
+        if (player != null) { try { player.stop(); } catch (Exception ignored) {} player.release(); player = null; }
+        playerPrepared = false;
     }
 
     private void move(int direction) {
