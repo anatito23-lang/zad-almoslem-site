@@ -16,7 +16,7 @@ if(p.getBoolean("full_screen_permission_prompted",false))return;
 p.edit().putBoolean("full_screen_permission_prompted",true).apply();
 new android.app.AlertDialog.Builder(this)
 .setTitle("إظهار الأذان على شاشة الهاتف")
-.setMessage("حتى تظهر خلفية الأذان كاملة على شاشة الهاتف عند قفل الجهاز، اسمح لزاد وطمأنينة بإشعارات الشاشة الكاملة من إعدادات الهاتف.")
+.setMessage("حتى تظهر خلفية الأذان كاملة على شاشة الهاتف عند قفل الجهاز، اسمح لسكينة بإشعارات الشاشة الكاملة من إعدادات الهاتف.")
 .setPositiveButton("فتح الإعدادات",(dialog,which)->{
 try{startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,android.net.Uri.parse("package:"+getPackageName())));}
 catch(Exception error){android.util.Log.e("ZadStartup","Could not open full-screen notification settings",error);}
