@@ -2,6 +2,12 @@ name: Deploy audio upload Worker
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - zad-audio-worker.js
+      - .github/workflows/deploy-audio-worker.yml
 
 permissions:
   contents: read
