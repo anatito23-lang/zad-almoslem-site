@@ -14,7 +14,7 @@ public class BootReceiver extends BroadcastReceiver {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
         for(String key:new String[]{"morning","evening","qiyam"}) {
             if(p.getBoolean(key+"_enabled",false))
-                ReminderReceiver.scheduleDaily(context,key,p.getInt(key+"_hour",7),p.getInt(key+"_minute",0),p.getString(key+"_title","تذكير من زاد وطمأنينة"));
+                ReminderReceiver.scheduleDaily(context,key,p.getInt(key+"_hour",7),p.getInt(key+"_minute",0),p.getString(key+"_title","تذكير من سكينة"));
         }
         // Rebuild prayer alarms from their saved local wall-clock times.
         // This keeps them aligned after reboot, manual clock changes, and DST/time-zone changes.
