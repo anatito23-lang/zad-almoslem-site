@@ -31,7 +31,6 @@ import androidx.media3.common.MediaItem;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.effect.BitmapOverlay;
 import androidx.media3.effect.OverlayEffect;
-import androidx.media3.effect.StaticOverlaySettings;
 import androidx.media3.transformer.Composition;
 import androidx.media3.transformer.EditedMediaItem;
 import androidx.media3.transformer.EditedMediaItemSequence;
@@ -295,14 +294,14 @@ public class IslamicReelsActivity extends Activity {
             p.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD)); p.setTextAlign(Paint.Align.CENTER);
             canvas.drawText("زاد المسلم  |  zad-almoslem.github.io", markWidth / 2f,
                     markHeight - margin - bandHeight * 0.34f, p);
-            BitmapOverlay watermark = BitmapOverlay.createStaticBitmapOverlay(mark, new StaticOverlaySettings.Builder().build());
+            BitmapOverlay watermark = BitmapOverlay.createStaticBitmapOverlay(mark);
             OverlayEffect overlay = new OverlayEffect(Collections.singletonList(watermark));
             MediaItem imageItem = new MediaItem.Builder().setUri(Uri.fromFile(imageFile)).setImageDurationMs(durationMs).build();
             EditedMediaItem video = new EditedMediaItem.Builder(imageItem).setFrameRate(30)
                     .setRemoveAudio(true).setEffects(new Effects(Collections.emptyList(), Collections.singletonList(overlay))).build();
             EditedMediaItem audio = new EditedMediaItem.Builder(MediaItem.fromUri(Uri.fromFile(audioFile))).setRemoveVideo(true).build();
-            EditedMediaItemSequence videoSequence = EditedMediaItemSequence.withVideoFrom(Collections.singletonList(video));
-            EditedMediaItemSequence audioSequence = EditedMediaItemSequence.withAudioFrom(Collections.singletonList(audio));
+            EditedMediaItemSequence videoSequence = new EditedMediaItemSequence.Builder(Collections.singletonList(video)).build();
+            EditedMediaItemSequence audioSequence = new EditedMediaItemSequence.Builder(Collections.singletonList(audio)).build();
             Composition composition = new Composition.Builder(videoSequence, audioSequence).build();
             transformer = new Transformer.Builder(this).addListener(new Transformer.Listener() {
                 @Override public void onCompleted(Composition c, ExportResult result) {
