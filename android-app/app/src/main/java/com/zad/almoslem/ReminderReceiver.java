@@ -188,7 +188,8 @@ public class ReminderReceiver extends BroadcastReceiver {
         boolean exactAlarmAudioAllowed = Build.VERSION.SDK_INT < 31
                 || ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).canScheduleExactAlarms();
         boolean audioStartFailed = false;
-        boolean reminderAudioMasterEnabled = prefs.getBoolean("reminder_audio_master_enabled", true);
+        boolean powerSaverEnabled = prefs.getBoolean("power_saver_enabled", false);
+        boolean reminderAudioMasterEnabled = prefs.getBoolean("reminder_audio_master_enabled", true) && !powerSaverEnabled;
         if (reminderAudioMasterEnabled && !prayer && ("morning".equals(key) || "evening".equals(key) || "qiyam".equals(key))) {
             if (prefs.getBoolean(key + "_audio_enabled", true) && exactAlarmAudioAllowed) {
                 try { ReminderAudioService.play(context, key); } catch (Exception error) {
@@ -216,7 +217,7 @@ public class ReminderReceiver extends BroadcastReceiver {
             }
         }
         boolean adhanEnabled=prefs.getBoolean("adhan_enabled",true);
-        String adhanMode=prefs.getString("adhan_mode","adhan");
+        String adhanMode=powerSaverEnabled ? "takbeer" : prefs.getString("adhan_mode","adhan");
         String prayerName = prayer ? key.substring("prayer_".length()) : "";
         boolean thisPrayerEnabled = prayer && prefs.getBoolean("prayer_enabled_" + prayerName, true);
         if (prayer && prefs.getBoolean("prayer_silent_" + prayerName, false)) activateSilentMode(context);
@@ -261,7 +262,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         boolean gentleAudioEnabled = prefs.getBoolean("gentle_audio_enabled", true);
         boolean approachAlert = key.startsWith("approach_");
         boolean dailyAudioReminder = "morning".equals(key) || "evening".equals(key) || "qiyam".equals(key);
-        boolean fallbackAudioNotification = reminderAudioMasterEnabled && !prayer && (!exactAlarmAudioAllowed || audioStartFailed) && (
+        boolean fallbackAudioNotification = !powerSaverEnabled && reminderAudioMasterEnabled && !prayer && (!exactAlarmAudioAllowed || audioStartFailed) && (
                 (gentle && gentleAudioEnabled)
                 || (approachAlert && prefs.getBoolean("approach_alert_enabled", true))
                 || (dailyAudioReminder && prefs.getBoolean(key + "_audio_enabled", true)));
@@ -326,7 +327,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         if(fullScreen!=null) b.setFullScreenIntent(fullScreen,true);
         if(prayer && adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode)) b.setDefaults(Notification.DEFAULT_SOUND|Notification.DEFAULT_VIBRATE);
         else if(prayer && adhanEnabled && thisPrayerEnabled && "off".equals(adhanMode)) { /* no alert */ }
-        else if((gentle && exactAlarmAudioAllowed) || fallbackAudioNotification) b.setDefaults(0);
+        else if(powerSaverEnabled || (gentle && exactAlarmAudioAllowed) || fallbackAudioNotification) b.setDefaults(0);
         else b.setDefaults(Notification.DEFAULT_VIBRATE);
         if(!prayer || (adhanEnabled && thisPrayerEnabled && !"off".equals(adhanMode))) nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
