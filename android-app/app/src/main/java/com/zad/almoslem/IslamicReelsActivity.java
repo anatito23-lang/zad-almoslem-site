@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Canvas;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -57,13 +58,13 @@ public class IslamicReelsActivity extends Activity {
     private void build() {
         LinearLayout root = new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(14), dp(10), dp(14), dp(18)); root.setBackgroundColor(Color.BLACK);
-        TextView brand = label("زَادُ الْمُسْلِم  •  صور إيمانية", 16, 0xffffdf9b, true);
+        TextView brand = label("زَادُ الْمُسْلِم  •  ريلز إيمانية", 16, 0xffffdf9b, true);
         root.addView(brand, new LinearLayout.LayoutParams(-1, dp(42)));
         counter = label("", 12, Color.WHITE, false);
         root.addView(counter, new LinearLayout.LayoutParams(-1, dp(28)));
         FrameLayout frame = new FrameLayout(this);
         frame.setBackground(round(0xff172a28, 20));
-        image = new ImageView(this); image.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        image = new ImageView(this); image.setScaleType(ImageView.ScaleType.CENTER_CROP);
         frame.addView(image, new FrameLayout.LayoutParams(-1, -1));
         TextView watermark = label("زاد المسلم  |  zad-almoslem.github.io", 12, Color.WHITE, true);
         watermark.setBackground(round(0x99000000, 9)); watermark.setPadding(dp(9), dp(5), dp(9), dp(5));
@@ -75,7 +76,7 @@ public class IslamicReelsActivity extends Activity {
         root.addView(title, new LinearLayout.LayoutParams(-1, dp(44)));
         description = label("", 14, Color.WHITE, false);
         root.addView(description, new LinearLayout.LayoutParams(-1, -2));
-        status = label("تصفّح الصور الإيمانية", 12, 0xffd7e4dc, false);
+        status = label("اسحب للأعلى للتنقل بين الريلز", 12, 0xffd7e4dc, false);
         status.setPadding(0, dp(7), 0, dp(7)); root.addView(status);
         LinearLayout nav = new LinearLayout(this); nav.setGravity(Gravity.CENTER);
         previousButton = button("السابق"); nextButton = button("التالي");
@@ -106,10 +107,7 @@ public class IslamicReelsActivity extends Activity {
         Collections.sort(fresh, Comparator.comparingInt(o -> o.optInt("order", 0)));
         posts.clear(); posts.addAll(fresh);
         if (posts.isEmpty()) {
-            title.setText("لا توجد صور منشورة حاليًا");
-            description.setText("ستظهر هنا الصور التي تنشرها من لوحة الإدارة.");
-            counter.setText("0 / 0"); image.setImageDrawable(null);
-            previousButton.setEnabled(false); nextButton.setEnabled(false); return;
+            addBuiltInPosts();
         }
         if (index >= posts.size()) index = 0;
         showPost();
@@ -122,9 +120,14 @@ public class IslamicReelsActivity extends Activity {
         title.setText(post.optString("title", "تذكرة إيمانية"));
         description.setText(post.optString("description", ""));
         counter.setText((index + 1) + " / " + posts.size());
-        status.setText("جارٍ تحميل الصورة…");
         previousButton.setEnabled(posts.size() > 1); nextButton.setEnabled(posts.size() > 1);
         image.setImageDrawable(null);
+        if (post.optBoolean("builtin", false)) {
+            image.setImageBitmap(makeBuiltInCard(post.optString("verse"), post.optString("reference")));
+            status.setText("ريلز إيمانية جاهزة — صور فقط");
+            return;
+        }
+        status.setText("جارٍ تحميل الصورة…");
         io.execute(() -> {
             Bitmap bitmap = null;
             HttpURLConnection connection = null;
@@ -142,6 +145,55 @@ public class IslamicReelsActivity extends Activity {
                 else status.setText("تعذر تحميل الصورة. تحقق من الاتصال.");
             });
         });
+    }
+
+    private void addBuiltInPosts() {
+        String[][] cards = {
+            {"ألا بذكر الله تطمئن القلوب", "سورة الرعد • الآية ٢٨", "طمئن قلبك بذكر الله، ولا تجعل ضجيج الدنيا يسرق منك سكينة القرب منه."},
+            {"فإن مع العسر يسرا", "سورة الشرح • الآية ٥", "لا تيأس إذا ضاقت بك الأسباب؛ ففرج الله قريب، ورحمته أوسع من همك."},
+            {"ومن يتق الله يجعل له مخرجا", "سورة الطلاق • الآية ٢", "اجعل تقوى الله طريقك، وثق أن من صدق مع الله لم يضيعه الله."},
+            {"فاذكروني أذكركم", "سورة البقرة • الآية ١٥٢", "يا لها من كرامة! تذكر ربك فيذكرك، وتقبل عليه فيفتح لك أبواب رحمته."}
+        };
+        for (String[] item : cards) {
+            JSONObject row = new JSONObject();
+            try {
+                row.put("builtin", true);
+                row.put("title", "وقفة إيمانية");
+                row.put("verse", item[0]);
+                row.put("reference", item[1]);
+                row.put("description", item[2]);
+            } catch (Exception ignored) {}
+            posts.add(row);
+        }
+    }
+
+    private Bitmap makeBuiltInCard(String verse, String reference) {
+        int w = 1080, h = 1600;
+        Bitmap bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        android.graphics.drawable.GradientDrawable bg = new android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.TL_BR,
+                new int[]{0xff082d27, 0xff155443, 0xff0b302a});
+        bg.setBounds(0, 0, w, h);
+        bg.draw(canvas);
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setGravity(Gravity.CENTER);
+        card.setPadding(90, 110, 90, 110);
+        TextView brand = label("زَادُ الْمُسْلِم", 34, 0xffffdf9b, true);
+        TextView main = label(verse, 58, Color.WHITE, true);
+        main.setPadding(0, 55, 0, 55);
+        TextView ref = label(reference, 32, 0xffffdf9b, true);
+        TextView footer = label("تذكرة إيمانية", 26, 0xffd7e4dc, false);
+        card.addView(brand, new LinearLayout.LayoutParams(-1, -2));
+        card.addView(main, new LinearLayout.LayoutParams(-1, -2));
+        card.addView(ref, new LinearLayout.LayoutParams(-1, -2));
+        card.addView(footer, new LinearLayout.LayoutParams(-1, -2));
+        card.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY));
+        card.layout(0, 0, w, h);
+        card.draw(canvas);
+        return bitmap;
     }
 
     private void move(int direction) {
