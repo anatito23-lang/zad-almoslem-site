@@ -95,7 +95,20 @@ public class MushafPageActivity extends Activity {
     private void build() {
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(6), dp(2), dp(6), dp(2));
+        // Respect Android status/navigation bar insets so the toolbar never
+        // sits underneath the screen edge or system icons on edge-to-edge devices.
+        root.setPadding(dp(12), dp(12), dp(12), dp(12));
+        root.setOnApplyWindowInsetsListener((view, insets) -> {
+            if (!fullScreen) {
+                view.setPadding(
+                    dp(12) + insets.getSystemWindowInsetLeft(),
+                    dp(12) + insets.getSystemWindowInsetTop(),
+                    dp(12) + insets.getSystemWindowInsetRight(),
+                    dp(12) + insets.getSystemWindowInsetBottom()
+                );
+            }
+            return insets;
+        });
         root.setBackgroundColor(AppThemeColors.bg(this));
 
         toolbar = new LinearLayout(this);
@@ -111,7 +124,9 @@ public class MushafPageActivity extends Activity {
         // Put the controls above the page and let the page consume all remaining
         // available height. A fixed pixel-derived height left a large blank area
         // on phones with different density and navigation-bar sizes.
-        root.addView(toolbar, new LinearLayout.LayoutParams(-1, dp(42)));
+        LinearLayout.LayoutParams toolbarLp = new LinearLayout.LayoutParams(-1, dp(46));
+        toolbarLp.bottomMargin = dp(8);
+        root.addView(toolbar, toolbarLp);
 
         offlineRow = new LinearLayout(this);
         offlineRow.setVisibility(View.GONE);
