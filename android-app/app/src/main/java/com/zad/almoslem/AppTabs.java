@@ -159,10 +159,6 @@ public final class AppTabs {
         JSONObject more=new JSONObject();
         try{more.put("key","more");more.put("label","المزيد");more.put("icon","⋯");more.put("visible",true);}catch(Exception ignored){}
         moreSlot.addView(makeTabItem(a,more,active,li),new LinearLayout.LayoutParams(-1,-1));
-        // A permanent website shortcut opens the public site in the user's external browser.
-        JSONObject website=new JSONObject();
-        try{website.put("key","website");website.put("label","الموقع");website.put("icon","🌐");website.put("visible",true);}catch(Exception ignored){}
-        dock.addView(makeTabItem(a,website,active,li),new LinearLayout.LayoutParams(dp(a,62),-1));
         for(JSONObject row:rows){
             dock.addView(makeTabItem(a,row,active,li),new LinearLayout.LayoutParams(dp(a,62),-1));
         }
