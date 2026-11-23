@@ -90,7 +90,7 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,collection,getDocs,addDoc,updateDoc,deleteDoc,doc,serverTimestamp,getDoc,setDoc,writeBatch} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {getStorage,ref as storageRef,uploadBytes,getDownloadURL} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import {getStorage,ref as storageRef,uploadBytesResumable,getDownloadURL} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 const firebaseConfig={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
 const ADMIN_UID="5UkeBQyyGGZcICXULT9LUD0S4lt2",app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),$=id=>document.getElementById(id);const storage=getStorage(app);
 const names={azkar:"الأذكار",duas:"الأدعية",khutbahs:"الخطب",waqafat:"الوقفات الإيمانية"};
@@ -193,10 +193,21 @@ document.querySelectorAll("[data-audio-upload]").forEach(button=>button.addEvent
  if(!file.type.startsWith("audio/")||file.size>25*1024*1024){audioMessage("الملف يجب أن يكون صوتيًا وألا يتجاوز 25 ميجابايت.",true);return;}
  button.disabled=true;const old=button.textContent;button.textContent="جارٍ الرفع…";
  try{const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_").slice(-90)||"audio";const path="app-audio/"+config.field.replace("Url","")+"/"+Date.now()+"-"+safeName;
-  const target=storageRef(storage,path);await uploadBytes(target,file,{contentType:file.type});const url=await getDownloadURL(target);
+  const target=storageRef(storage,path);
+  audioMessage("بدأ رفع "+config.name+" إلى التخزين: 0٪");
+  const uploadTask=uploadBytesResumable(target,file,{contentType:file.type});
+  await new Promise((resolve,reject)=>{
+   uploadTask.on("state_changed",snapshot=>{
+    const percent=snapshot.totalBytes?Math.round(snapshot.bytesTransferred/snapshot.totalBytes*100):0;
+    audioMessage("جارٍ رفع "+config.name+" إلى التخزين: "+percent+"٪");
+   },reject,resolve);
+  });
+  audioMessage("اكتمل رفع الملف. جارٍ استخراج رابط التنزيل…");
+  const url=await getDownloadURL(target);
+  audioMessage("تم رفع الملف. جارٍ حفظ رابط النشر في قاعدة البيانات…");
   await setDoc(doc(db,"app_audio_assets","ramadan"),{[config.field]:url,[config.field+"UpdatedAt"]:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true});
-  input.value="";audioMessage("تم رفع ونشر "+config.name+". سيزامن التطبيق الملف عند اتصاله بالإنترنت.");
- }catch(error){audioMessage("تعذر رفع الملف أو نشر رابطه: "+error.message,true);}
+  input.value="";audioMessage("تم رفع ونشر "+config.name+" بنجاح. سيزامن التطبيق الملف عند اتصاله بالإنترنت.");
+ }catch(error){audioMessage("فشلت العملية أثناء الرفع أو النشر: "+(error?.code||"")+(error?.message?" — "+error.message:" تعذر تحديد السبب."),true);}
  finally{button.disabled=false;button.textContent=old;}
 }));
 // إدارة المنشورات الإضافية داخل جميع أقسام الموقع
