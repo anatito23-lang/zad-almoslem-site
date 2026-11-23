@@ -86,7 +86,8 @@ function fileExtension(name) {
   return match ? match[1] : "";
 }
 async function uploadToGitHub(file, kind, env) {
-  if (!env.GITHUB_TOKEN) throw new Error("إعداد الرفع غير مكتمل على الخادم.");
+  const githubToken = env.GITHUB_TOKEN || env.GITHUB || env.GH_TOKEN;
+  if (!githubToken) throw new Error("إعداد الرفع غير مكتمل على الخادم: أضف سر GitHub باسم GITHUB_TOKEN أو GITHUB في إعدادات Worker.");
   const ext = fileExtension(file.name);
   const audioTypes = { mp3: ["audio/mpeg", "audio/mp3"], m4a: ["audio/mp4", "audio/x-m4a", "audio/m4a"], wav: ["audio/wav", "audio/x-wav"], ogg: ["audio/ogg", "application/ogg"] };
   const imageTypes = { jpg: ["image/jpeg"], jpeg: ["image/jpeg"], png: ["image/png"], webp: ["image/webp"] };
@@ -103,7 +104,7 @@ async function uploadToGitHub(file, kind, env) {
   const response = await fetch("https://api.github.com/repos/" + GITHUB_OWNER + "/" + GITHUB_REPO + "/contents/" + apiPath, {
     method: "PUT",
     headers: {
-      "Authorization": "Bearer " + env.GITHUB_TOKEN,
+      "Authorization": "Bearer " + githubToken,
       "Accept": "application/vnd.github+json",
       "Content-Type": "application/json",
       "X-GitHub-Api-Version": "2022-11-28"
