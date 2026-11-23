@@ -232,7 +232,7 @@ $reel("reelForm").addEventListener("submit",async e=>{
  const button=$reel("reelSave"),old=button.textContent;button.disabled=true;button.textContent="جارٍ الحفظ…";
  try{
   let imageUrl=$reel("reelImageUrl").value,audioUrl=$reel("reelAudioUrl").value,duration=0;
-  if(imageFile){if(imageFile.size>5*1024*1024)throw new Error("حجم الصورة أكبر من 5 ميجابايت.");imageUrl=await uploadReelAsset(imageFile,"image")}
+  if(imageFile){if(imageFile.size>8*1024*1024)throw new Error("حجم الصورة أكبر من 8 ميجابايت.");imageUrl=await uploadReelAsset(imageFile,"image")}
   if(audioFile){if(audioFile.size>8*1024*1024)throw new Error("حجم الصوت أكبر من 8 ميجابايت.");duration=await audioDuration(audioFile);if(duration>=60)throw new Error("مدة الريلز يجب أن تكون أقل من دقيقة.");audioUrl=await uploadReelAsset(audioFile,"audio")}
   if(!imageUrl||!audioUrl)throw new Error("لازم يكون للريلز صورة وصوت محفوظان.");
   const pub=$reel("reelPublished").checked,data={title,description:$reel("reelDescription").value.trim(),imageUrl,audioUrl,order,published:pub,"تم النشر":pub,"النشر":pub,updatedAt:serverTimestamp()};
