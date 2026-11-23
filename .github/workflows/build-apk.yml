@@ -107,6 +107,16 @@ jobs:
           print(f"Validated CC0 human adhan: {len(data)} bytes")
           PY
 
+      - name: Generate density-specific PNG launcher icons
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip install --disable-pip-version-check Pillow
+          python3 android-app/scripts/generate_launcher_icons.py
+          for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            test -s "android-app/app/src/main/res/mipmap-${density}/ic_launcher.png"
+          done
+
       - name: Build debug APK
         working-directory: android-app
         run: gradle assembleDebug
