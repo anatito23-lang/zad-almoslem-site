@@ -49,6 +49,7 @@ public class DailyReminderSettingsActivity extends Activity {
   TextView title=label("تنبيهاتك اليومية",24,Color.WHITE,true);title.setGravity(Gravity.CENTER);TextView sub=label("اختر مواعيد التذكير التي تناسب يومك",13,Color.rgb(222,239,229),false);sub.setGravity(Gravity.CENTER);
   LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(14),dp(18),dp(14),dp(18));hero.setBackground(bg(green,18));hero.addView(title);hero.addView(sub);root.addView(hero);
   addReminderAudioMasterSwitch(root);
+  addPowerSaverSwitch(root);
   addNotificationAccess(root);
   for(int i=0;i<keys.length;i++)addReminder(root,i);
   addGentleReminders(root);
@@ -71,6 +72,22 @@ public class DailyReminderSettingsActivity extends Activity {
    prefs.edit().putBoolean("reminder_audio_master_enabled",checked).apply();
    if(!checked)ReminderAudioService.stop(this);
    Toast.makeText(this,checked?"تم تشغيل أصوات التذكيرات":"تم إيقاف أصوات التذكيرات",Toast.LENGTH_SHORT).show();
+  });
+ }
+
+ private void addPowerSaverSwitch(LinearLayout root){
+  LinearLayout card=new LinearLayout(this);card.setOrientation(LinearLayout.VERTICAL);
+  card.setPadding(dp(14),dp(12),dp(14),dp(12));card.setBackground(bg(Color.WHITE,15));
+  LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.topMargin=dp(12);root.addView(card,lp);
+  card.addView(label("وضع توفير الطاقة",18,green,true));
+  TextView desc=label("عند التفعيل: تتوقف التلاوات الصوتية للتذكيرات ويظل إشعارها ظاهرًا دون صوت أو اهتزاز، ويعمل الأذان بتكبيرات البداية فقط وبصوت منخفض. يمكنك إيقاف الوضع في أي وقت.",12,Color.GRAY,false);
+  desc.setPadding(0,dp(5),0,dp(8));card.addView(desc);
+  Switch saver=new Switch(this);saver.setText("تفعيل وضع توفير الطاقة");
+  saver.setChecked(prefs.getBoolean("power_saver_enabled",false));card.addView(saver);
+  saver.setOnCheckedChangeListener((button,enabled)->{
+   prefs.edit().putBoolean("power_saver_enabled",enabled).apply();
+   if(enabled)ReminderAudioService.stop(this);
+   Toast.makeText(this,enabled?"تم تفعيل توفير الطاقة: إشعارات مرئية وأذان مختصر منخفض الصوت":"تم إيقاف وضع توفير الطاقة",Toast.LENGTH_SHORT).show();
   });
  }
 
