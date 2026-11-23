@@ -17,6 +17,7 @@ public class ReminderReceiver extends BroadcastReceiver {
     private static final String PRAYER_TONE_CHANNEL_ID = "zad_prayer_tone";
     private static final String GENTLE_CHANNEL_ID = "zad_gentle_reminders_v3";
     private static final String AUDIO_FALLBACK_CHANNEL_ID = "zad_reminder_audio_fallback_v3";
+    private static final String POWER_SAVER_CHANNEL_ID = "zad_power_saver_visual_v1";
 
     public static void scheduleDaily(Context context, String key, int hour, int minute, String title) {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders", Context.MODE_PRIVATE);
@@ -267,8 +268,9 @@ public class ReminderReceiver extends BroadcastReceiver {
                 || (approachAlert && prefs.getBoolean("approach_alert_enabled", true))
                 || (dailyAudioReminder && prefs.getBoolean(key + "_audio_enabled", true)));
         String channelId=prayer?((adhanEnabled && thisPrayerEnabled && "tone".equals(adhanMode))?PRAYER_TONE_CHANNEL_ID:PRAYER_CHANNEL_ID):
+                (powerSaverEnabled?POWER_SAVER_CHANNEL_ID:
                 (gentle?(fallbackAudioNotification?AUDIO_FALLBACK_CHANNEL_ID:GENTLE_CHANNEL_ID):
-                (fallbackAudioNotification?AUDIO_FALLBACK_CHANNEL_ID:CHANNEL_ID));
+                (fallbackAudioNotification?AUDIO_FALLBACK_CHANNEL_ID:CHANNEL_ID)));
         if(Build.VERSION.SDK_INT>=26){
             NotificationChannel ch;
             if(prayer){
@@ -281,6 +283,11 @@ public class ReminderReceiver extends BroadcastReceiver {
                 toneCh.setDescription("نغمة قصيرة عند دخول وقت الصلاة");
                 toneCh.enableVibration(true);
                 nm.createNotificationChannel(toneCh);
+            } else if(powerSaverEnabled) {
+                ch=new NotificationChannel(POWER_SAVER_CHANNEL_ID,"إشعارات توفير الطاقة",NotificationManager.IMPORTANCE_LOW);
+                ch.setDescription("إشعارات مرئية فقط دون صوت أو اهتزاز عند تفعيل وضع توفير الطاقة");
+                ch.setSound(null,null);
+                ch.enableVibration(false);
             } else if(fallbackAudioNotification) {
                 // If exact alarms are unavailable, Android may reject the background
                 // audio foreground-service launch. Use a distinct audible notification
