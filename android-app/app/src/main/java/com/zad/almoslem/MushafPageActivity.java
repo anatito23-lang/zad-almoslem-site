@@ -19,6 +19,7 @@ import android.widget.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.Locale;
 
 public class MushafPageActivity extends Activity {
@@ -120,16 +121,7 @@ public class MushafPageActivity extends Activity {
         root.addView(toolbar, new LinearLayout.LayoutParams(-1, dp(34)));
 
         offlineRow = new LinearLayout(this);
-        offlineRow.setOrientation(LinearLayout.VERTICAL);
-        offlineRow.setPadding(dp(4), dp(1), dp(4), dp(1));
-        Button downloadAll = new Button(this);
-        downloadAll.setText("تحميل المصحف كاملًا للعمل دون إنترنت");
-        downloadAll.setAllCaps(false);
-        TextView offlineStatus = label("يمكنك تنزيل الصفحات الـ 604 مرة واحدة والقراءة دون اتصال.", 11, AppThemeColors.muted(this), false);
-        offlineRow.addView(downloadAll, new LinearLayout.LayoutParams(-1, dp(34)));
-        offlineRow.addView(offlineStatus, new LinearLayout.LayoutParams(-1, dp(14)));
-        root.addView(offlineRow, new LinearLayout.LayoutParams(-1, -2));
-        downloadAll.setOnClickListener(v -> downloadAllPages(downloadAll, offlineStatus));
+        offlineRow.setVisibility(View.GONE);
 
         pageFrame = new LinearLayout(this);
         pageFrame.setOrientation(LinearLayout.VERTICAL);
@@ -145,9 +137,17 @@ public class MushafPageActivity extends Activity {
         imageLp.bottomMargin = dp(1);
         root.addView(pageFrame, imageLp);
 
+        pageLabel = label("الصفحة 1 من 604", 13, AppThemeColors.text(this), true);
+        pageLabel.setPadding(0, dp(3), 0, dp(3));
+        root.addView(pageLabel, new LinearLayout.LayoutParams(-1, dp(25)));
+
         gesture = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override public boolean onDown(MotionEvent e) { return true; }
-            @Override public boolean onSingleTapUp(MotionEvent e) {
+            @Override public boolean onSingleTapConfirmed(MotionEvent e) {
+                openInteractivePage();
+                return true;
+            }
+            @Override public boolean onDoubleTap(MotionEvent e) {
                 toggleFullScreen();
                 return true;
             }
@@ -198,6 +198,7 @@ public class MushafPageActivity extends Activity {
             root.setPadding(0, 0, 0, 0);
             toolbar.setVisibility(View.GONE);
             offlineRow.setVisibility(View.GONE);
+            pageLabel.setVisibility(View.GONE);
             status.setVisibility(View.GONE);
             attribution.setVisibility(View.GONE);
             progress.setVisibility(View.GONE);
@@ -216,7 +217,8 @@ public class MushafPageActivity extends Activity {
             AppThemeColors.apply(this);
             root.setPadding(dp(6), dp(2), dp(6), dp(2));
             toolbar.setVisibility(View.VISIBLE);
-            offlineRow.setVisibility(View.VISIBLE);
+            offlineRow.setVisibility(View.GONE);
+            pageLabel.setVisibility(View.VISIBLE);
             status.setVisibility(View.VISIBLE);
             attribution.setVisibility(View.VISIBLE);
             nav.setVisibility(View.VISIBLE);
@@ -245,6 +247,127 @@ public class MushafPageActivity extends Activity {
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             );
         }
+    }
+
+    private void showMushafTools() {
+        String[] actions = {
+                "البحث بالسورة والآية",
+                "البحث عن الآيات المتشابهة",
+                "تشغيل آيات الصفحة الحالية",
+                "تحميل المصحف كاملًا للعمل دون إنترنت"
+        };
+        new AlertDialog.Builder(this)
+                .setTitle("أدوات المصحف")
+                .setItems(actions, (dialog, which) -> {
+                    if (which == 0) showAyahSearch();
+                    else if (which == 1) showMutashabihatSearch();
+                    else if (which == 2) openInteractivePage();
+                    else showOfflineDownloadDialog();
+                })
+                .setNegativeButton("إغلاق", null)
+                .show();
+    }
+
+    private void showOfflineDownloadDialog() {
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        box.setPadding(dp(18), dp(12), dp(18), dp(8));
+        TextView message = label("سيتم تنزيل صفحات المصحف الـ604 وحفظها على الهاتف للقراءة دون إنترنت.", 13, AppThemeColors.text(this), false);
+        box.addView(message, new LinearLayout.LayoutParams(-1, -2));
+        Button download = new Button(this);
+        download.setText("ابدأ تنزيل المصحف");
+        download.setAllCaps(false);
+        box.addView(download, new LinearLayout.LayoutParams(-1, dp(46)));
+        TextView progressMessage = label("لم يبدأ التنزيل بعد", 12, AppThemeColors.muted(this), false);
+        box.addView(progressMessage, new LinearLayout.LayoutParams(-1, dp(36)));
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("تنزيل المصحف")
+                .setView(box)
+                .setNegativeButton("إغلاق", null)
+                .create();
+        download.setOnClickListener(v -> downloadAllPages(download, progressMessage));
+        dialog.show();
+    }
+
+    private void showMutashabihatSearch() {
+        EditText phrase = new EditText(this);
+        phrase.setSingleLine(false);
+        phrase.setMinLines(2);
+        phrase.setHint("اكتب كلمة أو عبارة من الآية");
+        new AlertDialog.Builder(this)
+                .setTitle("البحث عن الآيات المتشابهة")
+                .setMessage("اكتب لفظًا أو عبارة قرآنية لعرض مواضع ورودها في القرآن.")
+                .setView(phrase)
+                .setPositiveButton("بحث", (dialog, which) -> searchRepeatedAyahPhrase(phrase.getText().toString().trim()))
+                .setNegativeButton("إلغاء", null)
+                .show();
+    }
+
+    private void searchRepeatedAyahPhrase(String phrase) {
+        if (phrase == null || phrase.trim().length() < 2) {
+            Toast.makeText(this, "اكتب كلمة أو عبارة من الآية", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        status.setText("جارٍ البحث عن مواضع العبارة في القرآن...");
+        progress.setVisibility(View.VISIBLE);
+        new Thread(() -> {
+            HttpURLConnection connection = null;
+            try {
+                String encoded = URLEncoder.encode(phrase, "UTF-8");
+                URL url = new URL("https://api.alquran.cloud/v1/search/" + encoded + "/all/ar");
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setConnectTimeout(15000);
+                connection.setReadTimeout(25000);
+                connection.setRequestProperty("User-Agent", "ZadAlmoslem-Android");
+                if (connection.getResponseCode() != 200) throw new IOException("تعذر الاتصال بخدمة البحث");
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                try (InputStream in = connection.getInputStream()) {
+                    byte[] buffer = new byte[8192]; int count;
+                    while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
+                }
+                org.json.JSONObject response = new org.json.JSONObject(new String(out.toByteArray(), java.nio.charset.StandardCharsets.UTF_8));
+                org.json.JSONObject data = response.optJSONObject("data");
+                org.json.JSONArray matches = data == null ? null : data.optJSONArray("matches");
+                if (response.optInt("code") != 200 || matches == null || matches.length() == 0)
+                    throw new IOException("لم نعثر على مواضع مطابقة لهذه العبارة.");
+                String[] labels = new String[matches.length()];
+                int[] surahs = new int[matches.length()];
+                int[] versesFound = new int[matches.length()];
+                int[] pages = new int[matches.length()];
+                for (int i = 0; i < matches.length(); i++) {
+                    org.json.JSONObject item = matches.getJSONObject(i);
+                    org.json.JSONObject surah = item.optJSONObject("surah");
+                    surahs[i] = surah == null ? 1 : surah.optInt("number", 1);
+                    versesFound[i] = item.optInt("numberInSurah", 1);
+                    pages[i] = item.optInt("page", 1);
+                    String name = surah == null ? SURAHS[surahs[i] - 1] : surah.optString("name", SURAHS[surahs[i] - 1]);
+                    labels[i] = "سورة " + name + " — الآية " + versesFound[i] + " — صفحة " + pages[i];
+                }
+                runOnUiThread(() -> {
+                    progress.setVisibility(View.GONE);
+                    status.setText("نتائج البحث: " + matches.length() + " موضعًا.");
+                    new AlertDialog.Builder(this)
+                            .setTitle("مواضع العبارة في القرآن")
+                            .setItems(labels, (d, selected) -> {
+                                Intent open = new Intent(this, QuranTextActivity.class);
+                                open.putExtra("page_number", pages[selected]);
+                                open.putExtra("surah_number", surahs[selected]);
+                                open.putExtra("target_ayah", versesFound[selected]);
+                                startActivity(open);
+                            })
+                            .setNegativeButton("إغلاق", null)
+                            .show();
+                });
+            } catch (Exception error) {
+                runOnUiThread(() -> {
+                    progress.setVisibility(View.GONE);
+                    status.setText(error.getMessage() == null ? "تعذر البحث الآن." : error.getMessage());
+                    Toast.makeText(this, error.getMessage() == null ? "تعذر البحث الآن." : error.getMessage(), Toast.LENGTH_LONG).show();
+                });
+            } finally {
+                if (connection != null) connection.disconnect();
+            }
+        }).start();
     }
 
     private void showAyahSearch() {
