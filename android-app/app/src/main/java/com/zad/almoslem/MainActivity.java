@@ -264,6 +264,11 @@ public class MainActivity extends Activity {
         TextView audioDiagnostics = text("يعرض حالة ملفات الأذان المحفوظة على الهاتف.",12,Color.rgb(70,85,75),false);
         root.addView(audioDiagnostics,matchWrap());
         audioCheck.setOnClickListener(v -> audioDiagnostics.setText(buildAudioDiagnostics()));
+        Button prayerCheck = new Button(this);prayerCheck.setText("فحص جدولة الصلوات");
+        root.addView(prayerCheck,matchWrap());
+        TextView prayerDiagnostics = text("يعرض حالة منبّه كل صلاة ووقت تشغيله الأخير.",12,Color.rgb(70,85,75),false);
+        root.addView(prayerDiagnostics,matchWrap());
+        prayerCheck.setOnClickListener(v -> prayerDiagnostics.setText(buildPrayerScheduleDiagnostics()));
         setContentView(AppTabs.wrap(this,scroll,"more"));
     }
 
@@ -921,6 +926,51 @@ public class MainActivity extends Activity {
         if(files!=null)for(File f:files)if(f.isFile()&&(f.getName().endsWith(".mp3")||f.getName().endsWith(".ogg"))){count++;bytes+=f.length();}
         if(status!=null)status.setText("التسجيلات المحفوظة داخل التطبيق: "+count+" ملف — "+android.text.format.Formatter.formatShortFileSize(this,bytes));
     }
+    private String buildPrayerScheduleDiagnostics() {
+        StringBuilder report = new StringBuilder();
+        android.content.SharedPreferences reminderPrefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
+        android.app.AlarmManager alarmManager = (android.app.AlarmManager)getSystemService(ALARM_SERVICE);
+        android.app.NotificationManager notificationManager = (android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        boolean exactAllowed = Build.VERSION.SDK_INT < 31 || (alarmManager != null && alarmManager.canScheduleExactAlarms());
+        boolean notificationsAllowed = notificationManager != null && notificationManager.areNotificationsEnabled();
+        report.append("إذن المنبّهات الدقيقة: ").append(exactAllowed ? "مسموح" : "غير مسموح").append("\\n");
+        report.append("إشعارات التطبيق: ").append(notificationsAllowed ? "مسموحة" : "محظورة").append("\\n");
+        report.append("تفعيل الأذان العام: ").append(reminderPrefs.getBoolean("adhan_enabled", true) ? "مفعّل" : "متوقف").append("\\n");
+        report.append("وضع الأذان: ").append(reminderPrefs.getString("adhan_mode", "adhan")).append("\\n");
+        report.append("آخر منبّه استلمه التطبيق: ")
+                .append(reminderPrefs.getString("diag_last_received_key", "لم يُسجّل بعد"))
+                .append(" — ")
+                .append(reminderPrefs.getLong("diag_last_received_at", 0L) > 0
+                        ? android.text.format.DateFormat.format("yyyy-MM-dd HH:mm:ss", reminderPrefs.getLong("diag_last_received_at", 0L))
+                        : "لا يوجد")
+                .append("\\n\\n");
+        for (String prayer : PRAYERS) {
+            String key = "prayer_" + prayer;
+            long at = reminderPrefs.getLong(key, 0L);
+            Intent alarmIntent = new Intent(this, ReminderReceiver.class);
+            int flags = PendingIntent.FLAG_NO_CREATE;
+            if (Build.VERSION.SDK_INT >= 23) flags |= PendingIntent.FLAG_IMMUTABLE;
+            PendingIntent pending = PendingIntent.getBroadcast(this, key.hashCode(), alarmIntent, flags);
+            boolean enabled = reminderPrefs.getBoolean("prayer_enabled_" + prayer, true);
+            long fired = reminderPrefs.getLong("diag_fired_" + key, 0L);
+            report.append(prayer).append(": ")
+                    .append(enabled ? "مفعّلة" : "متوقفة")
+                    .append(" | المنبّه: ").append(pending != null ? "مسجّل" : "غير موجود")
+                    .append(" | الموعد: ")
+                    .append(at > 0 ? android.text.format.DateFormat.format("yyyy-MM-dd HH:mm", at) : "غير محفوظ")
+                    .append(" | آخر تشغيل: ")
+                    .append(fired > 0 ? android.text.format.DateFormat.format("MM-dd HH:mm", fired) : "لم يعمل بعد")
+                    .append("\\n");
+        }
+        if (Build.VERSION.SDK_INT >= 26 && notificationManager != null) {
+            android.app.NotificationChannel channel = notificationManager.getNotificationChannel("zad_prayer_alerts_v3");
+            report.append("\\nقناة إشعارات الصلاة: ");
+            if (channel == null) report.append("لم تُنشأ بعد");
+            else report.append("موجودة — أهمية ").append(channel.getImportance());
+        }
+        return report.toString();
+    }
+
     private String buildAudioDiagnostics() {
         StringBuilder report = new StringBuilder();
         android.content.SharedPreferences audioPrefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
