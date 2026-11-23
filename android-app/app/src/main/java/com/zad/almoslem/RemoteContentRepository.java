@@ -30,7 +30,7 @@ public final class RemoteContentRepository {
 
     public static void sync(Context context, String collection, Runnable onUpdated) {
         if (!"azkar".equals(collection) && !"duas".equals(collection)
-                && !"khutbahs".equals(collection) && !"waqafat".equals(collection)) return;
+                && !"khutbahs".equals(collection) && !"waqafat".equals(collection) && !"reels".equals(collection)) return;
         Context app = context.getApplicationContext();
         String[] publicationFields = {"published", "تم النشر", "النشر"};
         Map<String, JSONObject> merged = new HashMap<>();
@@ -51,7 +51,15 @@ public final class RemoteContentRepository {
                                     Map<String, Object> data = doc.getData();
                                     putIfPresent(row, "id", doc.getId());
                                     putIfPresent(row, "published", true);
-                                    if ("khutbahs".equals(collection) || "waqafat".equals(collection)) {
+                                    if ("reels".equals(collection)) {
+                                        putIfPresent(row, "title", data.get("title"));
+                                        putIfPresent(row, "description", data.get("description"));
+                                        putIfPresent(row, "imageUrl", data.get("imageUrl"));
+                                        putIfPresent(row, "audioUrl", data.get("audioUrl"));
+                                        putIfPresent(row, "durationSeconds", data.get("durationSeconds"));
+                                        putIfPresent(row, "order", data.get("order"));
+                                        putIfPresent(row, "createdAt", data.get("createdAt"));
+                                    } else if ("khutbahs".equals(collection) || "waqafat".equals(collection)) {
                                         putIfPresent(row, "title", data.get("title"));
                                         Object body = first(data, "body", "text", "نص");
                                         putIfPresent(row, "body", body);
