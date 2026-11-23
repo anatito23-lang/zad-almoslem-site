@@ -277,11 +277,23 @@ public class IslamicReelsActivity extends Activity {
 
     private void startExport(File imageFile, File audioFile, File output, String reelTitle, long durationMs, boolean shareAfter) {
         try {
-            Bitmap mark = Bitmap.createBitmap(960, 160, Bitmap.Config.ARGB_8888);
+            BitmapFactory.Options bounds = new BitmapFactory.Options(); bounds.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(imageFile.getAbsolutePath(), bounds);
+            int markWidth = Math.max(640, Math.min(1920, bounds.outWidth));
+            int markHeight = Math.max(640, Math.round(markWidth * (bounds.outHeight / (float)Math.max(1, bounds.outWidth))));
+            Bitmap mark = Bitmap.createBitmap(markWidth, markHeight, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(mark);
-            Paint p = new Paint(Paint.ANTI_ALIAS_FLAG); p.setColor(0xbb000000); canvas.drawRoundRect(12, 12, 948, 148, 24, 24, p);
-            p.setColor(Color.WHITE); p.setTextSize(42); p.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
-            p.setTextAlign(Paint.Align.CENTER); canvas.drawText("زاد المسلم  |  zad-almoslem.github.io", 480, 98, p);
+            Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+            float margin = markWidth * 0.025f, bandHeight = Math.max(72f, markHeight * 0.075f);
+            canvas.drawRoundRect(margin, markHeight - bandHeight - margin, markWidth - margin, markHeight - margin,
+                    bandHeight * 0.18f, bandHeight * 0.18f, p);
+            p.setColor(0xbb000000);
+            canvas.drawRoundRect(margin, markHeight - bandHeight - margin, markWidth - margin, markHeight - margin,
+                    bandHeight * 0.18f, bandHeight * 0.18f, p);
+            p.setColor(Color.WHITE); p.setTextSize(Math.max(28f, bandHeight * 0.42f));
+            p.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD)); p.setTextAlign(Paint.Align.CENTER);
+            canvas.drawText("زاد المسلم  |  zad-almoslem.github.io", markWidth / 2f,
+                    markHeight - margin - bandHeight * 0.34f, p);
             BitmapOverlay watermark = BitmapOverlay.createStaticBitmapOverlay(mark, new StaticOverlaySettings.Builder().build());
             OverlayEffect overlay = new OverlayEffect(Collections.singletonList(watermark));
             MediaItem imageItem = new MediaItem.Builder().setUri(Uri.fromFile(imageFile)).setImageDurationMs(durationMs).build();
