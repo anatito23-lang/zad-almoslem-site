@@ -89,8 +89,9 @@ public class AdhanPlaybackService extends Service {
         uiPositionMs = 0L;
         uiDurationMs = 0L;
         uiVoiceKey = selectedVoice == null ? "basit" : selectedVoice;
-        uiTakbeerOnly = getSharedPreferences("zad_reminders", MODE_PRIVATE)
-                .getString("adhan_mode", "adhan").equals("takbeer");
+        android.content.SharedPreferences audioPrefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
+        uiTakbeerOnly = audioPrefs.getBoolean("power_saver_enabled", false)
+                || audioPrefs.getString("adhan_mode", "adhan").equals("takbeer");
         createChannel();
         Intent screen = new Intent(this, AdhanFullScreenActivity.class);
         screen.putExtra("prayer", prayer);
@@ -219,6 +220,7 @@ public class AdhanPlaybackService extends Service {
             else if (prayer != null && prayer.contains("المغرب")) volumePrayerKey = "maghrib";
             else if (prayer != null && prayer.contains("العشاء")) volumePrayerKey = "isha";
             int savedVolume = prefs.getInt("adhan_volume_" + volumePrayerKey, prefs.getInt("adhan_volume", 100));
+            if (prefs.getBoolean("power_saver_enabled", false)) savedVolume = Math.min(savedVolume, 25);
             player.setVolume(Math.max(0, Math.min(100, savedVolume)) / 100f);
             String safeVoice = ("mustafa".equals(voice)||"husary".equals(voice)||"banna".equals(voice)||"basit".equals(voice)||"rifaat".equals(voice)||"haram".equals(voice)||"doha".equals(voice)||"fajr_cairo".equals(voice)||"fajr_haram".equals(voice)) ? voice : "doha";
             uiVoiceKey = safeVoice;
