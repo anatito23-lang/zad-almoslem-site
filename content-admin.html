@@ -38,7 +38,7 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <section class="card hidden" id="audioAssetsCard">
 <h2>إدارة أصوات التطبيق</h2>
 <p class="small">اختر ملف الصوت من هاتفك لرفعه مباشرة إلى GitHub، ثم اضغط نشر الرابط لحفظه في التطبيق. لا يستخدم هذا الرفع Firebase Storage ولا يتطلب ترقية مدفوعة. الحد الأقصى للملف 8 ميجابايت.</p>
-<div class="item"><strong>صوت مدفع الإفطار</strong><label for="audioFileCannon">اختيار ملف صوت من الهاتف</label><input id="audioFileCannon" type="file" accept=".mp3,.m4a,.wav,.ogg,audio/*"><div class="actions"><button type="button" data-audio-upload="cannon">رفع ملف صوت المدفع</button></div><label for="audioCannon">رابط ملف الصوت</label><input id="audioCannon" type="url" inputmode="url" placeholder="يظهر الرابط هنا بعد الرفع"><div class="actions"><button type="button" data-audio-publish="cannon">نشر رابط صوت المدفع</button></div></div>
+<div class="item"><strong>صوت مدفع الإفطار</strong><label for="audioFileCannon">اختيار ملف صوت من الهاتف</label><input id="audioFileCannon" type="file" accept=".mp3,audio/mpeg"><div class="actions"><button type="button" data-audio-upload="cannon">رفع ملف صوت المدفع</button></div><label for="audioCannon">رابط ملف الصوت</label><input id="audioCannon" type="url" inputmode="url" placeholder="يظهر الرابط هنا بعد الرفع"><div class="actions"><button type="button" data-audio-publish="cannon">نشر رابط صوت المدفع</button></div></div>
 <div class="item"><strong>صوت إعلان الإفطار</strong><label for="audioFileIftar">اختيار ملف صوت من الهاتف</label><input id="audioFileIftar" type="file" accept=".mp3,.m4a,.wav,.ogg,audio/*"><div class="actions"><button type="button" data-audio-upload="iftar">رفع ملف صوت الإفطار</button></div><label for="audioIftar">رابط ملف الصوت</label><input id="audioIftar" type="url" inputmode="url" placeholder="يظهر الرابط هنا بعد الرفع"><div class="actions"><button type="button" data-audio-publish="iftar">نشر رابط صوت الإفطار</button></div></div>
 <div class="item"><strong>صوت السحور</strong><label for="audioFileSuhoor">اختيار ملف صوت من الهاتف</label><input id="audioFileSuhoor" type="file" accept=".mp3,.m4a,.wav,.ogg,audio/*"><div class="actions"><button type="button" data-audio-upload="suhoor">رفع ملف صوت السحور</button></div><label for="audioSuhoor">رابط ملف الصوت</label><input id="audioSuhoor" type="url" inputmode="url" value="https://zad-almoslem.github.io/مسحراتي.mp3"><div class="actions"><button type="button" data-audio-publish="suhoor">نشر رابط صوت السحور</button></div></div>
 <div id="audioAssetsMessage" class="notice hidden" role="status"></div>
@@ -227,7 +227,7 @@ $reel("reelForm").addEventListener("submit",async e=>{
  if(!title){reelMsg("اكتب عنوان الريلز.",true);return}
  if(!editing&&(!imageFile||!audioFile)){reelMsg("اختر صورة وملفًا صوتيًا للريلز الجديد.",true);return}
  if(imageFile&&!["image/jpeg","image/png","image/webp"].includes(imageFile.type)){reelMsg("الصورة يجب أن تكون JPG أو PNG أو WebP.",true);return}
- if(audioFile&&![".mp3",".m4a",".wav",".ogg"].some(ext=>audioFile.name.toLowerCase().endsWith(ext))){reelMsg("الصوت يجب أن يكون MP3 أو M4A أو WAV أو OGG.",true);return}
+ if(audioFile&&!audioFile.name.toLowerCase().endsWith(".mp3")){reelMsg("صوت الريلز يجب أن يكون بصيغة MP3.",true);return}
  const order=Number($reel("reelOrder").value);if(!Number.isInteger(order)||order<0||order>9999){reelMsg("أدخل ترتيبًا صحيحًا.",true);return}
  const button=$reel("reelSave"),old=button.textContent;button.disabled=true;button.textContent="جارٍ الحفظ…";
  try{
