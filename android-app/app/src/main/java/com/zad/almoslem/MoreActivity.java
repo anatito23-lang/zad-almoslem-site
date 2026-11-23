@@ -1,12 +1,19 @@
 package com.zad.almoslem;
-import android.app.Activity;import android.content.Intent;import android.graphics.Color;import android.graphics.Typeface;import android.graphics.drawable.GradientDrawable;import android.os.Bundle;import android.view.Gravity;import android.widget.*;
+import android.app.Activity;import android.content.Intent;import android.graphics.Color;import android.graphics.Typeface;import android.graphics.drawable.GradientDrawable;import android.net.Uri;import android.os.Bundle;import android.view.Gravity;import android.widget.*;
 public class MoreActivity extends Activity{
 private int dp(float n){return(int)(n*getResources().getDisplayMetrics().density+.5f);}
 private void open(Class<?> c){startActivity(new Intent(this,c));}
 private TextView label(String s,int z,int c,boolean b){TextView t=new TextView(this);t.setText(s);t.setTextSize(z);t.setTextColor(c);t.setGravity(Gravity.RIGHT);if(b)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
 private void section(LinearLayout root,String title){TextView h=label(title,18,AppThemeColors.primary(this),true);h.setPadding(dp(3),dp(18),dp(3),dp(9));root.addView(h);}
 private void add(LinearLayout root,String title,String desc,Class<?> target){LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(15),dp(12),dp(15),dp(12));GradientDrawable bg=new GradientDrawable();bg.setColor(AppThemeColors.surface(this));bg.setCornerRadius(dp(15));card.setBackground(bg);card.addView(label(title,16,AppThemeColors.text(this),true));TextView d=label(desc,12,AppThemeColors.muted(this),false);d.setPadding(0,dp(4),0,0);card.addView(d);card.setOnClickListener(v->open(target));LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(9);root.addView(card,lp);}
-
+private void addPrivacyLink(LinearLayout root){
+ LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(15),dp(12),dp(15),dp(12));
+ GradientDrawable bg=new GradientDrawable();bg.setColor(AppThemeColors.surface(this));bg.setCornerRadius(dp(15));card.setBackground(bg);
+ card.addView(label("سياسة الخصوصية",16,AppThemeColors.text(this),true));
+ TextView desc=label("اطّلع على كيفية تعامل سكينة مع البيانات والأذونات والخدمات الخارجية.",12,AppThemeColors.muted(this),false);desc.setPadding(0,dp(4),0,0);card.addView(desc);
+ card.setOnClickListener(v->{try{startActivity(new Intent(Intent.ACTION_VIEW,Uri.parse("https://zad-almoslem.github.io/privacy.html")));}catch(Exception e){Toast.makeText(this,"تعذر فتح صفحة سياسة الخصوصية.",Toast.LENGTH_SHORT).show();}});
+ LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(9);root.addView(card,lp);
+}
 private void addPowerSaverQuickToggle(LinearLayout root){
  LinearLayout card=new LinearLayout(this);card.setOrientation(1);card.setPadding(dp(15),dp(12),dp(15),dp(12));
  GradientDrawable bg=new GradientDrawable();bg.setColor(AppThemeColors.surface(this));bg.setCornerRadius(dp(15));card.setBackground(bg);
@@ -48,5 +55,6 @@ add(root,"وردي اليومي","متابعة الورد والأذكار ال�
 add(root,"ورد يوم الجمعة","أذكار وأعمال يوم الجمعة",FridayWirdActivity.class);
 section(root,"⚙️ إعدادات التطبيق");
 add(root,"اللغة والثيم","اختيار لغة الواجهة وتغيير ألوان التطبيق",LanguageSettingsActivity.class);
+addPrivacyLink(root);
 setContentView(AppTabs.wrap(this,scroll,"more"));}
 }
