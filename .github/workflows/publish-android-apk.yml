@@ -31,25 +31,6 @@ jobs:
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
       - name: Install Android SDK 36
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
-      - name: Generate Android launcher icons before building
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install --yes webp
-          SOURCE="android-app/app/src/main/res/drawable-nodpi/ic_launcher_sakina.webp"
-          test -s "$SOURCE"
-          dwebp "$SOURCE" -o /tmp/sakina-icon.png
-          python3 -m pip install --user --break-system-packages Pillow
-          python3 android-app/scripts/generate_launcher_icons.py /tmp/sakina-icon.png
-          for spec in "mdpi:48" "hdpi:72" "xhdpi:96" "xxhdpi:144" "xxxhdpi:192"; do
-            density="${spec%%:*}"; expected="${spec##*:}"
-            icon="android-app/app/src/main/res/mipmap-$density/ic_launcher.png"
-            test -s "$icon"
-            actual="$(python3 -c 'from PIL import Image; import sys; im=Image.open(sys.argv[1]); print(f"{im.width}x{im.height}")' "$icon")"
-            test "$actual" = "${expected}x${expected}"
-            echo "Verified launcher icon $density: $actual"
-          done
       - name: Download and validate bundled adhan photographs
         shell: bash
         run: |
@@ -122,9 +103,9 @@ jobs:
           APK="android-app/app/build/outputs/apk/release/app-release.apk"
           test -s "$APK"
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
-          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | tee /tmp/apk-badging.txt
-          grep -q "application-icon-192:'res/mipmap-xxxhdpi-v4/ic_launcher.png'" /tmp/apk-badging.txt
-          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump xmltree "$APK" AndroidManifest.xml | grep -A3 -B2 'android:icon' | tee /tmp/apk-manifest-icon.txt
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump xmltree "$APK" AndroidManifest.xml | tee /tmp/apk-manifest.txt
+          grep -q 'android:icon' /tmp/apk-manifest.txt
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump resources "$APK" | grep -q 'drawable/ic_launcher_new'
           AAB="android-app/app/build/outputs/bundle/release/app-release.aab"
           test -s "$AAB"
           jarsigner -verify -verbose "$AAB" >/dev/null
