@@ -37,7 +37,7 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <section class="card hidden" id="listCard"><h2>المحتوى المسجل</h2><div id="itemsList"><p class="small">جارٍ التحميل…</p></div></section>
 <section class="card hidden" id="audioAssetsCard">
 <h2>إدارة أصوات التطبيق</h2>
-<p class="small">اختر ملف الصوت من هاتفك لرفعه مباشرة إلى GitHub، ثم اضغط نشر الرابط لحفظه في التطبيق. لا يستخدم هذا الرفع Firebase Storage ولا يتطلب ترقية مدفوعة. الحد الأقصى للملف 8 ميجابايت.</p>
+<p class="small">اختر ملف الصوت من هاتفك؛ بعد اكتمال الرفع يُنشر رابطه تلقائيًا في التطبيق ويُتحقق من حفظه. زر «نشر الرابط» متاح أيضًا إذا أردت إدخال رابط يدوي. لا يستخدم هذا الرفع Firebase Storage. الحد الأقصى 8 ميجابايت.</p>
 <div class="item"><strong>صوت مدفع الإفطار</strong><label for="audioFileCannon">اختيار ملف صوت من الهاتف</label><input id="audioFileCannon" type="file" accept=".mp3,audio/mpeg"><div class="actions"><button type="button" data-audio-upload="cannon">رفع ملف صوت المدفع</button></div><label for="audioCannon">رابط ملف الصوت</label><input id="audioCannon" type="url" inputmode="url" placeholder="يظهر الرابط هنا بعد الرفع"><audio id="audioPreview-cannon" class="hidden" controls preload="none" style="width:100%;margin-top:8px"></audio><div class="actions"><button type="button" data-audio-publish="cannon">نشر رابط صوت المدفع</button></div></div>
 <div class="item"><strong>صوت إعلان الإفطار</strong><label for="audioFileIftar">اختيار ملف صوت من الهاتف</label><input id="audioFileIftar" type="file" accept=".mp3,.m4a,.wav,.ogg,audio/*"><div class="actions"><button type="button" data-audio-upload="iftar">رفع ملف صوت الإفطار</button></div><label for="audioIftar">رابط ملف الصوت</label><input id="audioIftar" type="url" inputmode="url" placeholder="يظهر الرابط هنا بعد الرفع"><audio id="audioPreview-iftar" class="hidden" controls preload="none" style="width:100%;margin-top:8px"></audio><div class="actions"><button type="button" data-audio-publish="iftar">نشر رابط صوت الإفطار</button></div></div>
 <div class="item"><strong>صوت السحور</strong><label for="audioFileSuhoor">اختيار ملف صوت من الهاتف</label><input id="audioFileSuhoor" type="file" accept=".mp3,.m4a,.wav,.ogg,audio/*"><div class="actions"><button type="button" data-audio-upload="suhoor">رفع ملف صوت السحور</button></div><label for="audioSuhoor">رابط ملف الصوت</label><input id="audioSuhoor" type="url" inputmode="url" value="https://zad-almoslem.github.io/مسحراتي.mp3"><audio id="audioPreview-suhoor" class="hidden" controls preload="none" style="width:100%;margin-top:8px"></audio><div class="actions"><button type="button" data-audio-publish="suhoor">نشر رابط صوت السحور</button></div></div>
@@ -295,15 +295,20 @@ document.querySelectorAll("[data-audio-upload]").forEach(button=>button.addEvent
   if(!response.ok||!result.ok||!result.url)throw new Error(result.error||"تعذر رفع الملف. تحقق من اتصال الإنترنت ثم حاول مرة أخرى.");
   // Publish the URL immediately after GitHub confirms the upload, so the app
   // never waits for a separate manual "publish link" step.
-  await setDoc(doc(db,"app_audio_assets","ramadan"),{
+  const audioConfigRef=doc(db,"app_audio_assets","ramadan");
+  await setDoc(audioConfigRef,{
    [config.field]:result.url,
    [config.field+"UpdatedAt"]:serverTimestamp(),
    updatedAt:serverTimestamp()
   },{merge:true});
+  const savedAudioConfig=await getDoc(audioConfigRef);
+  if(!savedAudioConfig.exists()||savedAudioConfig.data()?.[config.field]!==result.url){
+   throw new Error("تم رفع الملف لكن تعذر التحقق من حفظ رابطه في قاعدة البيانات. أعد المحاولة.");
+  }
   $(config.input).value=result.url;
   const preview=$("audioPreview-"+kind);if(preview){preview.src=result.url;preview.classList.remove("hidden");preview.load();}
   fileInput.value="";
-  audioMessage("تم رفع تسجيل "+config.name+" ونشر رابطه للتطبيق. افتح تبويب رمضان واضغط تجربة التسجيل.");
+  audioMessage("تم رفع تسجيل "+config.name+" والتحقق من حفظ رابطه للتطبيق. افتح تبويب رمضان واضغط تجربة التسجيل.");
  }catch(error){audioMessage("تعذر رفع الملف: "+(error?.message||"خطأ غير معروف"),true);}
  finally{button.disabled=false;button.textContent=old;}
 }));
