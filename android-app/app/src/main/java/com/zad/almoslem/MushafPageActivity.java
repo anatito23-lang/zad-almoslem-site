@@ -120,7 +120,7 @@ public class MushafPageActivity extends Activity {
 
         Button tools = new Button(this);
         tools.setText("☰ أدوات المصحف");
-        tools.setTextSize(13);
+        tools.setTextSize(14);
         tools.setAllCaps(false);
         toolbar.addView(tools, new LinearLayout.LayoutParams(-1, dp(40)));
         tools.setOnClickListener(v -> showMushafTools());
@@ -193,7 +193,7 @@ public class MushafPageActivity extends Activity {
         next = new Button(this);
         next.setText("التالي");
         nav.addView(previous, new LinearLayout.LayoutParams(0, dp(40), 1));
-        nav.addView(next, new LinearLayout.LayoutParams(0, dp(34), 1));
+        nav.addView(next, new LinearLayout.LayoutParams(0, dp(40), 1));
         root.addView(nav);
         previous.setOnClickListener(v -> { if (page > 1) showPage(page - 1); });
         next.setOnClickListener(v -> { if (page < 604) showPage(page + 1); });
