@@ -31,6 +31,12 @@ before(async () => {
     await setDoc(doc(db, "waqafat", "custom-draft"), { tabId: "visible", published: false, title: "draft" });
     await setDoc(doc(db, "future-content", "published"), { published: true, title: "compatible" });
     await setDoc(doc(db, "future-content", "draft"), { published: false, title: "private" });
+    await setDoc(doc(db, "app_content", "app-public"), { published: true, title: "app content" });
+    await setDoc(doc(db, "app_content", "app-draft"), { published: false, title: "private app content" });
+    await setDoc(doc(db, "library_books", "book-public"), { published: true, title: "public book" });
+    await setDoc(doc(db, "site_settings", "website"), { heroTitle: "public presentation settings" });
+    await setDoc(doc(db, "site_settings", "private-secrets"), { secret: "never public" });
+    await setDoc(doc(db, "app_admin_config", "private-config"), { secret: "never public" });
   });
 });
 
@@ -97,9 +103,15 @@ test("only the configured admin can read drafts and write content", async () => 
   await assertFails(setDoc(doc(otherDb, "azkar", "blocked"), { published: true }));
 });
 
-test("unlisted collections retain the existing published-read and admin-write behavior", async () => {
+test("only allowlisted public collections expose published content", async () => {
   const publicDb = env.unauthenticatedContext().firestore();
-  await assertSucceeds(getDoc(doc(publicDb, "future-content", "published")));
+  await assertSucceeds(getDoc(doc(publicDb, "app_content", "app-public")));
+  await assertFails(getDoc(doc(publicDb, "app_content", "app-draft")));
+  await assertSucceeds(getDoc(doc(publicDb, "library_books", "book-public")));
+  await assertSucceeds(getDoc(doc(publicDb, "site_settings", "website")));
+  await assertFails(getDoc(doc(publicDb, "site_settings", "private-secrets")));
+  await assertFails(getDoc(doc(publicDb, "app_admin_config", "private-config")));
+  await assertFails(getDoc(doc(publicDb, "future-content", "published")));
   await assertFails(getDoc(doc(publicDb, "future-content", "draft")));
   await assertFails(setDoc(doc(publicDb, "future-content", "attacker"), { published: true }));
 
