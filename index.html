@@ -2409,6 +2409,7 @@ function playZadQuranTrack(id){
  $('quranStatus').textContent='جارٍ تشغيل سورة '+track.name+' بصوت '+track.artist+'.';
  audio.play().then(()=>$('quranStatus').textContent='يعمل الآن: سورة '+track.name+' — '+track.artist).catch(()=>{$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='تعذر بدء التلاوة. اضغط تشغيل مرة أخرى أو جرّب ملفًا آخر.';});
 }
+window.playZadQuranTrack=playZadQuranTrack;
 function stepZadQuranTrack(delta){
  const queue=window.zadQuranQueue||[];
  if(!queue.length)return;
