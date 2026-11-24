@@ -2364,18 +2364,15 @@ $('showSurah').addEventListener('click',()=>{
  });
  if(!moshaf||!moshaf.server){$('quranStatus').textContent='هذه السورة غير متاحة في التسجيل المختار.';return;}
  const server=moshaf.server.endsWith('/')?moshaf.server:moshaf.server+'/';
- const url=moshaf.edition?'https://cdn.islamic.network/quran/audio-surah/128/'+moshaf.edition+'/'+id+'.mp3':server+String(id).padStart(3,'0')+'.mp3';
+ const ids=(moshaf.surah_list||'').split(',').map(Number).filter(n=>n>=1&&n<=114);
+ window.zadQuranQueue=ids.map(surahId=>{
+  const surah=surahs.find(item=>Number(item.number)===surahId);
+  return {id:surahId,name:surah?.name||('السورة '+surahId),artist:reciter.name,url:moshaf.edition?'https://cdn.islamic.network/quran/audio-surah/128/'+moshaf.edition+'/'+surahId+'.mp3':server+String(surahId).padStart(3,'0')+'.mp3'};
+ });
  $('shuaishaTracks').classList.add('hidden');
- const trackTitle=`سورة ${surahs.find(s=>s.number===id)?.name||''} — ${reciter.name}`;
- $('quranStatus').textContent=`تلاوة ${trackTitle}.`;
- if(window.ZadAndroid && typeof window.ZadAndroid.playQuranAudio==='function'){
-  $('audio').pause();$('audio').removeAttribute('src');$('audio').classList.add('hidden');
-  window.ZadAndroid.playQuranAudio(url,trackTitle);
-  $('quranStatus').textContent+=' يستمر التشغيل في الخلفية، ويمكنك الخروج من التطبيق.';
- } else {
-  $('audio').src=url;$('audio').classList.remove('hidden');$('audio').load();
-  $('audio').play().catch(()=>{$('quranStatus').textContent+=' اضغط زر التشغيل في مشغل الصوت.';});
- }
+ $('audio').classList.remove('hidden');
+ if(typeof window.playZadQuranTrack==='function')window.playZadQuranTrack(id);
+ else $('quranStatus').textContent='مشغل التلاوات غير جاهز. أعد تحميل الصفحة.';
 });
 loadSurahs();
 
@@ -2487,7 +2484,12 @@ function renderZadReciterCatalog(rows){
  (rows||Object.values(window.zadReciterData||{})).forEach(rec=>{
   if(rec&&rec.id&&Array.isArray(rec.moshaf)&&rec.moshaf.length)unique.set(String(rec.id),rec);
  });
- const list=[...unique.values()].filter(rec=>!query||normalizeReciterName(rec.name).includes(query)).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'ar'));
+ const egyptianNames=['عبد الباسط عبد الصمد','محمد صديق المنشاوي','محمود خليل الحصري','مصطفى إسماعيل','محمود علي البنا','أبو العينين شعيشع','محمد رفعت','كامل يوسف البهتيمي','طه الفشني','راغب مصطفى غلوش','محمد الليثي','عبد الفتاح الشعشاعي','أحمد نعينع','محمد جبريل','محمد محمود الطبلاوي','حمدي الزامل','عبد العظيم زاهر','محمود الشحات أنور','الشحات محمد أنور'];
+ const egyptianSet=new Set(egyptianNames.map(normalizeReciterName));
+ const list=[...unique.values()].filter(rec=>!query||normalizeReciterName(rec.name).includes(query)).sort((a,b)=>{
+  const priority=Number(egyptianSet.has(normalizeReciterName(b.name)))-Number(egyptianSet.has(normalizeReciterName(a.name)));
+  return priority||String(a.name||'').localeCompare(String(b.name||''),'ar');
+ });
  box.replaceChildren();
  if(!list.length){
   const p=document.createElement('p');p.className='small';p.textContent='لم تظهر أسماء القراء بعد. تأكد من اتصال الإنترنت ثم أعد فتح المكتبة.';box.append(p);return;
