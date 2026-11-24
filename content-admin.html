@@ -293,10 +293,17 @@ document.querySelectorAll("[data-audio-upload]").forEach(button=>button.addEvent
   const response=await fetch(AUDIO_WORKER_URL,{method:"POST",headers:{Authorization:"Bearer "+token},body:form});
   const result=await response.json().catch(()=>({}));
   if(!response.ok||!result.ok||!result.url)throw new Error(result.error||"تعذر رفع الملف. تحقق من اتصال الإنترنت ثم حاول مرة أخرى.");
+  // Publish the URL immediately after GitHub confirms the upload, so the app
+  // never waits for a separate manual "publish link" step.
+  await setDoc(doc(db,"app_audio_assets","ramadan"),{
+   [config.field]:result.url,
+   [config.field+"UpdatedAt"]:serverTimestamp(),
+   updatedAt:serverTimestamp()
+  },{merge:true});
   $(config.input).value=result.url;
-  const preview=$("audioPreview-"+kind);if(preview){preview.src=result.url;preview.classList.remove("hidden");}
+  const preview=$("audioPreview-"+kind);if(preview){preview.src=result.url;preview.classList.remove("hidden");preview.load();}
   fileInput.value="";
-  audioMessage("تم رفع الملف بنجاح. أصبح الرابط جاهزًا؛ اضغط «نشر رابط "+config.name+"» لحفظه في التطبيق.");
+  audioMessage("تم رفع تسجيل "+config.name+" ونشر رابطه للتطبيق. افتح تبويب رمضان واضغط تجربة التسجيل.");
  }catch(error){audioMessage("تعذر رفع الملف: "+(error?.message||"خطأ غير معروف"),true);}
  finally{button.disabled=false;button.textContent=old;}
 }));
