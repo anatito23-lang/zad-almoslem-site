@@ -225,6 +225,7 @@ public class ReminderAudioService extends Service {
     }
 
     private void finishPlayback() {
+        if("dua".equals(activeKind)&&!userStopped&&postAdhanQueueIndex<POST_ADHAN_DUAS.length){stopCurrentPlayers();playNextPostAdhanTrack();return;}
         boolean resumeRadio = "dua".equals(activeKind);
         stopCurrentPlayers();
         // Start/resume the radio while this playback service is still foreground.
