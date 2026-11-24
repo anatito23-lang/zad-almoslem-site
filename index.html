@@ -2402,6 +2402,16 @@ function renderZadQuranTracks(){
   const play=document.createElement('button');play.type='button';play.className='zad-quran-play';play.textContent='استمع ▶';
   play.addEventListener('click',()=>playZadQuranTrack(id));
   const download=document.createElement('a');download.className='zad-quran-download';download.href=url;download.setAttribute('download',String(id).padStart(3,'0')+'.mp3');download.textContent='تحميل MP3 ⬇';download.rel='noopener';
+  download.addEventListener('click',async event=>{
+   event.preventDefault();const original=download.textContent;download.textContent='جارٍ التجهيز...';download.style.opacity='.65';
+   try{
+    const response=await fetch(url,{mode:'cors'});if(!response.ok)throw new Error('download failed');
+    const blob=await response.blob(),objectUrl=URL.createObjectURL(blob),temp=document.createElement('a');
+    temp.href=objectUrl;temp.download=String(id).padStart(3,'0')+'.mp3';document.body.append(temp);temp.click();temp.remove();
+    setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
+   }catch(error){window.open(url,'_blank','noopener');}
+   download.textContent=original;download.style.opacity='';
+  });
   actions.append(play,download);row.append(info,actions);list.append(row);
  });
 }
