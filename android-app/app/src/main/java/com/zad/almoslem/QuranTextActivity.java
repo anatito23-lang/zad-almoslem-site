@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -29,7 +28,6 @@ public class QuranTextActivity extends Activity {
     private int targetAyah = -1;
     private LinearLayout verses;
     private final ArrayList<JSONObject> ayahs=new ArrayList<>();
-    private MediaPlayer player;
 
     @Override public void onCreate(Bundle state){
         super.onCreate(state);
@@ -189,23 +187,36 @@ public class QuranTextActivity extends Activity {
     }
     private void playAyah(int index,boolean continueAfter){
         if(index<0||index>=ayahs.size())return;
-        stopAudio();currentIndex=index;autoAdvance=continueAfter;
+        stopAudio();currentIndex=index;autoAdvance=false;
         JSONObject ayah=ayahs.get(index);
         int global=ayah.optInt("number",0);
         if(global<1){status.setText("تعذر تحديد رقم الآية الصوتي.");return;}
         int selectedReciter=Math.max(0,Math.min(RECITER_IDS.length-1,reciterPicker.getSelectedItemPosition()));
         String edition=RECITER_IDS[selectedReciter];
         String audioUrl="https://cdn.islamic.network/quran/audio/"+("ar.abdulbasitmurattal".equals(edition)?"192":"128")+"/"+edition+"/"+global+".mp3";
-        status.setText("جارٍ تشغيل الآية "+ayah.optInt("numberInSurah",index+1)+" بصوت "+RECITER_NAMES[selectedReciter]);
+        int surah=ayah.optJSONObject("surah")==null?surahNumber:ayah.optJSONObject("surah").optInt("number",surahNumber);
+        getSharedPreferences("zad_audio",MODE_PRIVATE).edit()
+                .putInt("current_ayah_surah",surah)
+                .putInt("current_ayah_number",ayah.optInt("numberInSurah",index+1)).apply();
+        status.setText("جارٍ تشغيل الآية "+ayah.optInt("numberInSurah",index+1)+" بصوت "+RECITER_NAMES[selectedReciter]+" — سيستمر الصوت في الخلفية.");
         try{
-            player=new MediaPlayer();
-            player.setOnPreparedListener(mp->{if(player==mp){mp.start();}});
-            player.setOnCompletionListener(mp->{if(player==mp){mp.release();player=null;if(autoAdvance&&currentIndex+1<ayahs.size())playAyah(currentIndex+1,true);else status.setText("انتهى تشغيل الآيات المعروضة.");}});
-            player.setOnErrorListener((mp,what,extra)->{if(player==mp){mp.release();player=null;}status.setText("تعذر تشغيل هذه الآية. جرّب الاتصال أو اختر القارئ الآخر.");return true;});
-            player.setDataSource(audioUrl);player.prepareAsync();
-        }catch(Exception e){stopAudio();status.setText("تعذر بدء صوت الآية: "+(e.getMessage()==null?"خطأ في الصوت":e.getMessage()));}
+            android.content.Intent intent=new android.content.Intent(this,RadioPlaybackService.class);
+            intent.setAction(RadioPlaybackService.ACTION_PLAY);
+            intent.putExtra("url",audioUrl);
+            intent.putExtra("kind","quran_ayah");
+            intent.putExtra("label","القرآن الكريم — "+names[surah-1]+"، الآية "+ayah.optInt("numberInSurah",index+1));
+            if(android.os.Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);
+        }catch(Exception error){
+            status.setText("تعذر بدء صوت الآية: "+(error.getMessage()==null?"خطأ في التشغيل":error.getMessage()));
+        }
     }
-    private void stopAudio(){autoAdvance=false;if(player!=null){try{player.setOnCompletionListener(null);player.stop();}catch(Exception ignored){}try{player.release();}catch(Exception ignored){}player=null;}}
-    @Override protected void onStop(){stopAudio();super.onStop();}
-    @Override protected void onDestroy(){stopAudio();super.onDestroy();}
+    private void stopAudio(){
+        autoAdvance=false;
+        android.content.Intent stop=new android.content.Intent(this,RadioPlaybackService.class);
+        stop.setAction(RadioPlaybackService.ACTION_STOP);
+        try{startService(stop);}catch(Exception ignored){}
+    }
+    @Override protected void onStop(){super.onStop();}
+    @Override protected void onDestroy(){super.onDestroy();}
+
 }
