@@ -5,6 +5,7 @@ import { initializeTestEnvironment, assertSucceeds, assertFails } from "@firebas
 import {
   collection, doc, getDoc, getDocs, query, where, setDoc, updateDoc, deleteDoc
 } from "firebase/firestore";
+import { ref as storageRef, uploadBytes, getBytes, deleteObject } from "firebase/storage";
 
 const PROJECT_ID = "demo-zad-almoslem";
 const ADMIN_UID = "5UkeBQyyGGZcICXULT9LUD0S4lt2";
@@ -12,7 +13,12 @@ let env;
 
 before(async () => {
   const rules = await readFile(new URL("../firestore.rules", import.meta.url), "utf8");
-  env = await initializeTestEnvironment({ projectId: PROJECT_ID, firestore: { rules } });
+  const storageRules = await readFile(new URL("../storage.rules", import.meta.url), "utf8");
+  env = await initializeTestEnvironment({
+    projectId: PROJECT_ID,
+    firestore: { rules },
+    storage: { rules: storageRules }
+  });
   await env.clearFirestore();
   await env.withSecurityRulesDisabled(async context => {
     const db = context.firestore();
@@ -118,4 +124,36 @@ test("only allowlisted public collections expose published content", async () =>
   const adminDb = env.authenticatedContext(ADMIN_UID).firestore();
   await assertSucceeds(getDoc(doc(adminDb, "future-content", "draft")));
   await assertSucceeds(setDoc(doc(adminDb, "future-content", "admin-created"), { published: false }));
+});
+
+test("Storage allows public reads but only the admin can upload approved bounded files", async () => {
+  const publicStorage = env.unauthenticatedContext().storage();
+  const otherStorage = env.authenticatedContext("not-the-admin").storage();
+  await assertFails(uploadBytes(
+    storageRef(otherStorage, "library-books/book/attacker.pdf"),
+    new Uint8Array([1, 2, 3]),
+    { contentType: "application/pdf" }
+  ));
+
+  const adminStorage = env.authenticatedContext(ADMIN_UID).storage();
+  const valid = storageRef(adminStorage, "library-books/book/admin.pdf");
+  await assertSucceeds(uploadBytes(valid, new Uint8Array([1, 2, 3]), { contentType: "application/pdf" }));
+  await assertSucceeds(getBytes(storageRef(publicStorage, "library-books/book/admin.pdf")));
+  await assertFails(deleteObject(storageRef(otherStorage, "library-books/book/admin.pdf")));
+  await assertFails(uploadBytes(
+    storageRef(adminStorage, "library-books/book/mismatch.exe"),
+    new Uint8Array([1, 2, 3]),
+    { contentType: "application/pdf" }
+  ));
+  await assertFails(uploadBytes(
+    storageRef(adminStorage, "library-books/book/invalid.pdf"),
+    new Uint8Array([1, 2, 3]),
+    { contentType: "application/octet-stream" }
+  ));
+  await assertFails(uploadBytes(
+    storageRef(adminStorage, "app-audio/mismatch.mp3"),
+    new Uint8Array([1, 2, 3]),
+    { contentType: "application/pdf" }
+  ));
+  await assertSucceeds(deleteObject(valid));
 });
