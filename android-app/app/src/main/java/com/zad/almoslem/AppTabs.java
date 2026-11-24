@@ -144,6 +144,9 @@ public final class AppTabs {
                 if(row==null||!row.optBoolean("visible",true))continue;
                 String key=row.optString("key","");
                 String label=row.optString("label","").trim().replace("ـ","");
+                String keyLower=key.toLowerCase(java.util.Locale.ROOT);
+                String labelLower=label.toLowerCase(java.util.Locale.ROOT);
+                if("reels".equals(keyLower)||"islamic-reels".equals(keyLower)||labelLower.contains("ريلز")||labelLower.contains("reels"))continue;
                 String normalizedKey=key.toLowerCase(java.util.Locale.ROOT);
                 String normalizedLabel=label.replaceAll("\\s+","");
                 boolean companionStory=normalizedKey.matches(".*(sahab|sahabi|sahaba|companion).*")
