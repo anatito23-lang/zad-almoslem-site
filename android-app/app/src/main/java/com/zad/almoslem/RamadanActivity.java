@@ -129,12 +129,88 @@ public class RamadanActivity extends Activity {
         enabled.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
         suhoor.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("suhoor_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
 
-        LinearLayout audio=card("تنبيه السحور — تسجيل المسحراتي");
-        audioStatus=text("يُدار تسجيل السحور من لوحة الإدارة، ويُحدّثه التطبيق تلقائيًا ليعمل حتى دون إنترنت.",12,AppThemeColors.muted(this),false);
-        audio.addView(audioStatus,full());
-        addAudioTestButton(audio,"تجربة صوت تنبيه السحور","ramadan_suhoor_voice_test");
+        LinearLayout audio=card("ابتهالات رمضان وتنبيه السحور");
+        addSuhoorNasheedCard(audio);
         AdminTabContent.attach(this,root,"ramadan");
         setContentView(AppTabs.wrap(this,scroll,"ramadan"));
+    }
+    private Spinner suhoorArtistPicker,suhoorTrackPicker;
+    private TextView suhoorNasheedStatus;
+    private void addSuhoorNasheedCard(LinearLayout box){
+        TextView intro=text("اختر ابتهالًا من مكتبة الشيخ نصر الدين طوبار أو الشيخ سيد النقشبندي. يمكنك الاستماع إليه، ثم اعتماده ليكون صوت تنبيه السحور.",13,AppThemeColors.muted(this),false);
+        intro.setPadding(0,dp(8),0,dp(8));box.addView(intro,full());
+        String[] artists=new String[AudioLibraryActivity.getArtistCount()];
+        for(int i=0;i<artists.length;i++)artists[i]=AudioLibraryActivity.getArtistName(i);
+        suhoorArtistPicker=new Spinner(this);
+        suhoorArtistPicker.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,artists));
+        box.addView(suhoorArtistPicker,full());
+        suhoorTrackPicker=new Spinner(this);box.addView(suhoorTrackPicker,full());
+        int savedArtist=prefs.getInt("suhoor_nasheed_artist",1);
+        int savedTrack=prefs.getInt("suhoor_nasheed_track",0);
+        suhoorArtistPicker.setSelection(Math.max(0,Math.min(artists.length-1,savedArtist)));
+        suhoorArtistPicker.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
+            public void onNothingSelected(AdapterView<?> parent){}
+            public void onItemSelected(AdapterView<?> parent,View view,int position,long id){
+                String[] tracks=new String[AudioLibraryActivity.getTrackCount(position)];
+                for(int i=0;i<tracks.length;i++)tracks[i]=AudioLibraryActivity.getTrackName(position,i);
+                suhoorTrackPicker.setAdapter(new ArrayAdapter<>(RamadanActivity.this,android.R.layout.simple_spinner_dropdown_item,tracks));
+                int wanted=position==prefs.getInt("suhoor_nasheed_artist",1)?prefs.getInt("suhoor_nasheed_track",0):0;
+                suhoorTrackPicker.setSelection(Math.max(0,Math.min(tracks.length-1,wanted)));
+            }
+        });
+        suhoorNasheedStatus=text("",12,AppThemeColors.accent(this),true);
+        suhoorNasheedStatus.setPadding(0,dp(8),0,dp(5));box.addView(suhoorNasheedStatus,full());
+        LinearLayout buttons=new LinearLayout(this);buttons.setOrientation(LinearLayout.HORIZONTAL);
+        Button preview=new Button(this);preview.setText("▶ استمع للتجربة");
+        Button apply=new Button(this);apply.setText("اعتمده للسحور");
+        buttons.addView(preview,new LinearLayout.LayoutParams(0,dp(50),1));
+        buttons.addView(apply,new LinearLayout.LayoutParams(0,dp(50),1));
+        box.addView(buttons,full());
+        Button stop=new Button(this);stop.setText("■ إيقاف الصوت");box.addView(stop,full());
+        int volume=prefs.getInt("ramadan_volume_nasheed",100);
+        TextView volumeLabel=text("مستوى صوت الابتهال: "+volume+"٪",12,AppThemeColors.muted(this),false);box.addView(volumeLabel,full());
+        SeekBar volumeBar=new SeekBar(this);volumeBar.setMax(100);volumeBar.setProgress(volume);box.addView(volumeBar,full());
+        volumeBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            public void onProgressChanged(SeekBar bar,int value,boolean fromUser){volumeLabel.setText("مستوى صوت الابتهال: "+value+"٪");if(fromUser)prefs.edit().putInt("ramadan_volume_nasheed",value).apply();}
+            public void onStartTrackingTouch(SeekBar bar){}
+            public void onStopTrackingTouch(SeekBar bar){}
+        });
+        preview.setOnClickListener(v->{
+            if(!saveSelectedSuhoorNasheed())return;
+            Intent play=new Intent(this,RamadanAudioService.class);play.putExtra("key","ramadan_suhoor_nasheed_preview");
+            play.putExtra("volume",prefs.getInt("ramadan_volume_nasheed",100)/100f);
+            try{if(android.os.Build.VERSION.SDK_INT>=26)startForegroundService(play);else startService(play);suhoorNasheedStatus.setText("جارٍ تشغيل: "+prefs.getString("suhoor_nasheed_title","الابتهال المختار"));}
+            catch(Exception e){suhoorNasheedStatus.setText("تعذر تشغيل الابتهال: "+e.getMessage());}
+        });
+        apply.setOnClickListener(v->{
+            if(!saveSelectedSuhoorNasheed())return;
+            Toast.makeText(this,"تم اعتماد الابتهال لتنبيه السحور",Toast.LENGTH_LONG).show();
+        });
+        stop.setOnClickListener(v->{
+            Intent stopIntent=new Intent(this,RamadanAudioService.class);stopIntent.setAction(RamadanAudioService.ACTION_STOP);
+            try{startService(stopIntent);suhoorNasheedStatus.setText("تم إيقاف الصوت.");}
+            catch(Exception e){suhoorNasheedStatus.setText("تعذر إيقاف الصوت.");}
+        });
+        updateSuhoorNasheedStatus();
+    }
+    private boolean saveSelectedSuhoorNasheed(){
+        int artist=suhoorArtistPicker.getSelectedItemPosition(),track=suhoorTrackPicker.getSelectedItemPosition();
+        if(artist<0||track<0){Toast.makeText(this,"اختر الشيخ والابتهال أولًا",Toast.LENGTH_SHORT).show();return false;}
+        String url=AudioLibraryActivity.getTrackUrl(artist,track);
+        if(url==null||!url.startsWith("https://")){Toast.makeText(this,"رابط التسجيل غير متاح",Toast.LENGTH_LONG).show();return false;}
+        String title=AudioLibraryActivity.getTrackName(artist,track);
+        prefs.edit().putInt("suhoor_nasheed_artist",artist).putInt("suhoor_nasheed_track",track)
+                .putString("suhoor_nasheed_url",url).putString("suhoor_nasheed_title",title)
+                .putString("suhoor_nasheed_artist_name",AudioLibraryActivity.getArtistName(artist)).apply();
+        updateSuhoorNasheedStatus();
+        return true;
+    }
+    private void updateSuhoorNasheedStatus(){
+        if(suhoorNasheedStatus==null)return;
+        String title=prefs.getString("suhoor_nasheed_title","");
+        String artist=prefs.getString("suhoor_nasheed_artist_name","");
+        if(title.isEmpty())suhoorNasheedStatus.setText("لم يتم اختيار ابتهال بعد؛ سيعمل أذان التطبيق المرفق كصوت افتراضي.");
+        else suhoorNasheedStatus.setText("صوت السحور المعتمد: "+title+" — "+artist);
     }
     private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("لم يتم تحديد بداية الشهر بعد؛ اختر أول يوم حتى تتوقف التنبيهات تلقائيًا بعد 30 يومًا.");return;}Calendar c=Calendar.getInstance();c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
     private void addDua(LinearLayout box,String heading,String body){TextView h=text(heading,14,AppThemeColors.accent(this),true);h.setPadding(0,dp(9),0,dp(2));box.addView(h,full());box.addView(text(body,14,AppThemeColors.text(this),false),full());}
@@ -215,12 +291,7 @@ public class RamadanActivity extends Activity {
         if(prefs!=null){
             updateKhatma();
             if(prefs.getBoolean("enabled",false))RamadanReminderReceiver.scheduleAll(this);
-            // Re-read the admin-published URLs whenever the Ramadan tab returns
-            // to the foreground, then refresh the local audio cache.
-            if(audioStatus!=null)audioStatus.setText("جارٍ تحديث تسجيلات رمضان المنشورة من لوحة الإدارة…");
-            RemoteAudioAssets.refreshWithResult(this,message->{
-                if(audioStatus!=null)audioStatus.setText(message);
-            });
+            updateSuhoorNasheedStatus();
         }
     }
 }
