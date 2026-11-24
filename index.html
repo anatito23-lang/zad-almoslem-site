@@ -1132,9 +1132,9 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
       </div>
       <button type="button" id="zadReloadReciters" class="btn light" style="width:100%;margin:8px 0">إعادة تحميل قائمة القراء ↻</button>
       <div id="zadReciterCatalog" class="zad-reciter-catalog" aria-label="قائمة القراء"><p class="small">جارٍ تحميل قائمة القراء...</p></div>
-      <div class="quran-tools" style="margin-top:12px">
+      <div class="quran-tools" style="display:none" aria-hidden="true">
         <select id="surahSelect" aria-label="اختر السورة"><option value="">جارٍ تحميل السور...</option></select>
-        <button class="btn green" id="showSurah">استمع الآن</button>
+        <button class="btn green" id="showSurah" type="button">استمع الآن</button>
       </div>
       <p id="quranStatus" class="small" role="status" style="margin:8px 0 12px">جارٍ تحميل قائمة القراء والتسجيلات الصوتية...</p>
       <div class="zad-player" id="zadPlayer">
@@ -2338,8 +2338,9 @@ function showShuaishaTracks(){
  $('audio').pause();$('audio').removeAttribute('src');$('audio').classList.add('hidden');
  $('surahSelect').classList.add('hidden');$('showSurah').classList.add('hidden');
  $('quranStatus').textContent='المتاح حاليًا للشيخ أبو العينين شعيشع 12 سورة مسجلة برواية حفص عن عاصم.';
- $('shuaishaTracks').innerHTML=tracks.map(([id,name,slug])=>`<a class="surah-item" href="https://ar.assabile.com/abul-ainain-shu-aisha/quran/${slug}" rel="noopener"><span>${id}. سورة ${name}</span><strong>استمع ↗</strong></a>`).join('');
- $('shuaishaTracks').classList.remove('hidden');
+ $('shuaishaTracks').replaceChildren();
+ $('shuaishaTracks').classList.add('hidden');
+ $('quranStatus').textContent='اختر أبا العينين شعيشع من قائمة القراء إذا كانت تسجيلاته متاحة في المصدر؛ وسيعمل من المشغل الموحد.';
 }
 
 function resetQuranPlayer(){
@@ -2437,6 +2438,37 @@ zadAudio.addEventListener('ended',()=>{
  $('quranStatus').textContent='انتهت تلاوات هذه الرواية. جزاكم الله خيرًا.';
  $('zadPlayerUpNext').textContent='انتهت قائمة التلاوة';
 });
+
+// مشغل مركزي موحد: كل أزرار المكتبة تتحكم في عنصر audio نفسه.
+(function bindSingleZadPlayer(){
+ const audio=$('audio'),player=$('zadPlayer');
+ if(!audio||!player)return;
+ audio.setAttribute('playsinline','');audio.preload='metadata';audio.controls=false;
+ const replaceButton=(id,handler)=>{
+  const old=$(id);if(!old)return;
+  const fresh=old.cloneNode(true);old.replaceWith(fresh);
+  fresh.addEventListener('click',event=>{event.preventDefault();handler();});
+  return fresh;
+ };
+ replaceButton('zadPlayerToggle',async()=>{
+  if(!audio.src){
+   const queue=window.zadQuranQueue||[];
+   if(queue.length)playZadQuranTrack(queue[0].id);
+   else $('quranStatus').textContent='اختر الشيخ والرواية أولًا، ثم اضغط استمع أمام السورة.';
+   return;
+  }
+  if(audio.paused){
+   try{await audio.play();}catch(error){$('quranStatus').textContent='تعذر تشغيل التلاوة. اضغط على «استمع» أمام السورة لاختيار الملف أولًا.';}
+  }else audio.pause();
+ });
+ replaceButton('zadPlayerPause',()=>{audio.pause();$('quranStatus').textContent='تم إيقاف التلاوة مؤقتًا.';});
+ replaceButton('zadPlayerStop',()=>{audio.pause();try{audio.currentTime=0;}catch(error){}$('zadPlayerSeek').value='0';$('zadPlayerCurrent').textContent='00:00';$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='تم إيقاف التلاوة وإرجاعها للبداية.';});
+ replaceButton('zadPlayerPrev',()=>stepZadQuranTrack(-1));
+ replaceButton('zadPlayerNext',()=>stepZadQuranTrack(1));
+ audio.addEventListener('play',()=>{$('zadPlayerToggle').textContent='Ⅱ';});
+ audio.addEventListener('pause',()=>{$('zadPlayerToggle').textContent='▶';});
+ window.zadSinglePlayerReady=true;
+})();
 
 // مكتبة زاد قرآن: فهرسة الروايات والسور مع تشغيل MP3 وروابط التحميل
 function renderZadFallbackReciterCatalog(){
