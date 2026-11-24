@@ -30,6 +30,8 @@ public class ReminderAudioService extends Service {
         {"alsayed_abdalzez_2","https://www.ourquraan.com/audio/prayers/Alsayed.Abdalzez.Alzadany%202.mp3"},
         {"muhammed_alasyouty","https://www.ourquraan.com/audio/prayers/Muhammed.Alasyouty.mp3"},
         {"salah_algamal","https://www.ourquraan.com/audio/prayers/Salah.Algamal%20-%20Doaa.Alanbiaa.mp3"},
+        {"muhammad_jibril","https://www.ourquraan.com/audio/qdr/Muahmmed.Jebreel.mp3"},
+        {"hany_alrefaey","https://www.ourquraan.com/audio/quraan-completion/Hany.Alrefaey.mp3"},
         {"edres_abkar","https://www.ourquraan.com/audio/prayers/Edres.Abkar.mp3"},
         {"khalid_aljalil","https://www.ourquraan.com/audio/prayers/Khalid.Aljalil.mp3"},
         {"maher_m3equly","https://www.ourquraan.com/audio/prayers/Maher.M3equly.mp3"},
