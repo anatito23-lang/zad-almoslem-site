@@ -391,10 +391,21 @@ document.head.append(css);
    const records=contentSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
    if(!records.length){const empty=document.createElement("p");empty.className="small muted";empty.textContent="لا يوجد محتوى منشور في هذا القسم حاليًا.";section.append(empty);}
    records.forEach(item=>{
-    const article=document.createElement("article");article.className="card";article.style.margin="12px 0";
+    const article=document.createElement("article");
+    article.className=tab.kind==="khutbah"?"card khutbah-card":"card";
+    article.style.margin="12px 0";
     const h=document.createElement("h3");h.textContent=item.title||tab.title;
-    const body=document.createElement("p");body.style.whiteSpace="pre-wrap";body.style.lineHeight="2";body.textContent=item.body||"";
-    article.append(h,body);
+    if(tab.kind==="khutbah"){
+     const reader=document.createElement("details");reader.className="khutbah-reader";
+     const summary=document.createElement("summary");summary.textContent="افتح الخطبة";
+     const body=document.createElement("div");body.className="khutbah-full-text";
+     body.style.whiteSpace="pre-wrap";body.style.lineHeight="2";body.textContent=item.body||"";
+     reader.append(summary,body);
+     article.append(h,reader);
+    }else{
+     const body=document.createElement("p");body.style.whiteSpace="pre-wrap";body.style.lineHeight="2";body.textContent=item.body||"";
+     article.append(h,body);
+    }
     if(item.source){const source=document.createElement("p");source.className="small";source.style.marginTop="10px";source.textContent="المصدر: "+item.source;article.append(source);}
     section.append(article);
    });
