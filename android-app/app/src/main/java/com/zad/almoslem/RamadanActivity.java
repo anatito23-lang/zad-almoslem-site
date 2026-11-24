@@ -15,7 +15,7 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
-import java.util.Calendar;
+import java.util.Calendar;\nimport java.util.TimeZone;
 
 public class RamadanActivity extends Activity {
     private SharedPreferences prefs;
@@ -127,11 +127,11 @@ public class RamadanActivity extends Activity {
 
         LinearLayout settings=card("إعدادات الشهر والتنبيهات");
         Switch enabled=new Switch(this);enabled.setText("تفعيل تنبيهات رمضان");enabled.setTextColor(AppThemeColors.text(this));enabled.setChecked(prefs.getBoolean("enabled",false));settings.addView(enabled,full());
-        TextView startLabel=text("",13,AppThemeColors.muted(this),false);settings.addView(startLabel,full());
+        TextView startLabel=text("الموعد الفلكي المتوقع لأول رمضان 1448: الاثنين 8 فبراير 2027؛ ويُعتمد الموعد النهائي بعد إعلان رؤية الهلال في مصر.",13,AppThemeColors.muted(this),false);settings.addView(startLabel,full());
         Button chooseStart=new Button(this);chooseStart.setText("تحديد أول يوم في رمضان");settings.addView(chooseStart,full());
         updateStartLabel(startLabel);
-        chooseStart.setOnClickListener(v->{Calendar now=Calendar.getInstance();long saved=prefs.getLong("start_at",0L);if(saved>0)now.setTimeInMillis(saved);
-            new DatePickerDialog(this,(picker,y,m,d)->{Calendar first=Calendar.getInstance();first.set(y,m,d,0,0,0);first.set(Calendar.MILLISECOND,0);prefs.edit().putLong("start_at",first.getTimeInMillis()).apply();updateStartLabel(startLabel);RamadanReminderReceiver.scheduleAll(this);},now.get(Calendar.YEAR),now.get(Calendar.MONTH),now.get(Calendar.DAY_OF_MONTH)).show();});
+        chooseStart.setOnClickListener(v->{Calendar now=Calendar.getInstance(TimeZone.getTimeZone("Africa/Cairo"));long saved=prefs.getLong("start_at",0L);if(saved>0)now.setTimeInMillis(saved);else now.set(2027,Calendar.FEBRUARY,8,0,0,0);
+            new DatePickerDialog(this,(picker,y,m,d)->{Calendar first=Calendar.getInstance(TimeZone.getTimeZone("Africa/Cairo"));first.set(y,m,d,0,0,0);first.set(Calendar.MILLISECOND,0);prefs.edit().putLong("start_at",first.getTimeInMillis()).apply();updateStartLabel(startLabel);RamadanReminderReceiver.scheduleAll(this);},now.get(Calendar.YEAR),now.get(Calendar.MONTH),now.get(Calendar.DAY_OF_MONTH)).show();});
         settings.addView(text("تنبيه السحور",15,AppThemeColors.accent(this),true),full());
         TextView suhoorUploadLabel=text("اختر من مكتبة الابتهالات صوتًا لتنبيه السحور، أو اترك الاختيار الافتراضي ليعمل أذان التطبيق المرفق.",12,AppThemeColors.muted(this),false);settings.addView(suhoorUploadLabel,full());
         Switch suhoor=new Switch(this);suhoor.setText("تشغيل تنبيه السحور");suhoor.setTextColor(AppThemeColors.text(this));suhoor.setChecked(prefs.getBoolean("suhoor_enabled",true));settings.addView(suhoor,full());
@@ -226,7 +226,7 @@ public class RamadanActivity extends Activity {
         if(title.isEmpty())suhoorNasheedStatus.setText("لم يتم اختيار ابتهال بعد؛ سيعمل أذان التطبيق المرفق كصوت افتراضي.");
         else suhoorNasheedStatus.setText("صوت السحور المعتمد: "+title+" — "+artist);
     }
-    private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("لم يتم تحديد بداية الشهر بعد؛ اختر أول يوم حتى تتوقف التنبيهات تلقائيًا بعد 30 يومًا.");return;}Calendar c=Calendar.getInstance();c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
+    private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("الموعد الفلكي المتوقع: الاثنين 8 فبراير 2027 (1 رمضان 1448). انتظر إعلان دار الإفتاء المصرية لتأكيد بداية الشهر.");return;}Calendar c=Calendar.getInstance(TimeZone.getTimeZone("Africa/Cairo"));c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
     private void addDua(LinearLayout box,String heading,String body){TextView h=text(heading,14,AppThemeColors.accent(this),true);h.setPadding(0,dp(9),0,dp(2));box.addView(h,full());box.addView(text(body,14,AppThemeColors.text(this),false),full());}
     private void updateFastCount(){int n=0;for(int i=1;i<=30;i++)if(prefs.getBoolean("fast_"+i,false))n++;if(fastCount!=null)fastCount.setText("أيام الصيام المسجلة: "+n+" من 30");}
     private void updateKhatma(){
