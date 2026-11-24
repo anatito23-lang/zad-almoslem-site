@@ -112,8 +112,8 @@ public class IslamicReelsActivity extends Activity {
         }
         Collections.sort(fresh, Comparator.comparingInt(o -> o.optInt("order", 0)));
         posts.clear(); posts.addAll(fresh);
-        // Show the starter collection only when no published reels are available.
-        if (posts.isEmpty()) addBuiltInPosts();
+        // Keep the built-in reminders alongside published reels so the feed is never a single card.
+        addBuiltInPosts();
         if (index >= posts.size()) index = 0;
         showPost();
     }
