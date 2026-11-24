@@ -2883,9 +2883,20 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
     }
     const card=document.createElement("article");card.className="card site-published-item";card.style.margin="12px 0";
     if(item.sectionId==="khutbahs")card.classList.add("khutbah-card");
-    if(item.sectionId==="khutbahs")addText(card,"span","خطبة منشورة","topic-tag");
-    addText(card,"h3",item.title||"محتوى جديد");
-    const body=addText(card,"p",item.body||"");body.style.whiteSpace="pre-wrap";body.style.lineHeight="2";
+    if(item.sectionId==="khutbahs"){
+     addText(card,"span","خطبة منشورة","topic-tag");
+     addText(card,"h3",item.title||"محتوى جديد");
+     if(item.createdAt?.toDate){const date=addText(card,"p",item.createdAt.toDate().toLocaleDateString("ar-EG"),"small");date.style.margin="4px 0 10px";}
+     if(item.body){
+      const details=document.createElement("details");details.className="khutbah-reader";
+      const summary=document.createElement("summary");summary.textContent="افتح الخطبة";
+      const text=document.createElement("div");text.className="khutbah-full-text";text.textContent=item.body;text.style.whiteSpace="pre-wrap";text.style.lineHeight="2";
+      details.append(summary,text);card.append(details);
+     }
+    }else{
+     addText(card,"h3",item.title||"محتوى جديد");
+     const body=addText(card,"p",item.body||"");body.style.whiteSpace="pre-wrap";body.style.lineHeight="2";
+    }
     if(item.source)addText(card,"p","المصدر: "+item.source,"small");
     if(item.url&&/^https:\/\//i.test(item.url)){const link=document.createElement("a");link.className="btn green";link.href=item.url;link.target="_blank";link.rel="noopener noreferrer";link.textContent=item.urlLabel||"فتح الرابط";link.style.display="inline-block";link.style.marginTop="10px";card.append(link);}
     const list=item.sectionId==="khutbahs"?section.querySelector("#khutbahList"):null;
