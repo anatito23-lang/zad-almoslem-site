@@ -14,7 +14,9 @@ import android.net.Uri;
 import android.os.*;
 import java.io.IOException;
 import java.io.File;
-import java.util.HashSet;\nimport java.util.ArrayList;\nimport org.json.JSONArray;
+import java.util.HashSet;
+import java.util.ArrayList;
+import org.json.JSONArray;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +44,10 @@ public class RadioPlaybackService extends Service {
     private boolean resumeOnAudioFocusGain;
     private final AudioManager.OnAudioFocusChangeListener audioFocusListener = this::handleAudioFocusChange;
     private final Handler playbackHandler = new Handler(Looper.getMainLooper());
-    private Runnable startupTimeout;\n    private ArrayList<String> duaQueueUrls = new ArrayList<>();\n    private ArrayList<String> duaQueueTitles = new ArrayList<>();\n    private ArrayList<String> duaQueueLocalPaths = new ArrayList<>();
+    private Runnable startupTimeout;
+    private ArrayList<String> duaQueueUrls = new ArrayList<>();
+    private ArrayList<String> duaQueueTitles = new ArrayList<>();
+    private ArrayList<String> duaQueueLocalPaths = new ArrayList<>();
 
     @Override public int onStartCommand(Intent intent,int flags,int startId) {
         // A newly selected stream must also remain paused if playback is started during adhan.
@@ -57,7 +62,8 @@ public class RadioPlaybackService extends Service {
             intent.putExtra("kind", saved.getString("active_kind", "radio"));
             intent.putExtra("label", saved.getString("radio_title", "زاد وطمأنينة"));
             intent.putExtra("station", saved.getString("radio_station", ""));
-            intent.putExtra("local_path", saved.getString("stream_local_path", null));\n            restoreDuaQueueExtras(intent, saved);
+            intent.putExtra("local_path", saved.getString("stream_local_path", null));
+            restoreDuaQueueExtras(intent, saved);
         }
         if(intent!=null && (ACTION_TOGGLE.equals(intent.getAction()) || ACTION_PAUSE.equals(intent.getAction()) || ACTION_RESUME.equals(intent.getAction()))) {
             if (player != null) {
@@ -89,7 +95,8 @@ public class RadioPlaybackService extends Service {
                     restore.putExtra("kind", saved.getString("active_kind", "radio"));
                     restore.putExtra("label", saved.getString("radio_title", "زاد وطمأنينة"));
                     restore.putExtra("station", saved.getString("radio_station", ""));
-                    restore.putExtra("local_path", saved.getString("stream_local_path", null));\n                    restoreDuaQueueExtras(restore, saved);
+                    restore.putExtra("local_path", saved.getString("stream_local_path", null));
+                    restoreDuaQueueExtras(restore, saved);
                     intent = restore;
                 } else return START_NOT_STICKY;
             }
@@ -331,7 +338,11 @@ public class RadioPlaybackService extends Service {
                         playNextQuranSurah();
                         return;
                     }
-                    if(state==Player.STATE_ENDED && "dua".equals(getSharedPreferences("zad_audio",MODE_PRIVATE).getString("active_kind",""))){\n                        getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_paused",true).apply();\n                        updateRadioNotification(playbackTitle(),"اكتملت قائمة الأدعية");return;\n                    }\n                    if (state == Player.STATE_BUFFERING) {
+                    if(state==Player.STATE_ENDED && "dua".equals(getSharedPreferences("zad_audio",MODE_PRIVATE).getString("active_kind",""))){
+                        getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_paused",true).apply();
+                        updateRadioNotification(playbackTitle(),"اكتملت قائمة الأدعية");return;
+                    }
+                    if (state == Player.STATE_BUFFERING) {
                         getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_ready", false).apply();
                         updateRadioNotification(playbackTitle(), "جارٍ الاتصال بالبث...");
                     } else if (state == Player.STATE_READY) {
@@ -351,7 +362,14 @@ public class RadioPlaybackService extends Service {
                         }
                     }
                 }
-                @Override public void onMediaItemTransition(MediaItem mediaItem,int reason){\n                    if(mediaItem!=null && "dua".equals(getSharedPreferences("zad_audio",MODE_PRIVATE).getString("active_kind",""))){\n                        String title=mediaItem.mediaId==null?"الأدعية الصوتية":mediaItem.mediaId;\n                        getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putString("radio_title",title).apply();\n                        updateRadioNotification(title,"انتقل التشغيل تلقائيًا إلى الدعاء التالي");\n                    }\n                }\n                @Override public void onIsPlayingChanged(boolean isPlaying) {
+                @Override public void onMediaItemTransition(MediaItem mediaItem,int reason){
+                    if(mediaItem!=null && "dua".equals(getSharedPreferences("zad_audio",MODE_PRIVATE).getString("active_kind",""))){
+                        String title=mediaItem.mediaId==null?"الأدعية الصوتية":mediaItem.mediaId;
+                        getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putString("radio_title",title).apply();
+                        updateRadioNotification(title,"انتقل التشغيل تلقائيًا إلى الدعاء التالي");
+                    }
+                }
+                @Override public void onIsPlayingChanged(boolean isPlaying) {
                     setPlaybackWakeLock(isPlaying);
                     getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_paused", player == null || !player.getPlayWhenReady()).apply();
                     updateRadioNotification(playbackTitle(), isPlaying ? "يعمل الآن" : "متوقف مؤقتًا");
@@ -493,7 +511,8 @@ public class RadioPlaybackService extends Service {
     private String defaultTitle(String kind) {
         if ("quran".equals(kind)) return "استماع القرآن الكريم";
         if ("ruqyah".equals(kind)) return "الرقية الشرعية";
-        if ("nasheed".equals(kind)) return "الإنشاد والابتهالات";\n        if ("dua".equals(kind)) return "الأدعية الصوتية";
+        if ("nasheed".equals(kind)) return "الإنشاد والابتهالات";
+        if ("dua".equals(kind)) return "الأدعية الصوتية";
         return "إذاعة القرآن الكريم";
     }
 
