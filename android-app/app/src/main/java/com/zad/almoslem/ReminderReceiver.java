@@ -346,7 +346,8 @@ public class ReminderReceiver extends BroadcastReceiver {
         else if(prayer && adhanEnabled && thisPrayerEnabled && "off".equals(adhanMode)) { /* no alert */ }
         else if(powerSaverEnabled || (gentle && exactAlarmAudioAllowed) || fallbackAudioNotification) b.setDefaults(0);
         else b.setDefaults(Notification.DEFAULT_VIBRATE);
-        if(!prayer || (adhanEnabled && thisPrayerEnabled && !"off".equals(adhanMode))) nm.notify(key.hashCode(),b.build());
+        // "off" means silent prayer alert, not suppressing the notification itself.
+        if(!prayer || (adhanEnabled && thisPrayerEnabled)) nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
             String k=key.replace("daily_","");
             if(prefs.getBoolean(k+"_enabled",false)) scheduleDaily(context,k,prefs.getInt(k+"_hour",7),prefs.getInt(k+"_minute",0),prefs.getString(k+"_title","تذكير من سكينة"));
