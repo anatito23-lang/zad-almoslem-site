@@ -174,10 +174,16 @@ public class RamadanActivity extends Activity {
         suhoorNasheedStatus.setPadding(0,dp(8),0,dp(5));box.addView(suhoorNasheedStatus,full());
         LinearLayout buttons=new LinearLayout(this);buttons.setOrientation(LinearLayout.HORIZONTAL);
         Button preview=new Button(this);preview.setText("▶ استمع للتجربة");
-        Button apply=new Button(this);apply.setText("اعتمده للسحور");
+        Button apply=new Button(this);apply.setText("اعتماده لتنبيه السحور");
         buttons.addView(preview,new LinearLayout.LayoutParams(0,dp(50),1));
         buttons.addView(apply,new LinearLayout.LayoutParams(0,dp(50),1));
         box.addView(buttons,full());
+        Button saveOffline=new Button(this);saveOffline.setText("⬇ حفظ نسخة على الهاتف دون إنترنت");
+        box.addView(saveOffline,full());
+        saveOffline.setOnClickListener(v->{
+            if(!saveSelectedSuhoorNasheed())return;
+            Toast.makeText(this,"بدأ حفظ نسخة صوت السحور على الهاتف. انتظر رسالة اكتمال الحفظ.",Toast.LENGTH_LONG).show();
+        });
         Button stop=new Button(this);stop.setText("■ إيقاف الصوت");box.addView(stop,full());
         int volume=prefs.getInt("ramadan_volume_nasheed",100);
         TextView volumeLabel=text("مستوى صوت الابتهال: "+volume+"٪",12,AppThemeColors.muted(this),false);box.addView(volumeLabel,full());
@@ -254,8 +260,11 @@ public class RamadanActivity extends Activity {
         if(suhoorNasheedStatus==null)return;
         String title=prefs.getString("suhoor_nasheed_title","");
         String artist=prefs.getString("suhoor_nasheed_artist_name","");
+        java.io.File savedFile=new java.io.File(new java.io.File(getFilesDir(),"ramadan_audio"),"suhoor_nasheed.mp3");
+        boolean downloaded=prefs.getBoolean("suhoor_nasheed_downloaded",false)&&savedFile.isFile()&&savedFile.length()>4096;
         if(title.isEmpty())suhoorNasheedStatus.setText("لم يتم اختيار ابتهال بعد؛ سيعمل أذان التطبيق المرفق كصوت افتراضي.");
-        else suhoorNasheedStatus.setText("صوت السحور المعتمد: "+title+" — "+artist);
+        else if(downloaded)suhoorNasheedStatus.setText("✓ تم حفظ «"+title+"» على الهاتف — سيعمل دون إنترنت.");
+        else suhoorNasheedStatus.setText("الابتهال المختار: "+title+" — "+artist+" | لم تُحفظ النسخة دون إنترنت بعد.");
     }
     private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("الموعد الفلكي المتوقع: الاثنين 8 فبراير 2027 (1 رمضان 1448). انتظر إعلان دار الإفتاء المصرية لتأكيد بداية الشهر.");return;}Calendar c=Calendar.getInstance(TimeZone.getTimeZone("Africa/Cairo"));c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
     private void addDua(LinearLayout box,String heading,String body){TextView h=text(heading,14,AppThemeColors.accent(this),true);h.setPadding(0,dp(9),0,dp(2));box.addView(h,full());box.addView(text(body,14,AppThemeColors.text(this),false),full());}
