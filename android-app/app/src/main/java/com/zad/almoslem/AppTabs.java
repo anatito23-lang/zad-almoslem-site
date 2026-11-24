@@ -153,7 +153,9 @@ public final class AppTabs {
                 if(!contentSection&&key.matches("[A-Za-z][A-Za-z0-9_-]{0,59}"))rows.add(row);
             }
         }
-        boolean hasDua=false;for(JSONObject row:rows)if("dua".equals(row.optString("key",""))){hasDua=true;break;}\n        if(!hasDua){JSONObject dua=new JSONObject();try{dua.put("key","dua");dua.put("label","دعاء");dua.put("icon","🤲");dua.put("visible",true);}catch(Exception ignored){}rows.add(dua);}\n        JSONObject home=new JSONObject();
+        boolean hasDua=false;for(JSONObject row:rows)if("dua".equals(row.optString("key",""))){hasDua=true;break;}
+        if(!hasDua){JSONObject dua=new JSONObject();try{dua.put("key","dua");dua.put("label","دعاء");dua.put("icon","🤲");dua.put("visible",true);}catch(Exception ignored){}rows.add(dua);}
+        JSONObject home=new JSONObject();
         try{home.put("key","home");home.put("label","الرئيسية");home.put("icon","⌂");home.put("visible",true);}catch(Exception ignored){}
         homeSlot.addView(makeTabItem(a,home,active,li),new LinearLayout.LayoutParams(-1,-1));
         JSONObject more=new JSONObject();
@@ -406,7 +408,8 @@ public final class AppTabs {
     private static String emojiForTab(String key, String fallback) {
         switch (key) {
             case "mushaf": return "📖";
-            case "ramadan": return "🏮";\n            case "dua": return "🤲";
+            case "ramadan": return "🏮";
+            case "dua": return "🤲";
             case "radio": return "🎙️";
             case "quran": case "listening": case "listen": return "🎧";
             case "calendar": return "📆";
