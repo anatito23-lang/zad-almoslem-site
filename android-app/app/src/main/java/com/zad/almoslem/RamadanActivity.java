@@ -63,8 +63,7 @@ public class RamadanActivity extends Activity {
         fast.addView(days,full());updateFastCount();
 
         LinearLayout khatma=card("ختمة القرآن الكريم");
-        TextView invitation=text("اجعل لك وردًا يوميًا من القرآن 🌙
-افتح المصحف، وسجّل تقدمك تلقائيًا أثناء تشغيل الختمة.",13,AppThemeColors.text(this),false);
+        TextView invitation=text("اجعل لك وردًا يوميًا من القرآن 🌙\\nافتح المصحف، وسجّل تقدمك تلقائيًا أثناء تشغيل الختمة.",13,AppThemeColors.text(this),false);
         invitation.setPadding(0,dp(8),0,dp(10));khatma.addView(invitation,full());
         khatmaRing=new KhatmaRing();LinearLayout ringHolder=new LinearLayout(this);ringHolder.setGravity(Gravity.CENTER);ringHolder.addView(khatmaRing,new LinearLayout.LayoutParams(dp(116),dp(116)));khatma.addView(ringHolder,full());
         khatmaProgress=text("",15,AppThemeColors.accent(this),true);khatmaProgress.setGravity(Gravity.CENTER);khatma.addView(khatmaProgress,full());
@@ -217,9 +216,39 @@ public class RamadanActivity extends Activity {
         String title=AudioLibraryActivity.getTrackName(artist,track);
         prefs.edit().putInt("suhoor_nasheed_artist",artist).putInt("suhoor_nasheed_track",track)
                 .putString("suhoor_nasheed_url",url).putString("suhoor_nasheed_title",title)
-                .putString("suhoor_nasheed_artist_name",AudioLibraryActivity.getArtistName(artist)).apply();
+                .putString("suhoor_nasheed_artist_name",AudioLibraryActivity.getArtistName(artist))
+                .putBoolean("suhoor_nasheed_downloaded",false).apply();
+        downloadSuhoorNasheed(url,title);
         updateSuhoorNasheedStatus();
         return true;
+    }
+    private void downloadSuhoorNasheed(String url,String title){
+        if(!url.startsWith("https://"))return;
+        if(suhoorNasheedStatus!=null)suhoorNasheedStatus.setText("جارٍ حفظ صوت السحور على الهاتف لاستخدامه دون إنترنت...");
+        new Thread(()->{
+            java.net.HttpURLConnection connection=null;
+            try{
+                connection=(java.net.HttpURLConnection)new java.net.URL(url).openConnection();
+                connection.setConnectTimeout(20000);connection.setReadTimeout(30000);connection.setInstanceFollowRedirects(true);
+                connection.setRequestProperty("User-Agent","ZadAlmoslem Android");
+                if(connection.getResponseCode()!=200)throw new java.io.IOException("HTTP "+connection.getResponseCode());
+                java.io.File dir=new java.io.File(getFilesDir(),"ramadan_audio");if(!dir.exists()&&!dir.mkdirs())throw new java.io.IOException("تعذر إنشاء مجلد الصوت");
+                java.io.File temp=new java.io.File(dir,"suhoor_nasheed.tmp"),target=new java.io.File(dir,"suhoor_nasheed.mp3");
+                try(java.io.InputStream in=connection.getInputStream();java.io.FileOutputStream out=new java.io.FileOutputStream(temp)){
+                    byte[] buffer=new byte[8192];int n;long total=0;
+                    while((n=in.read(buffer))!=-1){total+=n;if(total>80L*1024*1024)throw new java.io.IOException("حجم التسجيل أكبر من الحد المسموح");out.write(buffer,0,n);}
+                    out.getFD().sync();
+                }
+                if(temp.length()<4096)throw new java.io.IOException("ملف الصوت غير مكتمل");
+                if(target.exists()&&!target.delete())throw new java.io.IOException("تعذر استبدال التسجيل القديم");
+                if(!temp.renameTo(target))throw new java.io.IOException("تعذر حفظ التسجيل");
+                prefs.edit().putBoolean("suhoor_nasheed_downloaded",true).apply();
+                runOnUiThread(()->{if(suhoorNasheedStatus!=null)suhoorNasheedStatus.setText("تم حفظ «"+title+"» على الهاتف — سيعمل دون إنترنت.");});
+            }catch(Exception e){
+                android.util.Log.e("ZadRamadan","Could not download suhoor audio",e);
+                runOnUiThread(()->{if(suhoorNasheedStatus!=null)suhoorNasheedStatus.setText("تعذر الحفظ دون إنترنت. تحقق من الاتصال ثم أعد اعتماد التسجيل.");});
+            }finally{if(connection!=null)connection.disconnect();}
+        }).start();
     }
     private void updateSuhoorNasheedStatus(){
         if(suhoorNasheedStatus==null)return;
