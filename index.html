@@ -2236,8 +2236,7 @@ async function loadOldEgyptianReciters(){
   try{const data=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(data)&&data.length){cached=data;break;}}catch(e){}
  }
  if(cached.length)populate(cached,true);
- else box.innerHTML='<p class="small">جارٍ الاتصال بمكتبة القراء…</p>';
- status.textContent=cached.length?'نعرض القراء المحفوظين ونحدّث القائمة…':'جارٍ تحميل أسماء القراء من مكتبة MP3Quran…';
+ status.textContent=cached.length?'نعرض القراء المحفوظين ونحدّث القائمة…':'قائمة القراء ظاهرة؛ جارٍ تحديث بيانات المكتبة من MP3Quran…';
  let lastError=null;
  for(const host of ['https://mp3quran.net','https://www.mp3quran.net']){
   try{
@@ -2376,7 +2375,7 @@ function renderZadFallbackReciterCatalog(){
  const allIds=Array.from({length:114},(_,i)=>i+1).join(',');
  readers.forEach(([key,name,edition])=>{
   if(!window.zadReciterData[key]){
-   window.zadReciterData[key]={id:'zad-'+key,name, moshaf:[{name:'حفص عن عاصم',moshaf_name:'حفص عن عاصم',edition,surah_list:allIds}]};
+   window.zadReciterData[key]={id:'zad-'+key,name, moshaf:[{name:'حفص عن عاصم',moshaf_name:'حفص عن عاصم',edition,server:'https://cdn.islamic.network/quran/audio-surah/128/'+edition+'/',surah_list:allIds}]};
   }
   if(!$('reciter').querySelector('option[value="'+key+'"]')){
    const opt=document.createElement('option');opt.value=key;opt.textContent=name+' — '+(edition.includes('mujawwad')?'مجود':'مرتّل');$('reciter').append(opt);
