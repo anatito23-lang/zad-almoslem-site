@@ -63,26 +63,39 @@ if(!nativeApp || publicWebsite){
   ramadanTracker.insertAdjacentElement('afterend',fiqh);
   (function initRamadanTracker(){
    const daysBox=ramadanTracker.querySelector('#ramadanDays'),doneLabel=ramadanTracker.querySelector('#ramadanDoneCount'),remainingLabel=ramadanTracker.querySelector('#ramadanRemaining'),fill=ramadanTracker.querySelector('#ramadanProgressFill'),season=ramadanTracker.querySelector('#ramadanSeasonStatus'),countryLabel=ramadanTracker.querySelector('#ramadanCountryLabel');
-   const hijriFormat=new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura-nu-latn',{day:'numeric',month:'numeric',year:'numeric'});
-   function hijriParts(date){const p={};hijriFormat.formatToParts(date).forEach(x=>{if(x.type!=='literal')p[x.type]=Number(x.value);});return p;}
-   const now=new Date(),hNow=hijriParts(now);
-   const targetYear=(hNow.month>9? hNow.year+1:hNow.year);
-   const storeKey='zad_ramadan_fast_days_'+targetYear;
-   let saved={};try{saved=JSON.parse(localStorage.getItem(storeKey)||'{}')||{};}catch(e){}
    const country=document.getElementById('prayerCountry');
-   countryLabel.textContent='الموقع المختار: '+(country?.selectedOptions?.[0]?.textContent||'بلدك');
-   const active=hNow.month===9;
-   if(active)season.textContent='رمضان مبارك — اليوم '+hNow.day+' من الشهر الهجري';
-   else{
-    let target=null;
-    for(let offset=0;offset<=400;offset++){
-     const d=new Date(now.getFullYear(),now.getMonth(),now.getDate()+offset,12);
-     const p=hijriParts(d);
-     if(p.month===9&&p.day===1){target=d;break;}
-    }
-    if(target){const days=Math.max(0,Math.ceil((new Date(target.getFullYear(),target.getMonth(),target.getDate())-new Date(now.getFullYear(),now.getMonth(),now.getDate()))/86400000));season.textContent='الموعد التقديري لرمضان القادم بعد نحو '+days+' يومًا';}
-    else season.textContent='يتجدد هذا القسم تلقائيًا مع دخول شهر رمضان';
+   const countryTimeZones={'Egypt':'Africa/Cairo','Saudi Arabia':'Asia/Riyadh','United Arab Emirates':'Asia/Dubai','Kuwait':'Asia/Kuwait','Qatar':'Asia/Qatar','Bahrain':'Asia/Bahrain','Oman':'Asia/Muscat','Jordan':'Asia/Amman','Palestine':'Asia/Gaza','Lebanon':'Asia/Beirut','Syria':'Asia/Damascus','Iraq':'Asia/Baghdad','Yemen':'Asia/Aden','Sudan':'Africa/Khartoum','Libya':'Africa/Tripoli','Tunisia':'Africa/Tunis','Algeria':'Africa/Algiers','Morocco':'Africa/Casablanca','Turkey':'Europe/Istanbul','United Kingdom':'Europe/London','Germany':'Europe/Berlin','France':'Europe/Paris','Malaysia':'Asia/Kuala_Lumpur','Indonesia':'Asia/Jakarta','Pakistan':'Asia/Karachi','India':'Asia/Kolkata','Singapore':'Asia/Singapore','United States':'America/New_York','Canada':'America/Toronto'};
+   function selectedTimeZone(){const value=country?.value||'Egypt';return countryTimeZones[value]||Intl.DateTimeFormat().resolvedOptions().timeZone||'UTC';}
+   function partsInZone(date,timeZone,calendar){const fmt=new Intl.DateTimeFormat(calendar||'en-US',{timeZone,year:'numeric',month:'numeric',day:'numeric'});const out={};fmt.formatToParts(date).forEach(x=>{if(x.type!=='literal')out[x.type]=Number(x.value);});return out;}
+   function dateAtLocalNoon(year,month,day,timeZone){
+    const guess=Date.UTC(year,month-1,day,12),fmt=new Intl.DateTimeFormat('en-US',{timeZone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}),p={};
+    fmt.formatToParts(new Date(guess)).forEach(x=>{if(x.type!=='literal')p[x.type]=Number(x.value);});
+    const represented=Date.UTC(p.year,p.month-1,p.day,p.hour,p.minute);
+    return new Date(guess-(represented-guess));
    }
+   const hijriLocale='en-US-u-ca-islamic-umalqura-nu-latn';
+   function hijriParts(date,timeZone){return partsInZone(date,timeZone,hijriLocale);}
+   let saved={},storeKey='',activeTimeZone='';
+   function loadSaved(){try{saved=JSON.parse(localStorage.getItem(storeKey)||'{}')||{};}catch(e){saved={};}}
+   function refreshSeason(){
+    const timeZone=selectedTimeZone(),now=new Date(),today=partsInZone(now,timeZone),hNow=hijriParts(now,timeZone);
+    activeTimeZone=timeZone;
+    const targetYear=(hNow.month>9?hNow.year+1:hNow.year);
+    storeKey='zad_ramadan_fast_days_'+targetYear;
+    loadSaved();
+    countryLabel.textContent='الموقع المختار: '+(country?.selectedOptions?.[0]?.textContent||'بلدك');
+    const active=hNow.month===9;
+    if(active)season.textContent='رمضان مبارك — اليوم '+hNow.day+' من الشهر الهجري';
+    else{
+     let daysUntil=null;
+     for(let offset=0;offset<=400;offset++){
+      const d=dateAtLocalNoon(today.year,today.month,today.day+offset,timeZone),p=hijriParts(d,timeZone);
+      if(p.month===9&&p.day===1){daysUntil=offset;break;}
+     }
+     season.textContent=daysUntil===null?'يتجدد هذا القسم تلقائيًا مع دخول شهر رمضان':'الموعد التقديري لرمضان القادم بعد نحو '+daysUntil+' يومًا';
+    }
+   }
+   refreshSeason();
    function paint(){
     const count=Object.values(saved).filter(Boolean).length,pct=Math.round(count/30*100);
     doneLabel.textContent=String(count);remainingLabel.textContent='المتبقي لإكمال 30 يومًا: '+(30-count);
@@ -92,7 +105,7 @@ if(!nativeApp || publicWebsite){
    }
    for(let day=1;day<=30;day++){const button=document.createElement('button');button.type='button';button.className='ramadan-day';button.addEventListener('click',()=>{saved[day]=!saved[day];paint();});daysBox.append(button);}
    paint();
-   country?.addEventListener('change',()=>{countryLabel.textContent='الموقع المختار: '+(country.selectedOptions[0]?.textContent||'بلدك');});
+   country?.addEventListener('change',()=>{refreshSeason();paint();});
   })();
   const hadith=document.getElementById('hadith-dua'),quran=document.getElementById('quran'),khutbah=document.getElementById('khutbahs');
   if(hadith)hadith.insertAdjacentElement('afterend',ramadan);else if(quran)quran.insertAdjacentElement('afterend',ramadan);else if(khutbah)khutbah.before(ramadan);else main?.append(ramadan);
