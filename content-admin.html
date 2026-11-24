@@ -179,7 +179,7 @@ async function migrateLegacyQalbiContent(){
  const markerSnap=await getDoc(marker);
  if(markerSnap.exists())return;
  const [legacySnap,appSnap]=await Promise.all([
-  getDocs(collection(db,"app_content")),
+  getDocs(collection(db,"site_content")),
   getDocs(collection(db,"app_content"))
  ]);
  const existing=new Set(appSnap.docs.map(d=>d.id));
