@@ -249,7 +249,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
         if(prayer) {
             // Advance by one local calendar day, not a fixed 24-hour duration.
-            Calendar nextPrayer = Calendar.getInstance();
+            String zoneId=prefs.getString("native_city_timezone","");\n            if(zoneId.isEmpty() && "Egypt".equals(prefs.getString("native_country","Egypt"))) zoneId="Africa/Cairo";\n            if(zoneId.isEmpty()) zoneId=java.util.TimeZone.getDefault().getID();\n            Calendar nextPrayer = Calendar.getInstance(java.util.TimeZone.getTimeZone(zoneId));
             long previous = prefs.getLong(key, 0L);
             if (previous <= 0L) previous = System.currentTimeMillis();
             nextPrayer.setTimeInMillis(previous);
