@@ -121,7 +121,7 @@ public class RamadanActivity extends Activity {
         Switch suhoor=new Switch(this);suhoor.setText("تشغيل تنبيه السحور");suhoor.setTextColor(AppThemeColors.text(this));suhoor.setChecked(prefs.getBoolean("suhoor_enabled",true));settings.addView(suhoor,full());
         addMinutesControl(settings,"التنبيه قبل المغرب بدقائق","iftar_lead_minutes",5,1,30);
         addMinutesControl(settings,"تنبيه السحور قبل الفجر بدقائق","suhoor_lead_minutes",45,10,120);
-        TextView note=text("تُحسب المواعيد من مواقيت المغرب والفجر المحفوظة في التطبيق. يلزم ضبط مواقيت الصلاة والسماح بالتنبيهات الدقيقة.",12,AppThemeColors.muted(this),false);note.setPadding(0,dp(7),0,dp(7));settings.addView(note,full());
+        TextView prayerTimesNote=text("تُحسب المواعيد من مواقيت المغرب والفجر المحفوظة في التطبيق. يلزم ضبط مواقيت الصلاة والسماح بالتنبيهات الدقيقة.",12,AppThemeColors.muted(this),false);prayerTimesNote.setPadding(0,dp(7),0,dp(7));settings.addView(prayerTimesNote,full());
         enabled.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
         iftarMode.setOnCheckedChangeListener((g,id)->{prefs.edit().putString("iftar_mode",id==5?"cannon":"upload").apply();RamadanReminderReceiver.scheduleAll(this);});
         cannon.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("cannon_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
