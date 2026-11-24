@@ -2142,7 +2142,7 @@ mushafSwipeArea.addEventListener('pointerup',event=>{
 mushafSwipeArea.addEventListener('pointercancel',()=>{mushafMouseStart=null;});
 
 async function loadOldEgyptianReciters(){
- const cacheKey='zad_mp3quran_reciters_ar_v2',select=$('reciter');
+ const cacheKey='zad_mp3quran_reciters_multi_v3',select=$('reciter');
  const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp());
  function populate(all,fromCache){
   if(!Array.isArray(all))return 0;
@@ -2164,16 +2164,24 @@ async function loadOldEgyptianReciters(){
  let cached=[];try{cached=JSON.parse(localStorage.getItem(cacheKey)||'[]');}catch(e){}
  if(Array.isArray(cached)&&cached.length)populate(cached,true);
  let apiError=null,all=[];
- for(const endpoint of ['https://mp3quran.net/api/v3/reciters?language=ar','https://www.mp3quran.net/api/v3/reciters?language=ar']){
-  try{
-   const response=await zadFetchTimeout(endpoint,{},10000);
-   if(!response.ok)throw new Error('HTTP '+response.status);
-   const data=await response.json();
-   all=(data.reciters||[]).filter(rec=>rec&&rec.id&&Array.isArray(rec.moshaf)&&rec.moshaf.length).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'ar'));
-   if(!all.length)throw new Error('empty reciter list');
-   break;
-  }catch(error){apiError=error;}
+ const merged=new Map();
+ for(const language of ['ar','eng']){
+  let languageRows=[];
+  for(const host of ['https://mp3quran.net','https://www.mp3quran.net']){
+   try{
+    const response=await zadFetchTimeout(host+'/api/v3/reciters?language='+language,{},12000);
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    const data=await response.json();
+    languageRows=(data.reciters||[]).filter(rec=>rec&&rec.id&&Array.isArray(rec.moshaf)&&rec.moshaf.length);
+    if(languageRows.length)break;
+   }catch(error){apiError=error;}
+  }
+  for(const rec of languageRows){
+   const id=String(rec.id),existing=merged.get(id);
+   if(!existing||language==='ar')merged.set(id,{...existing,...rec,name:language==='ar'?(rec.name||existing?.name):(existing?.name||rec.name)});
+  }
  }
+ all=[...merged.values()].sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'ar'));
  if(all.length){
   try{localStorage.setItem(cacheKey,JSON.stringify(all));}catch(e){}
   populate(all,false);
