@@ -46,6 +46,7 @@ public class QuranTextActivity extends Activity {
     private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.RIGHT);t.setTextDirection(View.TEXT_DIRECTION_RTL);if(bold)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
     private void build(){
         contentScroll=new ScrollView(this);
+        contentScroll.setOnScrollChangeListener((View view,int x,int y,int oldX,int oldY)->markVisibleQuranPage());
         LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setPadding(dp(14),dp(14),dp(14),dp(28));root.setBackgroundColor(Color.rgb(244,247,243));contentScroll.addView(root);
         heading=label(pageMode?"القراءة والتصحيح — صفحة "+pageNumber:(targetAyah>0?"سورة "+names[surahNumber-1]+" — الآية "+targetAyah:"سورة "+names[surahNumber-1]),22,green,true);heading.setGravity(Gravity.CENTER);root.addView(heading);
         TextView hint=label("اختر القارئ، ثم اضغط على الآية لسماعها. بعد انتهاء الآية ينتقل التشغيل تلقائيًا إلى الآية التالية. اضغط الآية مرة أخرى لإعادتها.",13,Color.DKGRAY,false);hint.setPadding(0,dp(10),0,dp(10));root.addView(hint);
@@ -150,6 +151,7 @@ public class QuranTextActivity extends Activity {
             });
             LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(7);verses.addView(verse,lp);
         }
+        verses.post(this::markVisibleQuranPage);
         if(targetAyah > 0 && !ayahs.isEmpty()) {
             int found = -1;
             for(int i=0;i<ayahs.size();i++) { JSONObject candidate=ayahs.get(i); JSONObject candidateSurah=candidate.optJSONObject("surah"); int candidateSurahNumber=candidateSurah==null?surahNumber:candidateSurah.optInt("number",surahNumber); if(candidateSurahNumber==surahNumber && candidate.optInt("numberInSurah",-1)==targetAyah){found=i;break;} }
@@ -170,6 +172,19 @@ public class QuranTextActivity extends Activity {
                 Toast.makeText(this,"رقم الآية غير صحيح لهذه السورة",Toast.LENGTH_LONG).show();
             }
             targetAyah = -1;
+        }
+    }
+    private void markVisibleQuranPage(){
+        if(!QuranKhatmaTracker.isTracking(this)||verses==null||ayahs.isEmpty())return;
+        int y=contentScroll==null?0:contentScroll.getScrollY();
+        int offset=verses.getTop();
+        for(int i=0;i<verses.getChildCount()&&i<ayahs.size();i++){
+            View row=verses.getChildAt(i);
+            if(row.getBottom()+offset>y){
+                int page=pageMode?pageNumber:ayahs.get(i).optInt("page",0);
+                if(page>0)QuranKhatmaTracker.markPageRead(this,page);
+                return;
+            }
         }
     }
     private void playAyah(int index,boolean continueAfter){
