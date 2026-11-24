@@ -115,9 +115,13 @@ async function uploadToGitHub(file, kind, env) {
       branch: GITHUB_BRANCH
     })
   });
-  const result = await response.json().catch(() => ({}));
+  const responseText = await response.text();
+  let result = {};
+  try { result = responseText ? JSON.parse(responseText) : {}; } catch {}
   if (!response.ok) {
-    const safeMessage = typeof result.message === "string" ? result.message.slice(0, 240) : "GitHub API returned an error.";
+    const safeMessage = typeof result.message === "string"
+      ? result.message.slice(0, 500)
+      : (responseText ? responseText.slice(0, 500) : "No response body from GitHub.");
     throw new Error("فشل رفع الملف إلى GitHub (HTTP " + response.status + "): " + safeMessage);
   }
   return "https://zad-almoslem.github.io/" + path;
