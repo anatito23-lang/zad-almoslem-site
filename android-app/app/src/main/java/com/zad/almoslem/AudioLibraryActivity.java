@@ -15,8 +15,8 @@ import java.util.*;
 
 public class AudioLibraryActivity extends Activity {
     private final int green=Color.rgb(8,48,40);
-    private final String[] artists={"نصر الدين طوبار","سيد النقشبندي"};
-    private final String[][] tobar={
+    private static final String[] artists={"نصر الدين طوبار","سيد النقشبندي"};
+    private static final String[][] tobar={
         {"جل المنادي","https://archive.org/download/20201209_20201209_0854/%D8%AC%D9%84%20%D8%A7%D9%84%D9%85%D9%86%D8%A7%D8%AF%D9%89.mp3"},
         {"يا مالك الملك","https://archive.org/download/20201209_20201209_0854/%D9%8A%D8%A7%20%D9%85%D8%A7%D9%84%D9%83%20%D8%A7%D9%84%D9%85%D9%84%D9%83.mp3"},
         {"حين يهدي الصبح إشراق سناه","https://archive.org/download/20201209_20201209_0854/%D8%AD%D9%8A%D9%86%20%D9%8A%D9%87%D8%AF%D9%8A%20%D8%A7%D9%84%D8%B5%D8%A8%D8%AD%20%D8%A5%D8%B4%D8%B1%D8%A7%D9%82%20%D8%B3%D9%86%D8%A7%D9%87.mp3"},
@@ -36,8 +36,20 @@ public class AudioLibraryActivity extends Activity {
         {"الله رب الوجود","https://www.nourelquran.com/force_download.php?id=5703"},
         {"الأمر أمرك","https://www.nourelquran.com/force_download.php?id=5704"}
     };
-    private final String[] naqshTitles={"مولاي إني ببابك","لحظات يزهى بهن الزمان","الله يا الله","نفسي يا رب","يا رب كرمك علينا","رباه ارفع مقتك عنا","في حبك ربي نتفانى","أقول أمتي","الكون صلاة وخشوع","ندخل بيتك","دعاء السائل المحروم","يا من يعلم","سبحانك يا كريم","أيها الناس","ربنا","أيها الساهر","أتيت إليك يا رب العباد","أدعوك في غمضي","إذا ما تلاقى الأفق بالأرض في المدى","أسعى لخلاقي"};
-    private final String[] naqshFiles={"01 - مولاي.mp3","02 - لحظات يزهى بهن الزمان -ابتهال للشيخ سيد النقشبندى.mp3","03 - الله يا الله.mp3","04 - نفسي يا رب.mp3","05 - يا رب كرمك علينا.mp3","06 - رباه ارفع مقتك عنا.mp3","07 - في حبك ربي نتفاني.mp3","08 - أقول امتي.mp3","09 - الكون صلاة وخشوع.mp3","10 - ندخل بيتك.mp3","11 - دعاء السائل المحروم.mp3","12 - يا من يعلم.mp3","12 - سبحانك يا كريم.mp3","13 - أيها الناس.mp3","14 - ربنا.mp3","15 - أيها الساهر.mp3","أتيت إليك يارب العباد.mp3","أدعوك في غمضي.mp3","إذا ماتلاقى الأفق بالأرض في المدى.mp3","أسعى لخلاقي.mp3"};
+    private static final String[] naqshTitles={"مولاي إني ببابك","لحظات يزهى بهن الزمان","الله يا الله","نفسي يا رب","يا رب كرمك علينا","رباه ارفع مقتك عنا","في حبك ربي نتفانى","أقول أمتي","الكون صلاة وخشوع","ندخل بيتك","دعاء السائل المحروم","يا من يعلم","سبحانك يا كريم","أيها الناس","ربنا","أيها الساهر","أتيت إليك يا رب العباد","أدعوك في غمضي","إذا ما تلاقى الأفق بالأرض في المدى","أسعى لخلاقي"};
+    private static final String[] naqshFiles={"01 - مولاي.mp3","02 - لحظات يزهى بهن الزمان -ابتهال للشيخ سيد النقشبندى.mp3","03 - الله يا الله.mp3","04 - نفسي يا رب.mp3","05 - يا رب كرمك علينا.mp3","06 - رباه ارفع مقتك عنا.mp3","07 - في حبك ربي نتفاني.mp3","08 - أقول امتي.mp3","09 - الكون صلاة وخشوع.mp3","10 - ندخل بيتك.mp3","11 - دعاء السائل المحروم.mp3","12 - يا من يعلم.mp3","12 - سبحانك يا كريم.mp3","13 - أيها الناس.mp3","14 - ربنا.mp3","15 - أيها الساهر.mp3","أتيت إليك يارب العباد.mp3","أدعوك في غمضي.mp3","إذا ماتلاقى الأفق بالأرض في المدى.mp3","أسعى لخلاقي.mp3"};
+    public static int getArtistCount(){return artists.length;}
+    public static String getArtistName(int artist){return artists[Math.max(0,Math.min(artists.length-1,artist))];}
+    public static int getTrackCount(int artist){return artist==0?tobar.length:naqshTitles.length;}
+    public static String getTrackName(int artist,int track){
+        if(artist==0)return tobar[track][0];
+        return naqshTitles[track];
+    }
+    public static String getTrackUrl(int artist,int track){
+        if(artist==0)return tobar[track][1];
+        try{return "https://archive.org/download/qr_20201208/"+URLEncoder.encode(naqshFiles[track],"UTF-8").replace("+","%20");}
+        catch(Exception e){return "";}
+    }
     private final String ruqyahUrl="https://archive.org/download/20240228_20240228_1849/041%20%2011%20%20%20%D8%A7%D9%84%D8%B1%D9%82%D9%8A%D8%A9%20%D8%A7%D9%84%D8%B4%D8%B1%D8%B9%D9%8A%D8%A9%20%D9%84%D8%B9%D9%84%D8%A7%D8%AC%20%D8%A7%D9%84%D8%B3%D8%AD%D8%B1%20%D8%A7%D9%84%D9%85%D8%B3%20%D8%A7%D9%84%D8%AD%D8%B3%D8%AF%20%D8%A8%D8%B5%D9%88%D8%AA%20%D8%A7%D9%84%D8%B4%D9%8A%D8%AE%20%D9%85%D8%AD%D9%85%D9%88%D8%AF%20%D8%AE%D9%84%D9%8A%D9%84%20%D8%A7%D9%84%D8%AD%D8%B5%D8%B1%D9%89%20%D8%B1%D8%AD%D9%85%D9%87%20%D8%A7%D9%84%D9%84%D9%87%20%D8%AC%D9%88%D8%AF%D8%A9%20%D8%B9%D8%A7%D9%84%D9%8A%D8%A9.mp3";
     private Spinner artistPicker,trackPicker;
     private TextView status;
