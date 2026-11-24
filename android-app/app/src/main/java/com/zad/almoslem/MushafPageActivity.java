@@ -51,6 +51,7 @@ public class MushafPageActivity extends Activity {
     private boolean busy = false;
     private TextView pageLabel, status, attribution;
     private LinearLayout root, toolbar, offlineRow, pageFrame, nav;
+    private ScrollView screenScroll;
     private boolean fullScreen = false;
     private boolean openedFromRamadan = false;
     private ImageView pageImage;
@@ -198,13 +199,17 @@ public class MushafPageActivity extends Activity {
         previous.setOnClickListener(v -> { if (page > 1) showPage(page - 1); });
         next.setOnClickListener(v -> { if (page < 604) showPage(page + 1); });
 
-        setContentView(AppTabs.wrap(this, root, openedFromRamadan ? "ramadan" : "mushaf"));
+        screenScroll = new ScrollView(this);
+        screenScroll.setFillViewport(true);
+        screenScroll.addView(root, new ScrollView.LayoutParams(-1, -1));
+        setContentView(AppTabs.wrap(this, screenScroll, openedFromRamadan ? "ramadan" : "mushaf"));
     }
 
     private void toggleFullScreen() {
         fullScreen = !fullScreen;
         if (fullScreen) {
             if (root.getParent() instanceof ViewGroup) ((ViewGroup) root.getParent()).removeView(root);
+            if (screenScroll != null && screenScroll.getParent() instanceof ViewGroup) ((ViewGroup) screenScroll.getParent()).removeView(screenScroll);
             root.setPadding(0, 0, 0, 0);
             toolbar.setVisibility(View.GONE);
             offlineRow.setVisibility(View.GONE);
@@ -235,7 +240,8 @@ public class MushafPageActivity extends Activity {
             pageFrame.setBackground(shape(Color.rgb(255,253,244), 5, Color.rgb(177,157,112)));
             pageFrame.setLayoutParams(new LinearLayout.LayoutParams(-1, 0, 1f));
             if (root.getParent() instanceof ViewGroup) ((ViewGroup) root.getParent()).removeView(root);
-            setContentView(AppTabs.wrap(this, root, openedFromRamadan ? "ramadan" : "mushaf"));
+            screenScroll.addView(root, new ScrollView.LayoutParams(-1, -1));
+            setContentView(AppTabs.wrap(this, screenScroll, openedFromRamadan ? "ramadan" : "mushaf"));
         }
     }
 
