@@ -80,13 +80,22 @@ public class IslamicReelsActivity extends Activity {
         // The image fills the frame and receives the touch first, so attach the
         // same vertical gesture handler to the image itself (and the frame).
         View.OnTouchListener swipe = (v, e) -> {
-            if (e.getAction() == android.view.MotionEvent.ACTION_DOWN) {
-                downY = e.getY();
+            int action = e.getActionMasked();
+            if (action == android.view.MotionEvent.ACTION_DOWN) {
+                downY = e.getRawY();
+                // Prevent the parent tab/scroll container from stealing a vertical
+                // swipe before the reels feed can process it.
+                if (v.getParent() != null) v.getParent().requestDisallowInterceptTouchEvent(true);
                 return true;
             }
-            if (e.getAction() == android.view.MotionEvent.ACTION_UP) {
-                float distance = downY - e.getY();
+            if (action == android.view.MotionEvent.ACTION_UP) {
+                float distance = downY - e.getRawY();
                 if (Math.abs(distance) > dp(55)) move(distance > 0 ? 1 : -1);
+                if (v.getParent() != null) v.getParent().requestDisallowInterceptTouchEvent(false);
+                return true;
+            }
+            if (action == android.view.MotionEvent.ACTION_CANCEL) {
+                if (v.getParent() != null) v.getParent().requestDisallowInterceptTouchEvent(false);
                 return true;
             }
             return true;
