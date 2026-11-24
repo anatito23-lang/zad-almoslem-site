@@ -1142,17 +1142,10 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
       <p id="quranStatus" class="small" role="status" style="margin:8px 0 12px">جارٍ تحميل قائمة القراء والتسجيلات الصوتية...</p>
       <div class="zad-player" id="zadPlayer">
         <div class="zad-player-picker" style="display:grid;grid-template-columns:1fr;gap:9px;margin:0 0 14px">
-          <label class="small">اختر القارئ
-            <select id="zadPlayerReciter" aria-label="اختيار القارئ"><option value="">جارٍ تحميل القراء...</option></select>
-          </label>
-          <label class="small">اختر الرواية
-            <select id="zadPlayerMoshaf" aria-label="اختيار الرواية" disabled><option value="">اختر القارئ أولًا</option></select>
-          </label>
-          <label class="small">اختر السورة
-            <select id="zadPlayerSurah" aria-label="اختيار السورة" disabled><option value="">اختر الرواية أولًا</option></select>
-          </label>
-        </div>
-        <div class="zad-player-cover" aria-label="هوية زاد قرآن"><span class="zad-player-ornament">۞</span><span>زاد قرآن</span><i></i></div>
+          <label class="small">اختر القارئ<select id="zadPlayerReciter" aria-label="اختيار القارئ"><option value="">جارٍ تحميل القراء...</option></select></label>
+          <label class="small">اختر الرواية<select id="zadPlayerMoshaf" aria-label="اختيار الرواية" disabled><option value="">اختر القارئ أولًا</option></select></label>
+          <label class="small">اختر السورة<select id="zadPlayerSurah" aria-label="اختيار السورة" disabled><option value="">اختر الرواية أولًا</option></select></label>
+        </div><div class="zad-player-cover" aria-label="هوية زاد قرآن"><span class="zad-player-ornament">۞</span><span>زاد قرآن</span><i></i></div>
         <div class="zad-player-info"><span class="zad-player-live">● الآن يُتلى</span><strong id="zadPlayerTitle">اختر تلاوة من المكتبة</strong><span id="zadPlayerArtist">مكتبة القراء والتلاوات</span><small id="zadPlayerUpNext">التشغيل التلقائي للسورة التالية مفعّل</small></div>
         <div class="zad-player-timeline"><span id="zadPlayerCurrent">00:00</span><input id="zadPlayerSeek" type="range" min="0" max="1000" value="0" aria-label="موضع التشغيل"><span id="zadPlayerDuration">00:00</span></div>
         <div class="zad-player-controls">
@@ -2474,9 +2467,8 @@ zadAudio.addEventListener('ended',()=>{
  replaceButton('zadPlayerToggle',async()=>{
   if(!audio.src){
    const queue=window.zadQuranQueue||[];
-   const selected=$id('zadPlayerSurah');
-   const selectedId=selected&&selected.value?Number(selected.value):null;
-   if(selectedId&&queue.some(track=>track.id===selectedId))playZadQuranTrack(selectedId);
+   const selected=$id('zadPlayerSurah'),id=selected&&selected.value?Number(selected.value):null;
+   if(id&&queue.some(track=>track.id===id))playZadQuranTrack(id);
    else $('quranStatus').textContent='اختر القارئ والرواية والسورة من قوائم المشغل أولًا.';
    return;
   }
@@ -3441,7 +3433,10 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
     #zadQuranLibraryTracks .zad-quran-track-actions button,#zadQuranLibraryTracks .zad-quran-track-actions a{border:0;border-radius:10px;padding:9px 13px;font-weight:700;text-decoration:none}
     #zadQuranLibraryTracks .zad-quran-play{background:#315f4a;color:#fff}
     #zadQuranLibraryTracks .zad-quran-download{background:#eee6d1;color:#214b3d}
-    #zadMoshafSelect{width:100%;border:1px solid #dce  <script id="zad-real-mp3quran-loader">
+    #zadMoshafSelect{width:100%;border:1px solid #dce5dc;border-radius:12px;padding:12px;background:#fff;font:inherit}
+    @media(max-width:390px){#zadReciterCatalog{grid-template-columns:1fr}}
+  </style>
+  <script id="zad-real-mp3quran-loader">
   (function(){
    const $id=id=>document.getElementById(id);
    const catalog=$id('zadReciterCatalog'),readerSearch=$id('zadReciterSearch'),surahSearch=$id('zadSurahSearch'),audio=$id('audio'),playerReciter=$id('zadPlayerReciter'),playerMoshaf=$id('zadPlayerMoshaf'),playerSurah=$id('zadPlayerSurah');
@@ -3493,55 +3488,12 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
     content.append(select,surahs);details.append(content);drawSurahs();
     return details;
    }
-   function fillSelect(select,items,placeholder){
-    select.replaceChildren();
-    const first=document.createElement('option');first.value='';first.textContent=placeholder;select.append(first);
-    items.forEach(item=>{const option=document.createElement('option');option.value=String(item.value);option.textContent=item.label;select.append(option);});
-   }
-   function updatePlayerQueue(){
-    const rec=reciters.find(r=>String(r.id)===playerReciter.value);
-    const m=(rec&&rec.moshaf||[])[Number(playerMoshaf.value)];
-    if(!rec||!m||!m.server){window.zadQuranQueue=[];playerSurah.disabled=true;fillSelect(playerSurah,[],'اختر الرواية أولًا');return;}
-    const ids=String(m.surah_list||'').split(',').map(Number).filter(n=>n>=1&&n<=114);
-    const rawServer=String(m.server);const server=rawServer.endsWith('/')?rawServer:rawServer+'/';
-    window.zadQuranQueue=ids.map(n=>({id:n,name:names[n-1],artist:rec.name,url:server+String(n).padStart(3,'0')+'.mp3'}));
-    fillSelect(playerSurah,ids.map(n=>({value:n,label:n+'. '+names[n-1]})),'اختر السورة');
-    playerSurah.disabled=!ids.length;
-    if(ids.length)playerSurah.value=String(ids[0]);
-    const chosen=window.zadQuranQueue.find(t=>String(t.id)===playerSurah.value);
-    if(chosen){const download=$id('zadPlayerDownload');if(download){download.href=chosen.url;download.download=String(chosen.id).padStart(3,'0')+'.mp3';}}
-   }
-   function drawReaders(){
-    const q=norm(readerSearch.value);
-    const shown=reciters.filter(r=>!q||norm(r.name).includes(q)).sort((a,b)=>{
-     const egyptian=Number(egyptianSet.has(norm(b.name)))-Number(egyptianSet.has(norm(a.name)));
-     return egyptian||String(a.name||'').localeCompare(String(b.name||''),'ar');
-    });
-    const previous=playerReciter.value;
-    fillSelect(playerReciter,shown.map(r=>({value:r.id,label:r.name+' — '+(r.moshaf||[]).length+' رواية'})),'اضغط لاختيار القارئ');
-    if(shown.some(r=>String(r.id)===previous))playerReciter.value=previous;
-    else if(shown.length)playerReciter.value=String(shown[0].id);
-    playerMoshaf.disabled=!playerReciter.value;
-    const selected=reciters.find(r=>String(r.id)===playerReciter.value);
-    fillSelect(playerMoshaf,(selected&&selected.moshaf||[]).map((m,i)=>({value:i,label:m.name||m.moshaf_name||('الرواية '+(i+1))})),'اختر الرواية');
-    if(selected&&selected.moshaf&&selected.moshaf.length)playerMoshaf.value='0';
-    updatePlayerQueue();
-    catalog.replaceChildren();
-    const note=document.createElement('p');note.className='small';note.textContent='استخدم قائمة «اختر القارئ» داخل المشغل، ثم اختر الرواية والسورة واضغط زر التشغيل في المشغل نفسه.';catalog.append(note);
-   }
-   playerReciter.addEventListener('change',()=>{
-    const rec=reciters.find(r=>String(r.id)===playerReciter.value);
-    fillSelect(playerMoshaf,(rec&&rec.moshaf||[]).map((m,i)=>({value:i,label:m.name||m.moshaf_name||('الرواية '+(i+1))})),'اختر الرواية');
-    playerMoshaf.disabled=!rec||!rec.moshaf.length;
-    if(rec&&rec.moshaf.length)playerMoshaf.value='0';
-    updatePlayerQueue();
-   });
-   playerMoshaf.addEventListener('change',updatePlayerQueue);
-   playerSurah.addEventListener('change',()=>{
-    const chosen=(window.zadQuranQueue||[]).find(t=>String(t.id)===playerSurah.value);
-    if(chosen){const download=$id('zadPlayerDownload');if(download){download.href=chosen.url;download.download=String(chosen.id).padStart(3,'0')+'.mp3';}}
-   });
-   readerSearch.addEventListener('input',drawReaders);
+   function fillSelect(el,items,placeholder){el.replaceChildren();const first=document.createElement('option');first.value='';first.textContent=placeholder;el.append(first);items.forEach(x=>{const o=document.createElement('option');o.value=String(x.value);o.textContent=x.label;el.append(o);});}
+   function syncDownload(){const t=(window.zadQuranQueue||[]).find(x=>String(x.id)===playerSurah.value),d=$id('zadPlayerDownload');if(t&&d){d.href=t.url;d.download=String(t.id).padStart(3,'0')+'.mp3';}}
+   function updateQueue(){const r=reciters.find(x=>String(x.id)===playerReciter.value),m=(r&&r.moshaf||[])[Number(playerMoshaf.value)];if(!r||!m||!m.server){window.zadQuranQueue=[];playerSurah.disabled=true;fillSelect(playerSurah,[],'اختر الرواية أولًا');return;}const ids=String(m.surah_list||'').split(',').map(Number).filter(n=>n>=1&&n<=114),raw=String(m.server),server=raw.endsWith('/')?raw:raw+'/';window.zadQuranQueue=ids.map(n=>({id:n,name:names[n-1],artist:r.name,url:server+String(n).padStart(3,'0')+'.mp3'}));fillSelect(playerSurah,ids.map(n=>({value:n,label:n+'. '+names[n-1]})),'اختر السورة');playerSurah.disabled=!ids.length;if(ids.length)playerSurah.value=String(ids[0]);syncDownload();}
+   function fillMoshaf(){const r=reciters.find(x=>String(x.id)===playerReciter.value);fillSelect(playerMoshaf,(r&&r.moshaf||[]).map((m,i)=>({value:i,label:m.name||m.moshaf_name||('الرواية '+(i+1))})),'اختر الرواية');playerMoshaf.disabled=!r||!r.moshaf.length;if(r&&r.moshaf.length)playerMoshaf.value='0';updateQueue();}
+   function drawReaders(){const q=norm(readerSearch.value),shown=reciters.filter(r=>!q||norm(r.name).includes(q)).sort((a,b)=>Number(egyptianSet.has(norm(b.name)))-Number(egyptianSet.has(norm(a.name)))||String(a.name||'').localeCompare(String(b.name||''),'ar'));const prev=playerReciter.value;fillSelect(playerReciter,shown.map(r=>({value:r.id,label:r.name+' — '+(r.moshaf||[]).length+' رواية'})),'اضغط لاختيار القارئ');if(shown.some(r=>String(r.id)===prev))playerReciter.value=prev;else if(shown.length)playerReciter.value=String(shown[0].id);fillMoshaf();catalog.replaceChildren();const p=document.createElement('p');p.className='small';p.textContent='اختر القارئ والرواية والسورة من قوائم المشغل أعلاه، ثم شغّل من زر التشغيل داخل المشغل.';catalog.append(p);}
+   playerReciter.addEventListener('change',fillMoshaf);playerMoshaf.addEventListener('change',updateQueue);playerSurah.addEventListener('change',syncDownload);readerSearch.addEventListener('input',drawReaders);
    async function load(){
     catalog.innerHTML='<p class="small">جارٍ تحميل قائمة القراء...</p>';
     status('جارٍ جمع القراء والروايات من مكتبة MP3Quran.');
@@ -3597,10 +3549,6 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
     status('تعذر الاتصال بمصدر التلاوات. '+(last&&last.message?last.message:''));
    }
    window.zadReloadQuranCatalog=load;
-   const reloadButton=$id('zadReloadReciters');if(reloadButton)reloadButton.addEventListener('click',load);
-   load();
-  })();
-  </script>tatalog=load;
    const reloadButton=$id('zadReloadReciters');if(reloadButton)reloadButton.addEventListener('click',load);
    load();
   })();
