@@ -15,6 +15,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ScrollView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -31,11 +32,8 @@ import java.util.concurrent.Executors;
 public class IslamicReelsActivity extends Activity {
     private final ExecutorService io = Executors.newSingleThreadExecutor();
     private final ArrayList<JSONObject> posts = new ArrayList<>();
-    private int index = 0;
-    private float downY;
-    private ImageView image;
-    private TextView title, description, counter, status;
-    private Button previousButton, nextButton;
+    private ScrollView reelScroll;
+    private LinearLayout reelFeed;
 
     private int dp(float n) { return (int)(n * getResources().getDisplayMetrics().density + .5f); }
     private TextView label(String value, int size, int color, boolean bold) {
@@ -56,39 +54,27 @@ public class IslamicReelsActivity extends Activity {
     }
 
     private void build() {
-        LinearLayout root = new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(dp(14), dp(10), dp(14), dp(18)); root.setBackgroundColor(Color.BLACK);
-        TextView brand = label("زَادُ الْمُسْلِم  •  ريلز إيمانية", 16, 0xffffdf9b, true);
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(dp(10), dp(6), dp(10), dp(8));
+        root.setBackgroundColor(Color.BLACK);
+
+        TextView brand = label("زَادُ الْمُسْلِم  •  ريلز إيمانية", 17, 0xffffdf9b, true);
         root.addView(brand, new LinearLayout.LayoutParams(-1, dp(42)));
-        counter = label("", 12, Color.WHITE, false);
-        root.addView(counter, new LinearLayout.LayoutParams(-1, dp(28)));
-        FrameLayout frame = new FrameLayout(this);
-        frame.setBackground(round(0xff172a28, 20));
-        image = new ImageView(this); image.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        frame.addView(image, new FrameLayout.LayoutParams(-1, -1));
-        TextView watermark = label("زاد المسلم  |  zad-almoslem.github.io", 12, Color.WHITE, true);
-        watermark.setBackground(round(0x99000000, 9)); watermark.setPadding(dp(9), dp(5), dp(9), dp(5));
-        FrameLayout.LayoutParams wm = new FrameLayout.LayoutParams(-2, -2, Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
-        wm.bottomMargin = dp(12); frame.addView(watermark, wm);
-        LinearLayout.LayoutParams frameLp = new LinearLayout.LayoutParams(-1, 0, 1f);
-        frameLp.bottomMargin = dp(10); root.addView(frame, frameLp);
-        title = label("جارٍ تحميل الصور…", 20, 0xffffe5b0, true);
-        root.addView(title, new LinearLayout.LayoutParams(-1, dp(44)));
-        description = label("", 14, Color.WHITE, false);
-        root.addView(description, new LinearLayout.LayoutParams(-1, -2));
-        status = label("اسحب للأعلى للتنقل بين الريلز", 12, 0xffd7e4dc, false);
-        status.setPadding(0, dp(7), 0, dp(7)); root.addView(status);
-        LinearLayout nav = new LinearLayout(this); nav.setGravity(Gravity.CENTER);
-        previousButton = button("السابق"); nextButton = button("التالي");
-        nav.addView(previousButton, new LinearLayout.LayoutParams(0, dp(48), 1));
-        nav.addView(nextButton, new LinearLayout.LayoutParams(0, dp(48), 1)); root.addView(nav);
-        previousButton.setOnClickListener(v -> move(-1));
-        nextButton.setOnClickListener(v -> move(1));
-        frame.setOnTouchListener((v, e) -> {
-            if (e.getAction() == 0) { downY = e.getY(); return true; }
-            if (e.getAction() == 1) { float d = downY - e.getY(); if (Math.abs(d) > dp(45)) move(d > 0 ? 1 : -1); return true; }
-            return true;
-        });
+
+        reelScroll = new ScrollView(this);
+        reelScroll.setFillViewport(true);
+        reelScroll.setVerticalScrollBarEnabled(false);
+        reelScroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        reelFeed = new LinearLayout(this);
+        reelFeed.setOrientation(LinearLayout.VERTICAL);
+        reelScroll.addView(reelFeed, new ScrollView.LayoutParams(-1, -2));
+        LinearLayout.LayoutParams feedLp = new LinearLayout.LayoutParams(-1, 0, 1f);
+        feedLp.topMargin = dp(4);
+        root.addView(reelScroll, feedLp);
+
+        TextView hint = label("اسحب لأعلى أو لأسفل لمشاهدة المزيد", 12, 0xffd7e4dc, false);
+        root.addView(hint, new LinearLayout.LayoutParams(-1, dp(30)));
         setContentView(AppTabs.wrap(this, root, "more"));
     }
 
@@ -105,46 +91,98 @@ public class IslamicReelsActivity extends Activity {
                     && row.optString("imageUrl").startsWith("https://")) fresh.add(row);
         }
         Collections.sort(fresh, Comparator.comparingInt(o -> o.optInt("order", 0)));
-        posts.clear(); posts.addAll(fresh);
-        if (posts.isEmpty()) {
-            addBuiltInPosts();
-        }
-        if (index >= posts.size()) index = 0;
-        showPost();
+        posts.clear();
+        posts.addAll(fresh);
+        if (posts.isEmpty()) addBuiltInPosts();
+        renderFeed();
     }
 
-    private JSONObject current() { return posts.isEmpty() ? null : posts.get(index); }
+    private void renderFeed() {
+        reelFeed.removeAllViews();
+        int pageHeight = Math.max(dp(420), getResources().getDisplayMetrics().heightPixels - dp(230));
+        for (int i = 0; i < posts.size(); i++) {
+            final JSONObject post = posts.get(i);
+            FrameLayout page = new FrameLayout(this);
+            page.setBackground(round(0xff10231f, 22));
+            page.setClipToOutline(true);
 
-    private void showPost() {
-        JSONObject post = current(); if (post == null) return;
-        title.setText(post.optString("title", "تذكرة إيمانية"));
-        description.setText(post.optString("description", ""));
-        counter.setText((index + 1) + " / " + posts.size());
-        previousButton.setEnabled(posts.size() > 1); nextButton.setEnabled(posts.size() > 1);
-        image.setImageDrawable(null);
-        if (post.optBoolean("builtin", false)) {
-            image.setImageBitmap(makeBuiltInCard(post.optString("verse"), post.optString("reference")));
-            status.setText("ريلز إيمانية جاهزة — صور فقط");
-            return;
+            ImageView photo = new ImageView(this);
+            photo.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            photo.setBackgroundColor(0xff10231f);
+            page.addView(photo, new FrameLayout.LayoutParams(-1, -1));
+
+            android.graphics.drawable.GradientDrawable shade = new android.graphics.drawable.GradientDrawable(
+                    android.graphics.drawable.GradientDrawable.Orientation.BOTTOM_TOP,
+                    new int[]{0xee061713, 0x99061713, 0x00000000});
+            View overlay = new View(this);
+            overlay.setBackground(shade);
+            page.addView(overlay, new FrameLayout.LayoutParams(-1, -1));
+
+            LinearLayout details = new LinearLayout(this);
+            details.setOrientation(LinearLayout.VERTICAL);
+            details.setPadding(dp(20), dp(18), dp(20), dp(24));
+            FrameLayout.LayoutParams detailsLp = new FrameLayout.LayoutParams(-1, -2, Gravity.BOTTOM);
+            page.addView(details, detailsLp);
+
+            TextView badge = label("زَادُ الْمُسْلِم  •  " + (i + 1) + " / " + posts.size(),
+                    12, 0xffffdf9b, true);
+            badge.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+            details.addView(badge, new LinearLayout.LayoutParams(-1, dp(30)));
+
+            TextView heading = label(post.optString("title", "وقفة إيمانية"), 21, Color.WHITE, true);
+            heading.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+            heading.setPadding(0, dp(5), 0, dp(7));
+            details.addView(heading, new LinearLayout.LayoutParams(-1, -2));
+
+            String body = post.optString("description", "");
+            if (post.optBoolean("builtin", false)) {
+                body = post.optString("verse", "") + "\\n" + post.optString("reference", "") +
+                        (body.isEmpty() ? "" : "\\n" + body);
+            }
+            TextView caption = label(body, 15, 0xfff5f5f0, false);
+            caption.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
+            details.addView(caption, new LinearLayout.LayoutParams(-1, -2));
+
+            TextView watermark = label("زاد المسلم", 12, Color.WHITE, true);
+            watermark.setBackground(round(0x88000000, 30));
+            watermark.setPadding(dp(13), dp(6), dp(13), dp(6));
+            FrameLayout.LayoutParams wm = new FrameLayout.LayoutParams(-2, -2, Gravity.TOP | Gravity.RIGHT);
+            wm.setMargins(0, dp(14), dp(14), 0);
+            page.addView(watermark, wm);
+
+            LinearLayout.LayoutParams pageLp = new LinearLayout.LayoutParams(-1, pageHeight);
+            pageLp.bottomMargin = dp(12);
+            reelFeed.addView(page, pageLp);
+
+            if (post.optBoolean("builtin", false)) {
+                photo.setImageBitmap(makeBuiltInCard(post.optString("verse"), post.optString("reference")));
+            } else {
+                io.execute(() -> {
+                    Bitmap bitmap = null;
+                    HttpURLConnection connection = null;
+                    try {
+                        connection = (HttpURLConnection)new URL(post.optString("imageUrl")).openConnection();
+                        connection.setConnectTimeout(12000);
+                        connection.setReadTimeout(20000);
+                        connection.setInstanceFollowRedirects(true);
+                        try (InputStream in = connection.getInputStream()) {
+                            bitmap = BitmapFactory.decodeStream(in);
+                        }
+                    } catch (Exception ignored) {
+                    } finally {
+                        if (connection != null) connection.disconnect();
+                    }
+                    Bitmap result = bitmap;
+                    runOnUiThread(() -> {
+                        if (result != null && photo.getParent() == reelFeed.getChildAt(i)) {
+                            photo.setImageBitmap(result);
+                        } else if (result != null && page.getParent() == reelFeed) {
+                            photo.setImageBitmap(result);
+                        }
+                    });
+                });
+            }
         }
-        status.setText("جارٍ تحميل الصورة…");
-        io.execute(() -> {
-            Bitmap bitmap = null;
-            HttpURLConnection connection = null;
-            try {
-                connection = (HttpURLConnection)new URL(post.optString("imageUrl")).openConnection();
-                connection.setConnectTimeout(12000); connection.setReadTimeout(20000);
-                connection.setInstanceFollowRedirects(true);
-                try (InputStream in = connection.getInputStream()) { bitmap = BitmapFactory.decodeStream(in); }
-            } catch (Exception ignored) {
-            } finally { if (connection != null) connection.disconnect(); }
-            Bitmap result = bitmap;
-            runOnUiThread(() -> {
-                if (current() != post) return;
-                if (result != null) { image.setImageBitmap(result); status.setText("صورة منشورة"); }
-                else status.setText("تعذر تحميل الصورة. تحقق من الاتصال.");
-            });
-        });
     }
 
     private void addBuiltInPosts() {
@@ -194,11 +232,6 @@ public class IslamicReelsActivity extends Activity {
         card.layout(0, 0, w, h);
         card.draw(canvas);
         return bitmap;
-    }
-
-    private void move(int direction) {
-        if (posts.isEmpty()) return;
-        index = (index + direction + posts.size()) % posts.size(); showPost();
     }
 
     @Override protected void onDestroy() { io.shutdownNow(); super.onDestroy(); }
