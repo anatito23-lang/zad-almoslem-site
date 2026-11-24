@@ -319,20 +319,31 @@ document.querySelectorAll("[data-audio-upload]").forEach(button=>button.addEvent
  }catch(error){const reason=error?.message||"خطأ غير معروف";audioUploadMessage(kind,"✕ تعذر إكمال الرفع: "+reason,true);audioMessage("تعذر رفع التسجيل: "+reason,true);}
  finally{button.disabled=false;button.textContent=old;}
 }));
-document.querySelectorAll("[data-audio-publish]").forEach(button=>button.addEventListener("click",async()=>{
- if(auth.currentUser?.uid!==ADMIN_UID){audioMessage("غير مصرح بهذا الإجراء.",true);return;}
- const config=AUDIO_UPLOADS[button.dataset.audioPublish],input=$(config.input),url=input.value.trim();
+// Capture manual publish clicks at the card level and acknowledge them immediately.
+$("audioAssetsCard").addEventListener("click",async event=>{
+ const button=event.target.closest("button[data-audio-publish]");
+ if(!button)return;
+ event.preventDefault();
+ event.stopImmediatePropagation();
+ const kind=button.dataset.audioPublish,config=AUDIO_UPLOADS[kind],input=config?$(config.input):null;
+ if(!config||!input){audioMessage("تعذر تحديد نوع التسجيل المطلوب نشره.",true);return;}
+ if(auth.currentUser?.uid!==ADMIN_UID){audioMessage("انتهت جلسة المسؤول أو الحساب غير مصرح له. سجّل الدخول مجددًا.",true);return;}
+ const url=input.value.trim();
  if(!url){audioMessage("الصق رابط ملف الصوت أولًا.",true);return;}
  let parsed;try{parsed=new URL(url)}catch(e){audioMessage("الرابط غير صحيح.",true);return;}
  if(parsed.protocol!=="https:"||!["zad-almoslem.github.io","raw.githubusercontent.com"].includes(parsed.hostname)||! /\.(mp3|m4a|wav|ogg)(\?.*)?$/i.test(parsed.pathname+parsed.search)){audioMessage("استخدم رابط HTTPS مباشرًا لملف صوتي مستضاف على zad-almoslem.github.io.",true);return;}
- button.disabled=true;const old=button.textContent;button.textContent="جارٍ نشر الرابط…";
+ const old=button.textContent;
+ button.disabled=true;button.textContent="جارٍ نشر الرابط…";
+ audioMessage("جارٍ حفظ رابط "+config.name+" في قاعدة البيانات…");
  try{
   await setDoc(doc(db,"app_audio_assets","ramadan"),{[config.field]:url,[config.field+"UpdatedAt"]:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true});
-  const preview=$("audioPreview-"+button.dataset.audioPublish);if(preview){preview.src=url;preview.classList.remove("hidden");}
-  audioMessage("تم نشر رابط "+config.name+" بنجاح. سيزامن التطبيق الملف عند اتصاله بالإنترنت.");
+  const verify=await getDoc(doc(db,"app_audio_assets","ramadan"));
+  if(!verify.exists()||verify.data()?.[config.field]!==url)throw new Error("لم يتم العثور على الرابط بعد الحفظ؛ أعد المحاولة.");
+  const preview=$("audioPreview-"+kind);if(preview){preview.src=url;preview.classList.remove("hidden");}
+  audioMessage("تم نشر رابط "+config.name+" والتحقق من حفظه بنجاح.");
  }catch(error){audioMessage("تعذر نشر الرابط: "+(error?.code||"")+(error?.message?" — "+error.message:""),true);}
  finally{button.disabled=false;button.textContent=old;}
-}));
+},{capture:true});
 // إدارة المنشورات الإضافية داخل جميع أقسام الموقع
 const SITE_SECTIONS=[
  ["prayer","مواقيت الصلاة"],["calendar","التقويم الشهري"],
