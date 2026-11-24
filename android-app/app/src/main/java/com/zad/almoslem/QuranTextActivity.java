@@ -57,12 +57,7 @@ public class QuranTextActivity extends Activity {
             @Override public void onNothingSelected(AdapterView<?> parent) {}
             @Override public void onItemSelected(AdapterView<?> parent,View view,int position,long id) {
                 getPreferences(MODE_PRIVATE).edit().putInt("ayah_reciter",position).apply();
-                if(player!=null){
-                    stopAudio();
-                    status.setText("تم اختيار "+RECITER_NAMES[position]+". اضغط على الآية للاستماع بالصوت الجديد.");
-                } else if(status!=null) {
-                    status.setText("القارئ المختار: "+RECITER_NAMES[position]+". اضغط على أي آية للاستماع.");
-                }
+                if(status!=null) status.setText("القارئ المختار: "+RECITER_NAMES[position]+". اضغط على أي آية للاستماع.");
             }
         });
         root.addView(reciterPicker);
