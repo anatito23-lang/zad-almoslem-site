@@ -52,6 +52,7 @@ public class MushafPageActivity extends Activity {
     private TextView pageLabel, status, attribution;
     private LinearLayout root, toolbar, offlineRow, pageFrame, nav;
     private boolean fullScreen = false;
+    private boolean openedFromRamadan = false;
     private ImageView pageImage;
     private Button previous, next;
     private ProgressBar progress;
@@ -65,6 +66,7 @@ public class MushafPageActivity extends Activity {
         super.onCreate(state);
         green=AppThemeColors.primary(this);
         AppThemeColors.apply(this);
+        openedFromRamadan = getIntent().getBooleanExtra("from_ramadan", false);
         page = Math.max(1, Math.min(604, getIntent().getIntExtra("page",
                 getSharedPreferences("zad_mushaf", MODE_PRIVATE).getInt("last_page", 1))));
         build();
@@ -196,7 +198,7 @@ public class MushafPageActivity extends Activity {
         previous.setOnClickListener(v -> { if (page > 1) showPage(page - 1); });
         next.setOnClickListener(v -> { if (page < 604) showPage(page + 1); });
 
-        setContentView(root);
+        setContentView(AppTabs.wrap(this, root, openedFromRamadan ? "ramadan" : "mushaf"));
     }
 
     private void toggleFullScreen() {
@@ -233,7 +235,7 @@ public class MushafPageActivity extends Activity {
             pageFrame.setBackground(shape(Color.rgb(255,253,244), 5, Color.rgb(177,157,112)));
             pageFrame.setLayoutParams(new LinearLayout.LayoutParams(-1, 0, 1f));
             if (root.getParent() instanceof ViewGroup) ((ViewGroup) root.getParent()).removeView(root);
-            setContentView(AppTabs.wrap(this, root, "mushaf"));
+            setContentView(AppTabs.wrap(this, root, openedFromRamadan ? "ramadan" : "mushaf"));
         }
     }
 
