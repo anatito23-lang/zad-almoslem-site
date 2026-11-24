@@ -75,6 +75,19 @@ public class RamadanActivity extends Activity {
         note.setPadding(0,dp(7),0,dp(8));khatma.addView(note,full());
         Button openMushaf=new Button(this);openMushaf.setText("📖  افتح المصحف وابدأ القراءة");khatma.addView(openMushaf,full());
         khatmaToggle=new Button(this);khatma.addView(khatmaToggle,full());
+        Button resetKhatma=new Button(this);
+        resetKhatma.setText("↺ تصفير عداد الختمة");
+        khatma.addView(resetKhatma,full());
+        resetKhatma.setOnClickListener(v->new android.app.AlertDialog.Builder(this)
+                .setTitle("تصفير عداد الختمة")
+                .setMessage("هل تريد بدء ختمة جديدة؟ سيتم تصفير الصفحات المسجلة وإيقاف متابعة الختمة الحالية.")
+                .setNegativeButton("إلغاء",null)
+                .setPositiveButton("تصفير", (dialog,which)->{
+                    QuranKhatmaTracker.stop(this);
+                    QuranKhatmaTracker.reset(this);
+                    updateKhatma();
+                    Toast.makeText(this,"تم تصفير عداد الختمة. بالتوفيق في ختمتك الجديدة 🌙",Toast.LENGTH_LONG).show();
+                }).show());
         openMushaf.setOnClickListener(v->{
             if(!QuranKhatmaTracker.isTracking(this))QuranKhatmaTracker.start(this);
             updateKhatma();
