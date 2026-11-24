@@ -1023,7 +1023,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
   <section class="section site-directory" aria-labelledby="siteDirectoryTitle">
 <div class="section-head"><div><h2 id="siteDirectoryTitle">دليل زاد المسلم</h2><p>اختر ما تبحث عنه، وستصل إلى القسم مباشرة.</p></div></div>
 <div class="site-directory-grid">
-<article class="directory-card"><span>🕌</span><h3>العبادة اليومية</h3><p>الصلاة والذكر والورد.</p><div><a href="#prayer">مواقيت الصلاة</a><a href="#calendar">التقويم</a><a href="#azkar">الأذكار</a><a href="#daily-wird">وردي اليومي</a><a href="#friday-wird">ورد الجمعة</a><a href="#duas">الأدعية</a></div></article>
+<article class="directory-card"><span>🕌</span><h3>العبادة اليومية</h3><p>الصلاة والذكر والورد.</p><div><a href="#prayer">مواقيت الصلاة</a><a href="#calendar">التقويم</a><a href="#azkar">الأذكار</a><a href="#daily-wird">وردي اليومي</a><a href="#duas">الأدعية</a></div></article>
 <article class="directory-card"><span>📖</span><h3>القرآن والتلاوات</h3><p>استمع واقرأ وتدبر.</p><div><a href="#quran">استماع القرآن</a><a href="#mushaf">المصحف الشريف</a><a href="#radio-egypt">إذاعات القرآن</a><a href="#ruqyah">الرقية الشرعية</a><a href="#nasheed">الإنشاد والابتهالات</a></div></article>
 <article class="directory-card"><span>📚</span><h3>السنة والعلم</h3><p>زاد معرفتك بالحديث والكتب.</p><div><a href="#hadith-dua">الحديث الشريف</a><a href="#books-library">المكتبة الإسلامية</a><a href="#library">المكتبة الإيمانية</a><a href="#shaaraawi">خواطر الشعراوي</a><a href="#islamic-knowledge">زاد العلم والإيمان</a></div></article>
 <article class="directory-card"><span>💚</span><h3>الخطب والخواطر</h3><p>كلمات إيمانية توقظ القلب.</p><div><a href="#qalbi-itmaann">قلبي اطمئن</a><a href="#khutbahs">خطب الجمعة</a><a href="#friday-live">بث خطبة الجمعة</a></div></article>
@@ -1595,25 +1595,7 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
 
   
 
-  <section class="section" id="friday-wird">
-    <div class="section-head"><div><h2>ورد يوم الجمعة</h2><p>أعمال مستحبة تملأ يوم الجمعة بالصلاة والذكر والدعاء</p></div><span class="badge" id="fridayBadge" style="color:var(--green);background:var(--soft);padding:6px 10px;border-radius:9px;font-size:12px">ورد أسبوعي</span></div>
-    <div class="card">
-      <div class="row" style="justify-content:space-between;align-items:center"><div><h3 style="margin:0">اللهم صلِّ وسلم على نبينا محمد</h3><p class="small">أكثر من الصلاة والسلام على النبي ﷺ يوم الجمعة.</p></div><div class="zikr-count" id="fridaySalawatCount">0</div></div>
-      <div class="row" style="margin-top:10px"><button class="btn green" id="fridaySalawatBtn">صلِّ على النبي ﷺ</button><button class="btn light" id="fridaySalawatReset">تصفير العداد</button></div>
-      <div class="divider" style="height:1px;background:var(--line);margin:17px 0"></div>
-      <div class="row" style="align-items:center"><div style="flex:1"><h3 style="margin:0">سورة الكهف</h3><p class="small">افتح سورة الكهف لقراءتها أو الاستماع إليها.</p></div><button class="btn light" id="openKahf">افتح سورة الكهف</button></div>
-      <div class="list" id="fridayChecklist" style="margin-top:15px">
-        <label class="zikr-item"><span><input type="checkbox" class="friday-check"> قراءة سورة الكهف</span><span class="small">قرآن</span></label>
-        <label class="zikr-item"><span><input type="checkbox" class="friday-check"> الإكثار من الصلاة والسلام على النبي ﷺ</span><span class="small">صلاة على النبي</span></label>
-        <label class="zikr-item"><span><input type="checkbox" class="friday-check"> الاغتسال والتطيب ولبس أحسن الثياب</span><span class="small">تهيؤ للصلاة</span></label>
-        <label class="zikr-item"><span><input type="checkbox" class="friday-check"> التبكير إلى صلاة الجمعة</span><span class="small">صلاة الجمعة</span></label>
-        <label class="zikr-item"><span><input type="checkbox" class="friday-check"> الإنصات للخطبة وعدم اللغو</span><span class="small">آداب الجمعة</span></label>
-        <label class="zikr-item"><span><input type="checkbox" class="friday-check"> تحرّي ساعة الإجابة والإكثار من الدعاء</span><span class="small">دعاء</span></label>
-      </div>
-      <div style="margin-top:14px"><div class="row" style="justify-content:space-between"><strong>إنجاز ورد الجمعة</strong><strong id="fridayPercent">0%</strong></div><div style="height:10px;background:var(--soft);border-radius:20px;overflow:hidden;margin-top:7px"><div id="fridayProgress" style="height:100%;width:0%;background:var(--green2);border-radius:20px;transition:width .2s"></div></div></div>
-      <p class="small" style="margin-top:10px">هذه قائمة تذكيرية بالأعمال، وليست كل بنودها واجبة، ولا يلزم عدد محدد للصلاة على النبي ﷺ.</p>
-    </div>
-  </section>
+
 
   
 
@@ -2322,26 +2304,7 @@ function notifyUser(title,body){
 // حُذفت تنبيهات الموقع الصوتية من الواجهة لتوفير المساحة.
 
 
-// ورد الجمعة: يُعاد التقدم أسبوعيًا مع بداية يوم جمعة جديد
-const fridayDateKey=getLocalDateKey();
-const fridayStoreKey='zad_friday_wird_'+fridayDateKey;
-const fridayChecks=[...document.querySelectorAll('.friday-check')];
-let fridaySaved={};try{fridaySaved=JSON.parse(localStorage.getItem(fridayStoreKey)||'{}')}catch(e){}
-if(Array.isArray(fridaySaved.done))fridayChecks.forEach((c,i)=>c.checked=!!fridaySaved.done[i]);
-function updateFridayProgress(){
- const done=fridayChecks.filter(c=>c.checked).length;const pct=Math.round(done/fridayChecks.length*100);
- $('fridayPercent').textContent=pct+'%';$('fridayProgress').style.width=pct+'%';
- localStorage.setItem(fridayStoreKey,JSON.stringify({done:fridayChecks.map(c=>c.checked)}));
-}
-fridayChecks.forEach(c=>c.addEventListener('change',updateFridayProgress));updateFridayProgress();
-const fridayCountKey='zad_friday_salawat_'+fridayDateKey;
-let fridayCount=Number(localStorage.getItem(fridayCountKey)||0);$('fridaySalawatCount').textContent=fridayCount;
-$('fridaySalawatBtn').addEventListener('click',()=>{fridayCount++;$('fridaySalawatCount').textContent=fridayCount;localStorage.setItem(fridayCountKey,String(fridayCount));});
-$('fridaySalawatReset').addEventListener('click',()=>{fridayCount=0;$('fridaySalawatCount').textContent=0;localStorage.setItem(fridayCountKey,'0');});
-$('openKahf').addEventListener('click',()=>{
- const select=$('surahSelect');if(select){select.value='18';$('showSurah').click();$('quran').scrollIntoView({behavior:'smooth'});}
-});
-if(new Date().getDay()===5){$('fridayBadge').textContent='اليوم يوم الجمعة';$('fridayBadge').style.background='#f6edd9';$('fridayBadge').style.color='#87652a';}
+
 
  
 
@@ -2909,7 +2872,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
 <script id="zad-site-content-renderer-20261122">
 (function(){
  if(!['zad-almoslem.github.io','anatito23-lang.github.io'].includes(location.hostname))return;
- const sectionNames={prayer:"مواقيت الصلاة",calendar:"التقويم الشهري",nasheed:"الإنشاد الديني والابتهالات",ruqyah:"الرقية الشرعية","radio-egypt":"إذاعة القرآن الكريم",azkar:"الأذكار اليومية","books-library":"مكتبة الكتب الإسلامية","hadith-dua":"الحديث الشريف",duas:"الأدعية","daily-wird":"وردي اليومي","friday-wird":"ورد الجمعة","qalbi-itmaann":"قلبي اطمأن",library:"المكتبة الإيمانية","friday-live":"بث خطبة الجمعة",khutbahs:"خطب الجمعة",shaaraawi:"خواطر الشعراوي","islamic-knowledge":"زاد العلم والإيمان",ramadan:"زادك في رمضان"};
+ const sectionNames={prayer:"مواقيت الصلاة",calendar:"التقويم الشهري",nasheed:"الإنشاد الديني والابتهالات",ruqyah:"الرقية الشرعية","radio-egypt":"إذاعة القرآن الكريم",azkar:"الأذكار اليومية","books-library":"مكتبة الكتب الإسلامية","hadith-dua":"الحديث الشريف",duas:"الأدعية","daily-wird":"وردي اليومي","qalbi-itmaann":"قلبي اطمأن",library:"المكتبة الإيمانية","friday-live":"بث خطبة الجمعة",khutbahs:"خطب الجمعة",shaaraawi:"خواطر الشعراوي","islamic-knowledge":"زاد العلم والإيمان",ramadan:"زادك في رمضان"};
  const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
  const escId=/^[A-Za-z][A-Za-z0-9_-]{0,59}$/;
  function addText(parent,tag,text,cls){const el=document.createElement(tag);el.textContent=text||"";if(cls)el.className=cls;parent.append(el);return el;}
@@ -2931,7 +2894,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
    const publishedDocs=new Map();
    publishedSnapshots.forEach(result=>result.docs.forEach(doc=>publishedDocs.set(doc.id,doc)));
    const rows=Array.from(publishedDocs.values()).map(d=>({id:d.id,...d.data()}))
-    .filter(x=>(x.published===true||x["تم النشر"]===true||x["النشر"]===true)&&x.sectionId&&escId.test(x.sectionId))
+    .filter(x=>(x.published===true||x["تم النشر"]===true||x["النشر"]===true)&&x.sectionId&&x.sectionId!=="friday-wird"&&escId.test(x.sectionId))
     .sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
    const main=document.querySelector("main.wrap");if(!main)return;
    const createdSections=new Map();
