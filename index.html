@@ -2125,7 +2125,7 @@ async function loadOldEgyptianReciters(){
    const found=all.find(rec=>{const n=normalizeReciterName(rec.name);return tokens.some(token=>n.includes(normalizeReciterName(token)));});
    if(found){window.zadReciterData[key]=found;known.add(String(found.id));}
   });
-  if(!nativeApp)all.forEach(rec=>{
+  all.forEach(rec=>{
    if(!rec||!rec.id||!Array.isArray(rec.moshaf)||!rec.moshaf.length)return;
    window.zadReciterData['api_'+rec.id]=rec;if(known.has(String(rec.id)))return;
    const option=document.createElement('option');option.value='api_'+rec.id;option.dataset.apiReciter='1';option.textContent=rec.name+(rec.moshaf.length>1?' — '+rec.moshaf.length+' روايات':'');select.append(option);
