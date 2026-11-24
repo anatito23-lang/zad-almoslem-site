@@ -2539,7 +2539,7 @@ nasheedAudio.addEventListener('error',()=>{
  });
  const saved=localStorage.getItem('zad_language');
  const manualFlag=localStorage.getItem('zad_language_manual');
- let manual=manualFlag==='1'||(manualFlag===null&&saved&&languages.some(l=>l.code===saved));
+ let manual=manualFlag==='1';
  function normalizeLanguage(code){code=(code||'').toLowerCase().split('-')[0];return code==='zh'?'zh-CN':code;}
  function autoLanguage(countryOverride){
   const storedCountry=localStorage.getItem('zad_prayer_country');
