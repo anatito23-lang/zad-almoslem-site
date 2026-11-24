@@ -121,31 +121,17 @@ public class RamadanActivity extends Activity {
         updateStartLabel(startLabel);
         chooseStart.setOnClickListener(v->{Calendar now=Calendar.getInstance();long saved=prefs.getLong("start_at",0L);if(saved>0)now.setTimeInMillis(saved);
             new DatePickerDialog(this,(picker,y,m,d)->{Calendar first=Calendar.getInstance();first.set(y,m,d,0,0,0);first.set(Calendar.MILLISECOND,0);prefs.edit().putLong("start_at",first.getTimeInMillis()).apply();updateStartLabel(startLabel);RamadanReminderReceiver.scheduleAll(this);},now.get(Calendar.YEAR),now.get(Calendar.MONTH),now.get(Calendar.DAY_OF_MONTH)).show();});
-        settings.addView(text("اختيار تنبيه المغرب",15,AppThemeColors.accent(this),true),full());
-        RadioGroup iftarMode=new RadioGroup(this);iftarMode.setOrientation(RadioGroup.VERTICAL);
-        RadioButton iftarUploadMode=new RadioButton(this);iftarUploadMode.setText("تسجيل إعلان المغرب المنشور من لوحة الإدارة");iftarUploadMode.setId(6);
-        
-        RadioButton iftarCannonMode=new RadioButton(this);iftarCannonMode.setText("مدفع الإفطار");iftarCannonMode.setId(5);
-        iftarMode.addView(iftarUploadMode);iftarMode.addView(iftarCannonMode);
-        String savedIftarMode=prefs.getString("iftar_mode","music");
-        iftarMode.check("cannon".equals(savedIftarMode)?5:6);settings.addView(iftarMode,full());
-        Switch cannon=new Switch(this);cannon.setText("تشغيل صوت مدفع الإفطار عند المغرب");cannon.setTextColor(AppThemeColors.text(this));cannon.setChecked(prefs.getBoolean("cannon_enabled",true));settings.addView(cannon,full());
-        settings.addView(text("اختيار تنبيه السحور",15,AppThemeColors.accent(this),true),full());
-        TextView suhoorUploadLabel=text("سيُستخدم تسجيل المسحراتي المنشور من لوحة الإدارة.",12,AppThemeColors.muted(this),false);settings.addView(suhoorUploadLabel,full());
+        settings.addView(text("تنبيه السحور",15,AppThemeColors.accent(this),true),full());
+        TextView suhoorUploadLabel=text("سيُستخدم تسجيل المسحراتي المنشور من لوحة الإدارة قبل أذان الفجر بالمدة التي تختارها.",12,AppThemeColors.muted(this),false);settings.addView(suhoorUploadLabel,full());
         Switch suhoor=new Switch(this);suhoor.setText("تشغيل تنبيه السحور");suhoor.setTextColor(AppThemeColors.text(this));suhoor.setChecked(prefs.getBoolean("suhoor_enabled",true));settings.addView(suhoor,full());
-        addMinutesControl(settings,"التنبيه قبل المغرب بدقائق","iftar_lead_minutes",5,1,30);
         addMinutesControl(settings,"تنبيه السحور قبل الفجر بدقائق","suhoor_lead_minutes",45,10,120);
-        TextView prayerTimesNote=text("تُحسب المواعيد من مواقيت المغرب والفجر المحفوظة في التطبيق. يلزم ضبط مواقيت الصلاة والسماح بالتنبيهات الدقيقة.",12,AppThemeColors.muted(this),false);prayerTimesNote.setPadding(0,dp(7),0,dp(7));settings.addView(prayerTimesNote,full());
+        TextView prayerTimesNote=text("يُحسب تنبيه السحور من موعد الفجر المحفوظ في التطبيق. يلزم ضبط مواقيت الصلاة والسماح بالتنبيهات الدقيقة.",12,AppThemeColors.muted(this),false);prayerTimesNote.setPadding(0,dp(7),0,dp(7));settings.addView(prayerTimesNote,full());
         enabled.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
-        iftarMode.setOnCheckedChangeListener((g,id)->{prefs.edit().putString("iftar_mode",id==5?"cannon":"upload").apply();RamadanReminderReceiver.scheduleAll(this);});
-        cannon.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("cannon_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
         suhoor.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("suhoor_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
 
-        LinearLayout audio=card("أصوات رمضان — تسجيلات تعمل دون إنترنت");
-        audioStatus=text("تُدار تسجيلات المغرب والمدفع والمسحراتي من لوحة الإدارة، ويحدّثها التطبيق تلقائيًا للعمل حتى دون إنترنت.",12,AppThemeColors.muted(this),false);
+        LinearLayout audio=card("تنبيه السحور — تسجيل المسحراتي");
+        audioStatus=text("يُدار تسجيل السحور من لوحة الإدارة، ويُحدّثه التطبيق تلقائيًا ليعمل حتى دون إنترنت.",12,AppThemeColors.muted(this),false);
         audio.addView(audioStatus,full());
-        addAudioTestButton(audio,"تجربة تسجيل إعلان المغرب","ramadan_iftar_voice_test");
-        addAudioTestButton(audio,"تجربة صوت مدفع الإفطار","ramadan_cannon_test");
         addAudioTestButton(audio,"تجربة تسجيل المسحراتي","ramadan_suhoor_voice_test");
         AdminTabContent.attach(this,root,"ramadan");
         setContentView(AppTabs.wrap(this,scroll,"ramadan"));
