@@ -94,9 +94,9 @@ public class RamadanActivity extends Activity {
                 cell.setText(next?"✓ "+String.format(java.util.Locale.getDefault(),"%02d",day):String.format(java.util.Locale.getDefault(),"%02d",day));
                 updateFastCount();
             });
-            GridLayout.LayoutParams dp=new GridLayout.LayoutParams();
-            dp.width=0;dp.columnSpec=GridLayout.spec(GridLayout.UNDEFINED,1f);
-            dp.setMargins(dp(3),dp(3),dp(3),dp(3));days.addView(cell,dp);
+            GridLayout.LayoutParams cellParams=new GridLayout.LayoutParams();
+            cellParams.width=0;cellParams.columnSpec=GridLayout.spec(GridLayout.UNDEFINED,1f);
+            cellParams.setMargins(dp(3),dp(3),dp(3),dp(3));days.addView(cell,cellParams);
         }
         fast.addView(days,full());
         updateFastCount();
