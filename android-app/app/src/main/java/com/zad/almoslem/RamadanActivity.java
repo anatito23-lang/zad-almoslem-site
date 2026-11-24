@@ -15,7 +15,8 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
-import java.util.Calendar;\nimport java.util.TimeZone;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 public class RamadanActivity extends Activity {
     private SharedPreferences prefs;
@@ -62,7 +63,8 @@ public class RamadanActivity extends Activity {
         fast.addView(days,full());updateFastCount();
 
         LinearLayout khatma=card("ختمة القرآن الكريم");
-        TextView invitation=text("اجعل لك وردًا يوميًا من القرآن 🌙\nافتح المصحف، وسجّل تقدمك تلقائيًا أثناء تشغيل الختمة.",13,AppThemeColors.text(this),false);
+        TextView invitation=text("اجعل لك وردًا يوميًا من القرآن 🌙
+افتح المصحف، وسجّل تقدمك تلقائيًا أثناء تشغيل الختمة.",13,AppThemeColors.text(this),false);
         invitation.setPadding(0,dp(8),0,dp(10));khatma.addView(invitation,full());
         khatmaRing=new KhatmaRing();LinearLayout ringHolder=new LinearLayout(this);ringHolder.setGravity(Gravity.CENTER);ringHolder.addView(khatmaRing,new LinearLayout.LayoutParams(dp(116),dp(116)));khatma.addView(ringHolder,full());
         khatmaProgress=text("",15,AppThemeColors.accent(this),true);khatmaProgress.setGravity(Gravity.CENTER);khatma.addView(khatmaProgress,full());
