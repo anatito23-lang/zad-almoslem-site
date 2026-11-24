@@ -18,6 +18,7 @@ import java.util.Locale;
 public class ReminderAudioService extends Service {
     public static final String ACTION_PLAY = "com.zad.almoslem.PLAY_REMINDER_AUDIO";
     public static final String ACTION_STOP = "com.zad.almoslem.STOP_REMINDER_AUDIO";
+    public static final String ACTION_TOGGLE = "com.zad.almoslem.TOGGLE_REMINDER_AUDIO";
     public static final String ACTION_SET_VOLUME = "com.zad.almoslem.SET_REMINDER_AUDIO_VOLUME";
     private static final String CHANNEL = "zad_reminder_audio";
     private static final int NOTIFICATION_ID = 7520;
@@ -70,7 +71,12 @@ public class ReminderAudioService extends Service {
             if(player!=null)player.setVolume(volume/100f,volume/100f);
             return START_NOT_STICKY;
         }
+        if (intent != null && ACTION_TOGGLE.equals(intent.getAction())) {
+            if(player!=null){try{if(player.isPlaying())player.pause();else player.start();}catch(Exception ignored){} updatePlaybackNotification();}
+            return START_NOT_STICKY;
+        }
         if (intent != null && ACTION_STOP.equals(intent.getAction())) {
+            userStopped=true;
             finishPlayback();
             return START_NOT_STICKY;
         }
@@ -93,17 +99,12 @@ public class ReminderAudioService extends Service {
                 "gentle".equals(kind) ? "تذكير بالذكر" : "قيام الليل";
         Notification.Builder b = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
-        Intent stopIntent = new Intent(this, ReminderAudioService.class);
-        stopIntent.setAction(ACTION_STOP);
-        PendingIntent stopAction = PendingIntent.getService(this, 7521, stopIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-                .setContentTitle("سكينة – أذان وصلاة وقرآن")
-                .setContentText("يتم تشغيل " + title)
-                .setOngoing(true)
-                .addAction(android.R.drawable.ic_media_pause,
-                        "dua".equals(kind) ? "إيقاف الدعاء" : "إيقاف الصوت", stopAction);
+        b.setSmallIcon(android.R.drawable.ic_media_play)
+                .setContentTitle(title)
+                .setContentText("يعمل في الخلفية")
+                .setOngoing(true);
         startForeground(NOTIFICATION_ID, b.build());
+        updatePlaybackNotification();
         boolean adhanActive = getSharedPreferences("zad_reminders", MODE_PRIVATE).getBoolean("adhan_active", false);
         if (adhanActive && !"dua".equals(kind)) { finishPlayback(); return START_NOT_STICKY; }
         if (!"dua".equals(kind)) {
@@ -123,6 +124,30 @@ public class ReminderAudioService extends Service {
             playFile(kind, null);
         }
         return START_NOT_STICKY;
+    }
+
+    private void updatePlaybackNotification(){
+        try{
+            boolean playing=player!=null&&player.isPlaying();
+            Intent toggle=new Intent(this,ReminderAudioService.class);toggle.setAction(ACTION_TOGGLE);
+            PendingIntent toggleAction=PendingIntent.getService(this,7522,toggle,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+            Intent stop=new Intent(this,ReminderAudioService.class);stop.setAction(ACTION_STOP);
+            PendingIntent stopAction=PendingIntent.getService(this,7521,stop,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+            String title="dua".equals(activeKind)?"دعاء ما بعد الأذان":
+                    "morning".equals(activeKind)?"أذكار الصباح":
+                    "evening".equals(activeKind)?"أذكار المساء":
+                    "approach".equals(activeKind)?"تنبيه الصلاة":
+                    "gentle".equals(activeKind)?"تذكير بالذكر":"قيام الليل";
+            Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
+            b.setSmallIcon(android.R.drawable.ic_media_play).setContentTitle(title)
+                    .setContentText(playing?"يعمل في الخلفية":"متوقف مؤقتًا")
+                    .setOngoing(true).setOnlyAlertOnce(true)
+                    .addAction(playing?android.R.drawable.ic_media_pause:android.R.drawable.ic_media_play,
+                            playing?"إيقاف مؤقت":"استكمال",toggleAction)
+                    .addAction(android.R.drawable.ic_menu_close_clear_cancel,"إيقاف",stopAction);
+            NotificationManager nm=getSystemService(NotificationManager.class);
+            if(nm!=null)nm.notify(NOTIFICATION_ID,b.build());
+        }catch(Exception error){android.util.Log.w("ZadAlmoslem","Could not update reminder playback notification",error);}
     }
 
     private void createChannel() {
@@ -178,6 +203,7 @@ public class ReminderAudioService extends Service {
                 if (reminderPrefs.getBoolean("power_saver_enabled", false)) level = Math.min(level, 20);
                 mp.setVolume(level / 100f, level / 100f);
                 mp.start();
+                updatePlaybackNotification();
             });
             if (file.isFile() && file.length() >= 10000) player.setDataSource(file.getAbsolutePath());
             else player.setDataSource(remoteUrl);
@@ -201,6 +227,7 @@ public class ReminderAudioService extends Service {
     private void playNextPostAdhanTrack(){
         if(userStopped||postAdhanQueueIndex>=POST_ADHAN_DUAS.length){finishPlayback();return;}
         String[] item=POST_ADHAN_DUAS[postAdhanQueueIndex++];
+        updatePlaybackNotification();
         try{
             stopCurrentPlayers();
             File local=new File(new File(getFilesDir(),"duas"),item[0]+".mp3");
@@ -210,7 +237,7 @@ public class ReminderAudioService extends Service {
             player.setVolume(volume/100f,volume/100f);
             player.setOnCompletionListener(mp->finishPlayback());
             player.setOnErrorListener((mp,what,extra)->{android.util.Log.w("ZadAlmoslem","Post-adhan dua skipped after playback error: "+item[0]);finishPlayback();return true;});
-            player.setOnPreparedListener(MediaPlayer::start);
+            player.setOnPreparedListener(mp->{mp.start();updatePlaybackNotification();});
             if(local.isFile()&&local.length()>10000)player.setDataSource(local.getAbsolutePath());else player.setDataSource(item[1]);
             player.prepareAsync();
         }catch(Exception error){android.util.Log.w("ZadAlmoslem","Could not start post-adhan dua "+item[0],error);finishPlayback();}
