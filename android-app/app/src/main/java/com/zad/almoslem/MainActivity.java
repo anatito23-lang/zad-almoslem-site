@@ -595,7 +595,11 @@ public class MainActivity extends Activity {
                     ByteArrayOutputStream output=new ByteArrayOutputStream();
                     try(InputStream in=connection.getInputStream()){byte[] buffer=new byte[4096];int n;while((n=in.read(buffer))!=-1)output.write(buffer,0,n);}
                     org.json.JSONObject rootJson=new org.json.JSONObject(output.toString("UTF-8"));
-                    org.json.JSONObject prayerData=rootJson.getJSONObject("data");\n                    org.json.JSONObject timings=prayerData.getJSONObject("timings");\n                    String cityTimezone=prayerData.getJSONObject("meta").optString("timezone","Africa/Cairo");\n                    prefs.edit().putString("native_city_timezone",cityTimezone).apply();\n                    java.util.TimeZone prayerZone=java.util.TimeZone.getTimeZone(cityTimezone);
+                    org.json.JSONObject prayerData=rootJson.getJSONObject("data");
+                    org.json.JSONObject timings=prayerData.getJSONObject("timings");
+                    String cityTimezone=prayerData.getJSONObject("meta").optString("timezone","Africa/Cairo");
+                    prefs.edit().putString("native_city_timezone",cityTimezone).apply();
+                    java.util.TimeZone prayerZone=java.util.TimeZone.getTimeZone(cityTimezone);
                     String[] apiKeys={"Fajr","Dhuhr","Asr","Maghrib","Isha"};
                     long now=System.currentTimeMillis();
                     for(int i=0;i<PRAYERS.length;i++){
@@ -665,7 +669,11 @@ public class MainActivity extends Activity {
         LinearLayout actions=row();
         Switch enabled=new Switch(this); enabled.setText("تفعيل الصلاة"); enabled.setTextSize(12);
         enabled.setChecked(prefs.getBoolean("prayer_enabled_"+prayer,true));
-        enabled.setOnCheckedChangeListener((b,checked)->{\n            prefs.edit().putBoolean("prayer_enabled_"+prayer,checked).apply();\n            if(!checked){ReminderReceiver.cancelPrayer(MainActivity.this,prayer);status.setText("تم إيقاف تنبيه صلاة "+prayer+".");}\n            else {int h=prefs.getInt("native_time_hour_"+prayer,-1),m=prefs.getInt("native_time_minute_"+prayer,0);if(h>=0){String zone=prefs.getString("native_city_timezone","Africa/Cairo");Calendar next=Calendar.getInstance(java.util.TimeZone.getTimeZone(zone));next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,m);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);ReminderReceiver.schedulePrayer(MainActivity.this,prayer,next.getTimeInMillis());status.setText("تم تفعيل تنبيه صلاة "+prayer+" من جديد.");}}\n        });
+        enabled.setOnCheckedChangeListener((b,checked)->{
+            prefs.edit().putBoolean("prayer_enabled_"+prayer,checked).apply();
+            if(!checked){ReminderReceiver.cancelPrayer(MainActivity.this,prayer);status.setText("تم إيقاف تنبيه صلاة "+prayer+".");}
+            else {int h=prefs.getInt("native_time_hour_"+prayer,-1),m=prefs.getInt("native_time_minute_"+prayer,0);if(h>=0){String zone=prefs.getString("native_city_timezone","Africa/Cairo");Calendar next=Calendar.getInstance(java.util.TimeZone.getTimeZone(zone));next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,m);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);ReminderReceiver.schedulePrayer(MainActivity.this,prayer,next.getTimeInMillis());status.setText("تم تفعيل تنبيه صلاة "+prayer+" من جديد.");}}
+        });
         actions.addView(enabled,new LinearLayout.LayoutParams(0,dp(48),1));
         Button test=new Button(this); test.setText("تجربة الأذان"); test.setTextSize(11); actions.addView(test);
         Button stopTest=new Button(this); stopTest.setText("إيقاف التجربة"); stopTest.setTextSize(11); actions.addView(stopTest);
