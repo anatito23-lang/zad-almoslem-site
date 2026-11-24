@@ -2507,84 +2507,110 @@ nasheedAudio.addEventListener('error',()=>{
   {code:'en',label:'English',dir:'ltr'},
   {code:'fr',label:'Français',dir:'ltr'},
   {code:'tr',label:'Türkçe',dir:'ltr'},
-  {code:'id',label:'Indonesia',dir:'ltr'},
+  {code:'id',label:'Bahasa Indonesia',dir:'ltr'},
   {code:'ur',label:'اردو',dir:'rtl'},
-  {code:'es',label:'Español',dir:'ltr'}
+  {code:'es',label:'Español',dir:'ltr'},
+  {code:'de',label:'Deutsch',dir:'ltr'},
+  {code:'pt',label:'Português',dir:'ltr'},
+  {code:'bn',label:'বাংলা',dir:'ltr'},
+  {code:'ms',label:'Bahasa Melayu',dir:'ltr'},
+  {code:'hi',label:'हिन्दी',dir:'ltr'},
+  {code:'ru',label:'Русский',dir:'ltr'},
+  {code:'zh-CN',label:'中文（简体）',dir:'ltr'}
  ];
+ const countryLanguage={
+  'Egypt':'ar','Saudi Arabia':'ar','United Arab Emirates':'ar','Kuwait':'ar','Qatar':'ar','Bahrain':'ar','Oman':'ar','Jordan':'ar','Palestine':'ar','Lebanon':'ar','Syria':'ar','Iraq':'ar','Yemen':'ar','Sudan':'ar','Libya':'ar','Tunisia':'ar','Algeria':'ar','Morocco':'ar',
+  'Turkey':'tr','United States':'en','United Kingdom':'en','Canada':'en','Germany':'de','France':'fr','Malaysia':'ms','Indonesia':'id','Pakistan':'ur','India':'hi','Singapore':'en'
+ };
+ const regionLanguage={EG:'ar',SA:'ar',AE:'ar',KW:'ar',QA:'ar',BH:'ar',OM:'ar',JO:'ar',PS:'ar',LB:'ar',SY:'ar',IQ:'ar',YE:'ar',SD:'ar',LY:'ar',TN:'ar',DZ:'ar',MA:'ar',TR:'tr',US:'en',GB:'en',CA:'en',DE:'de',FR:'fr',MY:'ms',ID:'id',PK:'ur',IN:'hi',SG:'en',ES:'es',MX:'es',AR:'es',BR:'pt',PT:'pt',BD:'bn',RU:'ru',CN:'zh-CN',TW:'zh-CN'};
+ const timeZoneLanguage={'Europe/Berlin':'de','Europe/Paris':'fr','Europe/Istanbul':'tr','Asia/Kuala_Lumpur':'ms','Asia/Jakarta':'id','Asia/Karachi':'ur','Asia/Kolkata':'hi','Asia/Dhaka':'bn','Asia/Shanghai':'zh-CN','Asia/Riyadh':'ar','Africa/Cairo':'ar'};
  const picker=document.createElement('select');
  picker.id='zadLanguagePicker';
  picker.setAttribute('aria-label','اختر لغة الموقع');
  picker.title='تغيير لغة الموقع';
+ const autoOption=document.createElement('option');autoOption.value='auto';autoOption.textContent='تلقائي حسب الدولة';picker.appendChild(autoOption);
  languages.forEach(l=>{const o=document.createElement('option');o.value=l.code;o.textContent=l.label;picker.appendChild(o)});
  const brand=document.querySelector('.top .brand');
  (brand||document.querySelector('.top')||document.body).appendChild(picker);
- picker.classList.add('notranslate');
- picker.setAttribute('translate','no');
-
- // Keep Quran listening and the Mushaf in Arabic.
+ picker.classList.add('notranslate');picker.setAttribute('translate','no');
  ['quran','mushaf','mushafPageImage','mushafSwipeArea'].forEach(id=>{
   const el=document.getElementById(id);
   if(el){el.classList.add('notranslate');el.setAttribute('translate','no');}
  });
  const saved=localStorage.getItem('zad_language');
- const browser=(navigator.language||'ar').toLowerCase().split('-')[0];
- const initial=saved&&languages.some(l=>l.code===saved)?saved:(languages.some(l=>l.code===browser)?browser:'ar');
- picker.value=initial;
+ const manualFlag=localStorage.getItem('zad_language_manual');
+ let manual=manualFlag==='1'||(manualFlag===null&&saved&&languages.some(l=>l.code===saved));
+ function normalizeLanguage(code){code=(code||'').toLowerCase().split('-')[0];return code==='zh'?'zh-CN':code;}
+ function autoLanguage(countryOverride){
+  const storedCountry=localStorage.getItem('zad_prayer_country');
+  const country=countryOverride||(storedCountry&&storedCountry!=='Other'?storedCountry:null);
+  if(country&&countryLanguage[country])return countryLanguage[country];
+  const locale=(navigator.language||'ar').split('-'),region=(locale[1]||'').toUpperCase();
+  if(regionLanguage[region])return regionLanguage[region];
+  const browser=normalizeLanguage(locale[0]);
+  if(languages.some(l=>l.code===browser))return browser;
+  const zone=Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if(timeZoneLanguage[zone])return timeZoneLanguage[zone];
+  const selected=document.getElementById('prayerCountry')?.value;
+  return countryLanguage[selected]||'ar';
+ }
+ const pickerSaved=manual&&languages.some(l=>l.code===saved);
+ let currentLanguage=pickerSaved?saved:autoLanguage();
+ picker.value=manual?currentLanguage:'auto';
  function setDirection(code){
   const chosen=languages.find(l=>l.code===code)||languages[0];
-  document.documentElement.lang=chosen.code;
-  document.documentElement.dir=chosen.dir;
+  document.documentElement.lang=chosen.code;document.documentElement.dir=chosen.dir;
  }
- setDirection(initial);
- // If Arabic is selected, clear any old Google Translate preference before its script starts.
+ setDirection(currentLanguage);
  function clearGoogleLanguageCookie(){
   document.cookie='googtrans=; Max-Age=0; path=/';
   document.cookie='googtrans=; Max-Age=0; path=/; domain='+location.hostname;
  }
- if(initial==='ar')clearGoogleLanguageCookie();
-
+ if(currentLanguage==='ar')clearGoogleLanguageCookie();
  let translateInitialized=false,translateLoading=false;
  function applyGoogleLanguage(code){
-  const combo=document.querySelector('.goog-te-combo');
-  if(!combo)return false;
-  combo.value=code==='ar'?'':code;
-  combo.dispatchEvent(new Event('change',{bubbles:true}));
-  return true;
+  const combo=document.querySelector('.goog-te-combo');if(!combo)return false;
+  combo.value=code==='ar'?'':code;combo.dispatchEvent(new Event('change',{bubbles:true}));return true;
  }
  function loadGoogleTranslate(code){
+  if(code==='ar'){clearGoogleLanguageCookie();return;}
   if(window.google&&google.translate){
    window.googleTranslateElementInit();
-   let tries=0;const retry=setInterval(()=>{tries++;if(applyGoogleLanguage(code)||tries>=40)clearInterval(retry);},250);
-   return;
+   let tries=0;const retry=setInterval(()=>{tries++;if(applyGoogleLanguage(code)||tries>=40)clearInterval(retry);},250);return;
   }
   window.googleTranslateElementInit=function(){
    if(translateInitialized||!window.google||!google.translate)return;
    translateInitialized=true;
-   new google.translate.TranslateElement({pageLanguage:'ar',includedLanguages:'en,fr,tr,id,ur,es',autoDisplay:false},'google_translate_element');
-   let tries=0;
-   const ready=setInterval(()=>{tries++;if(document.querySelector('.goog-te-combo')){applyGoogleLanguage(code);clearInterval(ready);}if(tries>=40)clearInterval(ready);},250);
+   new google.translate.TranslateElement({pageLanguage:'ar',includedLanguages:'en,fr,tr,id,ur,es,de,pt,bn,ms,hi,ru,zh-CN',autoDisplay:false},'google_translate_element');
+   let tries=0;const ready=setInterval(()=>{tries++;if(document.querySelector('.goog-te-combo')){applyGoogleLanguage(code);clearInterval(ready);}if(tries>=40)clearInterval(ready);},250);
   };
   if(!translateLoading){
-   translateLoading=true;
-   const script=document.createElement('script');
-   script.src='https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-   script.async=true;script.onerror=()=>{translateLoading=false;};
+   translateLoading=true;const script=document.createElement('script');
+   script.src='https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';script.async=true;script.onerror=()=>{translateLoading=false;};
    document.head.appendChild(script);
   }
  }
- picker.addEventListener('change',()=>{
-  const code=picker.value;
-  localStorage.setItem('zad_language',code);
-  setDirection(code);
-  if(code==='ar'){
+ function chooseLanguage(code,isManual){
+  const previous=currentLanguage;
+  manual=isManual;
+  localStorage.setItem('zad_language_manual',manual?'1':'0');
+  if(manual){currentLanguage=code;localStorage.setItem('zad_language',code);picker.value=code;}
+  else{currentLanguage=autoLanguage(code==='auto'?undefined:code);localStorage.setItem('zad_language',currentLanguage);picker.value='auto';}
+  setDirection(currentLanguage);
+  if(currentLanguage==='ar'){
    clearGoogleLanguageCookie();
-   if(applyGoogleLanguage('ar')){setTimeout(()=>location.reload(),450);}
-   else location.reload();
+   if(previous!=='ar')location.reload();
    return;
   }
-  loadGoogleTranslate(code);
+  loadGoogleTranslate(currentLanguage);
+ }
+ picker.addEventListener('change',()=>chooseLanguage(picker.value,picker.value!=='auto'));
+ const countryPicker=document.getElementById('prayerCountry');
+ countryPicker?.addEventListener('change',()=>{
+  if(!manual)chooseLanguage(countryPicker.value,false);
  });
- if(initial!=='ar')loadGoogleTranslate(initial);
+ localStorage.setItem('zad_language',currentLanguage);
+ if(currentLanguage!=='ar')loadGoogleTranslate(currentLanguage);
 })();
 </script>
 <div id="google_translate_element" aria-hidden="true"></div>
