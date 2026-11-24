@@ -76,19 +76,20 @@ public class RamadanAudioService extends Service {
         }
 
         if (fileName != null) {
-            File audio=new File(new File(getFilesDir(),"ramadan_audio"),fileName);
-            if (audio.isFile() && audio.length()>1000) playFile(audio,volume);
-            else {
-                // Test buttons use *_test keys, while RemoteAudioAssets stores the
-                // matching production URL keys. Resolve both to the same saved asset.
-                String remoteKey=key;
-                if("ramadan_cannon_test".equals(key)) remoteKey="ramadan_iftar_cannon";
-                else if("ramadan_iftar_voice_test".equals(key)) remoteKey="ramadan_iftar_voice";
-                else if("ramadan_suhoor_voice_test".equals(key)) remoteKey="ramadan_suhoor";
-                String remoteUrl=prefs.getString("remote_"+remoteKey,"");
-                if(remoteUrl.startsWith("https://")) playRemote(remoteUrl,volume);
-                else showMissingRecording();
+            // The administration panel is the sole publishing source. A cached file
+            // is valid only when its matching admin URL has been synchronized.
+            String remoteKey=key;
+            if("ramadan_cannon_test".equals(key)) remoteKey="ramadan_iftar_cannon";
+            else if("ramadan_iftar_voice_test".equals(key)) remoteKey="ramadan_iftar_voice";
+            else if("ramadan_suhoor_voice_test".equals(key)) remoteKey="ramadan_suhoor";
+            String remoteUrl=prefs.getString("remote_"+remoteKey,"");
+            if(!remoteUrl.startsWith("https://")) {
+                showMissingRecording();
+                return START_NOT_STICKY;
             }
+            File audio=new File(new File(getFilesDir(),"ramadan_audio"),fileName);
+            if(audio.isFile() && audio.length()>1000) playFile(audio,volume);
+            else playRemote(remoteUrl,volume);
             return START_NOT_STICKY;
         }
         if ("ramadan_adhan_test".equals(key)) {
@@ -171,7 +172,7 @@ public class RamadanAudioService extends Service {
             Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
             b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                     .setContentTitle("سكينة — تسجيل صوتي")
-                    .setContentText("أضف التسجيل الصوتي المطلوب من قسم أصوات رمضان لتشغيله هنا.")
+                    .setContentText("التسجيل غير متاح حاليًا. حاول مرة أخرى لاحقًا.")
                     .setOngoing(false).setAutoCancel(true);
             getSystemService(NotificationManager.class).notify(ID,b.build());
         }catch(Exception e){android.util.Log.e("ZadRamadan","Could not show missing recording notice",e);}
