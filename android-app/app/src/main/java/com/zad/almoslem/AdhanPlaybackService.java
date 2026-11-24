@@ -128,6 +128,7 @@ public class AdhanPlaybackService extends Service {
         }
         getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_active", true).apply();
         ReminderAudioService.stop(this);
+        RamadanAudioService.pauseForAdhan(this);
         // Keep the current radio/Quran player alive and pause it until the adhan finishes.
         Intent pauseAudio = new Intent(this, RadioPlaybackService.class);
         pauseAudio.setAction(RadioPlaybackService.ACTION_PAUSE_FOR_ADHAN);
