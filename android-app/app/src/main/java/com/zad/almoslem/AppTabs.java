@@ -23,9 +23,9 @@ import org.json.JSONObject;
 
 public final class AppTabs {
     private static final String PREFS = "zad_app_navigation";
-    private static final String[] KEYS = {"more","ramadan","dua","tasbeeh","calendar","radio","quran","mushaf","home"};
-    private static final String[] LABELS = {"المزيد","رمضان","دعاء","السبحة","التقويم","الإذاعة","استماع","المصحف","الرئيسية"};
-    private static final String[] ICONS = {"⋯","☾","🤲","۞","▦","◉","♫","📖","⌂"};
+    private static final String[] KEYS = {"more","ramadan","qalbi-itmaann","tasbeeh","calendar","radio","quran","mushaf","home"};
+    private static final String[] LABELS = {"المزيد","رمضان","قلبي اطمئن","السبحة","التقويم","الإذاعة","استماع","المصحف","الرئيسية"};
+    private static final String[] ICONS = {"⋯","☾","💚","۞","▦","◉","♫","📖","⌂"};
     private static final Class<?>[] SCREENS = {MoreActivity.class,RamadanActivity.class,DuaActivity.class,TasbeehActivity.class,CalendarActivity.class,RadioActivity.class,QuranListeningActivity.class,MushafPageActivity.class,HomeActivity.class};
     private AppTabs() {}
 
@@ -153,8 +153,12 @@ public final class AppTabs {
                 if(!contentSection&&key.matches("[A-Za-z][A-Za-z0-9_-]{0,59}"))rows.add(row);
             }
         }
-        boolean hasDua=false;for(JSONObject row:rows)if("dua".equals(row.optString("key",""))){hasDua=true;break;}
-        if(!hasDua){JSONObject dua=new JSONObject();try{dua.put("key","dua");dua.put("label","دعاء");dua.put("icon","🤲");dua.put("visible",true);}catch(Exception ignored){}rows.add(dua);}
+        boolean hasQalbi=false;
+        for(JSONObject row:rows){
+            if("dua".equals(row.optString("key",""))){try{row.put("key","qalbi-itmaann");row.put("label","قلبي اطمئن");row.put("icon","💚");}catch(Exception ignored){}}
+            if("qalbi-itmaann".equals(row.optString("key","")))hasQalbi=true;
+        }
+        if(!hasQalbi){JSONObject qalbi=new JSONObject();try{qalbi.put("key","qalbi-itmaann");qalbi.put("label","قلبي اطمئن");qalbi.put("icon","💚");qalbi.put("visible",true);}catch(Exception ignored){}rows.add(qalbi);}
         JSONObject home=new JSONObject();
         try{home.put("key","home");home.put("label","الرئيسية");home.put("icon","⌂");home.put("visible",true);}catch(Exception ignored){}
         homeSlot.addView(makeTabItem(a,home,active,li),new LinearLayout.LayoutParams(-1,-1));
@@ -409,7 +413,8 @@ public final class AppTabs {
         switch (key) {
             case "mushaf": return "📖";
             case "ramadan": return "🏮";
-            case "dua": return "🤲";
+            case "dua": return "💚";
+            case "qalbi-itmaann": return "💚";
             case "radio": return "🎙️";
             case "quran": case "listening": case "listen": return "🎧";
             case "calendar": return "📆";
@@ -422,7 +427,7 @@ public final class AppTabs {
     }
 
     private static String localizedLabel(int index,int lang,String fallback) {
-        String[][] names={{"المزيد","More","Plus","مزید","Daha Fazla"},{"رمضان","Ramadan","Ramadan","رمضان","Ramazan"},{"دعاء","Dua","Prière","دعا","Dua"},{"السبحة","Tasbeeh","Tasbih","تسبیح","Tesbih"},{"النتيجة","Calendar","Calendrier","کیلنڈر","Takvim"},{"الإذاعة","Radio","Radio","ریڈیو","Radyo"},{"استماع","Listen","Écoute","تلاوت","Dinle"},{"المصحف","Mushaf","Coran","قرآن","Mushaf"},{"الرئيسية","Home","Accueil","مرکزی","Ana Sayfa"}};
+        String[][] names={{"المزيد","More","Plus","مزید","Daha Fazla"},{"رمضان","Ramadan","Ramadan","رمضان","Ramazan"},{"قلبي اطمئن","Find Peace","Paix du cœur","دل کو سکون","Kalbim Huzur Bulur"},{"السبحة","Tasbeeh","Tasbih","تسبیح","Tesbih"},{"النتيجة","Calendar","Calendrier","کیلنڈر","Takvim"},{"الإذاعة","Radio","Radio","ریڈیو","Radyo"},{"استماع","Listen","Écoute","تلاوت","Dinle"},{"المصحف","Mushaf","Coran","قرآن","Mushaf"},{"الرئيسية","Home","Accueil","مرکزی","Ana Sayfa"}};
         return index>=0&&index<names.length?names[index][lang]:fallback;
     }
     private static int indexOf(String key){for(int i=0;i<KEYS.length;i++)if(KEYS[i].equals(key))return i;return -1;}
