@@ -1158,6 +1158,10 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
     </div>
   </section>
   <style id="zad-quran-library-style">
+    .zad-player{color:#fff!important}
+    .zad-player-info strong,.zad-player-info span,.zad-player-timeline span{color:#fff!important}
+    .zad-player-cover span{color:#173d32!important}
+    .zad-player-controls a{background:#f5e9cc!important;color:#174638!important;border-radius:14px;padding:12px 18px;font-weight:800;text-decoration:none}
     .zad-player{color:#fff}
     .zad-player-info strong,.zad-player-info span{color:#fff!important}
     .zad-player-cover span{color:#173d32!important}
@@ -2203,7 +2207,8 @@ mushafSwipeArea.addEventListener('pointerup',event=>{
 mushafSwipeArea.addEventListener('pointercancel',()=>{mushafMouseStart=null;});
 
 async function loadOldEgyptianReciters(){
- const cacheKey='zad_mp3quran_reciters_multi_v4',select=$('reciter');
+ const cacheKeys=['zad_mp3quran_reciters_multi_v4','zad_mp3quran_reciters_multi_v3','zad_mp3quran_reciters_multi_v2'];
+ const select=$('reciter'),box=$('zadReciterCatalog'),status=$('quranStatus');
  function populate(all,fromCache){
   if(!Array.isArray(all)||!all.length)return false;
   select.querySelectorAll('option[data-api-reciter="1"]').forEach(option=>option.remove());
@@ -2213,39 +2218,45 @@ async function loadOldEgyptianReciters(){
    if(found){window.zadReciterData[key]=found;known.add(String(found.id));}
   });
   all.forEach(rec=>{
-   if(!rec||!rec.id||!Array.isArray(rec.moshaf)||!rec.moshaf.length)return;
+   if(!rec||!rec.id||!Array.isArray(rec.moshaf)||!rec.moshaf.some(m=>m&&m.server&&m.surah_list))return;
    window.zadReciterData['api_'+rec.id]=rec;
    if(known.has(String(rec.id)))return;
    const option=document.createElement('option');option.value='api_'+rec.id;option.dataset.apiReciter='1';
    option.textContent=rec.name+(rec.moshaf.length>1?' — '+rec.moshaf.length+' روايات':'');select.append(option);
   });
   renderZadReciterCatalog(all);
-  $('quranStatus').textContent=(fromCache?'قائمة محفوظة: ':'تم تحميل ')+all.length+' قارئًا. اختر الشيخ لعرض تلاواته.';
-  if(typeof renderZadQuranLibrary==='function')renderZadQuranLibrary();
+  status.textContent=(fromCache?'قائمة محفوظة: ':'تم تحميل ')+all.length+' قارئًا. اختر الشيخ لعرض تلاواته.';
+  renderZadQuranLibrary();
   return true;
  }
- let cached=[];try{cached=JSON.parse(localStorage.getItem(cacheKey)||'[]');}catch(e){}
- if(Array.isArray(cached)&&cached.length)populate(cached,true);
- $('zadReciterCatalog').innerHTML='<p class="small">يتم تحديث قائمة القراء من MP3Quran…</p>';
- try{
-  const response=await zadFetchTimeout('https://www.mp3quran.net/api/v3/reciters?language=ar',{},9000);
-  if(!response.ok)throw new Error('HTTP '+response.status);
-  const data=await response.json();
-  const all=(data.reciters||[]).filter(rec=>rec&&rec.id&&Array.isArray(rec.moshaf)&&rec.moshaf.some(m=>m&&m.server&&m.surah_list));
-  if(!all.length)throw new Error('empty reciter list');
-  try{localStorage.setItem(cacheKey,JSON.stringify(all));}catch(e){}
-  populate(all,false);
- }catch(error){
-  console.warn('MP3Quran reciters API unavailable',error);
-  if(cached.length){
-   $('quranStatus').textContent='نعرض القائمة المحفوظة؛ تعذر تحديثها الآن.';
-  }else{
-   $('zadReciterCatalog').innerHTML='<div class="notice"><b>تعذر تحميل أسماء القراء الآن.</b><br>تأكد من الإنترنت ثم اضغط «إعادة تحميل القراء».</div>';
-   $('quranStatus').textContent='لم يصل الموقع إلى مصدر القراء. لم نعرض أسماء وهمية أو روابط غير مؤكدة.';
-  }
+ let cached=[];
+ for(const key of cacheKeys){
+  try{const data=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(data)&&data.length){cached=data;break;}}catch(e){}
  }
+ if(cached.length)populate(cached,true);
+ else box.innerHTML='<p class="small">جارٍ الاتصال بمكتبة القراء…</p>';
+ status.textContent=cached.length?'نعرض القراء المحفوظين ونحدّث القائمة…':'جارٍ تحميل أسماء القراء من مكتبة MP3Quran…';
+ let lastError=null;
+ for(const host of ['https://mp3quran.net','https://www.mp3quran.net']){
+  try{
+   const response=await zadFetchTimeout(host+'/api/v3/reciters?language=ar',{},10000);
+   if(!response.ok)throw new Error('HTTP '+response.status);
+   const data=await response.json();
+   const all=(data.reciters||[]).filter(rec=>rec&&rec.id&&Array.isArray(rec.moshaf)&&rec.moshaf.some(m=>m&&m.server&&m.surah_list));
+   if(!all.length)throw new Error('empty reciter list');
+   try{localStorage.setItem(cacheKeys[0],JSON.stringify(all));}catch(e){}
+   populate(all,false);
+   return;
+  }catch(error){lastError=error;console.warn('MP3Quran host unavailable',host,error);}
+ }
+ if(cached.length){
+  status.textContent='نعرض القائمة المحفوظة على جهازك؛ تعذر تحديثها من المصدر الآن.';
+ }else{
+  box.innerHTML='<div class="notice"><b>تعذر الاتصال بمصدر أسماء القراء.</b><p>جرّب زر إعادة تحميل القائمة بعد التأكد من الإنترنت.</p></div>';
+  status.textContent='لم يصل الموقع إلى خدمة القراء. لم نعرض أسماء أو روابط صوتية غير مؤكدة.';
+ }
+ console.warn('MP3Quran reciter list failed',lastError);
 }
-
 function showShuaishaTracks(){
  const tracks=[
   [2,'البقرة','al-baqara'],[3,'آل عمران','aal-e-imran'],[4,'النساء','an-nisa'],[6,'الأنعام','al-anaam'],
