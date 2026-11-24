@@ -35,26 +35,6 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <div class="actions"><button id="saveButton" type="submit">حفظ المحتوى</button><button class="secondary" id="cancelEdit" type="button">إلغاء التعديل</button><button class="secondary" id="refreshButton" type="button">تحديث القائمة</button></div></form>
 <div id="adminMessage" class="notice hidden" role="status"></div></section>
 <section class="card hidden" id="listCard"><h2>المحتوى المسجل</h2><div id="itemsList"><p class="small">جارٍ التحميل…</p></div></section>
-<section class="card hidden" id="audioAssetsCard">
-<h2>إدارة أصوات التطبيق</h2>
-<p class="small">اختر ملف الصوت من هاتفك؛ بعد اكتمال الرفع يُنشر رابطه تلقائيًا في التطبيق ويُتحقق من حفظه. زر «نشر الرابط» متاح أيضًا إذا أردت إدخال رابط يدوي. لا يستخدم هذا الرفع Firebase Storage. الحد الأقصى 8 ميجابايت.</p>
-<div class="item"><strong>تنبيه السحور — تسجيل المسحراتي</strong><label for="audioFileSuhoor">اختيار ملف صوت من الهاتف</label><input id="audioFileSuhoor" type="file" accept=".mp3,.m4a,.wav,.ogg,audio/*"><div class="actions"><button type="button" data-audio-upload="suhoor">رفع ملف صوت السحور</button></div><div id="audioUploadStatus-suhoor" class="notice hidden" role="status" aria-live="polite"></div><label for="audioSuhoor">رابط ملف الصوت</label><input id="audioSuhoor" type="url" inputmode="url" value="https://zad-almoslem.github.io/مسحراتي.mp3"><audio id="audioPreview-suhoor" class="hidden" controls preload="none" style="width:100%;margin-top:8px"></audio><div class="actions"><button type="button" data-audio-publish="suhoor">نشر رابط صوت السحور</button></div></div>
-<div id="audioAssetsMessage" class="notice hidden" role="status"></div>
-</section>
-<section class="card hidden" id="reelsAdminCard">
-<h2>إدارة منشورات الصور</h2>
-<p class="small">ارفع صورة فقط بصيغة JPG أو PNG أو WebP (بحد أقصى 8 ميجابايت)، وأضف عنوانًا ووصفًا اختياريًا. تُرفع الصورة إلى GitHub وتُحفظ بيانات المنشور في Firestore.</p>
-<form id="reelForm">
-<input id="reelId" type="hidden"><input id="reelImageUrl" type="hidden">
-<label for="reelTitle">عنوان المنشور *</label><input id="reelTitle" maxlength="150" required>
-<label for="reelDescription">وصف أو نص مختصر (اختياري)</label><textarea id="reelDescription" maxlength="1200" style="min-height:90px"></textarea>
-<label for="reelImageFile">اختيار صورة *</label><input id="reelImageFile" type="file" accept="image/jpeg,image/png,image/webp">
-<div id="reelImagePreviewWrap" class="item hidden"><img id="reelImagePreview" alt="معاينة الصورة المختارة" style="display:block;width:100%;max-height:260px;object-fit:contain;border-radius:10px"><p id="reelImagePreviewName" class="small"></p></div>
-<div class="row"><div><label for="reelOrder">ترتيب الظهور</label><input id="reelOrder" type="number" min="0" max="9999" value="0"></div><div><label class="check" style="margin-top:38px"><input id="reelPublished" type="checkbox" checked> نشر الصورة</label></div></div>
-<div class="actions"><button id="reelSave" type="submit">رفع الصورة ونشرها</button><button class="secondary" id="reelCancel" type="button">إلغاء</button><button class="secondary" id="reelRefresh" type="button">تحديث القائمة</button></div>
-</form><div id="reelsMessage" class="notice hidden" role="status"></div>
-<hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h2>الصور المنشورة</h2><div id="reelsList"><p class="small">جارٍ التحميل…</p></div>
-</section>
 <section class="card hidden" id="customTabsCard">
 <h2>إنشاء وإدارة التبويبات الجديدة</h2>
 <p class="small">أضف أقسامًا جديدة، أو انشر محتوى داخل الأقسام الأساسية: استماع القرآن ورمضان والسبحة. المحتوى يظهر داخل القسم المناسب بعد مزامنة التطبيق مع الإنترنت.</p>
@@ -78,6 +58,20 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <div class="actions"><button type="submit">حفظ المحتوى</button><button class="secondary" id="customContentCancel" type="button">إلغاء التعديل</button></div>
 </form>
 <div id="customContentList"></div><div id="customTabsMessage" class="notice hidden" role="status"></div>
+</section>
+<section class="card hidden" id="qalbiAdminCard">
+<h2>قلبي اطمئن — إدارة النفحات الإيمانية</h2>
+<p class="small">أضف آيات للتدبر، وأحاديث صحيحة، ووقفات ومواعظ إيمانية. المحتوى المنشور يظهر داخل تبويب «قلبي اطمئن» في التطبيق.</p>
+<form id="qalbiContentForm">
+<input id="qalbiContentId" type="hidden">
+<label for="qalbiContentTitle">عنوان النفحة *</label><input id="qalbiContentTitle" maxlength="200" required placeholder="مثال: حين يضيق صدرك، تذكّر لطف الله">
+<label for="qalbiContentBody">النص *</label><textarea id="qalbiContentBody" maxlength="30000" required placeholder="اكتب الآية أو الحديث الصحيح أو الوقفة الإيمانية، مع ذكر النص بدقة"></textarea>
+<label for="qalbiContentSource">المصدر والتخريج *</label><input id="qalbiContentSource" maxlength="300" required placeholder="مثال: سورة الشرح: 5-6، أو صحيح مسلم: رقم الحديث">
+<div class="row"><div><label for="qalbiContentOrder">ترتيب الظهور</label><input id="qalbiContentOrder" type="number" min="0" max="9999" value="0"></div><div><label class="check" style="margin-top:38px"><input id="qalbiContentPublished" type="checkbox" checked> نشر النفحة</label></div></div>
+<div class="actions"><button id="qalbiContentSave" type="submit">حفظ ونشر النفحة</button><button class="secondary" id="qalbiContentCancel" type="button">إلغاء التعديل</button><button class="secondary" id="qalbiContentRefresh" type="button">تحديث المحتوى</button></div>
+</form>
+<div id="qalbiContentMessage" class="notice hidden" role="status"></div>
+<hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h2>النفحات المسجلة</h2><div id="qalbiContentList"><p class="small">سجّل الدخول لعرض المحتوى.</p></div>
 </section>
 <section class="card hidden" id="siteContentCard">
 <h2>إدارة جميع تبويبات الموقع</h2>
@@ -342,6 +336,35 @@ $("audioAssetsCard").addEventListener("click",async event=>{
  }catch(error){audioMessage("تعذر نشر الرابط: "+(error?.code||"")+(error?.message?" — "+error.message:""),true);}
  finally{button.disabled=false;button.textContent=old;}
 },{capture:true});
+// إدارة محتوى «قلبي اطمئن» بصورة مستقلة وواضحة.
+function qalbiMsg(value,error=false){const el=$("qalbiContentMessage");el.textContent=value;el.classList.remove("hidden","error");if(error)el.classList.add("error");}
+function resetQalbiForm(){$("qalbiContentForm").reset();$("qalbiContentId").value="";$("qalbiContentOrder").value="0";$("qalbiContentPublished").checked=true;$("qalbiContentSave").textContent="حفظ ونشر النفحة";clearMessage("qalbiContentMessage");}
+async function loadQalbiContent(){
+ if(auth.currentUser?.uid!==ADMIN_UID)return;
+ const box=$("qalbiContentList");box.innerHTML='<p class="small">جارٍ تحميل النفحات…</p>';
+ try{
+  const snap=await getDocs(collection(db,"site_content"));
+  const rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.sectionId==="qalbi-itmaann").sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
+  if(!rows.length){box.innerHTML='<p class="small">لا توجد نفحات بعد. أضف أول نفحة من النموذج أعلاه.</p>';return;}
+  box.innerHTML=rows.map(x=>'<article class="item"><div class="row"><strong>'+escapeHtml(x.title||"نفحة إيمانية")+'</strong><span class="tag">'+(isPublished(x)?"منشور":"مسودة")+'</span></div><p>'+escapeHtml((x.body||"").slice(0,260))+'</p><p class="small">'+escapeHtml(x.source||"")+' · الترتيب: '+escapeHtml(String(x.order??0))+'</p><div class="actions"><button type="button" class="secondary" data-qalbi-edit="'+escapeHtml(x.id)+'">تعديل</button><button type="button" class="gold" data-qalbi-toggle="'+escapeHtml(x.id)+'">'+(isPublished(x)?"إخفاء":"نشر")+'</button><button type="button" class="danger" data-qalbi-delete="'+escapeHtml(x.id)+'">حذف</button></div></article>').join("");
+  box.querySelectorAll("[data-qalbi-edit]").forEach(b=>b.addEventListener("click",()=>{const x=rows.find(y=>y.id===b.dataset.qalbiEdit);if(!x)return;$("qalbiContentId").value=x.id;$("qalbiContentTitle").value=x.title||"";$("qalbiContentBody").value=x.body||"";$("qalbiContentSource").value=x.source||"";$("qalbiContentOrder").value=String(x.order??0);$("qalbiContentPublished").checked=isPublished(x);$("qalbiContentSave").textContent="حفظ التعديلات";$("qalbiContentForm").scrollIntoView({behavior:"smooth",block:"start"});}));
+  box.querySelectorAll("[data-qalbi-toggle]").forEach(b=>b.addEventListener("click",async()=>{const x=rows.find(y=>y.id===b.dataset.qalbiToggle);if(!x)return;const published=!isPublished(x);try{await updateDoc(doc(db,"site_content",x.id),{published,"تم النشر":published,updatedAt:serverTimestamp()});qalbiMsg(published?"تم نشر النفحة.":"تم إخفاء النفحة.");await loadQalbiContent();}catch(e){qalbiMsg("تعذر تغيير حالة النشر: "+e.message,true);}}));
+  box.querySelectorAll("[data-qalbi-delete]").forEach(b=>b.addEventListener("click",async()=>{const x=rows.find(y=>y.id===b.dataset.qalbiDelete);if(!x||!confirm("هل تريد حذف هذه النفحة نهائيًا؟"))return;try{await deleteDoc(doc(db,"site_content",x.id));qalbiMsg("تم حذف النفحة.");await loadQalbiContent();}catch(e){qalbiMsg("تعذر حذف النفحة: "+e.message,true);}}));
+ }catch(e){box.innerHTML='<p class="small error">تعذر تحميل النفحات: '+escapeHtml(e.message)+'</p>';}
+}
+$("qalbiContentForm").addEventListener("submit",async e=>{
+ e.preventDefault();if(auth.currentUser?.uid!==ADMIN_UID)return;
+ const title=$("qalbiContentTitle").value.trim(),body=$("qalbiContentBody").value.trim(),source=$("qalbiContentSource").value.trim(),order=Number($("qalbiContentOrder").value);
+ if(!title||!body||!source){qalbiMsg("اكتب العنوان والنص والمصدر والتخريج.",true);return;}
+ if(!Number.isInteger(order)||order<0||order>9999){qalbiMsg("أدخل ترتيبًا صحيحًا من 0 إلى 9999.",true);return;}
+ const published=$("qalbiContentPublished").checked,data={sectionId:"qalbi-itmaann",title,body,source,order,published,"تم النشر":published,updatedAt:serverTimestamp()};
+ const id=$("qalbiContentId").value;
+ try{if(id)await updateDoc(doc(db,"site_content",id),data);else{data.createdAt=serverTimestamp();await addDoc(collection(db,"site_content"),data);}resetQalbiForm();qalbiMsg(id?"تم حفظ تعديلات النفحة.":"تم نشر النفحة في قلبي اطمئن.");await loadQalbiContent();}
+ catch(e){qalbiMsg("تعذر حفظ النفحة: "+e.message,true);}
+});
+$("qalbiContentCancel").addEventListener("click",resetQalbiForm);
+$("qalbiContentRefresh").addEventListener("click",loadQalbiContent);
+
 // إدارة المنشورات الإضافية داخل جميع أقسام الموقع
 const SITE_SECTIONS=[
  ["prayer","مواقيت الصلاة"],["calendar","التقويم الشهري"],
@@ -389,6 +412,11 @@ $("siteContentForm").addEventListener("submit",async e=>{
 $("siteContentCancel").addEventListener("click",resetSiteForm);
 $("siteContentRefresh").addEventListener("click",loadSiteContent);
 
-onAuthStateChanged(auth,async user=>{if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");$("customTabsCard").classList.add("hidden");$("siteContentCard").classList.add("hidden");$("audioAssetsCard").classList.add("hidden");$("reelsAdminCard").classList.add("hidden");return}if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return}$("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("customTabsCard").classList.remove("hidden");$("siteContentCard").classList.add("hidden");$("audioAssetsCard").classList.remove("hidden");$("reelsAdminCard").classList.remove("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";await loadItems();await loadReels();await loadAudioAssets();try{await readCustomTabs()}catch(e){customMessage("تعذر تحميل التبويبات: "+e.message,true)}});
+onAuthStateChanged(auth,async user=>{
+ if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");$("customTabsCard").classList.add("hidden");$("qalbiAdminCard").classList.add("hidden");$("siteContentCard").classList.add("hidden");return;}
+ if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return;}
+ $("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("customTabsCard").classList.remove("hidden");$("qalbiAdminCard").classList.remove("hidden");$("siteContentCard").classList.add("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";
+ await loadItems();await loadQalbiContent();try{await readCustomTabs()}catch(e){customMessage("تعذر تحميل التبويبات: "+e.message,true);}
+});
 </script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=20261122-admin-pwa",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));}</script>
 </body></html>
