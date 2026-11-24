@@ -3500,6 +3500,11 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
  .zad-player-controls button{opacity:1!important;filter:none!important}
 }
 </style>
+<style id="zad-player-download-state">
+#zadPlayerDownload.is-disabled{opacity:.48!important;filter:grayscale(1)!important;pointer-events:auto!important;cursor:not-allowed!important}
+#zadPlayerDownload:not(.is-disabled){opacity:1!important;filter:none!important}
+#quranStatus{display:block!important;min-height:24px!important;margin:10px 0!important;padding:7px 10px!important;border-radius:9px!important;background:rgba(255,255,255,.12)!important;color:#fff!important;font-weight:700!important;line-height:1.6!important;overflow-wrap:anywhere!important}
+</style>
 <script id="zad-real-mp3quran-loader">
   (function(){
    const $id=id=>document.getElementById(id);
@@ -3561,7 +3566,15 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
     items.forEach(x=>{const o=document.createElement('option');o.value=String(x.value);o.textContent=x.label;el.append(o);});
     if(selectedValue!==undefined&&selectedValue!==null&&items.some(x=>String(x.value)===String(selectedValue)))el.value=String(selectedValue);
    }
-   function syncDownload(){const t=(window.zadQuranQueue||[]).find(x=>String(x.id)===playerSurah.value),d=$id('zadPlayerDownload');if(t&&d){d.href=t.url;d.download=String(t.id).padStart(3,'0')+'.mp3';}}
+   function syncDownload(){
+    const t=(window.zadQuranQueue||[]).find(x=>String(x.id)===playerSurah.value),d=$id('zadPlayerDownload');
+    if(!d)return;
+    if(t&&/^https:\/\//i.test(t.url||'')){
+     d.href=t.url;d.download=String(t.id).padStart(3,'0')+'.mp3';d.removeAttribute('aria-disabled');d.classList.remove('is-disabled');d.title='تحميل سورة '+t.name;
+    }else{
+     d.removeAttribute('href');d.removeAttribute('download');d.setAttribute('aria-disabled','true');d.classList.add('is-disabled');d.title='اختر السورة أولًا لتفعيل التحميل';
+    }
+   }
    function updateQueue(keepSurah){
     const r=reciters.find(x=>String(x.id)===playerReciter.value),m=(r&&r.moshaf||[])[Number(playerMoshaf.value)];
     if(!r||!m||!m.server){window.zadQuranQueue=[];playerSurah.disabled=true;fillSelect(playerSurah,[],'اختر الرواية أولًا');return;}
@@ -3616,6 +3629,12 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
    playerReciter.addEventListener('change',fillMoshaf);
    playerMoshaf.addEventListener('change',()=>updateQueue(false));
    playerSurah.addEventListener('change',syncDownload);
+   const downloadLink=$id('zadPlayerDownload');
+   if(downloadLink)downloadLink.addEventListener('click',event=>{
+    const t=(window.zadQuranQueue||[]).find(x=>String(x.id)===playerSurah.value);
+    if(!t||!/^https:\/\//i.test(t.url||'')){event.preventDefault();status('اختَر السورة من قائمة المشغل أولًا؛ بعدها سيتفعّل زر تحميل MP3.');return;}
+    downloadLink.href=t.url;
+   });
    readerSearch.addEventListener('input',()=>{
     const q=norm(readerSearch.value),matches=reciters.filter(r=>!q||norm(r.name).includes(q));
     fillSelect(playerReciter,matches.map(r=>({value:r.id,label:r.name+' — '+(r.moshaf||[]).length+' رواية'})),'اختر القارئ',playerReciter.value);
