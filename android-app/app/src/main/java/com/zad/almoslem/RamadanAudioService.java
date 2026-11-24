@@ -18,7 +18,28 @@ public class RamadanAudioService extends Service {
     private static final int ID=7630;
     private MediaPlayer player;
     private PowerManager.WakeLock wakeLock;
+    public static void pauseForAdhan(android.content.Context context){
+        Intent i=new Intent(context,RamadanAudioService.class);i.setAction(ACTION_PAUSE_FOR_ADHAN);
+        try{context.startService(i);}catch(Exception ignored){}
+    }
+    public static void resumeAfterAdhan(android.content.Context context){
+        Intent i=new Intent(context,RamadanAudioService.class);i.setAction(ACTION_RESUME_AFTER_ADHAN);
+        try{context.startService(i);}catch(Exception ignored){}
+    }
     @Override public int onStartCommand(Intent intent,int flags,int startId){
+        if(intent!=null&&ACTION_PAUSE_FOR_ADHAN.equals(intent.getAction())){
+            if(player!=null&&player.isPlaying()){positionBeforeAdhan=player.getCurrentPosition();wasPlayingBeforeAdhan=true;pausedForAdhan=true;player.pause();}
+            else stopSelf(startId);
+            return START_NOT_STICKY;
+        }
+        if(intent!=null&&ACTION_RESUME_AFTER_ADHAN.equals(intent.getAction())){
+            if(player!=null&&pausedForAdhan&&wasPlayingBeforeAdhan){
+                try{player.seekTo(positionBeforeAdhan);player.start();}
+                catch(Exception error){android.util.Log.w("ZadRamadan","Could not resume Ramadan audio after adhan",error);}
+                pausedForAdhan=false;wasPlayingBeforeAdhan=false;
+            }else stopSelf(startId);
+            return START_NOT_STICKY;
+        }
         String key=intent==null?"":intent.getStringExtra("key");
         if("stop".equals(key)){finish();return START_NOT_STICKY;}
         float volume=intent==null?1f:intent.getFloatExtra("volume",1f);
