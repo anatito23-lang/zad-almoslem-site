@@ -3394,29 +3394,78 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
    surahSearch.addEventListener('input',drawTracks);
    moshafSelect.addEventListener('change',drawTracks);
    async function load(){
-    catalog.innerHTML='<p class="small">جارٍ جلب أسماء القراء والتسجيلات الحقيقية...</p>';
+    catalog.innerHTML='<p class="small">جارٍ جلب أكبر قائمة متاحة من القراء والتسجيلات من جميع اللغات...</p>';
     tracks.innerHTML='<p class="small">يتم تجهيز قائمة السور...</p>';
-    status('جارٍ الاتصال بمكتبة MP3Quran الرسمية لتحميل أسماء القراء وروابط التلاوات.');
+    status('جارٍ الاتصال بمكتبة MP3Quran الرسمية وجمع قوائم القراء متعددة اللغات.');
     let last;
-    for(const url of ['https://mp3quran.net/api/v3/reciters?language=ar','https://www.mp3quran.net/api/v3/reciters?language=ar']){
+    const hosts=['https://mp3quran.net','https://www.mp3quran.net'];
+    for(const host of hosts){
      try{
-      const res=await fetch(url,{mode:'cors',cache:'no-store'});
-      if(!res.ok)throw new Error('HTTP '+res.status);
-      const data=await res.json();
-      const arr=(data.reciters||[]).filter(r=>r&&r.id&&Array.isArray(r.moshaf)&&r.moshaf.some(m=>m&&m.server&&m.surah_list));
-      if(!arr.length)throw new Error('قائمة فارغة');
+      const getJson=async url=>{
+       const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
+       try{
+        const response=await fetch(url,{mode:'cors',cache:'no-store',signal:controller.signal});
+        if(!response.ok)throw new Error('HTTP '+response.status);
+        return await response.json();
+       }finally{clearTimeout(timer);}
+      };
+      let codes=[];
+      try{
+       const languageData=await getJson(host+'/api/v3/languages');
+       const entries=Array.isArray(languageData.language)?languageData.language:(Array.isArray(languageData.languages)?languageData.languages:[]);
+       codes=entries.map(item=>{
+        const link=String(item.reciters||'');
+        const match=link.match(/[?&]language=([^&]+)/i);
+        return match?decodeURIComponent(match[1]):'';
+       }).filter(Boolean);
+      }catch(languageError){console.warn('MP3Quran languages list unavailable; using core languages',languageError);}
+      if(!codes.length)codes=['ar','eng'];
+      codes=[...new Set(codes)].sort((a,b)=>a==='ar'?-1:b==='ar'?1:a==='eng'?-1:b==='eng'?1:a.localeCompare(b));
+      const byId=new Map();
+      let successfulLists=0;
+      for(let offset=0;offset<codes.length;offset+=4){
+       const batch=codes.slice(offset,offset+4);
+       const results=await Promise.allSettled(batch.map(async language=>{
+        const data=await getJson(host+'/api/v3/reciters?language='+encodeURIComponent(language));
+        return {language,reciters:Array.isArray(data.reciters)?data.reciters:[]};
+       }));
+       results.forEach(result=>{
+        if(result.status!=='fulfilled')return;
+        successfulLists++;
+        const {language,reciters}=result.value;
+        reciters.forEach(rec=>{
+         if(!rec||!rec.id||!Array.isArray(rec.moshaf))return;
+         const key=String(rec.id),existing=byId.get(key);
+         if(!existing){
+          byId.set(key,{...rec,moshaf:[...rec.moshaf],_sourceLanguage:language});
+          return;
+         }
+         const reads=new Map((existing.moshaf||[]).map(m=>[String(m.id||'')+'|'+String(m.server||'')+'|'+String(m.surah_list||''),m]));
+         (rec.moshaf||[]).forEach(m=>{
+          const readKey=String(m.id||'')+'|'+String(m.server||'')+'|'+String(m.surah_list||'');
+          if(!reads.has(readKey))reads.set(readKey,m);
+         });
+         existing.moshaf=[...reads.values()];
+         if(language==='ar'&&existing._sourceLanguage!=='ar'&&rec.name){existing.name=rec.name;existing._sourceLanguage='ar';}
+        });
+       });
+      }
+      const arr=[...byId.values()].filter(r=>r&&r.id&&Array.isArray(r.moshaf)&&r.moshaf.some(m=>m&&m.server&&m.surah_list));
+      if(!successfulLists||!arr.length)throw new Error('لم تصل بيانات قراء صالحة من المصدر');
+      arr.forEach(r=>delete r._sourceLanguage);
       reciters=arr;
-      try{localStorage.setItem('zad_mp3quran_real_catalog_v1',JSON.stringify(arr));}catch(e){}
+      try{localStorage.setItem('zad_mp3quran_real_catalog_v2',JSON.stringify(arr));localStorage.setItem('zad_mp3quran_real_catalog_v1',JSON.stringify(arr));}catch(e){}
       drawReaders();
-      status('تم تحميل '+arr.length+' قارئًا حقيقيًا من MP3Quran. اختر الشيخ لعرض تسجيلاته.');
+      const reads=arr.reduce((sum,r)=>sum+(r.moshaf||[]).length,0);
+      status('تم تحميل '+arr.length+' قارئًا و'+reads+' رواية/مصحف من '+successfulLists+' لغة متاحة. اختر الشيخ لعرض تسجيلاته.');
       const preferred=arr.find(r=>norm(r.name).includes(norm('عبد الباسط'))) || arr[0];
       if(preferred)chooseReader(preferred);
       return;
-     }catch(e){last=e;}
+     }catch(e){last=e;console.warn('MP3Quran multi-language catalog failed',host,e);}
     }
     try{
-     const cache=JSON.parse(localStorage.getItem('zad_mp3quran_real_catalog_v1')||'[]');
-     if(cache.length){reciters=cache;drawReaders();status('نعرض قائمة القراء الحقيقية المحفوظة على جهازك.');return;}
+     const cache=JSON.parse(localStorage.getItem('zad_mp3quran_real_catalog_v2')||localStorage.getItem('zad_mp3quran_real_catalog_v1')||'[]');
+     if(cache.length){reciters=cache;drawReaders();status('نعرض قائمة القراء الحقيقية المحفوظة على جهازك؛ تعذر تحديثها من المصدر الآن.');return;}
     }catch(e){}
     catalog.innerHTML='<p class="small">تعذر جلب قائمة القراء الحقيقية من المصدر. تحقق من الإنترنت وحاول مرة أخرى.</p>';
     tracks.innerHTML='<p class="small">لا توجد تلاوات محملة. لم نعرض أسماء غير موثقة.</p>';
