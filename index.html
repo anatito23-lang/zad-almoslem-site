@@ -2115,7 +2115,7 @@ mushafSwipeArea.addEventListener('pointerup',event=>{
 mushafSwipeArea.addEventListener('pointercancel',()=>{mushafMouseStart=null;});
 
 async function loadOldEgyptianReciters(){
- const cacheKey='zad_mp3quran_reciters_ar_v1',select=$('reciter');
+ const cacheKey='zad_mp3quran_reciters_ar_v2',select=$('reciter');
  const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp());
  function populate(all,fromCache){
   if(!Array.isArray(all))return 0;
@@ -2137,12 +2137,12 @@ async function loadOldEgyptianReciters(){
  let cached=[];try{cached=JSON.parse(localStorage.getItem(cacheKey)||'[]');}catch(e){}
  if(Array.isArray(cached)&&cached.length)populate(cached,true);
  let apiError=null,all=[];
- for(const endpoint of ['https://mp3quran.net/api/v3/reciters?language=ar','https://api.mp3quran.net/api/v3/reciters?language=ar']){
+ for(const endpoint of ['https://mp3quran.net/api/v3/reciters?language=ar','https://www.mp3quran.net/api/v3/reciters?language=ar']){
   try{
    const response=await zadFetchTimeout(endpoint,{},10000);
    if(!response.ok)throw new Error('HTTP '+response.status);
    const data=await response.json();
-   all=(data.reciters||[]).filter(rec=>rec&&rec.id&&Array.isArray(rec.moshaf)&&rec.moshaf.length);
+   all=(data.reciters||[]).filter(rec=>rec&&rec.id&&Array.isArray(rec.moshaf)&&rec.moshaf.length).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'ar'));
    if(!all.length)throw new Error('empty reciter list');
    break;
   }catch(error){apiError=error;}
