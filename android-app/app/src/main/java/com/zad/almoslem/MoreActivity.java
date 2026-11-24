@@ -35,7 +35,6 @@ section(root,"📿 الرقية والابتهالات");
 add(root,"الرقية الشرعية","اختيار القارئ وتشغيل الرقية أو إيقافها",RuqyahActivity.class);
 add(root,"الابتهالات والإنشاد","تسجيلات الابتهالات الدينية",AudioLibraryActivity.class);
 section(root,"🎞️ محتوى إيماني");
-add(root,"ريلز إسلامي","بطاقات إيمانية رأسية: آيات وأحاديث صحيحة وأدعية، اسحب للتنقل بينها",IslamicReelsActivity.class);
 add(root,"الوقفات الإيمانية","وقفة قصيرة متجددة من المحتوى المنشور في لوحة الإدارة",FaithReflectionsActivity.class);
 add(root,"مكتبة خطب الجمعة","خطب محفوظة وخطب جديدة من لوحة الإدارة",KhutbahLibraryActivity.class);
 section(root,"🧭 خدمات إسلامية");

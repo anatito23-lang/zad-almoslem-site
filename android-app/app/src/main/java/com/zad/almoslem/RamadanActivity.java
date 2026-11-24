@@ -33,8 +33,8 @@ public class RamadanActivity extends Activity {
     private LinearLayout.LayoutParams full(){return new LinearLayout.LayoutParams(-1,-2);}
     private void gap(LinearLayout parent,int h){View v=new View(this);parent.addView(v,new LinearLayout.LayoutParams(1,dp(h)));}
     private LinearLayout card(String title){
-        LinearLayout c=new LinearLayout(this);c.setOrientation(LinearLayout.VERTICAL);c.setPadding(dp(14),dp(13),dp(14),dp(13));c.setBackground(shape(AppThemeColors.surface(this),18));
-        LinearLayout.LayoutParams p=full();p.topMargin=dp(12);root.addView(c,p);
+        LinearLayout c=new LinearLayout(this);c.setOrientation(LinearLayout.VERTICAL);c.setPadding(dp(12),dp(10),dp(12),dp(10));c.setBackground(shape(AppThemeColors.surface(this),18));
+        LinearLayout.LayoutParams p=full();p.topMargin=dp(8);root.addView(c,p);
         c.addView(text(title,18,AppThemeColors.text(this),true),full());return c;
     }
     @Override public void onCreate(Bundle state){
@@ -43,18 +43,17 @@ public class RamadanActivity extends Activity {
     private void build(){
         ScrollView scroll=new ScrollView(this);root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(15),dp(14),dp(15),dp(24));root.setBackgroundColor(AppThemeColors.bg(this));scroll.setBackgroundColor(AppThemeColors.bg(this));scroll.addView(root);
-        LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(15),dp(30),dp(15),dp(30));hero.setBackground(shape(Color.rgb(31,43,70),24));
-        hero.addView(new SectionArtworkView(this,"ramadan"),new LinearLayout.LayoutParams(-1,dp(164)));
-        TextView moon=text("☾  ✦  🏮",32,0xFFFFD98A,true);moon.setGravity(Gravity.CENTER);hero.addView(moon,full());
-        TextView title=text("رمضان شهر الصيام والقرآن",23,Color.WHITE,true);title.setGravity(Gravity.CENTER);hero.addView(title,full());
-        TextView subtitle=text("رمضان كريم  •  جدّد نيتك، واملأ أيام الشهر بالطاعة  •  ✦",13,0xFFFFE9BE,false);subtitle.setGravity(Gravity.CENTER);hero.addView(subtitle,full());
+        LinearLayout hero=new LinearLayout(this);hero.setOrientation(LinearLayout.VERTICAL);hero.setGravity(Gravity.CENTER);hero.setPadding(dp(12),dp(12),dp(12),dp(12));hero.setBackground(shape(Color.rgb(31,43,70),24));
+        ImageView ramadanPhoto=new ImageView(this);ramadanPhoto.setImageResource(R.drawable.azhar_mosque_bg);ramadanPhoto.setScaleType(ImageView.ScaleType.CENTER_CROP);ramadanPhoto.setBackground(shape(Color.rgb(31,43,70),18));hero.addView(ramadanPhoto,new LinearLayout.LayoutParams(-1,dp(118)));
+        TextView title=text("يا شهر رمضان",24,0xFFFFE2A3,true);title.setGravity(Gravity.CENTER);title.setPadding(0,dp(9),0,dp(2));hero.addView(title,full());
+        TextView subtitle=text("أهلًا بشهر الصيام والقرآن • جدّد نيتك واملأ أيامك بالطاعة",12,0xFFFFE9BE,false);subtitle.setGravity(Gravity.CENTER);hero.addView(subtitle,full());
         root.addView(hero,full());
 
         LinearLayout fast=card("متتبع الصيام — ثلاثون يومًا");
         fastCount=text("",14,AppThemeColors.accent(this),true);fast.addView(fastCount,full());
-        GridLayout days=new GridLayout(this);days.setColumnCount(5);days.setUseDefaultMargins(true);
+        GridLayout days=new GridLayout(this);days.setColumnCount(6);days.setUseDefaultMargins(true);
         for(int i=1;i<=30;i++){
-            final int day=i;CheckBox check=new CheckBox(this);check.setText(String.valueOf(i));check.setTextSize(13);
+            final int day=i;CheckBox check=new CheckBox(this);check.setText(String.valueOf(i));check.setTextSize(11);
             check.setButtonTintList(android.content.res.ColorStateList.valueOf(AppThemeColors.accent(this)));
             check.setTextColor(AppThemeColors.text(this));check.setChecked(prefs.getBoolean("fast_"+i,false));
             check.setOnCheckedChangeListener((b,checked)->{prefs.edit().putBoolean("fast_"+day,checked).apply();updateFastCount();});
@@ -63,11 +62,11 @@ public class RamadanActivity extends Activity {
         fast.addView(days,full());updateFastCount();
 
         LinearLayout khatma=card("ختمة القرآن الكريم");
-        TextView invitation=text("اجعل لك وردًا من القرآن في رمضان 🌙\\nاضغط على الزر لفتح المصحف، وسنتابع الصفحات التي تتنقل بينها تلقائيًا ما دامت الختمة قيد التشغيل.",14,AppThemeColors.text(this),false);
+        TextView invitation=text("اجعل لك وردًا يوميًا من القرآن 🌙\\nافتح المصحف، وسجّل تقدمك تلقائيًا أثناء تشغيل الختمة.",13,AppThemeColors.text(this),false);
         invitation.setPadding(0,dp(8),0,dp(10));khatma.addView(invitation,full());
-        khatmaRing=new KhatmaRing();LinearLayout ringHolder=new LinearLayout(this);ringHolder.setGravity(Gravity.CENTER);ringHolder.addView(khatmaRing,new LinearLayout.LayoutParams(dp(178),dp(178)));khatma.addView(ringHolder,full());
+        khatmaRing=new KhatmaRing();LinearLayout ringHolder=new LinearLayout(this);ringHolder.setGravity(Gravity.CENTER);ringHolder.addView(khatmaRing,new LinearLayout.LayoutParams(dp(116),dp(116)));khatma.addView(ringHolder,full());
         khatmaProgress=text("",15,AppThemeColors.accent(this),true);khatmaProgress.setGravity(Gravity.CENTER);khatma.addView(khatmaProgress,full());
-        TextView note=text("يتابع المؤشر صفحات المصحف التي تفتحها أثناء تشغيل الختمة، ولا يدّعي التحقق من القراءة الفعلية. تقدمك محفوظ عند الإيقاف والعودة.",12,AppThemeColors.muted(this),false);
+        TextView note=text("يُسجّل الصفحات التي تفتحها أثناء تشغيل الختمة، ويُحفظ تقدمك عند العودة.",11,AppThemeColors.muted(this),false);
         note.setPadding(0,dp(7),0,dp(8));khatma.addView(note,full());
         Button openMushaf=new Button(this);openMushaf.setText("📖  افتح المصحف وابدأ القراءة");khatma.addView(openMushaf,full());
         khatmaToggle=new Button(this);khatma.addView(khatmaToggle,full());
@@ -88,6 +87,7 @@ public class RamadanActivity extends Activity {
             if(!QuranKhatmaTracker.isTracking(this))QuranKhatmaTracker.start(this);
             updateKhatma();
             Intent open=new Intent(this,MushafPageActivity.class);
+            open.putExtra("from_ramadan",true);
             open.putExtra("page",getSharedPreferences("zad_mushaf",MODE_PRIVATE).getInt("last_page",1));
             startActivity(open);
         });
@@ -112,7 +112,7 @@ public class RamadanActivity extends Activity {
         addDua(ramadanGuide,"اغتنم أيام الشهر","اجعل لك وردًا ثابتًا من القرآن، واحفظ لسانك، وأكثر من الدعاء والاستغفار، وتفقد المحتاجين، وأحسن إلى أهلك وجيرانك.");
         addDua(ramadanGuide,"لا تؤجل التوبة","ابدأ من اليوم؛ فالعبرة ليست بكثرة ما نخطط له، وإنما بصدق العمل والثبات عليه.");
         Button guideMushaf=new Button(this);guideMushaf.setText("📖  انتقل إلى المصحف");ramadanGuide.addView(guideMushaf,full());
-        guideMushaf.setOnClickListener(v->{Intent open=new Intent(this,MushafPageActivity.class);open.putExtra("page",getSharedPreferences("zad_mushaf",MODE_PRIVATE).getInt("last_page",1));startActivity(open);});
+        guideMushaf.setOnClickListener(v->{Intent open=new Intent(this,MushafPageActivity.class);open.putExtra("from_ramadan",true);open.putExtra("page",getSharedPreferences("zad_mushaf",MODE_PRIVATE).getInt("last_page",1));startActivity(open);});
 
         LinearLayout settings=card("إعدادات الشهر والتنبيهات");
         Switch enabled=new Switch(this);enabled.setText("تفعيل تنبيهات رمضان");enabled.setTextColor(AppThemeColors.text(this));enabled.setChecked(prefs.getBoolean("enabled",false));settings.addView(enabled,full());

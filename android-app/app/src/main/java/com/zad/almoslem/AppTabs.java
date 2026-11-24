@@ -144,6 +144,9 @@ public final class AppTabs {
                 if(row==null||!row.optBoolean("visible",true))continue;
                 String key=row.optString("key","");
                 String label=row.optString("label","").trim().replace("ـ","");
+                String keyLower=key.toLowerCase(java.util.Locale.ROOT);
+                String labelLower=label.toLowerCase(java.util.Locale.ROOT);
+                if("reels".equals(keyLower)||"islamic-reels".equals(keyLower)||labelLower.contains("ريلز")||labelLower.contains("reels"))continue;
                 String normalizedKey=key.toLowerCase(java.util.Locale.ROOT);
                 String normalizedLabel=label.replaceAll("\\s+","");
                 boolean companionStory=normalizedKey.matches(".*(sahab|sahabi|sahaba|companion).*")
@@ -190,7 +193,7 @@ public final class AppTabs {
         if(li>0&&index>=0&&LABELS[index].equals(labelText))labelText=localizedLabel(index,li,labelText);
         final String clickLabel=labelText,clickIcon=iconText;
         LinearLayout item=new LinearLayout(a);item.setOrientation(1);item.setGravity(Gravity.CENTER);
-        item.setClickable(!selected);item.setFocusable(!selected);
+        item.setClickable(!selected || "ramadan".equals(key));item.setFocusable(!selected || "ramadan".equals(key));
         item.setPadding(dp(a,2),dp(a,1),dp(a,2),dp(a,1));
         if(selected){GradientDrawable selectedBg=new GradientDrawable();selectedBg.setColor(Color.rgb(218,235,218));selectedBg.setCornerRadius(dp(a,12));selectedBg.setStroke(dp(a,1),Color.rgb(177,199,165));item.setBackground(selectedBg);item.setElevation(dp(a,2));}
         else {GradientDrawable idleBg=new GradientDrawable();idleBg.setColor(Color.TRANSPARENT);idleBg.setCornerRadius(dp(a,12));item.setBackground(idleBg);}

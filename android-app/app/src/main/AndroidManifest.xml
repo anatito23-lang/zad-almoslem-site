@@ -19,7 +19,6 @@
         <activity android:name=".CustomTabActivity" android:exported="false" />
         <activity android:name=".HomeActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity>
         <activity android:name=".TasbeehActivity" android:exported="false" />
-        <activity android:name=".IslamicReelsActivity" android:exported="false" />
         <activity android:name=".QuranListeningActivity" android:exported="false" />
         <activity android:name=".RuqyahActivity" android:exported="false" />
         <activity android:name=".MoreActivity" android:exported="false" />
