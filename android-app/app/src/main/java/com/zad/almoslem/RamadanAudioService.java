@@ -84,6 +84,12 @@ public class RamadanAudioService extends Service {
             else if("ramadan_suhoor_voice_test".equals(key)) remoteKey="ramadan_suhoor";
             String remoteUrl=prefs.getString("remote_"+remoteKey,"");
             if(!remoteUrl.startsWith("https://")) {
+                // Use the bundled, human-recorded CC0 adhan as the default suhoor alert.
+                // An administrator-published suhoor recording may still override it.
+                if("ramadan_suhoor_voice_test".equals(key)||"ramadan_suhoor".equals(key)){
+                    playBundledAdhan();
+                    return START_NOT_STICKY;
+                }
                 showMissingRecording();
                 return START_NOT_STICKY;
             }
