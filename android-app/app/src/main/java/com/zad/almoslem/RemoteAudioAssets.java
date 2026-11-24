@@ -62,7 +62,7 @@ public final class RemoteAudioAssets {
         FirebaseFirestore.getInstance().collection("app_audio_assets").document("ramadan").get()
                 .addOnSuccessListener(snapshot -> {
                     if (!snapshot.exists() || snapshot.getData() == null) {
-                        postResult(callback, "لم تُنشر روابط تسجيلات رمضان بعد. ارفع التسجيل من لوحة الإدارة أولًا.");
+                        postResult(callback, "لم تُنشر تسجيلات رمضان بعد من لوحة الإدارة.");
                         return;
                     }
                     ArrayList<Asset> pending = new ArrayList<>();
@@ -80,7 +80,7 @@ public final class RemoteAudioAssets {
                         }
                     }
                     if (configured == 0) {
-                        postResult(callback, "لم أجد روابط صوت صالحة في قاعدة البيانات. راجع نشر التسجيل من لوحة الإدارة.");
+                        postResult(callback, "لا توجد تسجيلات منشورة صالحة حاليًا. راجع لوحة الإدارة.");
                         return;
                     }
                     if (pending.isEmpty()) {
@@ -107,7 +107,7 @@ public final class RemoteAudioAssets {
                     });
                 })
                 .addOnFailureListener(error -> postResult(callback,
-                        "تعذر قراءة روابط التسجيلات من قاعدة البيانات: " + error.getMessage()));
+                        "تعذر تحديث تسجيلات رمضان: " + error.getMessage()));
     }
 
     private static void postResult(RefreshCallback callback, String message) {
