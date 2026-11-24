@@ -8,7 +8,12 @@ import android.media.MediaPlayer;
 import android.os.*;
 import java.io.File;
 
-public class RamadanAudioService extends Service {\n    public static final String ACTION_PAUSE_FOR_ADHAN="com.zad.almoslem.RAMADAN_PAUSE_FOR_ADHAN";\n    public static final String ACTION_RESUME_AFTER_ADHAN="com.zad.almoslem.RAMADAN_RESUME_AFTER_ADHAN";\n    private boolean pausedForAdhan;\n    private boolean wasPlayingBeforeAdhan;\n    private int positionBeforeAdhan;
+public class RamadanAudioService extends Service {
+    public static final String ACTION_PAUSE_FOR_ADHAN="com.zad.almoslem.RAMADAN_PAUSE_FOR_ADHAN";
+    public static final String ACTION_RESUME_AFTER_ADHAN="com.zad.almoslem.RAMADAN_RESUME_AFTER_ADHAN";
+    private boolean pausedForAdhan;
+    private boolean wasPlayingBeforeAdhan;
+    private int positionBeforeAdhan;
     private static final String CHANNEL="zad_ramadan_audio";
     private static final int ID=7630;
     private MediaPlayer player;
