@@ -35,26 +35,6 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <div class="actions"><button id="saveButton" type="submit">حفظ المحتوى</button><button class="secondary" id="cancelEdit" type="button">إلغاء التعديل</button><button class="secondary" id="refreshButton" type="button">تحديث القائمة</button></div></form>
 <div id="adminMessage" class="notice hidden" role="status"></div></section>
 <section class="card hidden" id="listCard"><h2>المحتوى المسجل</h2><div id="itemsList"><p class="small">جارٍ التحميل…</p></div></section>
-<section class="card hidden" id="audioAssetsCard">
-<h2>إدارة أصوات التطبيق</h2>
-<p class="small">اختر ملف الصوت من هاتفك؛ بعد اكتمال الرفع يُنشر رابطه تلقائيًا في التطبيق ويُتحقق من حفظه. زر «نشر الرابط» متاح أيضًا إذا أردت إدخال رابط يدوي. لا يستخدم هذا الرفع Firebase Storage. الحد الأقصى 8 ميجابايت.</p>
-<div class="item"><strong>تنبيه السحور — تسجيل المسحراتي</strong><label for="audioFileSuhoor">اختيار ملف صوت من الهاتف</label><input id="audioFileSuhoor" type="file" accept=".mp3,.m4a,.wav,.ogg,audio/*"><div class="actions"><button type="button" data-audio-upload="suhoor">رفع ملف صوت السحور</button></div><div id="audioUploadStatus-suhoor" class="notice hidden" role="status" aria-live="polite"></div><label for="audioSuhoor">رابط ملف الصوت</label><input id="audioSuhoor" type="url" inputmode="url" value="https://zad-almoslem.github.io/مسحراتي.mp3"><audio id="audioPreview-suhoor" class="hidden" controls preload="none" style="width:100%;margin-top:8px"></audio><div class="actions"><button type="button" data-audio-publish="suhoor">نشر رابط صوت السحور</button></div></div>
-<div id="audioAssetsMessage" class="notice hidden" role="status"></div>
-</section>
-<section class="card hidden" id="reelsAdminCard">
-<h2>إدارة منشورات الصور</h2>
-<p class="small">ارفع صورة فقط بصيغة JPG أو PNG أو WebP (بحد أقصى 8 ميجابايت)، وأضف عنوانًا ووصفًا اختياريًا. تُرفع الصورة إلى GitHub وتُحفظ بيانات المنشور في Firestore.</p>
-<form id="reelForm">
-<input id="reelId" type="hidden"><input id="reelImageUrl" type="hidden">
-<label for="reelTitle">عنوان المنشور *</label><input id="reelTitle" maxlength="150" required>
-<label for="reelDescription">وصف أو نص مختصر (اختياري)</label><textarea id="reelDescription" maxlength="1200" style="min-height:90px"></textarea>
-<label for="reelImageFile">اختيار صورة *</label><input id="reelImageFile" type="file" accept="image/jpeg,image/png,image/webp">
-<div id="reelImagePreviewWrap" class="item hidden"><img id="reelImagePreview" alt="معاينة الصورة المختارة" style="display:block;width:100%;max-height:260px;object-fit:contain;border-radius:10px"><p id="reelImagePreviewName" class="small"></p></div>
-<div class="row"><div><label for="reelOrder">ترتيب الظهور</label><input id="reelOrder" type="number" min="0" max="9999" value="0"></div><div><label class="check" style="margin-top:38px"><input id="reelPublished" type="checkbox" checked> نشر الصورة</label></div></div>
-<div class="actions"><button id="reelSave" type="submit">رفع الصورة ونشرها</button><button class="secondary" id="reelCancel" type="button">إلغاء</button><button class="secondary" id="reelRefresh" type="button">تحديث القائمة</button></div>
-</form><div id="reelsMessage" class="notice hidden" role="status"></div>
-<hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h2>الصور المنشورة</h2><div id="reelsList"><p class="small">جارٍ التحميل…</p></div>
-</section>
 <section class="card hidden" id="customTabsCard">
 <h2>إنشاء وإدارة التبويبات الجديدة</h2>
 <p class="small">أضف أقسامًا جديدة، أو انشر محتوى داخل الأقسام الأساسية: استماع القرآن ورمضان والسبحة. المحتوى يظهر داخل القسم المناسب بعد مزامنة التطبيق مع الإنترنت.</p>
@@ -78,6 +58,20 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 <div class="actions"><button type="submit">حفظ المحتوى</button><button class="secondary" id="customContentCancel" type="button">إلغاء التعديل</button></div>
 </form>
 <div id="customContentList"></div><div id="customTabsMessage" class="notice hidden" role="status"></div>
+</section>
+<section class="card hidden" id="qalbiAdminCard">
+<h2>قلبي اطمئن — إدارة النفحات الإيمانية</h2>
+<p class="small">أضف آيات للتدبر، وأحاديث صحيحة، ووقفات ومواعظ إيمانية. المحتوى المنشور يظهر داخل تبويب «قلبي اطمئن» في التطبيق.</p>
+<form id="qalbiContentForm">
+<input id="qalbiContentId" type="hidden">
+<label for="qalbiContentTitle">عنوان النفحة *</label><input id="qalbiContentTitle" maxlength="200" required placeholder="مثال: حين يضيق صدرك، تذكّر لطف الله">
+<label for="qalbiContentBody">النص *</label><textarea id="qalbiContentBody" maxlength="30000" required placeholder="اكتب الآية أو الحديث الصحيح أو الوقفة الإيمانية، مع ذكر النص بدقة"></textarea>
+<label for="qalbiContentSource">المصدر والتخريج *</label><input id="qalbiContentSource" maxlength="300" required placeholder="مثال: سورة الشرح: 5-6، أو صحيح مسلم: رقم الحديث">
+<div class="row"><div><label for="qalbiContentOrder">ترتيب الظهور</label><input id="qalbiContentOrder" type="number" min="0" max="9999" value="0"></div><div><label class="check" style="margin-top:38px"><input id="qalbiContentPublished" type="checkbox" checked> نشر النفحة</label></div></div>
+<div class="actions"><button id="qalbiContentSave" type="submit">حفظ ونشر النفحة</button><button class="secondary" id="qalbiContentCancel" type="button">إلغاء التعديل</button><button class="secondary" id="qalbiContentRefresh" type="button">تحديث المحتوى</button></div>
+</form>
+<div id="qalbiContentMessage" class="notice hidden" role="status"></div>
+<hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h2>النفحات المسجلة</h2><div id="qalbiContentList"><p class="small">سجّل الدخول لعرض المحتوى.</p></div>
 </section>
 <section class="card hidden" id="siteContentCard">
 <h2>إدارة جميع تبويبات الموقع</h2>
@@ -196,152 +190,6 @@ $("customContentCancel").addEventListener("click",()=>{$("customContentForm").re
 
 
 // إدارة منشورات الصور فقط، مع بقاء مسار رفع أصوات التطبيق المستقل كما هو.
-const REEL_WORKER_URL="https://ancient-mountain-76f0.ana-tito23.workers.dev";
-const $reel=id=>document.getElementById(id);
-function reelMsg(text,error=false){const el=$reel("reelsMessage");el.textContent=text;el.classList.remove("hidden","error");if(error)el.classList.add("error")}
-function clearReelForm(){$reel("reelForm").reset();$reel("reelId").value="";$reel("reelImageUrl").value="";$reel("reelOrder").value="0";$reel("reelPublished").checked=true;$reel("reelSave").textContent="رفع الصورة ونشرها";clearMessage("reelsMessage")}
-async function uploadReelImage(file){
- const token=await auth.currentUser.getIdToken(),form=new FormData();form.append("image",file,file.name);
- const response=await fetch(REEL_WORKER_URL,{method:"POST",headers:{Authorization:"Bearer "+token},body:form});
- const result=await response.json().catch(()=>({}));
- if(!response.ok||!result.ok||!result.url)throw new Error(result.error||"تعذر رفع الصورة.");
- return result.url;
-}
-async function loadReels(){
- if(auth.currentUser?.uid!==ADMIN_UID)return;
- const box=$reel("reelsList");box.innerHTML='<p class="small">جارٍ تحميل الصور…</p>';
- try{
-  const snap=await getDocs(collection(db,"reels"));
-  const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0));
-  if(!rows.length){box.innerHTML='<p class="small">لا توجد صور مسجلة حتى الآن.</p>';return}
-  box.innerHTML=rows.map(r=>'<div class="item"><div class="row"><strong>'+escapeHtml(r.title||"بدون عنوان")+'</strong><span class="tag">'+(isPublished(r)?"منشور":"مخفي")+'</span></div>'+(r.imageUrl?'<img src="'+escapeHtml(r.imageUrl)+'" alt="" loading="lazy" style="display:block;width:100%;max-height:220px;object-fit:contain;border-radius:10px;margin:8px 0">':'<p class="small">لا توجد صورة مرفقة</p>')+'<p>'+escapeHtml(r.description||"")+'</p><div class="small">الترتيب: '+(Number(r.order)||0)+'</div><div class="actions"><button type="button" data-reel-edit="'+escapeHtml(r.id)+'">تعديل</button><button class="secondary" type="button" data-reel-toggle="'+escapeHtml(r.id)+'">'+(isPublished(r)?"إخفاء":"نشر")+'</button><button class="danger" type="button" data-reel-delete="'+escapeHtml(r.id)+'">حذف</button></div></div>').join("");
-  window.__zadReelsAdminRows=rows;
- }catch(e){box.innerHTML='<p class="small">تعذر تحميل الصور: '+escapeHtml(e.message)+'</p>'}
-}
-
-$reel("reelImageFile").addEventListener("change",()=>{
- const file=$reel("reelImageFile").files?.[0],wrap=$reel("reelImagePreviewWrap"),img=$reel("reelImagePreview"),name=$reel("reelImagePreviewName");
- if(!file){wrap.classList.add("hidden");img.removeAttribute("src");return;}
- if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>8*1024*1024){wrap.classList.add("hidden");reelMsg("اختر صورة JPG أو PNG أو WebP لا يتجاوز حجمها 8 ميجابايت.",true);return;}
- if(img.dataset.objectUrl)URL.revokeObjectURL(img.dataset.objectUrl);
- const objectUrl=URL.createObjectURL(file);img.src=objectUrl;img.dataset.objectUrl=objectUrl;name.textContent=file.name+" — "+(file.size/1024/1024).toFixed(2)+" MB";wrap.classList.remove("hidden");clearMessage("reelsMessage");
-});
-
-$reel("reelForm").addEventListener("submit",async e=>{
- e.preventDefault();if(auth.currentUser?.uid!==ADMIN_UID){reelMsg("سجّل الدخول بحساب المسؤول أولًا.",true);return}
- const title=$reel("reelTitle").value.trim(),imageFile=$reel("reelImageFile").files[0],editing=$reel("reelId").value;
- if(!title){reelMsg("اكتب عنوان المنشور.",true);return}
- if(!imageFile&&!$reel("reelImageUrl").value) {reelMsg("اختر صورة من الهاتف أولًا.",true);return}
- if(imageFile&&!["image/jpeg","image/png","image/webp"].includes(imageFile.type)){reelMsg("الصورة يجب أن تكون JPG أو PNG أو WebP.",true);return}
- if(imageFile&&imageFile.size>8*1024*1024){reelMsg("حجم الصورة أكبر من 8 ميجابايت.",true);return}
- const order=Number($reel("reelOrder").value);if(!Number.isInteger(order)||order<0||order>9999){reelMsg("أدخل ترتيبًا صحيحًا.",true);return}
- const button=$reel("reelSave"),old=button.textContent;button.disabled=true;button.textContent="جارٍ رفع الصورة…";
- try{
-  let imageUrl=$reel("reelImageUrl").value;
-  if(imageFile){imageUrl=await uploadReelImage(imageFile);$reel("reelImageUrl").value=imageUrl}
-  if(!imageUrl)throw new Error("اختر صورة للمنشور.");
-  const pub=$reel("reelPublished").checked,data={title,description:$reel("reelDescription").value.trim(),imageUrl,order,published:pub,"تم النشر":pub,"النشر":pub,updatedAt:serverTimestamp()};
-  if(editing)await updateDoc(doc(db,"reels",editing),data);else{data.createdAt=serverTimestamp();await addDoc(collection(db,"reels"),data)}
-  clearReelForm();reelMsg(editing?"تم تحديث الصورة.":"تم رفع الصورة ونشرها بنجاح.");await loadReels();
- }catch(error){reelMsg("تعذر حفظ الصورة: "+error.message,true)}
- finally{button.disabled=false;button.textContent=old}
-});
-$reel("reelsList").addEventListener("click",async e=>{
- const b=e.target.closest("button");if(!b||auth.currentUser?.uid!==ADMIN_UID)return;
- const id=b.dataset.reelEdit||b.dataset.reelToggle||b.dataset.reelDelete,rows=window.__zadReelsAdminRows||[],row=rows.find(x=>x.id===id);if(!row)return;
- try{
-  if(b.dataset.reelEdit){$reel("reelId").value=id;$reel("reelTitle").value=row.title||"";$reel("reelDescription").value=row.description||"";$reel("reelImageUrl").value=row.imageUrl||"";$reel("reelOrder").value=Number(row.order)||0;$reel("reelPublished").checked=isPublished(row);$reel("reelSave").textContent="حفظ التعديلات";reelMsg("عدّل العنوان أو الوصف، أو اختر صورة جديدة بدل الحالية.")}
-  else if(b.dataset.reelToggle){const pub=!isPublished(row);await updateDoc(doc(db,"reels",id),{published:pub,"تم النشر":pub,"النشر":pub,updatedAt:serverTimestamp()});reelMsg(pub?"تم نشر الصورة.":"تم إخفاء الصورة.");await loadReels()}
-  else if(b.dataset.reelDelete){if(!confirm("هل تريد حذف هذا المنشور من قائمة الصور؟"))return;await deleteDoc(doc(db,"reels",id));reelMsg("تم حذف المنشور من Firestore.");await loadReels()}
- }catch(error){reelMsg("تعذر تنفيذ العملية: "+error.message,true)}
-});
-$reel("reelCancel").addEventListener("click",clearReelForm);
-$reel("reelRefresh").addEventListener("click",loadReels);
-
-// نشر روابط ملفات الصوت المستضافة على GitHub Pages بدل Firebase Storage.
-const AUDIO_UPLOADS={suhoor:{input:"audioSuhoor",field:"suhoorVoiceUrl",name:"تنبيه السحور"}};
-function audioMessage(value,error=false){const el=$("audioAssetsMessage");el.textContent=value;el.classList.remove("hidden","error");if(error)el.classList.add("error");}
-function audioUploadMessage(kind,value,error=false){
- const el=$("audioUploadStatus-"+kind);
- if(!el)return;
- el.textContent=value;
- el.classList.remove("hidden","error");
- if(error)el.classList.add("error");
-}
-const AUDIO_WORKER_URL="https://ancient-mountain-76f0.ana-tito23.workers.dev";
-const AUDIO_FILE_INPUTS={suhoor:"audioFileSuhoor"};
-async function loadAudioAssets(){
- if(auth.currentUser?.uid!==ADMIN_UID)return;
- try{
-  const snap=await getDoc(doc(db,"app_audio_assets","ramadan"));
-  const data=snap.exists()?snap.data():{};
-  for(const [kind,config] of Object.entries(AUDIO_UPLOADS)){
-   const url=typeof data[config.field]==="string"?data[config.field]:"";
-   $(config.input).value=url;
-   const preview=$("audioPreview-"+kind);
-   if(preview){preview.src=url;preview.classList.toggle("hidden",!url);}
-  }
-  audioMessage("تم تحميل روابط الأصوات المحفوظة من التطبيق.");
- }catch(error){audioMessage("تعذر قراءة روابط الأصوات المحفوظة: "+(error?.code||"")+" "+(error?.message||""),true);}
-}
-
-document.querySelectorAll("[data-audio-upload]").forEach(button=>button.addEventListener("click",async()=>{
- if(auth.currentUser?.uid!==ADMIN_UID){audioMessage("سجّل الدخول بحساب المسؤول أولًا.",true);return;}
- const kind=button.dataset.audioUpload,fileInput=$(AUDIO_FILE_INPUTS[kind]),file=fileInput?.files?.[0],config=AUDIO_UPLOADS[kind];
- if(!file){audioMessage("اختر ملفًا صوتيًا من الهاتف أولًا.",true);return;}
- if(file.size>8*1024*1024){audioMessage("حجم الملف أكبر من 8 ميجابايت. اختر ملفًا أصغر.",true);return;}
- if(![".mp3",".m4a",".wav",".ogg"].some(ext=>file.name.toLowerCase().endsWith(ext))){audioMessage("الصيغ المدعومة: MP3 وM4A وWAV وOGG.",true);return;}
- button.disabled=true;const old=button.textContent;button.textContent="جارٍ رفع الملف…";audioUploadMessage(kind,"جارٍ رفع الملف ثم حفظ رابطه للتطبيق…");
- try{
-  const token=await auth.currentUser.getIdToken();
-  const form=new FormData();form.append("audio",file,file.name);
-  const response=await fetch(AUDIO_WORKER_URL,{method:"POST",headers:{Authorization:"Bearer "+token},body:form});
-  const result=await response.json().catch(()=>({}));
-  if(!response.ok||!result.ok||!result.url)throw new Error(result.error||"تعذر رفع الملف. تحقق من اتصال الإنترنت ثم حاول مرة أخرى.");
-  // Publish the URL immediately after GitHub confirms the upload, so the app
-  // never waits for a separate manual "publish link" step.
-  const audioConfigRef=doc(db,"app_audio_assets","ramadan");
-  await setDoc(audioConfigRef,{
-   [config.field]:result.url,
-   [config.field+"UpdatedAt"]:serverTimestamp(),
-   updatedAt:serverTimestamp()
-  },{merge:true});
-  const savedAudioConfig=await getDoc(audioConfigRef);
-  if(!savedAudioConfig.exists()||savedAudioConfig.data()?.[config.field]!==result.url){
-   throw new Error("تم رفع الملف لكن تعذر التحقق من حفظ رابطه في قاعدة البيانات. أعد المحاولة.");
-  }
-  $(config.input).value=result.url;
-  const preview=$("audioPreview-"+kind);if(preview){preview.src=result.url;preview.classList.remove("hidden");preview.load();}
-  fileInput.value="";
-  audioUploadMessage(kind,"✓ تم رفع تسجيل "+config.name+" والتحقق من حفظ رابطه في قاعدة البيانات.");audioMessage("اكتمل رفع التسجيل وحفظ رابطه. افتح تبويب رمضان ثم جرّب الصوت.");
- }catch(error){const reason=error?.message||"خطأ غير معروف";audioUploadMessage(kind,"✕ تعذر إكمال الرفع: "+reason,true);audioMessage("تعذر رفع التسجيل: "+reason,true);}
- finally{button.disabled=false;button.textContent=old;}
-}));
-// Capture manual publish clicks at the card level and acknowledge them immediately.
-$("audioAssetsCard").addEventListener("click",async event=>{
- const button=event.target.closest("button[data-audio-publish]");
- if(!button)return;
- event.preventDefault();
- event.stopImmediatePropagation();
- const kind=button.dataset.audioPublish,config=AUDIO_UPLOADS[kind],input=config?$(config.input):null;
- if(!config||!input){audioMessage("تعذر تحديد نوع التسجيل المطلوب نشره.",true);return;}
- if(auth.currentUser?.uid!==ADMIN_UID){audioMessage("انتهت جلسة المسؤول أو الحساب غير مصرح له. سجّل الدخول مجددًا.",true);return;}
- const url=input.value.trim();
- if(!url){audioMessage("الصق رابط ملف الصوت أولًا.",true);return;}
- let parsed;try{parsed=new URL(url)}catch(e){audioMessage("الرابط غير صحيح.",true);return;}
- if(parsed.protocol!=="https:"||!["zad-almoslem.github.io","raw.githubusercontent.com"].includes(parsed.hostname)||! /\.(mp3|m4a|wav|ogg)(\?.*)?$/i.test(parsed.pathname+parsed.search)){audioMessage("استخدم رابط HTTPS مباشرًا لملف صوتي مستضاف على zad-almoslem.github.io.",true);return;}
- const old=button.textContent;
- button.disabled=true;button.textContent="جارٍ نشر الرابط…";
- audioMessage("جارٍ حفظ رابط "+config.name+" في قاعدة البيانات…");
- try{
-  await setDoc(doc(db,"app_audio_assets","ramadan"),{[config.field]:url,[config.field+"UpdatedAt"]:serverTimestamp(),updatedAt:serverTimestamp()},{merge:true});
-  const verify=await getDoc(doc(db,"app_audio_assets","ramadan"));
-  if(!verify.exists()||verify.data()?.[config.field]!==url)throw new Error("لم يتم العثور على الرابط بعد الحفظ؛ أعد المحاولة.");
-  const preview=$("audioPreview-"+kind);if(preview){preview.src=url;preview.classList.remove("hidden");}
-  audioMessage("تم نشر رابط "+config.name+" والتحقق من حفظه بنجاح.");
- }catch(error){audioMessage("تعذر نشر الرابط: "+(error?.code||"")+(error?.message?" — "+error.message:""),true);}
- finally{button.disabled=false;button.textContent=old;}
-},{capture:true});
 // إدارة المنشورات الإضافية داخل جميع أقسام الموقع
 const SITE_SECTIONS=[
  ["prayer","مواقيت الصلاة"],["calendar","التقويم الشهري"],
@@ -389,6 +237,11 @@ $("siteContentForm").addEventListener("submit",async e=>{
 $("siteContentCancel").addEventListener("click",resetSiteForm);
 $("siteContentRefresh").addEventListener("click",loadSiteContent);
 
-onAuthStateChanged(auth,async user=>{if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");$("customTabsCard").classList.add("hidden");$("siteContentCard").classList.add("hidden");$("audioAssetsCard").classList.add("hidden");$("reelsAdminCard").classList.add("hidden");return}if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return}$("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("customTabsCard").classList.remove("hidden");$("siteContentCard").classList.add("hidden");$("audioAssetsCard").classList.remove("hidden");$("reelsAdminCard").classList.remove("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";await loadItems();await loadReels();await loadAudioAssets();try{await readCustomTabs()}catch(e){customMessage("تعذر تحميل التبويبات: "+e.message,true)}});
+onAuthStateChanged(auth,async user=>{
+ if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");$("customTabsCard").classList.add("hidden");$("qalbiAdminCard").classList.add("hidden");$("siteContentCard").classList.add("hidden");return;}
+ if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return;}
+ $("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("customTabsCard").classList.remove("hidden");$("qalbiAdminCard").classList.remove("hidden");$("siteContentCard").classList.add("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";
+ await loadItems();await loadQalbiContent();try{await readCustomTabs()}catch(e){customMessage("تعذر تحميل التبويبات: "+e.message,true);}
+});
 </script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=20261122-admin-pwa",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));}</script>
 </body></html>
