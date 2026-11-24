@@ -23,6 +23,8 @@ public class PrayerDashboardActivity extends Activity {
     private static final String[] COUNTRIES={"مصر","السعودية","الإمارات","الكويت","قطر","الأردن","لبنان","فلسطين","المغرب","الجزائر","تونس","تركيا","باكستان","الهند","إندونيسيا","ماليزيا","المملكة المتحدة","الولايات المتحدة","كندا","ألمانيا","فرنسا","البحرين","عُمان","العراق","سوريا","اليمن","ليبيا","السودان","بنغلاديش","سنغافورة","اليابان","أستراليا","جنوب أفريقيا","نيجيريا","روسيا","إسبانيا","إيطاليا","هولندا","السويد","النرويج"};
     private static final String[] COUNTRY_CODES={"Egypt","Saudi Arabia","United Arab Emirates","Kuwait","Qatar","Jordan","Lebanon","Palestine","Morocco","Algeria","Tunisia","Turkey","Pakistan","India","Indonesia","Malaysia","United Kingdom","United States","Canada","Germany","France","Bahrain","Oman","Iraq","Syria","Yemen","Libya","Sudan","Bangladesh","Singapore","Japan","Australia","South Africa","Nigeria","Russia","Spain","Italy","Netherlands","Sweden","Norway"};
     private static final String[] METHODS={"5","4","8","9","10","23","3","3","21","19","18","13","1","1","20","17","3","2","2","3","12","8","8","3","3","3","3","3","1","11","3","3","3","3","14","3","3","3","3","3"};
+    // Hanafi Asr is used by default in South Asian countries; other listed countries use standard Shafi Asr.
+    private static final String[] SCHOOLS={"0","0","0","0","0","0","0","0","0","0","0","0","1","1","0","0","0","0","0","0","0","0","0","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","0"};
     private static final String[] DEFAULT_CITIES={"Cairo","Riyadh","Dubai","Kuwait City","Doha","Amman","Beirut","Jerusalem","Rabat","Algiers","Tunis","Istanbul","Islamabad","New Delhi","Jakarta","Kuala Lumpur","London","New York","Toronto","Berlin","Paris","Manama","Muscat","Baghdad","Damascus","Sanaa","Tripoli","Khartoum","Dhaka","Singapore","Tokyo","Sydney","Johannesburg","Lagos","Moscow","Madrid","Rome","Amsterdam","Stockholm","Oslo"};
     private android.content.SharedPreferences prefs;
     private Spinner countrySpinner;
@@ -142,7 +144,7 @@ public class PrayerDashboardActivity extends Activity {
         String method=METHODS[pos];prefs.edit().putString("native_country",country).putString("native_prayer_city",city).putString("native_prayer_method",method).apply();
         button.setEnabled(false);result.setText("جارٍ جلب المواقيت...");
         new Thread(()->{HttpURLConnection c=null;try{
-            String address="https://api.aladhan.com/v1/timingsByCity?city="+URLEncoder.encode(city,"UTF-8")+"&country="+URLEncoder.encode(country,"UTF-8")+"&method="+method+(pos==0?"&school=0":"");
+            String address="https://api.aladhan.com/v1/timingsByCity?city="+URLEncoder.encode(city,"UTF-8")+"&country="+URLEncoder.encode(country,"UTF-8")+"&method="+method+"&school="+SCHOOLS[pos];
             c=(HttpURLConnection)new URL(address).openConnection();c.setConnectTimeout(15000);c.setReadTimeout(20000);c.setRequestProperty("User-Agent","ZadAlmoslem Android");
             if(c.getResponseCode()!=200)throw new Exception("خدمة المواقيت لم تستجب");
             ByteArrayOutputStream out=new ByteArrayOutputStream();try(InputStream in=c.getInputStream()){byte[] b=new byte[4096];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}
