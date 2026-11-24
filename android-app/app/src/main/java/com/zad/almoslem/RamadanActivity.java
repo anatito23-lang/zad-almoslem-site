@@ -122,7 +122,7 @@ public class RamadanActivity extends Activity {
         chooseStart.setOnClickListener(v->{Calendar now=Calendar.getInstance();long saved=prefs.getLong("start_at",0L);if(saved>0)now.setTimeInMillis(saved);
             new DatePickerDialog(this,(picker,y,m,d)->{Calendar first=Calendar.getInstance();first.set(y,m,d,0,0,0);first.set(Calendar.MILLISECOND,0);prefs.edit().putLong("start_at",first.getTimeInMillis()).apply();updateStartLabel(startLabel);RamadanReminderReceiver.scheduleAll(this);},now.get(Calendar.YEAR),now.get(Calendar.MONTH),now.get(Calendar.DAY_OF_MONTH)).show();});
         settings.addView(text("تنبيه السحور",15,AppThemeColors.accent(this),true),full());
-        TextView suhoorUploadLabel=text("سيعمل صوت أذان مرفق بالتطبيق تلقائيًا لتنبيه السحور، ويمكن استبداله بتسجيل مسحراتي من لوحة الإدارة.",12,AppThemeColors.muted(this),false);settings.addView(suhoorUploadLabel,full());
+        TextView suhoorUploadLabel=text("اختر من مكتبة الابتهالات صوتًا لتنبيه السحور، أو اترك الاختيار الافتراضي ليعمل أذان التطبيق المرفق.",12,AppThemeColors.muted(this),false);settings.addView(suhoorUploadLabel,full());
         Switch suhoor=new Switch(this);suhoor.setText("تشغيل تنبيه السحور");suhoor.setTextColor(AppThemeColors.text(this));suhoor.setChecked(prefs.getBoolean("suhoor_enabled",true));settings.addView(suhoor,full());
         addMinutesControl(settings,"تنبيه السحور قبل الفجر بدقائق","suhoor_lead_minutes",45,10,120);
         TextView prayerTimesNote=text("يُحسب تنبيه السحور من موعد الفجر المحفوظ في التطبيق. يلزم ضبط مواقيت الصلاة والسماح بالتنبيهات الدقيقة.",12,AppThemeColors.muted(this),false);prayerTimesNote.setPadding(0,dp(7),0,dp(7));settings.addView(prayerTimesNote,full());
