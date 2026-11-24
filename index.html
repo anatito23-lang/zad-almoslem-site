@@ -1107,28 +1107,55 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
   </script>
 
   <section class="section" id="quran">
-    <div class="section-head"><div><h2>استماع القرآن الكريم</h2><p>اختر القارئ والسورة، واستمع إلى تلاوات من مكتبة واسعة من القراء.</p></div></div>
-    <div class="card">
-      <div class="quran-tools">
-        <select id="reciter" aria-label="اختر الشيخ">
-          <option value="basit">الشيخ عبد الباسط عبد الصمد</option>
-          <option value="minshawi">الشيخ محمد صديق المنشاوي</option>
-          <option value="husary">الشيخ محمود خليل الحصري</option>
-          <option value="mustafa">الشيخ مصطفى إسماعيل</option>
-          <option value="banna">الشيخ محمود علي البنا</option>
-          <option value="shuaisha">الشيخ أبو العينين شعيشع — 12 سورة متاحة</option>
-          <option value="ezzat">الشيخ عزت السيد راشد — 5 تلاوات تفتح خارجيًا</option>
-        </select>
+    <div class="section-head"><div><h2>🎧 زاد قرآن — المكتبة الصوتية</h2><p>مكتبة تلاوات واسعة؛ اختر القارئ والرواية والسورة، واستمع أو حمّل ملف MP3 على هاتفك.</p></div></div>
+    <div class="card zad-quran-library">
+      <div class="zad-quran-search-grid">
+        <label class="small">ابحث عن قارئ
+          <input id="zadReciterSearch" type="search" placeholder="اكتب اسم الشيخ..." autocomplete="off">
+        </label>
+        <label class="small">اختر القارئ
+          <select id="reciter" aria-label="اختر الشيخ">
+            <option value="basit">الشيخ عبد الباسط عبد الصمد</option>
+            <option value="minshawi">الشيخ محمد صديق المنشاوي</option>
+            <option value="husary">الشيخ محمود خليل الحصري</option>
+            <option value="mustafa">الشيخ مصطفى إسماعيل</option>
+            <option value="banna">الشيخ محمود علي البنا</option>
+            <option value="shuaisha">الشيخ أبو العينين شعيشع — 12 سورة متاحة</option>
+            <option value="ezzat">الشيخ عزت السيد راشد — 5 تلاوات</option>
+          </select>
+        </label>
+        <label class="small">الرواية / المصحف
+          <select id="zadMoshafSelect" aria-label="اختر الرواية"><option value="">جارٍ تحميل الروايات...</option></select>
+        </label>
+        <label class="small">ابحث عن سورة
+          <input id="zadSurahSearch" type="search" placeholder="مثال: سورة مريم..." autocomplete="off">
+        </label>
+      </div>
+      <div class="quran-tools" style="margin-top:12px">
         <select id="surahSelect" aria-label="اختر السورة"><option value="">جارٍ تحميل السور...</option></select>
         <button class="btn green" id="showSurah">استمع الآن</button>
       </div>
       <button class="btn light" id="ezzatShortcut" type="button" style="margin-top:10px;width:100%">استمع إلى تلاوات الشيخ عزت السيد راشد</button>
-      <p id="quranStatus" class="small" role="status" style="margin:8px 0 12px">جارٍ تحميل قائمة التسجيلات الصوتية...</p>
+      <p id="quranStatus" class="small" role="status" style="margin:8px 0 12px">جارٍ تحميل قائمة القراء والتسجيلات الصوتية...</p>
       <audio id="audio" controls class="hidden" preload="none" style="width:100%;margin-top:8px"></audio>
       <div id="shuaishaTracks" class="list hidden" style="margin-top:12px"></div>
-      <div class="notice">القسم مخصص للاستماع فقط. تُحدَّث قائمة القراء والتلاوات من مكتبة MP3Quran عند فتح الموقع، ويمكنك البحث باسم القارئ واختيار السورة والرواية المتاحة. يلزم الاتصال بالإنترنت للتشغيل.</div>
+      <div class="zad-quran-library-heading"><strong>التلاوات المتاحة</strong><span class="small">استمع أو حمّل كل سورة بصيغة MP3</span></div>
+      <div id="zadQuranLibraryTracks" class="list" aria-live="polite"><p class="small">جارٍ تجهيز المكتبة الصوتية...</p></div>
+      <div class="notice" style="margin-top:12px">تُحمّل قائمة القراء والروايات من مكتبة MP3Quran، ولا تُنزّل الملفات إلا عند اختيار الاستماع أو التحميل؛ لتوفير مساحة الهاتف. يلزم اتصال بالإنترنت.</div>
     </div>
   </section>
+  <style id="zad-quran-library-style">
+    .zad-quran-search-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+    .zad-quran-search-grid label{display:grid;gap:5px}
+    .zad-quran-search-grid input,.zad-quran-search-grid select{width:100%;min-width:0;border:1px solid #dce5dc;border-radius:12px;padding:11px;background:#fff;color:#18332d;font:inherit}
+    .zad-quran-library-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:18px 0 8px;color:#174638}
+    .zad-quran-track{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .zad-quran-track-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+    .zad-quran-track-actions button,.zad-quran-track-actions a{border:0;border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer}
+    .zad-quran-play{background:#174638;color:#fff}.zad-quran-download{background:#edf4ee;color:#174638}
+    .zad-quran-track-actions a{display:inline-block}
+    @media(max-width:520px){.zad-quran-track{align-items:flex-start}.zad-quran-track-actions{width:100%}.zad-quran-track-actions button,.zad-quran-track-actions a{flex:1;text-align:center}}
+  </style>
 
 
   <section class="section" id="nasheed">
@@ -2159,6 +2186,7 @@ async function loadOldEgyptianReciters(){
   });
   if(fromCache)$('quranStatus').textContent='نعرض قائمة القراء المحفوظة سابقًا ('+all.length+' قارئًا) — جارٍ تحديثها.';
   else $('quranStatus').textContent='تم تحديث قائمة القراء: '+all.length+' قارئًا من مكتبة MP3Quran.';
+  if(typeof renderZadQuranLibrary==='function')renderZadQuranLibrary();
   return all.length;
  }
  let cached=[];try{cached=JSON.parse(localStorage.getItem(cacheKey)||'[]');}catch(e){}
@@ -2261,6 +2289,76 @@ $('showSurah').addEventListener('click',()=>{
  }
 });
 loadSurahs();loadOldEgyptianReciters();
+
+// مكتبة زاد قرآن: فهرسة الروايات والسور مع تشغيل MP3 وروابط التحميل
+function renderZadQuranLibrary(){
+ const list=$('zadQuranLibraryTracks'),moshafSelect=$('zadMoshafSelect'),reciterSelect=$('reciter');
+ if(!list||!moshafSelect||!reciterSelect)return;
+ const key=reciterSelect.value,reciter=window.zadReciterData[key];
+ moshafSelect.replaceChildren();
+ if(!reciter||!Array.isArray(reciter.moshaf)||!reciter.moshaf.length){
+  const option=document.createElement('option');option.value='';option.textContent='لا توجد روايات متاحة لهذا الاختيار';moshafSelect.append(option);
+  list.innerHTML='<p class="small">اختر قارئًا من القائمة أو انتظر اكتمال تحميل المكتبة.</p>';
+  return;
+ }
+ reciter.moshaf.forEach((moshaf,index)=>{
+  const option=document.createElement('option');option.value=String(index);
+  option.textContent=moshaf.name||moshaf.moshaf_name||('الرواية '+(index+1));
+  moshafSelect.append(option);
+ });
+ renderZadQuranTracks();
+}
+function renderZadQuranTracks(){
+ const list=$('zadQuranLibraryTracks'),key=$('reciter').value,reciter=window.zadReciterData[key];
+ if(!list||!reciter)return;
+ const index=Number($('zadMoshafSelect').value||0),moshaf=(reciter.moshaf||[])[index];
+ if(!moshaf||!moshaf.server){list.innerHTML='<p class="small">لا تتوفر ملفات صوتية لهذه الرواية حاليًا.</p>';return;}
+ const ids=String(moshaf.surah_list||'').split(',').map(Number).filter(n=>n>=1&&n<=114);
+ const search=normalizeReciterName($('zadSurahSearch')?.value||'');
+ const filtered=ids.filter(id=>{
+  const surah=surahs.find(item=>Number(item.number)===id);
+  const name=surah?surah.name:'سورة '+id;
+  return !search||normalizeReciterName(name).includes(search)||String(id)===search;
+ });
+ const server=String(moshaf.server).endsWith('/')?String(moshaf.server):String(moshaf.server)+'/';
+ list.replaceChildren();
+ if(!filtered.length){const p=document.createElement('p');p.className='small';p.textContent='لا توجد سورة مطابقة للبحث في هذه الرواية.';list.append(p);return;}
+ filtered.forEach(id=>{
+  const surah=surahs.find(item=>Number(item.number)===id),name=surah?surah.name:'السورة '+id;
+  const url=server+String(id).padStart(3,'0')+'.mp3';
+  const row=document.createElement('div');row.className='surah-item zad-quran-track';
+  const info=document.createElement('span');const title=document.createElement('b');title.textContent=id+'. سورة '+name;
+  const subtitle=document.createElement('span');subtitle.className='small';subtitle.style.display='block';subtitle.textContent=reciter.name+' — '+(moshaf.name||moshaf.moshaf_name||'الرواية المختارة');
+  info.append(title,subtitle);
+  const actions=document.createElement('div');actions.className='zad-quran-track-actions';
+  const play=document.createElement('button');play.type='button';play.className='zad-quran-play';play.textContent='استمع ▶';
+  play.addEventListener('click',()=>{
+   const audio=$('audio');audio.pause();audio.src=url;audio.classList.remove('hidden');audio.load();
+   $('quranStatus').textContent='جارٍ تشغيل سورة '+name+' بصوت '+reciter.name+'.';
+   audio.play().then(()=>$('quranStatus').textContent='يعمل الآن: سورة '+name+' — '+reciter.name).catch(()=>$('quranStatus').textContent='اضغط زر التشغيل في مشغّل الصوت لبدء التلاوة.');
+   audio.scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+  const download=document.createElement('a');download.className='zad-quran-download';download.href=url;download.setAttribute('download',String(id).padStart(3,'0')+'.mp3');download.textContent='تحميل MP3 ⬇';download.rel='noopener';
+  actions.append(play,download);row.append(info,actions);list.append(row);
+ });
+}
+$('reciter').addEventListener('change',()=>renderZadQuranLibrary());
+$('zadMoshafSelect').addEventListener('change',renderZadQuranTracks);
+$('zadSurahSearch').addEventListener('input',renderZadQuranTracks);
+$('zadReciterSearch').addEventListener('input',()=>{
+ const query=normalizeReciterName($('zadReciterSearch').value);
+ Array.from($('reciter').options).forEach(option=>{
+  const match=!query||normalizeReciterName(option.textContent).includes(query);
+  option.hidden=!match;
+ });
+ const selected=$('reciter').selectedOptions[0];
+ if(selected&&selected.hidden){
+  const next=Array.from($('reciter').options).find(option=>!option.hidden);
+  if(next){$('reciter').value=next.value;$('reciter').dispatchEvent(new Event('change'));}
+ }
+});
+renderZadQuranLibrary();
+
 const azkar={
  morning:{title:'أذكار الصباح',items:[['أصبحنا وأصبح الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.',1],['اللهم بك أصبحنا وبك أمسينا وبك نحيا وبك نموت وإليك النشور.',1],['رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا.',3],['سبحان الله وبحمده.',100],['أستغفر الله وأتوب إليه.',100]]},
  evening:{title:'أذكار المساء',items:[['أمسينا وأمسى الملك لله، والحمد لله، لا إله إلا الله وحده لا شريك له، له الملك وله الحمد وهو على كل شيء قدير.',1],['اللهم بك أمسينا وبك أصبحنا وبك نحيا وبك نموت وإليك المصير.',1],['رضيت بالله ربًا، وبالإسلام دينًا، وبمحمد ﷺ نبيًا.',3],['سبحان الله وبحمده.',100],['أستغفر الله وأتوب إليه.',100]]},
