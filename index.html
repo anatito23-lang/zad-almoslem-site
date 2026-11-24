@@ -3415,17 +3415,19 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
      const filtered=ids.filter(n=>!q||norm(names[n-1]).includes(q)||String(n)===q);
      if(!filtered.length){const p=document.createElement('p');p.className='small';p.textContent='لا توجد سورة مطابقة في هذه الرواية.';surahs.append(p);return;}
      const server=String(m.server).replace(/\/$/,'')+'/';
-     const queue=filtered.map(n=>({id:n,name:names[n-1],artist:r.name,url:server+String(n).padStart(3,'0')+'.mp3'}));
-     filtered.forEach((n,i)=>{
+     // احتفظ بقائمة الرواية كاملة للتشغيل التلقائي، واجعل البحث للعرض فقط.
+     const queue=ids.map(n=>({id:n,name:names[n-1],artist:r.name,url:server+String(n).padStart(3,'0')+'.mp3'}));
+     filtered.forEach(n=>{
       const row=document.createElement('div');row.className='zad-reader-surah';
       const label=document.createElement('span');label.textContent=n+'. '+names[n-1];
       const actions=document.createElement('span');
       const play=document.createElement('button');play.type='button';play.textContent='▶ استمع';
       play.addEventListener('click',()=>{
        window.zadQuranQueue=queue;
+       const track=queue.find(item=>item.id===n);if(!track)return;
        if(typeof window.playZadQuranTrack==='function')window.playZadQuranTrack(n);
-       else{audio.src=queue[i].url;audio.load();audio.play().catch(()=>status('تعذر تشغيل التلاوة. تحقق من الاتصال.'));}
-       const download=$id('zadPlayerDownload');if(download){download.href=queue[i].url;download.download=String(n).padStart(3,'0')+'.mp3';}
+       else{audio.src=track.url;audio.load();audio.play().catch(()=>status('تعذر تشغيل التلاوة. تحقق من الاتصال.'));}
+       const download=$id('zadPlayerDownload');if(download){download.href=track.url;download.download=String(n).padStart(3,'0')+'.mp3';}
        status('جارٍ تشغيل سورة '+names[n-1]+' بصوت '+r.name);
       });
       const download=document.createElement('a');download.href=queue[i].url;download.target='_blank';download.rel='noopener noreferrer';download.textContent='تحميل';
