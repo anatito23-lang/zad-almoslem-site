@@ -221,6 +221,13 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 .nasheed-track-btn{width:100%;text-align:right;cursor:pointer;font:inherit}
 .nasheed-track-btn strong{white-space:nowrap}
 .nasheed-track-btn.active{border-color:var(--gold);background:#fbf7eb}
+.nasheed-list-disclosure{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:var(--paper);padding:10px}
+.nasheed-list-disclosure>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 13px;border-radius:10px;background:#edf4ee;color:var(--green);font-weight:800;cursor:pointer;list-style:none}
+.nasheed-list-disclosure>summary::-webkit-details-marker{display:none}
+.nasheed-list-disclosure>summary::after{content:"＋";font-size:18px}
+.nasheed-list-disclosure[open]>summary::after{content:"−"}
+.nasheed-list-disclosure #nasheedTracks{margin-top:10px}
+
 @media(max-width:600px){
  .book-reader-modal{padding:0}
  .book-reader-dialog{width:100%;height:100dvh;border-radius:0}
@@ -1122,7 +1129,10 @@ remove-prayer-tracker    <div class="small">المواقيت تُجلب عبر �
         <div><strong id="nasheedNowTitle">اختر ابتهالًا للاستماع</strong><p class="small" id="nasheedStatus" role="status">اختر المنشد ثم اختر التسجيل.</p></div>
       </div>
       <audio id="nasheedAudio" controls preload="none" style="width:100%;margin:8px 0 14px"></audio>
-      <div id="nasheedTracks" class="list" aria-label="قائمة الابتهالات"></div>
+      <details class="nasheed-list-disclosure">
+        <summary>عرض قائمة الابتهالات</summary>
+        <div id="nasheedTracks" class="list" aria-label="قائمة الابتهالات"></div>
+      </details>
       <div class="notice" style="margin-top:12px">التسجيلات الصوتية تُشغّل من مشغّل زاد المسلم مباشرة، ويحتاج التشغيل إلى اتصال بالإنترنت.</div>
     </div>
   </section>
