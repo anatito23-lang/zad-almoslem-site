@@ -430,7 +430,7 @@ public class RadioPlaybackService extends Service {
     private String defaultTitle(String kind) {
         if ("quran".equals(kind)) return "استماع القرآن الكريم";
         if ("ruqyah".equals(kind)) return "الرقية الشرعية";
-        if ("nasheed".equals(kind)) return "الإنشاد والابتهالات";
+        if ("nasheed".equals(kind)) return "الإنشاد والابتهالات";\n        if ("dua".equals(kind)) return "الأدعية الصوتية";
         return "إذاعة القرآن الكريم";
     }
 
