@@ -62,7 +62,7 @@ public class RamadanActivity extends Activity {
         fast.addView(days,full());updateFastCount();
 
         LinearLayout khatma=card("ختمة القرآن الكريم");
-        TextView invitation=text("اجعل لك وردًا يوميًا من القرآن 🌙\\nافتح المصحف، وسجّل تقدمك تلقائيًا أثناء تشغيل الختمة.",13,AppThemeColors.text(this),false);
+        TextView invitation=text("اجعل لك وردًا يوميًا من القرآن 🌙\nافتح المصحف، وسجّل تقدمك تلقائيًا أثناء تشغيل الختمة.",13,AppThemeColors.text(this),false);
         invitation.setPadding(0,dp(8),0,dp(10));khatma.addView(invitation,full());
         khatmaRing=new KhatmaRing();LinearLayout ringHolder=new LinearLayout(this);ringHolder.setGravity(Gravity.CENTER);ringHolder.addView(khatmaRing,new LinearLayout.LayoutParams(dp(116),dp(116)));khatma.addView(ringHolder,full());
         khatmaProgress=text("",15,AppThemeColors.accent(this),true);khatmaProgress.setGravity(Gravity.CENTER);khatma.addView(khatmaProgress,full());
@@ -111,6 +111,17 @@ public class RamadanActivity extends Activity {
         addDua(ramadanGuide,"فضل قيام ليلة القدر","قال رسول الله ﷺ: «من قام ليلة القدر إيمانًا واحتسابًا غُفر له ما تقدم من ذنبه» متفق عليه.");
         addDua(ramadanGuide,"اغتنم أيام الشهر","اجعل لك وردًا ثابتًا من القرآن، واحفظ لسانك، وأكثر من الدعاء والاستغفار، وتفقد المحتاجين، وأحسن إلى أهلك وجيرانك.");
         addDua(ramadanGuide,"لا تؤجل التوبة","ابدأ من اليوم؛ فالعبرة ليست بكثرة ما نخطط له، وإنما بصدق العمل والثبات عليه.");
+        addDua(ramadanGuide,"خطة يومية بسيطة","بعد الفجر: أذكار الصباح وورد القرآن. أثناء النهار: حفظ اللسان وإتقان العمل. قبل المغرب: دعاء واستغفار. بعد العشاء: التراويح وما تيسر من القيام.");
+        addDua(ramadanGuide,"الصيام جُنّة","قال رسول الله ﷺ: «الصيام جُنّة، فلا يرفث ولا يجهل» متفق عليه. فاحفظ صيامك من الغيبة والخصومة وسوء الخلق.");
+        addDua(ramadanGuide,"باب الصدقة مفتوح","قال ابن عباس رضي الله عنهما: «كان رسول الله ﷺ أجود الناس، وكان أجود ما يكون في رمضان» متفق عليه. تصدق ولو بالقليل، وأطعم صائمًا، وتفقد محتاجًا.");
+        addDua(ramadanGuide,"رمضان وصلة الرحم","اجعل في شهرك زيارة أو اتصالًا برحمك، وابدأ بالسلام والعفو، ولا تجعل خلافًا قديمًا يحرمك أجر الصلة.");
+        addDua(ramadanGuide,"رمضان وحفظ اللسان","قال رسول الله ﷺ: «من لم يدع قول الزور والعمل به فليس لله حاجة في أن يدع طعامه وشرابه» رواه البخاري. ليس الصيام جوعًا وعطشًا فقط؛ بل تهذيب للقلب واللسان.");
+        addDua(ramadanGuide,"العشر الأواخر","كان النبي ﷺ إذا دخل العشر شد مئزره وأحيا ليله وأيقظ أهله، متفق عليه. فاستعد لها من الآن، ولا تجعل آخر الشهر أضعف أيامك.");
+        addDua(ramadanGuide,"ليلة القدر","قال الله تعالى: ﴿لَيْلَةُ الْقَدْرِ خَيْرٌ مِنْ أَلْفِ شَهْرٍ﴾ [القدر: 3]. وأكثر من الدعاء الذي علّمه النبي ﷺ لعائشة: «اللهم إنك عفو تحب العفو فاعف عني» رواه الترمذي وصححه.");
+        addDua(ramadanGuide,"زكاة الفطر","تذكّر إخراج زكاة الفطر قبل صلاة العيد، طُهرةً للصائم وطُعمةً للمساكين؛ وأخرجها وفق المقدار المعتمد في بلدك.");
+        addDua(ramadanGuide,"أدب الاختلاف","لا تجعل الصيام سببًا للغضب ورفع الصوت. إذا جادلك أحد فقل: إني صائم، كما أرشد النبي ﷺ في الحديث المتفق عليه.");
+        addDua(ramadanGuide,"اجعل للقرآن أثرًا","لا يكن همّك عدد الصفحات وحده؛ اقرأ بتدبر، واسأل نفسك: ما الآية التي سأعمل بها اليوم؟ ثم خذ منها خطوة عملية.");
+
         Button guideMushaf=new Button(this);guideMushaf.setText("📖  انتقل إلى المصحف");ramadanGuide.addView(guideMushaf,full());
         guideMushaf.setOnClickListener(v->{Intent open=new Intent(this,MushafPageActivity.class);open.putExtra("from_ramadan",true);open.putExtra("page",getSharedPreferences("zad_mushaf",MODE_PRIVATE).getInt("last_page",1));startActivity(open);});
 
