@@ -1113,7 +1113,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
         <label class="small">ابحث عن قارئ
           <input id="zadReciterSearch" type="search" placeholder="اكتب اسم الشيخ..." autocomplete="off">
         </label>
-        <label class="small">اختر القارئ
+        <label class="small zad-reciter-select-wrap">اختر القارئ
           <select id="reciter" aria-label="اختر الشيخ">
             <option value="basit">الشيخ عبد الباسط عبد الصمد</option>
             <option value="minshawi">الشيخ محمد صديق المنشاوي</option>
@@ -1131,6 +1131,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
           <input id="zadSurahSearch" type="search" placeholder="مثال: سورة مريم..." autocomplete="off">
         </label>
       </div>
+      <div id="zadReciterCatalog" class="zad-reciter-catalog" aria-label="قائمة القراء"><p class="small">جارٍ تحميل قائمة القراء...</p></div>
       <div class="quran-tools" style="margin-top:12px">
         <select id="surahSelect" aria-label="اختر السورة"><option value="">جارٍ تحميل السور...</option></select>
         <button class="btn green" id="showSurah">استمع الآن</button>
@@ -1156,6 +1157,16 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
     </div>
   </section>
   <style id="zad-quran-library-style">
+    .zad-reciter-select-wrap{display:none!important}
+    .zad-reciter-catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:9px;margin:14px 0}
+    .zad-reciter-card{display:flex;align-items:center;gap:9px;text-align:right;width:100%;min-height:62px;padding:10px;border:1px solid #dfe8e2;border-radius:13px;background:#fff;color:#18332d;cursor:pointer}
+    .zad-reciter-card:active,.zad-reciter-card.active{border-color:#155b49;background:#edf5ef}
+    .zad-reciter-avatar{flex:0 0 38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#e8dfc9;color:#174638;font-size:20px}
+    .zad-reciter-card strong{display:block;font-size:13px;line-height:1.5}
+    .zad-reciter-card small{display:block;color:#71817b;font-size:11px;margin-top:2px}
+    .zad-quran-track-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+    .zad-quran-track-actions button,.zad-quran-track-actions a{white-space:nowrap}
+    @media(max-width:420px){.zad-reciter-catalog{grid-template-columns:repeat(2,minmax(0,1fr))}.zad-reciter-card{padding:8px;gap:7px}}
     .zad-player{background:linear-gradient(145deg,#123c31,#1d5948);color:#fff;border-radius:20px;padding:18px;margin:14px 0;display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:center;box-shadow:0 12px 28px #123c3122}
     .zad-player-cover{width:76px;height:76px;border-radius:15px;background:linear-gradient(145deg,#d9c18b,#987844);color:#173d32;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:34px;font-weight:800}
     .zad-player-cover span{font-size:10px}.zad-player-info{min-width:0;display:grid;gap:5px}.zad-player-info strong{font-size:15px;overflow-wrap:anywhere}.zad-player-info span{font-size:12px;color:#e4d8bd}
@@ -2205,6 +2216,7 @@ async function loadOldEgyptianReciters(){
   });
   if(fromCache)$('quranStatus').textContent='نعرض قائمة القراء المحفوظة سابقًا ('+all.length+' قارئًا) — جارٍ تحديثها.';
   else $('quranStatus').textContent='تم تحديث قائمة القراء: '+all.length+' قارئًا من مكتبة MP3Quran.';
+  renderZadReciterCatalog(all);
   if(typeof renderZadQuranLibrary==='function')renderZadQuranLibrary();
   return all.length;
  }
@@ -2358,6 +2370,33 @@ zadAudio.addEventListener('pause',()=>$('zadPlayerToggle').textContent='▶');
 zadAudio.addEventListener('ended',()=>stepZadQuranTrack(1));
 
 // مكتبة زاد قرآن: فهرسة الروايات والسور مع تشغيل MP3 وروابط التحميل
+function renderZadReciterCatalog(rows){
+ const box=$('zadReciterCatalog');if(!box)return;
+ const query=normalizeReciterName($('zadReciterSearch')?.value||'');
+ const unique=new Map();
+ (rows||Object.values(window.zadReciterData||{})).forEach(rec=>{
+  if(rec&&rec.id&&Array.isArray(rec.moshaf)&&rec.moshaf.length)unique.set(String(rec.id),rec);
+ });
+ const list=[...unique.values()].filter(rec=>!query||normalizeReciterName(rec.name).includes(query)).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'ar'));
+ box.replaceChildren();
+ if(!list.length){
+  const p=document.createElement('p');p.className='small';p.textContent='لم تظهر أسماء القراء بعد. تأكد من اتصال الإنترنت ثم أعد فتح المكتبة.';box.append(p);return;
+ }
+ list.forEach(rec=>{
+  const key=Object.keys(window.zadReciterData||{}).find(k=>String(window.zadReciterData[k]?.id)===String(rec.id))||('api_'+rec.id);
+  const button=document.createElement('button');button.type='button';button.className='zad-reciter-card'+($('reciter')?.value===key?' active':'');
+  const avatar=document.createElement('span');avatar.className='zad-reciter-avatar';avatar.textContent='۞';
+  const info=document.createElement('span');const name=document.createElement('strong');name.textContent=rec.name||'قارئ القرآن الكريم';
+  const meta=document.createElement('small');meta.textContent=(rec.moshaf||[]).length+' رواية/مصحف';
+  info.append(name,meta);button.append(avatar,info);
+  button.addEventListener('click',()=>{
+   $('reciter').value=key;
+   $('reciter').dispatchEvent(new Event('change'));
+   renderZadReciterCatalog(list);
+  });
+  box.append(button);
+ });
+}
 function renderZadQuranLibrary(){
  const list=$('zadQuranLibraryTracks'),moshafSelect=$('zadMoshafSelect'),reciterSelect=$('reciter');
  if(!list||!moshafSelect||!reciterSelect)return;
@@ -2419,6 +2458,7 @@ $('reciter').addEventListener('change',()=>renderZadQuranLibrary());
 $('zadMoshafSelect').addEventListener('change',renderZadQuranTracks);
 $('zadSurahSearch').addEventListener('input',renderZadQuranTracks);
 $('zadReciterSearch').addEventListener('input',()=>{
+ renderZadReciterCatalog(Object.values(window.zadReciterData||{}));
  const query=normalizeReciterName($('zadReciterSearch').value);
  Array.from($('reciter').options).forEach(option=>{
   const match=!query||normalizeReciterName(option.textContent).includes(query);
