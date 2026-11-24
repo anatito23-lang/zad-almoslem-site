@@ -507,7 +507,6 @@ public class MushafPageActivity extends Activity {
         }
         page = number;
         getSharedPreferences("zad_mushaf", MODE_PRIVATE).edit().putInt("last_page", page).apply();
-        QuranKhatmaTracker.markPageRead(this, page);
         pageLabel.setText("صفحة " + page + " من 604");
         previous.setEnabled(page > 1);
         next.setEnabled(page < 604);
@@ -519,6 +518,7 @@ public class MushafPageActivity extends Activity {
         if (cached.isFile() && cached.length() > 10000) {
             Bitmap bitmap = BitmapFactory.decodeFile(cached.getAbsolutePath());
             if (bitmap != null) {
+                QuranKhatmaTracker.markPageRead(this, number);
                 pageImage.setImageBitmap(bitmap);
                 if (pendingAyahMessage.isEmpty()) status.setText("صفحة محفوظة على الهاتف — يمكنك القراءة دون إنترنت");
                 else showSearchVerseResult(pendingAyahMessage);
@@ -556,6 +556,7 @@ public class MushafPageActivity extends Activity {
                 if (bitmap == null) throw new IOException("تعذر قراءة صورة الصفحة");
                 runOnUiThread(() -> {
                     if (page == number) {
+                        QuranKhatmaTracker.markPageRead(this, number);
                         pageImage.setImageBitmap(bitmap);
                         if (pendingAyahMessage.isEmpty()) status.setText("تم تحميل الصفحة وحفظها على الهاتف");
                         else showSearchVerseResult(pendingAyahMessage);
