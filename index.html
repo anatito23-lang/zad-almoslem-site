@@ -2537,7 +2537,8 @@ function renderZadQuranTracks(){
   return !search||normalizeReciterName(name).includes(search)||String(id)===search;
  });
  const server=String(moshaf.server).endsWith('/')?String(moshaf.server):String(moshaf.server)+'/';
- window.zadQuranQueue=filtered.map(id=>{const surah=surahs.find(item=>Number(item.number)===id);return {id,name:surah?surah.name:'السورة '+id,artist:reciter.name,url:moshaf.edition?'https://cdn.islamic.network/quran/audio-surah/128/'+moshaf.edition+'/'+id+'.mp3':server+String(id).padStart(3,'0')+'.mp3'};});
+ // قائمة التشغيل تشمل كل سور الرواية المتاحة؛ البحث يفلتر العرض فقط.
+ window.zadQuranQueue=ids.map(id=>{const surah=surahs.find(item=>Number(item.number)===id);return {id,name:surah?surah.name:'السورة '+id,artist:reciter.name,url:moshaf.edition?'https://cdn.islamic.network/quran/audio-surah/128/'+moshaf.edition+'/'+id+'.mp3':server+String(id).padStart(3,'0')+'.mp3'};});
  list.replaceChildren();
  if(!filtered.length){const p=document.createElement('p');p.className='small';p.textContent='لا توجد سورة مطابقة للبحث في هذه الرواية.';list.append(p);return;}
  filtered.forEach(id=>{
@@ -3430,7 +3431,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
        const download=$id('zadPlayerDownload');if(download){download.href=track.url;download.download=String(n).padStart(3,'0')+'.mp3';}
        status('جارٍ تشغيل سورة '+names[n-1]+' بصوت '+r.name);
       });
-      const download=document.createElement('a');download.href=queue[i].url;download.target='_blank';download.rel='noopener noreferrer';download.textContent='تحميل';
+      const download=document.createElement('a');download.href=track.url;download.target='_blank';download.rel='noopener noreferrer';download.textContent='تحميل';
       actions.append(play,download);row.append(label,actions);surahs.append(row);
      });
     }
@@ -3440,7 +3441,10 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
    }
    function drawReaders(){
     const q=norm(readerSearch.value);
-    const shown=reciters.filter(r=>!q||norm(r.name).includes(q));
+    const shown=reciters.filter(r=>!q||norm(r.name).includes(q)).sort((a,b)=>{
+     const egyptian=Number(egyptianSet.has(norm(b.name)))-Number(egyptianSet.has(norm(a.name)));
+     return egyptian||String(a.name||'').localeCompare(String(b.name||''),'ar');
+    });
     catalog.replaceChildren();
     if(!shown.length){const p=document.createElement('p');p.className='small';p.textContent='لا يوجد قارئ بهذا الاسم.';catalog.append(p);return;}
     shown.forEach(r=>catalog.append(buildReaderCard(r)));
