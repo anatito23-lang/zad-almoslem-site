@@ -2303,9 +2303,11 @@ function resetQuranPlayer(){
  $('surahSelect').classList.remove('hidden');$('showSurah').classList.remove('hidden');
 }
 $('reciter').addEventListener('change',()=>{
- if($('reciter').value==='shuaisha'){showShuaishaTracks();}
-
- else{resetQuranPlayer();$('quranStatus').textContent='اختر السورة ثم اضغط «استمع الآن».';}
+ const key=$('reciter').value;
+ if(key==='shuaisha'&&!window.zadReciterData[key]){showShuaishaTracks();return;}
+ resetQuranPlayer();
+ renderZadQuranLibrary();
+ $('quranStatus').textContent='اختر الرواية والسورة ثم اضغط «استمع الآن».';
 });
 $('showSurah').addEventListener('click',()=>{
  const id=Number($('surahSelect').value);if(!id)return;
