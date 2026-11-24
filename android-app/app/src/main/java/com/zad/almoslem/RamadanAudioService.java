@@ -11,6 +11,9 @@ import java.io.File;
 public class RamadanAudioService extends Service {
     public static final String ACTION_PAUSE_FOR_ADHAN="com.zad.almoslem.RAMADAN_PAUSE_FOR_ADHAN";
     public static final String ACTION_RESUME_AFTER_ADHAN="com.zad.almoslem.RAMADAN_RESUME_AFTER_ADHAN";
+    public static final String ACTION_TOGGLE="com.zad.almoslem.RAMADAN_TOGGLE_AUDIO";
+    public static final String ACTION_STOP="com.zad.almoslem.RAMADAN_STOP_AUDIO";
+    private boolean userPaused;
     private boolean pausedForAdhan;
     private boolean wasPlayingBeforeAdhan;
     private int positionBeforeAdhan;
@@ -27,17 +30,27 @@ public class RamadanAudioService extends Service {
         try{context.startService(i);}catch(Exception ignored){}
     }
     @Override public int onStartCommand(Intent intent,int flags,int startId){
+        if(intent!=null&&ACTION_TOGGLE.equals(intent.getAction())){
+            if(player!=null){
+                if(player.isPlaying()){positionBeforeAdhan=player.getCurrentPosition();player.pause();userPaused=true;wasPlayingBeforeAdhan=false;}
+                else {userPaused=false;if(pausedForAdhan)wasPlayingBeforeAdhan=true;else try{player.start();}catch(Exception ignored){}}
+                updatePlaybackNotification();
+            }
+            return START_NOT_STICKY;
+        }
+        if(intent!=null&&ACTION_STOP.equals(intent.getAction())){finish();return START_NOT_STICKY;}
         if(intent!=null&&ACTION_PAUSE_FOR_ADHAN.equals(intent.getAction())){
-            if(player!=null&&player.isPlaying()){positionBeforeAdhan=player.getCurrentPosition();wasPlayingBeforeAdhan=true;pausedForAdhan=true;player.pause();}
-            else stopSelf(startId);
+            if(player!=null&&player.isPlaying()){positionBeforeAdhan=player.getCurrentPosition();wasPlayingBeforeAdhan=true;pausedForAdhan=true;player.pause();updatePlaybackNotification();}
+            else if(player==null)stopSelf(startId);
             return START_NOT_STICKY;
         }
         if(intent!=null&&ACTION_RESUME_AFTER_ADHAN.equals(intent.getAction())){
-            if(player!=null&&pausedForAdhan&&wasPlayingBeforeAdhan){
+            if(player!=null&&pausedForAdhan&&wasPlayingBeforeAdhan&&!userPaused){
                 try{player.seekTo(positionBeforeAdhan);player.start();}
                 catch(Exception error){android.util.Log.w("ZadRamadan","Could not resume Ramadan audio after adhan",error);}
-                pausedForAdhan=false;wasPlayingBeforeAdhan=false;
-            }else stopSelf(startId);
+                pausedForAdhan=false;wasPlayingBeforeAdhan=false;updatePlaybackNotification();
+            }else if(player!=null){pausedForAdhan=false;wasPlayingBeforeAdhan=false;updatePlaybackNotification();}
+            else stopSelf(startId);
             return START_NOT_STICKY;
         }
         String key=intent==null?"":intent.getStringExtra("key");
@@ -46,9 +59,10 @@ public class RamadanAudioService extends Service {
         volume=Math.max(0f,Math.min(1f,volume));
         createChannel();
         Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
-        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle("سكينة — رمضان")
-          .setContentText("تذكير رمضاني").setOngoing(true);
+        b.setSmallIcon(android.R.drawable.ic_media_play).setContentTitle("سكينة — رمضان")
+          .setContentText("تشغيل صوت رمضاني").setOngoing(true);
         startForeground(ID,b.build());
+        updatePlaybackNotification();
         stopCurrent();
         SharedPreferences prefs=getSharedPreferences("zad_ramadan",MODE_PRIVATE);
         String fileName=null;
@@ -94,9 +108,27 @@ public class RamadanAudioService extends Service {
             player=new MediaPlayer();player.setWakeMode(this,PowerManager.PARTIAL_WAKE_LOCK);
             player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
             player.setOnCompletionListener(mp->finish());player.setOnErrorListener((mp,w,e)->{finish();return true;});
-            player.setDataSource(url);player.setOnPreparedListener(mp->{mp.setVolume(volume,volume);mp.start();});player.prepareAsync();
+            player.setDataSource(url);player.setOnPreparedListener(mp->{mp.setVolume(volume,volume);mp.start();updatePlaybackNotification();});player.prepareAsync();
         }catch(Exception error){android.util.Log.e("ZadRamadan","Remote Ramadan audio playback failed",error);showMissingRecording();}
     }
+    private void updatePlaybackNotification(){
+        try{
+            boolean playing=player!=null&&player.isPlaying();
+            Intent toggle=new Intent(this,RamadanAudioService.class);toggle.setAction(ACTION_TOGGLE);
+            PendingIntent toggleAction=PendingIntent.getService(this,7631,toggle,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+            Intent stop=new Intent(this,RamadanAudioService.class);stop.setAction(ACTION_STOP);
+            PendingIntent stopAction=PendingIntent.getService(this,7632,stop,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+            Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(this,CHANNEL):new Notification.Builder(this);
+            b.setSmallIcon(android.R.drawable.ic_media_play).setContentTitle("سكينة — رمضان")
+                    .setContentText(playing?"يعمل في الخلفية":"متوقف مؤقتًا")
+                    .setOngoing(true).setOnlyAlertOnce(true)
+                    .addAction(playing?android.R.drawable.ic_media_pause:android.R.drawable.ic_media_play,
+                            playing?"إيقاف مؤقت":"استكمال",toggleAction)
+                    .addAction(android.R.drawable.ic_menu_close_clear_cancel,"إيقاف",stopAction);
+            NotificationManager nm=getSystemService(NotificationManager.class);if(nm!=null)nm.notify(ID,b.build());
+        }catch(Exception error){android.util.Log.w("ZadRamadan","Could not update Ramadan audio notification",error);}
+    }
+
     private void createChannel(){
         if(Build.VERSION.SDK_INT>=26){NotificationManager nm=getSystemService(NotificationManager.class);
             NotificationChannel c=new NotificationChannel(CHANNEL,"تنبيهات رمضان الصوتية",NotificationManager.IMPORTANCE_HIGH);
@@ -109,7 +141,7 @@ public class RamadanAudioService extends Service {
             player=new MediaPlayer();player.setWakeMode(this,PowerManager.PARTIAL_WAKE_LOCK);
             player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
             player.setOnCompletionListener(mp->finish());player.setOnErrorListener((mp,w,e)->{finish();return true;});
-            player.setDataSource(file.getAbsolutePath());player.setOnPreparedListener(mp->{mp.setVolume(volume,volume);mp.start();});player.prepareAsync();
+            player.setDataSource(file.getAbsolutePath());player.setOnPreparedListener(mp->{mp.setVolume(volume,volume);mp.start();updatePlaybackNotification();});player.prepareAsync();
         }catch(Exception e){android.util.Log.e("ZadRamadan","Audio file playback failed",e);showMissingRecording();}
     }
     private void playBundledAdhan(){
