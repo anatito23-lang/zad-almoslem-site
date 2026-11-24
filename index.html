@@ -2255,7 +2255,7 @@ async function loadOldEgyptianReciters(){
  }else{
   box.innerHTML='<p class="small">تعذر الاتصال بمكتبة القراء. تحقق من الإنترنت ثم أعد المحاولة.</p>';
   renderZadQuranLibrary();
-  status.textContent='قائمة القراء جاهزة. اختر الشيخ ثم اختر أي سورة للاستماع أو التحميل.';
+  status.textContent='تعذر الوصول إلى مكتبة القراء الآن؛ لم نعرض أسماء غير موثقة.';
  }
  console.warn('MP3Quran reciter list failed',lastError);
 }
@@ -2484,7 +2484,7 @@ $('zadMoshafSelect').addEventListener('change',renderZadQuranTracks);
 $('zadSurahSearch').addEventListener('input',renderZadQuranTracks);
 $('zadReciterSearch').addEventListener('input',()=>{
  if(Object.keys(window.zadReciterData||{}).length)renderZadReciterCatalog(Object.values(window.zadReciterData||{}));
- else renderZadFallbackReciterCatalog();
+ else $('zadReciterCatalog').innerHTML='<p class="small">جارٍ تحميل قائمة القراء الحقيقية من MP3Quran...</p>';
  const query=normalizeReciterName($('zadReciterSearch').value);
  Array.from($('reciter').options).forEach(option=>{
   const match=!query||normalizeReciterName(option.textContent).includes(query);
