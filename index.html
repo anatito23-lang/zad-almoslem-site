@@ -2211,6 +2211,7 @@ async function loadOldEgyptianReciters(){
  const cacheKeys=['zad_mp3quran_reciters_multi_v4','zad_mp3quran_reciters_multi_v3','zad_mp3quran_reciters_multi_v2'];
  const select=$('reciter'),box=$('zadReciterCatalog'),status=$('quranStatus');
  renderZadFallbackReciterCatalog();
+ $('zadMoshafSelect').closest('label').hidden=true;
  function populate(all,fromCache){
   if(!Array.isArray(all)||!all.length)return false;
   select.querySelectorAll('option[data-api-reciter="1"]').forEach(option=>option.remove());
@@ -2226,6 +2227,7 @@ async function loadOldEgyptianReciters(){
    const option=document.createElement('option');option.value='api_'+rec.id;option.dataset.apiReciter='1';
    option.textContent=rec.name+(rec.moshaf.length>1?' — '+rec.moshaf.length+' روايات':'');select.append(option);
   });
+  $('zadMoshafSelect').closest('label').hidden=false;
   renderZadReciterCatalog(all);
   status.textContent=(fromCache?'قائمة محفوظة: ':'تم تحميل ')+all.length+' قارئًا. اختر الشيخ لعرض تلاواته.';
   renderZadQuranLibrary();
@@ -2398,6 +2400,7 @@ function renderZadFallbackReciterCatalog(){
   button.addEventListener('click',()=>{
    $('reciter').value=reader.key;
    $('reciter').dispatchEvent(new Event('change'));
+   $('zadMoshafSelect').closest('label').hidden=true;
    renderZadFallbackReciterCatalog();
    $('quranStatus').textContent='تم اختيار '+reader.name+'. اختر السورة ثم اضغط «استمع الآن».';
   });
