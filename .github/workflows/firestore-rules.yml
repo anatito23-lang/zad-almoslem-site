@@ -32,4 +32,4 @@ jobs:
           java-version: '21'
       - run: npm install
       - name: Test Firestore rules in the emulator
-        run: npx --yes firebase-tools emulators:exec --project demo-zad-almoslem --only firestore "npm test"
+        run: npx --yes firebase-tools emulators:exec --project demo-zad-almoslem --only firestore,storage "npm test"
