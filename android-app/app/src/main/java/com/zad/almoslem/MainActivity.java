@@ -23,8 +23,8 @@ public class MainActivity extends Activity {
     private static final String PREFS = "zad_reminders";
     private static final String[] PRAYERS = {"الفجر","الظهر","العصر","المغرب","العشاء"};
     private static final String[] KEYS = {"fajr","dhuhr","asr","maghrib","isha"};
-    private static final String[] VOICES = {"doha","basit","mustafa","husary","banna","rifaat","haram"};
-    private static final String[] VOICE_LABELS = {"أذان الدوحة","عبد الباسط عبد الصمد","مصطفى إسماعيل","محمود خليل الحصري","محمود علي البنا","الشيخ محمد رفعت","أذان الحرم المكي"};
+    private static final String[] VOICES = {"doha","basit","mustafa","husary","banna","rifaat","haram","mishary","shuaisha","nuinaa"};
+    private static final String[] VOICE_LABELS = {"أذان الدوحة","عبد الباسط عبد الصمد","مصطفى إسماعيل","محمود خليل الحصري","محمود علي البنا","الشيخ محمد رفعت","أذان الحرم المكي","مشاري راشد العفاسي","أبو العينين شعيشع","أحمد نعينع"};
     private static final String[] FAJR_VOICES = {"doha","fajr_cairo","fajr_haram"};
     private static final String[] FAJR_VOICE_LABELS = {"أذان الفجر — الدوحة","أذان الفجر — القاهرة","أذان الفجر — الحرم المكي"};
     private final Map<String, Spinner> voiceSpinners = new LinkedHashMap<>();
@@ -788,6 +788,9 @@ public class MainActivity extends Activity {
             case "haram": file="Ali_Ibn_Ahmad_Mala_1_-_Al_Haram_Al_Maki_(علي_بن_أحمد_ملا_-_الحرم_المكي).mp3"; break;
             case "fajr_cairo": file="Adhan_Fajr_Cairo_Egypt_(أذان_الفجر_القاهرة_مصر).mp3"; break;
             case "fajr_haram": file="Adhan_Fajr_Al_Haram_Al_Maki_(أذان_الفجر_الحرم_المكي).mp3"; break;
+            case "mishary": file="Mishary_Rashid_Alafasy_1_-_Kuwait_(مشاري_راشد_العفاسي_-_الكويت).mp3"; break;
+            case "shuaisha": file="Abul_Ainain_Shuaisha_-_Cairo_(أبو_العينين_شعيشع_-_القاهرة).mp3"; break;
+            case "nuinaa": file="Ahmed_Nuinaa_1_-_Egypt_(أحمد_نعينع_-_مصر).mp3"; break;
             default: throw new Exception("هذا الصوت غير متاح");
         }
         String encoded=java.net.URLEncoder.encode(file,"UTF-8").replace("+","%20").replace("%28","(").replace("%29",")");
