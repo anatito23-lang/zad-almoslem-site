@@ -47,7 +47,9 @@ public class PrayerDashboardActivity extends Activity {
         boolean timezoneOffsetChanged=currentOffset!=prefs.getInt("native_times_utc_offset",Integer.MIN_VALUE);
         if(missing||timezoneOffsetChanged||!today.equals(prefs.getString("native_times_date","")))updateButton.post(()->fetchTimes(updateButton));
     }
-    private TimeZone cityTimeZone(){String id=prefs.getString("native_city_timezone","");if(id.isEmpty()&&"Egypt".equals(prefs.getString("native_country","Egypt")))id="Africa/Cairo";if(id.isEmpty())id=TimeZone.getDefault().getID();return TimeZone.getTimeZone(id);}\n    private String todayInCityZone(){SimpleDateFormat f=new SimpleDateFormat("yyyyMMdd",Locale.US);f.setTimeZone(cityTimeZone());return f.format(new Date());}\n    private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
+    private TimeZone cityTimeZone(){String id=prefs.getString("native_city_timezone","");if(id.isEmpty()&&"Egypt".equals(prefs.getString("native_country","Egypt")))id="Africa/Cairo";if(id.isEmpty())id=TimeZone.getDefault().getID();return TimeZone.getTimeZone(id);}
+    private String todayInCityZone(){SimpleDateFormat f=new SimpleDateFormat("yyyyMMdd",Locale.US);f.setTimeZone(cityTimeZone());return f.format(new Date());}
+    private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
     private GradientDrawable bg(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
     private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.RIGHT);t.setTextDirection(View.TEXT_DIRECTION_RTL);if(bold)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
     private LinearLayout col(){LinearLayout l=new LinearLayout(this);l.setOrientation(LinearLayout.VERTICAL);return l;}
