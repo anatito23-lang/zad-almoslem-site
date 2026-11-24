@@ -32,6 +32,8 @@ public final class RemoteAudioAssets {
         Asset(String url, File target) { this.url = url; this.target = target; }
     }
 
+    public interface RefreshCallback { void onComplete(String message); }
+
     private RemoteAudioAssets() {}
 
     public static void watchConnectivity(Context context) {
@@ -53,6 +55,63 @@ public final class RemoteAudioAssets {
                 Log.w(TAG, "Could not register network callback", error);
             }
         }
+    }
+
+    public static void refreshWithResult(Context context, RefreshCallback callback) {
+        Context app = context.getApplicationContext();
+        FirebaseFirestore.getInstance().collection("app_audio_assets").document("ramadan").get()
+                .addOnSuccessListener(snapshot -> {
+                    if (!snapshot.exists() || snapshot.getData() == null) {
+                        postResult(callback, "لم تُنشر روابط تسجيلات رمضان بعد. ارفع التسجيل من لوحة الإدارة أولًا.");
+                        return;
+                    }
+                    ArrayList<Asset> pending = new ArrayList<>();
+                    SharedPreferences prefs = app.getSharedPreferences("zad_ramadan", Context.MODE_PRIVATE);
+                    Map<String, Object> values = snapshot.getData();
+                    String[] fields = {"cannonUrl", "iftarVoiceUrl", "suhoorVoiceUrl"};
+                    String[] keys = {"ramadan_iftar_cannon", "ramadan_iftar_voice", "ramadan_suhoor"};
+                    String[] files = {"iftar_cannon.mp3", "iftar_announcement.mp3", "suhoor_voice.mp3"};
+                    int configured = 0;
+                    for (int i = 0; i < fields.length; i++) {
+                        Object raw = values.get(fields[i]);
+                        if (raw instanceof String && ((String) raw).trim().startsWith("https://")) {
+                            configured++;
+                            syncOne(app, prefs, values, fields[i], keys[i], files[i], pending);
+                        }
+                    }
+                    if (configured == 0) {
+                        postResult(callback, "لم أجد روابط صوت صالحة في قاعدة البيانات. راجع نشر التسجيل من لوحة الإدارة.");
+                        return;
+                    }
+                    if (pending.isEmpty()) {
+                        postResult(callback, "✓ روابط التسجيلات محفوظة، والملفات موجودة بالفعل على الجهاز.");
+                        return;
+                    }
+                    WORKER.execute(() -> {
+                        int downloaded = 0;
+                        ArrayList<String> errors = new ArrayList<>();
+                        for (Asset asset : pending) {
+                            String error = download(asset.url, asset.target);
+                            if (error == null) downloaded++;
+                            else errors.add(asset.target.getName() + ": " + error);
+                        }
+                        StringBuilder message = new StringBuilder(downloaded + " من " + pending.size() + " تسجيلات تم تنزيلها بنجاح.");
+                        if (!errors.isEmpty()) {
+                            message.append(" تعذر تنزيل: ");
+                            for (int i = 0; i < errors.size(); i++) {
+                                if (i > 0) message.append("؛ ");
+                                message.append(errors.get(i));
+                            }
+                        }
+                        postResult(callback, message.toString());
+                    });
+                })
+                .addOnFailureListener(error -> postResult(callback,
+                        "تعذر قراءة روابط التسجيلات من قاعدة البيانات: " + error.getMessage()));
+    }
+
+    private static void postResult(RefreshCallback callback, String message) {
+        if (callback != null) new Handler(Looper.getMainLooper()).post(() -> callback.onComplete(message));
     }
 
     public static void refresh(Context context) { refresh(context, null); }
@@ -110,7 +169,7 @@ public final class RemoteAudioAssets {
         if (callback != null) new Handler(Looper.getMainLooper()).post(callback);
     }
 
-    private static void download(String url, File target) {
+    private static String download(String url, File target) {
         HttpURLConnection connection = null;
         File dir = target.getParentFile();
         File temp = new File(dir, target.getName() + ".part");
@@ -148,9 +207,11 @@ public final class RemoteAudioAssets {
             if (target.exists() && !target.delete()) throw new IllegalStateException("Cannot replace cached audio");
             if (!temp.renameTo(target)) throw new IllegalStateException("Cannot finalize cached audio");
             Log.i(TAG, "Downloaded " + target.getName() + " (" + target.length() + " bytes)");
+            return null;
         } catch (Exception error) {
             Log.w(TAG, "Audio download failed for " + target.getName() + ": " + error.getMessage(), error);
             if (temp.exists()) temp.delete();
+            return error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage();
         } finally {
             if (connection != null) connection.disconnect();
         }
