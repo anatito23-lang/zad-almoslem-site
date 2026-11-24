@@ -1109,7 +1109,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
   <section class="section" id="quran">
     <div class="section-head"><div><h2>🎧 زاد قرآن — المكتبة الصوتية</h2><p>مكتبة تلاوات واسعة؛ اختر القارئ والرواية والسورة، واستمع أو حمّل ملف MP3 على هاتفك.</p></div></div>
     <div class="card zad-quran-library">
-      <details class="zad-all-readers" open>
+      <details class="zad-all-readers">
         <summary class="zad-all-readers-summary"><span>۞ كل القراء</span><small>اضغط على اسم القارئ لعرض الروايات والسور</small></summary>
       <div class="zad-quran-search-grid">
         <label class="small">ابحث عن قارئ
@@ -2411,7 +2411,7 @@ function playZadQuranTrack(id){
  audio.src=track.url;audio.load();
  $('zadPlayerToggle').textContent='Ⅱ';
  $('quranStatus').textContent='جارٍ تشغيل سورة '+track.name+' بصوت '+track.artist+'.';
- audio.play().then(()=>$('quranStatus').textContent='يعمل الآن: سورة '+track.name+' — '+track.artist).catch(()=>{$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='تعذر بدء التلاوة. اضغط تشغيل مرة أخرى أو جرّب ملفًا آخر.';});
+ audio.play().then(()=>$('quranStatus').textContent='يعمل الآن: سورة '+track.name+' — '+track.artist).catch(()=>{$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='تعذر بدء الصوت من الرابط الحالي: '+track.url+' — جرّب فتح الرابط أو اختيار رواية أخرى.';});
 }
 window.playZadQuranTrack=playZadQuranTrack;
 function stepZadQuranTrack(delta){
@@ -2466,10 +2466,11 @@ zadAudio.addEventListener('ended',()=>{
  };
  replaceButton('zadPlayerToggle',async()=>{
   const queue=window.zadQuranQueue||[];
-  const selected=$id('zadPlayerSurah'),selectedId=selected&&selected.value?Number(selected.value):null;
+  const selected=document.getElementById('zadPlayerSurah'),selectedId=selected&&selected.value?Number(selected.value):null;
   const selectedIndex=queue.findIndex(track=>track.id===selectedId);
   if(selectedIndex<0){$('quranStatus').textContent='اختر القارئ والرواية والسورة من قوائم المشغل أولًا.';return;}
-  if(!audio.src||selectedIndex!==zadCurrentTrackIndex){playZadQuranTrack(selectedId);return;}
+  const selectedTrack=queue[selectedIndex];
+  if(!audio.getAttribute('src')||audio.getAttribute('src')!==selectedTrack.url){playZadQuranTrack(selectedId);return;}
   if(audio.paused){
    try{await audio.play();}catch(error){$('quranStatus').textContent='تعذر تشغيل الملف الصوتي. تحقق من الاتصال أو جرّب رواية أخرى، ثم أعد المحاولة.';}
   }else audio.pause();
@@ -3462,6 +3463,25 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
 .zad-search-results .small{margin:4px 2px;color:#53645c;font-size:13px}
 .zad-search-result{display:block;width:100%;text-align:right;padding:11px 13px;border:1px solid #d7dfd9;border-radius:11px;background:#fff;color:#173d32;font:600 14px/1.5 inherit;cursor:pointer}
 .zad-search-result:active{background:#eaf2ec}
+</style>
+<style id="zad-player-contrast-search-compact">
+.zad-player{background:#103f32!important;color:#fff!important;box-shadow:0 12px 28px rgba(8,35,27,.32)!important;border-color:#c9b77f!important}
+.zad-player:before{opacity:.025!important;background:repeating-radial-gradient(circle at 88% 10%,transparent 0 18px,#e7d7ae 19px 20px,transparent 21px 36px)!important}
+.zad-player-picker label{color:#fff!important;font-weight:800!important;text-shadow:0 1px 2px rgba(0,0,0,.45)!important}
+.zad-player-info,.zad-player-info strong,.zad-player-info span,.zad-player-info small,.zad-player-timeline{color:#fff!important;opacity:1!important;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.zad-player-live{color:#ffe29a!important}
+.zad-player-info strong{font-size:17px!important}
+.zad-player-info span:not(.zad-player-live){color:#f4f7f2!important}
+.zad-player-info small{color:#ffe4a7!important;white-space:normal!important}
+.zad-player-controls button{opacity:1!important}
+.zad-player-controls .zad-player-main{background:#f4d994!important;color:#123e31!important}
+.zad-quran-search-grid{grid-template-columns:1fr!important;gap:6px!important}
+.zad-quran-search-grid label{gap:3px!important;font-size:12px!important}
+.zad-quran-search-grid input{height:38px!important;padding:7px 10px!important;font-size:13px!important;border-radius:10px!important}
+.zad-all-readers{padding:9px!important;margin:7px 0 10px!important}
+.zad-all-readers-summary{padding:3px 1px!important;font-size:14px!important}
+.zad-search-results{gap:4px!important;margin:4px 0 7px!important}
+.zad-search-result{padding:7px 10px!important;font-size:12px!important}
 </style>
 <script id="zad-real-mp3quran-loader">
   (function(){
