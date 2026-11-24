@@ -120,10 +120,16 @@ public class MushafPageActivity extends Activity {
 
         Button tools = new Button(this);
         tools.setText("☰ أدوات المصحف");
-        tools.setTextSize(14);
+        tools.setTextSize(13);
         tools.setAllCaps(false);
-        toolbar.addView(tools, new LinearLayout.LayoutParams(-1, dp(40)));
+        toolbar.addView(tools, new LinearLayout.LayoutParams(0, dp(40), 1f));
         tools.setOnClickListener(v -> showMushafTools());
+        Button enlarge = new Button(this);
+        enlarge.setText("⛶ تكبير المصحف");
+        enlarge.setTextSize(13);
+        enlarge.setAllCaps(false);
+        toolbar.addView(enlarge, new LinearLayout.LayoutParams(0, dp(40), 1f));
+        enlarge.setOnClickListener(v -> toggleFullScreen());
         // Put the controls above the page and let the page consume all remaining
         // available height. A fixed pixel-derived height left a large blank area
         // on phones with different density and navigation-bar sizes.
