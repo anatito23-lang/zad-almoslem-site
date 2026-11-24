@@ -1137,7 +1137,18 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
       </div>
       <button class="btn light" id="ezzatShortcut" type="button" style="margin-top:10px;width:100%">استمع إلى تلاوات الشيخ عزت السيد راشد</button>
       <p id="quranStatus" class="small" role="status" style="margin:8px 0 12px">جارٍ تحميل قائمة القراء والتسجيلات الصوتية...</p>
-      <audio id="audio" controls class="hidden" preload="none" style="width:100%;margin-top:8px"></audio>
+      <div class="zad-player" id="zadPlayer">
+        <div class="zad-player-cover">۞<span>زاد قرآن</span></div>
+        <div class="zad-player-info"><strong id="zadPlayerTitle">اختر تلاوة من المكتبة</strong><span id="zadPlayerArtist">مكتبة القراء والتلاوات</span></div>
+        <div class="zad-player-timeline"><span id="zadPlayerCurrent">00:00</span><input id="zadPlayerSeek" type="range" min="0" max="1000" value="0" aria-label="موضع التشغيل"><span id="zadPlayerDuration">00:00</span></div>
+        <div class="zad-player-controls">
+          <button type="button" id="zadPlayerPrev" aria-label="التلاوة السابقة">⏮</button>
+          <button type="button" id="zadPlayerToggle" class="zad-player-main" aria-label="تشغيل">▶</button>
+          <button type="button" id="zadPlayerNext" aria-label="التلاوة التالية">⏭</button>
+          <a id="zadPlayerDownload" href="#" download="tilawa.mp3">⬇ تحميل MP3</a>
+        </div>
+        <audio id="audio" preload="none"></audio>
+      </div>
       <div id="shuaishaTracks" class="list hidden" style="margin-top:12px"></div>
       <div class="zad-quran-library-heading"><strong>التلاوات المتاحة</strong><span class="small">استمع أو حمّل كل سورة بصيغة MP3</span></div>
       <div id="zadQuranLibraryTracks" class="list" aria-live="polite"><p class="small">جارٍ تجهيز المكتبة الصوتية...</p></div>
@@ -1145,6 +1156,14 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
     </div>
   </section>
   <style id="zad-quran-library-style">
+    .zad-player{background:linear-gradient(145deg,#123c31,#1d5948);color:#fff;border-radius:20px;padding:18px;margin:14px 0;display:grid;grid-template-columns:76px 1fr;gap:12px;align-items:center;box-shadow:0 12px 28px #123c3122}
+    .zad-player-cover{width:76px;height:76px;border-radius:15px;background:linear-gradient(145deg,#d9c18b,#987844);color:#173d32;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:34px;font-weight:800}
+    .zad-player-cover span{font-size:10px}.zad-player-info{min-width:0;display:grid;gap:5px}.zad-player-info strong{font-size:15px;overflow-wrap:anywhere}.zad-player-info span{font-size:12px;color:#e4d8bd}
+    .zad-player-timeline{grid-column:1/-1;display:grid;grid-template-columns:42px 1fr 42px;gap:8px;align-items:center;font-size:11px;font-variant-numeric:tabular-nums}
+    .zad-player-timeline input{width:100%;accent-color:#d6bd82}.zad-player-controls{grid-column:1/-1;display:flex;justify-content:center;align-items:center;gap:15px;flex-wrap:wrap}
+    .zad-player-controls button{border:0;background:transparent;color:#fff;font-size:22px;padding:7px;cursor:pointer}.zad-player-controls .zad-player-main{background:#d6bd82;color:#173d32;border-radius:50%;width:48px;height:48px;font-size:20px}
+    .zad-player-controls a{background:#f4ead2;color:#173d32;text-decoration:none;border-radius:12px;padding:10px 14px;font-size:13px;font-weight:800}
+    #audio{display:none}
     .zad-quran-search-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
     .zad-quran-search-grid label{display:grid;gap:5px}
     .zad-quran-search-grid input,.zad-quran-search-grid select{width:100%;min-width:0;border:1px solid #dce5dc;border-radius:12px;padding:11px;background:#fff;color:#18332d;font:inherit}
@@ -2290,6 +2309,54 @@ $('showSurah').addEventListener('click',()=>{
 });
 loadSurahs();loadOldEgyptianReciters();
 
+let zadCurrentTrackIndex=-1;
+function zadFormatTime(seconds){
+ if(!Number.isFinite(seconds)||seconds<0)return '00:00';
+ const m=Math.floor(seconds/60),s=Math.floor(seconds%60);
+ return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function playZadQuranTrack(id){
+ const queue=window.zadQuranQueue||[],index=queue.findIndex(track=>track.id===Number(id));
+ if(index<0)return;
+ zadCurrentTrackIndex=index;
+ const track=queue[index],audio=$('audio');
+ audio.src=track.url;audio.load();
+ $('zadPlayerTitle').textContent='سورة '+track.name;
+ $('zadPlayerArtist').textContent=track.artist;
+ $('zadPlayerDownload').href=track.url;
+ $('zadPlayerDownload').download=String(track.id).padStart(3,'0')+'.mp3';
+ $('zadPlayerToggle').textContent='Ⅱ';
+ $('quranStatus').textContent='جارٍ تشغيل سورة '+track.name+' بصوت '+track.artist+'.';
+ audio.play().then(()=>$('quranStatus').textContent='يعمل الآن: سورة '+track.name+' — '+track.artist).catch(()=>{$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='اضغط زر التشغيل في المشغّل لبدء التلاوة.';});
+}
+function stepZadQuranTrack(delta){
+ const queue=window.zadQuranQueue||[];
+ if(!queue.length)return;
+ let index=zadCurrentTrackIndex;
+ if(index<0)index=delta>0?-1:0;
+ index=(index+delta+queue.length)%queue.length;
+ playZadQuranTrack(queue[index].id);
+}
+const zadAudio=$('audio');
+$('zadPlayerToggle').addEventListener('click',()=>{
+ if(!zadAudio.src){const first=(window.zadQuranQueue||[])[0];if(first)playZadQuranTrack(first.id);return;}
+ if(zadAudio.paused)zadAudio.play().then(()=>$('zadPlayerToggle').textContent='Ⅱ').catch(()=>{});
+ else{zadAudio.pause();$('zadPlayerToggle').textContent='▶';}
+});
+$('zadPlayerPrev').addEventListener('click',()=>stepZadQuranTrack(-1));
+$('zadPlayerNext').addEventListener('click',()=>stepZadQuranTrack(1));
+$('zadPlayerSeek').addEventListener('input',()=>{
+ if(Number.isFinite(zadAudio.duration)&&zadAudio.duration>0)zadAudio.currentTime=(Number($('zadPlayerSeek').value)/1000)*zadAudio.duration;
+});
+zadAudio.addEventListener('timeupdate',()=>{
+ $('zadPlayerCurrent').textContent=zadFormatTime(zadAudio.currentTime);
+ if(Number.isFinite(zadAudio.duration)&&zadAudio.duration>0)$('zadPlayerSeek').value=String(Math.round(zadAudio.currentTime/zadAudio.duration*1000));
+});
+zadAudio.addEventListener('loadedmetadata',()=>{$('zadPlayerDuration').textContent=zadFormatTime(zadAudio.duration);});
+zadAudio.addEventListener('play',()=>$('zadPlayerToggle').textContent='Ⅱ');
+zadAudio.addEventListener('pause',()=>$('zadPlayerToggle').textContent='▶');
+zadAudio.addEventListener('ended',()=>stepZadQuranTrack(1));
+
 // مكتبة زاد قرآن: فهرسة الروايات والسور مع تشغيل MP3 وروابط التحميل
 function renderZadQuranLibrary(){
  const list=$('zadQuranLibraryTracks'),moshafSelect=$('zadMoshafSelect'),reciterSelect=$('reciter');
@@ -2321,6 +2388,7 @@ function renderZadQuranTracks(){
   return !search||normalizeReciterName(name).includes(search)||String(id)===search;
  });
  const server=String(moshaf.server).endsWith('/')?String(moshaf.server):String(moshaf.server)+'/';
+ window.zadQuranQueue=filtered.map(id=>{const surah=surahs.find(item=>Number(item.number)===id);return {id,name:surah?surah.name:'السورة '+id,artist:reciter.name,url:server+String(id).padStart(3,'0')+'.mp3'};});
  list.replaceChildren();
  if(!filtered.length){const p=document.createElement('p');p.className='small';p.textContent='لا توجد سورة مطابقة للبحث في هذه الرواية.';list.append(p);return;}
  filtered.forEach(id=>{
@@ -2332,12 +2400,7 @@ function renderZadQuranTracks(){
   info.append(title,subtitle);
   const actions=document.createElement('div');actions.className='zad-quran-track-actions';
   const play=document.createElement('button');play.type='button';play.className='zad-quran-play';play.textContent='استمع ▶';
-  play.addEventListener('click',()=>{
-   const audio=$('audio');audio.pause();audio.src=url;audio.classList.remove('hidden');audio.load();
-   $('quranStatus').textContent='جارٍ تشغيل سورة '+name+' بصوت '+reciter.name+'.';
-   audio.play().then(()=>$('quranStatus').textContent='يعمل الآن: سورة '+name+' — '+reciter.name).catch(()=>$('quranStatus').textContent='اضغط زر التشغيل في مشغّل الصوت لبدء التلاوة.');
-   audio.scrollIntoView({behavior:'smooth',block:'nearest'});
-  });
+  play.addEventListener('click',()=>playZadQuranTrack(id));
   const download=document.createElement('a');download.className='zad-quran-download';download.href=url;download.setAttribute('download',String(id).padStart(3,'0')+'.mp3');download.textContent='تحميل MP3 ⬇';download.rel='noopener';
   actions.append(play,download);row.append(info,actions);list.append(row);
  });
