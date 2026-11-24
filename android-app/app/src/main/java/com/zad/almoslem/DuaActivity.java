@@ -21,6 +21,8 @@ public class DuaActivity extends Activity {
         {"الدعاء الثاني","الشيخ السيد عبدالعزيز السعدني","https://www.ourquraan.com/audio/prayers/Alsayed.Abdalzez.Alzadany%202.mp3","alsayed_abdalzez_2"},
         {"دعاء","الشيخ محمد الأسيوطي","https://www.ourquraan.com/audio/prayers/Muhammed.Alasyouty.mp3","muhammed_alasyouty"},
         {"دعاء الأنبياء","الشيخ صلاح الجمل","https://www.ourquraan.com/audio/prayers/Salah.Algamal%20-%20Doaa.Alanbiaa.mp3","salah_algamal"},
+        {"دعاء ليلة القدر","الشيخ محمد جبريل","https://www.ourquraan.com/audio/qdr/Muahmmed.Jebreel.mp3","muhammad_jibril"},
+        {"دعاء ختم القرآن","الشيخ هاني الرفاعي","https://www.ourquraan.com/audio/quraan-completion/Hany.Alrefaey.mp3","hany_alrefaey"},
         {"دعاء خاشع","الشيخ إدريس أبكر","https://www.ourquraan.com/audio/prayers/Edres.Abkar.mp3","edres_abkar"},
         {"دعاء","الشيخ خالد الجليل","https://www.ourquraan.com/audio/prayers/Khalid.Aljalil.mp3","khalid_aljalil"},
         {"دعاء","الشيخ ماهر المعيقلي","https://www.ourquraan.com/audio/prayers/Maher.M3equly.mp3","maher_m3equly"},
