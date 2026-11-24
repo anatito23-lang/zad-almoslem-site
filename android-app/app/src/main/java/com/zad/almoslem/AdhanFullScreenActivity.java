@@ -18,13 +18,17 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 public class AdhanFullScreenActivity extends Activity {
     private final String[] ids={"azhar_mosque_bg","kaaba_wallpaper","madinah_wallpaper","aqsa_wallpaper","quran_wallpaper"};
     private final Handler handler=new Handler(Looper.getMainLooper());
-    private TextView lyric, lyricHint;
+    private TextView lyricHint;
     private ProgressBar progress;
+    private ScrollView lyricScroll;
+    private LinearLayout phraseContainer;
+    private TextView[] phraseViews=new TextView[0];
     private int lastLine=-1;
     private final Runnable lyricTicker=new Runnable(){
         @Override public void run(){
@@ -90,32 +94,58 @@ public class AdhanFullScreenActivity extends Activity {
         return Math.min(count-1,selected);
     }
     private void updateLyrics(){
-        if(lyric==null)return;
+        if(phraseContainer==null)return;
         long duration=AdhanPlaybackService.uiDurationMs;
         long position=AdhanPlaybackService.uiPositionMs;
         boolean takbeer=AdhanPlaybackService.uiTakbeerOnly;
-        boolean fajr="الفجر".equals(getIntent().getStringExtra("prayer"));
-        String[] lines=phrases(fajr);
-        int line;
-        if(takbeer){
-            line=duration>0L && position*2L>=duration ? 1 : 0;
-            lyricHint.setText("تكبيرات الأذان");
-            if(progress!=null)progress.setProgress(duration>0?(int)Math.min(100L,position*100L/duration):0);
-            if(line!=lastLine){
-                lyric.setText(line==0?"الله أكبر، الله أكبر":"الله أكبر، الله أكبر");
-                lastLine=line;
+        String prayer=getIntent().getStringExtra("prayer");
+        boolean fajr=prayer!=null&&prayer.contains("الفجر");
+        String[] lines=takbeer
+                ?new String[]{"الله أكبر، الله أكبر","الله أكبر، الله أكبر"}
+                :phrases(fajr);
+        if(phraseViews.length!=lines.length){
+            phraseContainer.removeAllViews();
+            phraseViews=new TextView[lines.length];
+            for(int i=0;i<lines.length;i++){
+                TextView lineView=new TextView(this);
+                lineView.setText(lines[i]);
+                lineView.setTextSize(20);
+                lineView.setGravity(Gravity.CENTER);
+                lineView.setPadding(dp(10),dp(9),dp(10),dp(9));
+                lineView.setTextColor(0xFFD8D5CB);
+                lineView.setTypeface(Typeface.DEFAULT,Typeface.NORMAL);
+                phraseViews[i]=lineView;
+                phraseContainer.addView(lineView,new LinearLayout.LayoutParams(-1,-2));
             }
-            return;
+            lastLine=-1;
         }
-        line=activePhraseIndex(position,duration,lines.length);
-        if(line!=lastLine){
-            lyric.animate().cancel();
-            lyric.setAlpha(.35f);
-            lyric.setText(lines[line]);
-            lyric.animate().alpha(1f).setDuration(260L).start();
-            lastLine=line;
+        int active=takbeer?(duration>0L&&position*2L>=duration?1:0)
+                :activePhraseIndex(position,duration,lines.length);
+        for(int i=0;i<phraseViews.length;i++){
+            TextView item=phraseViews[i];
+            boolean selected=i==active;
+            item.setTextColor(selected?0xFFFFE3A0:0xFFE5E1D6);
+            item.setTypeface(Typeface.DEFAULT,selected?Typeface.BOLD:Typeface.NORMAL);
+            GradientDrawable bg=new GradientDrawable();
+            bg.setColor(selected?0x665E9B79:Color.TRANSPARENT);
+            bg.setCornerRadius(dp(12));
+            if(selected)bg.setStroke(dp(1),0x99E5C77A);
+            item.setBackground(bg);
+            item.setAlpha(selected?1f:.72f);
         }
-        if(lyricHint!=null)lyricHint.setText("كلمات الأذان مع صوت المؤذن");
+        if(active!=lastLine){
+            lastLine=active;
+            if(lyricScroll!=null&&active>=0&&active<phraseViews.length){
+                final TextView target=phraseViews[active];
+                lyricScroll.post(()->{
+                    if(target.getParent()==phraseContainer){
+                        int top=target.getTop()-dp(48);
+                        lyricScroll.smoothScrollTo(0,Math.max(0,top));
+                    }
+                });
+            }
+        }
+        if(lyricHint!=null)lyricHint.setText(takbeer?"تكبيرات الأذان":"كلمات الأذان كاملة — تمييز العبارة مع صوت المؤذن");
         if(progress!=null)progress.setProgress(duration>0?(int)Math.min(100L,position*100L/duration):0);
     }
 
@@ -170,37 +200,38 @@ public class AdhanFullScreenActivity extends Activity {
         LinearLayout lyricCard=new LinearLayout(this);
         lyricCard.setOrientation(LinearLayout.VERTICAL);
         lyricCard.setGravity(Gravity.CENTER);
-        lyricCard.setPadding(dp(18),dp(22),dp(18),dp(18));
+        lyricCard.setPadding(dp(14),dp(14),dp(14),dp(12));
         GradientDrawable cardBg=new GradientDrawable();
         cardBg.setColor(0xB20A3028);
         cardBg.setCornerRadius(dp(22));
         cardBg.setStroke(dp(1),0x88D5BD82);
         lyricCard.setBackground(cardBg);
-        LinearLayout.LayoutParams lyricCardParams=new LinearLayout.LayoutParams(-1,dp(178));
-        lyricCardParams.topMargin=dp(26);
+        LinearLayout.LayoutParams lyricCardParams=new LinearLayout.LayoutParams(-1,dp(280));
+        lyricCardParams.topMargin=dp(20);
 
         lyricHint=new TextView(this);
-        lyricHint.setText("كلمات الأذان مع صوت المؤذن");
+        lyricHint.setText("كلمات الأذان كاملة — تمييز العبارة مع صوت المؤذن");
         lyricHint.setTextColor(0xFFE6D8B5);
-        lyricHint.setTextSize(14);
+        lyricHint.setTextSize(13);
         lyricHint.setGravity(Gravity.CENTER);
+        lyricHint.setPadding(0,0,0,dp(8));
 
-        lyric=new TextView(this);
-        lyric.setText("الله أكبر، الله أكبر");
-        lyric.setTextColor(Color.WHITE);
-        lyric.setTextSize(29);
-        lyric.setTypeface(Typeface.DEFAULT,Typeface.BOLD);
-        lyric.setGravity(Gravity.CENTER);
-        lyric.setPadding(0,dp(18),0,dp(18));
+        lyricScroll=new ScrollView(this);
+        lyricScroll.setFillViewport(false);
+        lyricScroll.setVerticalScrollBarEnabled(false);
+        phraseContainer=new LinearLayout(this);
+        phraseContainer.setOrientation(LinearLayout.VERTICAL);
+        phraseContainer.setGravity(Gravity.CENTER_HORIZONTAL);
+        lyricScroll.addView(phraseContainer,new ScrollView.LayoutParams(-1,-2));
 
         progress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
         progress.setMax(100);
         progress.setProgress(0);
         LinearLayout.LayoutParams progressParams=new LinearLayout.LayoutParams(-1,dp(5));
-        progressParams.topMargin=dp(4);
+        progressParams.topMargin=dp(8);
 
         lyricCard.addView(lyricHint);
-        lyricCard.addView(lyric,new LinearLayout.LayoutParams(-1,dp(82)));
+        lyricCard.addView(lyricScroll,new LinearLayout.LayoutParams(-1,0,1f));
         lyricCard.addView(progress,progressParams);
 
         TextView footer=new TextView(this);
