@@ -31,6 +31,13 @@ public class DuaActivity extends Activity {
         AppThemeColors.apply(this);
         build();
         render(readCache());
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        // AppTabs reuses this Activity when the user returns to the tab. Refresh
+        // published content each time so new admin posts do not stay hidden
+        // behind an old offline cache.
         loadContent();
     }
 
