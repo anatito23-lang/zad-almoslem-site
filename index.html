@@ -1851,8 +1851,8 @@ async function loadPrayer(){
   const hijriText=`الهجري: ${h.weekday.ar} ${h.day} ${h.month.ar} ${h.year} هـ`;
   $('hijriDate').textContent=hijriText;
   try{localStorage.setItem(cacheKey,JSON.stringify({timings:t,hijri:hijriText,savedAt:Date.now()}));}catch(e){}
-  $('prayerStatus').textContent=`مواقيت ${settings.country} — ${cityNames[city]||city}`;
- }catch(e){if(window.zadPrayerTimings){$('prayerStatus').textContent='تعذر الاتصال — نعرض آخر مواقيت محفوظة لهذا اليوم';}else{$('prayerStatus').textContent='تعذر تحميل المواقيت. أعد المحاولة بعد التأكد من الاتصال.';$('hijriDate').textContent=hijriArabicLocal();}$('nextPrayerMessage').textContent='المواقيت المحفوظة تعمل حتى عودة الاتصال';}
+  $('prayerStatus').textContent=`مواقيت ${settings.country} — ${cityNames[city]||city}`;if(typeof updatePrayerCountdown==='function')updatePrayerCountdown();
+ }catch(e){if(!window.zadPrayerTimings&&typeof window.zadCalculatePrayerFallback==='function'){try{const fallback=await window.zadCalculatePrayerFallback(new Date());const t=fallback.data.timings;window.zadPrayerTimings=t;const names=[['الفجر','Fajr'],['الشروق','Sunrise'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']];$('prayerGrid').innerHTML=names.map(([n,k])=>`<div class="prayer"><div class="pname">${n}</div><div class="ptime">${fmtTime(t[k])}</div></div>`).join('');$('prayerStatus').textContent='مواقيت محسوبة محليًا — '+(cityNames[city]||city);$('hijriDate').textContent=hijriArabicLocal();if(typeof updatePrayerCountdown==='function')updatePrayerCountdown();return;}catch(fallbackError){console.warn('تعذر الحساب المحلي لمواقيت الصلاة',fallbackError);}}if(window.zadPrayerTimings){$('prayerStatus').textContent='تعذر الاتصال — نعرض آخر مواقيت محفوظة لهذا اليوم';}else{$('prayerStatus').textContent='تعذر تحميل المواقيت. أعد المحاولة بعد التأكد من الاتصال.';$('hijriDate').textContent=hijriArabicLocal();$('nextPrayerName').textContent='تعذر حساب الصلاة القادمة';$('nextPrayerAt').textContent='تحقق من المدينة أو اتصال الإنترنت';$('nextPrayerRemaining').textContent='--:--:--';}$('nextPrayerMessage').textContent='المواقيت المحفوظة تعمل حتى عودة الاتصال';}
 }
 restorePrayerSettings();
 $('loadPrayer').addEventListener('click',loadPrayer);
@@ -2735,7 +2735,7 @@ nasheedAudio.addEventListener('error',()=>{
 })();
 </script>
 <script>
-if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261122-full-site-admin-v3", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
+if ("serviceWorker" in navigator) { window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js?v=20261124-ramadan-tab-v1", {updateViaCache:"none"}).then(reg => reg.update()).catch(() => {})); }
 </script>
 
 
@@ -2744,7 +2744,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
   document.getElementById('mushafFloatingButton')?.style.setProperty('display','none','important');
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
-<script src="./app-pages.js?v=20261122-full-site-admin-v3"></script>
+<script src="./app-pages.js?v=20261124-ramadan-tab-v1"></script>
 <script id="zad-public-site-final-guard">
 (function(){
  if(!['anatito23-lang.github.io','zad-almoslem.github.io'].includes(location.hostname))return;
@@ -2980,6 +2980,6 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
 })();
 </script>
 
-<script src="./site-resilience.js?v=20261122-prayer-quran-fallback1"></script>
+<script src="./site-resilience.js?v=20261124-prayer-fallback-v2"></script>
 </body>
 </html>

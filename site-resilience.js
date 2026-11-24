@@ -179,6 +179,7 @@ document.getElementById('audio')?.addEventListener('error',()=>{
 });
 
 // If the first prayer request is blocked, retry through the local calculation fallback.
-setTimeout(()=>{if(!window.zadPrayerTimings&&typeof window.loadPrayer==='function'){forcePrayerFallback=true;window.loadPrayer();}},8500);
+window.zadCalculatePrayerFallback=fallbackPrayerData;
+setTimeout(()=>{if(!window.zadPrayerTimings&&typeof window.loadPrayer==='function'){forcePrayerFallback=true;window.loadPrayer();}},3000);
 
 })();

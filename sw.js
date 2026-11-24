@@ -1,5 +1,5 @@
-const CACHE_NAME = "zad-almoslem-shell-v125";
-const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg", "./daily-reminders.js?v=20261119native-diagnostics1", "./app-pages.js?v=20261122-full-site-admin-v3", "./website-cleanup.js?v=20261122-full-site-admin-v3", "./site-resilience.js?v=20261122-prayer-quran-fallback3"];
+const CACHE_NAME = "zad-almoslem-shell-v126";
+const APP_SHELL = ["./", "./index.html", "./ramadan.html", "./manifest.webmanifest", "./icon.svg", "./daily-reminders.js?v=20261119native-diagnostics1", "./app-pages.js?v=20261122-full-site-admin-v3", "./website-cleanup.js?v=20261122-full-site-admin-v3", "./site-resilience.js?v=20261122-prayer-quran-fallback3"];
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
@@ -42,7 +42,7 @@ self.addEventListener("fetch", event => {
     return;
   }
   if (url.origin !== self.location.origin) return;
-  const isAppDocument = request.mode === "navigate" || /\/(?:index\.html|app-pages\.js|daily-reminders\.js)$/.test(url.pathname);
+  const isAppDocument = request.mode === "navigate" || /\/(?:index\.html|ramadan\.html|app-pages\.js|daily-reminders\.js)$/.test(url.pathname);
   if (isAppDocument) {
     event.respondWith((async () => {
       try {
