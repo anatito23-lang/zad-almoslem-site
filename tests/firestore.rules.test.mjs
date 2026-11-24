@@ -128,9 +128,6 @@ test("only allowlisted public collections expose published content", async () =>
 
 test("Storage allows public reads but only the admin can upload approved bounded files", async () => {
   const publicStorage = env.unauthenticatedContext().storage();
-  const publicTarget = storageRef(publicStorage, "library-books/book/public.pdf");
-  await assertFails(getBytes(publicTarget));
-
   const otherStorage = env.authenticatedContext("not-the-admin").storage();
   await assertFails(uploadBytes(
     storageRef(otherStorage, "library-books/book/attacker.pdf"),
@@ -142,6 +139,7 @@ test("Storage allows public reads but only the admin can upload approved bounded
   const valid = storageRef(adminStorage, "library-books/book/admin.pdf");
   await assertSucceeds(uploadBytes(valid, new Uint8Array([1, 2, 3]), { contentType: "application/pdf" }));
   await assertSucceeds(getBytes(storageRef(publicStorage, "library-books/book/admin.pdf")));
+  await assertFails(deleteObject(storageRef(otherStorage, "library-books/book/admin.pdf")));
   await assertFails(uploadBytes(
     storageRef(adminStorage, "library-books/book/mismatch.exe"),
     new Uint8Array([1, 2, 3]),
