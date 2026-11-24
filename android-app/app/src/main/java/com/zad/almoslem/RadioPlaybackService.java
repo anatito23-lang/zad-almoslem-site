@@ -74,6 +74,7 @@ public class RadioPlaybackService extends Service {
                     if (shouldPlay) resumeAfterAdhan = true;
                     else resumeAfterAdhan = false;
                 } else if (shouldPlay) {
+                    if (player.getPlaybackState() == Player.STATE_ENDED) player.seekToDefaultPosition();
                     resumeOnAudioFocusGain = true;
                     if (requestAudioFocus()) {
                         resumeOnAudioFocusGain = false;
@@ -334,6 +335,7 @@ public class RadioPlaybackService extends Service {
             player.addListener(new Player.Listener() {
                 @Override public void onPlaybackStateChanged(int state) {
                     if (state == Player.STATE_ENDED && "quran_ayah".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""))) {
+                        if(player!=null)player.pause();
                         getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_paused",true).apply();
                         updateRadioNotification(playbackTitle(),"انتهت الآية الصوتية"); return;
                     }
