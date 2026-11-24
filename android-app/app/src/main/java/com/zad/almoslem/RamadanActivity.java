@@ -256,8 +256,8 @@ public class RamadanActivity extends Activity {
             // Re-read the admin-published URLs whenever the Ramadan tab returns
             // to the foreground, then refresh the local audio cache.
             if(audioStatus!=null)audioStatus.setText("جارٍ تحديث تسجيلات رمضان المنشورة من لوحة الإدارة…");
-            RemoteAudioAssets.refresh(this,()->{
-                if(audioStatus!=null)audioStatus.setText("تم فحص روابط تسجيلات رمضان. جرّب التسجيل المطلوب من الأزرار أدناه.");
+            RemoteAudioAssets.refreshWithResult(this,message->{
+                if(audioStatus!=null)audioStatus.setText(message);
             });
         }
     }
