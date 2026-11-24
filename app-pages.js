@@ -114,9 +114,18 @@ if(!nativeApp || publicWebsite){
    ramadan.remove();
    const entry=document.createElement('section');entry.className='section ramadan-entry';
    entry.innerHTML='<div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;background:linear-gradient(120deg,#0b3b30,#176149);color:#fff"><div><h2 style="margin:0;color:#f4dfac">🌙 زادك في شهر رمضان</h2><p style="margin:5px 0 0;color:#edf5ef">افتح صفحة رمضان المستقلة: ورد القرآن، الصيام والقيام، متتبع الصيام، وفقه الصيام.</p></div><a class="btn" href="./ramadan.html" style="text-decoration:none;white-space:nowrap">دخول تبويب رمضان ←</a></div>';
-   main?.insertBefore(entry,main.firstChild);
+   main?.append(entry);
   }
  }
+if(publicWebsite){
+ const prayerSection=document.getElementById('prayer');
+ const prayerSettings=document.querySelector('.prayer-location-settings');
+ const prayerGrid=document.getElementById('prayerGrid');
+ if(prayerSection&&main){
+  if(prayerSettings&&prayerGrid&&!prayerSection.contains(prayerSettings))prayerSection.insertBefore(prayerSettings,prayerGrid);
+  main.insertBefore(prayerSection,main.firstElementChild);
+ }
+}
 const prayerTitle=document.querySelector('#prayer .section-head p');if(prayerTitle)prayerTitle.textContent='مواقيت الصلوات الخمس والوقت المتبقي للصلاة القادمة';
  const quick=document.createElement('nav');quick.className='zad-web-shortcuts';quick.setAttribute('aria-label','اختصارات الموقع');
  quick.innerHTML=[['#prayer','🕌','مواقيت الصلاة'],['#quran','📖','استماع القرآن'],['#hadith-dua','ﷺ','الحديث الشريف'],['#azkar','☀️','الأذكار'],['#mushaf','۞','المصحف'],['#radio-egypt','📻','الإذاعة'],['#ruqyah','🤲','الرقية'],['#books-library','📚','المكتبة الإسلامية'],['#khutbahs','🎙️','الخطب'],['./ramadan.html','🌙','رمضان']].map(([href,ico,label])=>{const target=onRamadanPage&&href.startsWith('#')?'./index.html'+href:href;return '<a href="'+target+'"><span>'+ico+'</span><b>'+label+'</b></a>';}).join('');
