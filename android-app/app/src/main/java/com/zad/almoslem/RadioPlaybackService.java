@@ -14,7 +14,7 @@ import android.net.Uri;
 import android.os.*;
 import java.io.IOException;
 import java.io.File;
-import java.util.HashSet;
+import java.util.HashSet;\nimport java.util.ArrayList;\nimport org.json.JSONArray;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class RadioPlaybackService extends Service {
     private boolean resumeOnAudioFocusGain;
     private final AudioManager.OnAudioFocusChangeListener audioFocusListener = this::handleAudioFocusChange;
     private final Handler playbackHandler = new Handler(Looper.getMainLooper());
-    private Runnable startupTimeout;
+    private Runnable startupTimeout;\n    private ArrayList<String> duaQueueUrls = new ArrayList<>();\n    private ArrayList<String> duaQueueTitles = new ArrayList<>();\n    private ArrayList<String> duaQueueLocalPaths = new ArrayList<>();
 
     @Override public int onStartCommand(Intent intent,int flags,int startId) {
         // A newly selected stream must also remain paused if playback is started during adhan.
@@ -57,7 +57,7 @@ public class RadioPlaybackService extends Service {
             intent.putExtra("kind", saved.getString("active_kind", "radio"));
             intent.putExtra("label", saved.getString("radio_title", "زاد وطمأنينة"));
             intent.putExtra("station", saved.getString("radio_station", ""));
-            intent.putExtra("local_path", saved.getString("stream_local_path", null));
+            intent.putExtra("local_path", saved.getString("stream_local_path", null));\n            restoreDuaQueueExtras(intent, saved);
         }
         if(intent!=null && (ACTION_TOGGLE.equals(intent.getAction()) || ACTION_PAUSE.equals(intent.getAction()) || ACTION_RESUME.equals(intent.getAction()))) {
             if (player != null) {
@@ -89,7 +89,7 @@ public class RadioPlaybackService extends Service {
                     restore.putExtra("kind", saved.getString("active_kind", "radio"));
                     restore.putExtra("label", saved.getString("radio_title", "زاد وطمأنينة"));
                     restore.putExtra("station", saved.getString("radio_station", ""));
-                    restore.putExtra("local_path", saved.getString("stream_local_path", null));
+                    restore.putExtra("local_path", saved.getString("stream_local_path", null));\n                    restoreDuaQueueExtras(restore, saved);
                     intent = restore;
                 } else return START_NOT_STICKY;
             }
@@ -121,22 +121,51 @@ public class RadioPlaybackService extends Service {
         boolean allowedQuran=false,allowedLocal=false,allowedAudio=false;
         File localFile=null;
         String localPath=intent==null?null:intent.getStringExtra("local_path");
-        try {
-            if("quran".equals(kind)&&localPath!=null){
-                File quranDir=new File(getFilesDir(),"quran").getCanonicalFile();
-                localFile=new File(localPath).getCanonicalFile();
-                allowedLocal=localFile.isFile()&&localFile.length()>10000&&localFile.getPath().startsWith(quranDir.getPath()+File.separator);
+        if("dua".equals(kind)){
+            ArrayList<String> incomingUrls=intent==null?null:intent.getStringArrayListExtra("queue_urls");
+            ArrayList<String> incomingTitles=intent==null?null:intent.getStringArrayListExtra("queue_titles");
+            ArrayList<String> incomingPaths=intent==null?null:intent.getStringArrayListExtra("queue_local_paths");
+            duaQueueUrls=new ArrayList<>();duaQueueTitles=new ArrayList<>();duaQueueLocalPaths=new ArrayList<>();
+            if(incomingUrls!=null&&!incomingUrls.isEmpty()){
+                duaQueueUrls.addAll(incomingUrls);
+                for(int i=0;i<duaQueueUrls.size();i++){
+                    duaQueueTitles.add(incomingTitles!=null&&i<incomingTitles.size()?incomingTitles.get(i):"دعاء");
+                    duaQueueLocalPaths.add(incomingPaths!=null&&i<incomingPaths.size()?incomingPaths.get(i):"");
+                }
+            }else if(url!=null){duaQueueUrls.add(url);duaQueueTitles.add(intent==null?"الأدعية الصوتية":intent.getStringExtra("label"));duaQueueLocalPaths.add(localPath==null?"":localPath);}
+            allowedAudio=!duaQueueUrls.isEmpty();
+            for(int i=0;i<duaQueueUrls.size();i++){
+                String path=i<duaQueueLocalPaths.size()?duaQueueLocalPaths.get(i):"";
+                if(path!=null&&!path.isEmpty()&&isAllowedDuaLocalFile(path)){
+                    if(i==0){try{localFile=new File(path).getCanonicalFile();allowedLocal=true;}catch(Exception ignored){}}
+                    continue;
+                }
+                if(!isAllowedDuaUrl(duaQueueUrls.get(i)))allowedAudio=false;
             }
-            if(!allowedLocal){
-                android.net.Uri parsed=android.net.Uri.parse(url);
-                String host=parsed.getHost();
-                allowedQuran="quran".equals(kind) && "https".equalsIgnoreCase(parsed.getScheme()) && host!=null &&
-                    (host.equalsIgnoreCase("mp3quran.net") || host.toLowerCase().endsWith(".mp3quran.net") || host.equalsIgnoreCase("mp3quran.com") || host.toLowerCase().endsWith(".mp3quran.com"));
-                allowedAudio=("nasheed".equals(kind)||"ruqyah".equals(kind)) && "https".equalsIgnoreCase(parsed.getScheme()) && host!=null &&
-                    (host.equalsIgnoreCase("archive.org") || host.toLowerCase().endsWith(".archive.org") || host.toLowerCase().endsWith(".us.archive.org") ||
-                     host.equalsIgnoreCase("nourelquran.com") || host.equalsIgnoreCase("www.nourelquran.com"));
+            if(allowedAudio){
+                android.content.SharedPreferences.Editor qe=getSharedPreferences("zad_audio",MODE_PRIVATE).edit();
+                qe.putString("dua_queue_urls",new JSONArray(duaQueueUrls).toString())
+                  .putString("dua_queue_titles",new JSONArray(duaQueueTitles).toString())
+                  .putString("dua_queue_local_paths",new JSONArray(duaQueueLocalPaths).toString()).apply();
             }
-        } catch(Exception ignored) {}
+        }else{
+            try {
+                if("quran".equals(kind)&&localPath!=null){
+                    File quranDir=new File(getFilesDir(),"quran").getCanonicalFile();
+                    localFile=new File(localPath).getCanonicalFile();
+                    allowedLocal=localFile.isFile()&&localFile.length()>10000&&localFile.getPath().startsWith(quranDir.getPath()+File.separator);
+                }
+                if(!allowedLocal){
+                    android.net.Uri parsed=android.net.Uri.parse(url);
+                    String host=parsed.getHost();
+                    allowedQuran="quran".equals(kind) && "https".equalsIgnoreCase(parsed.getScheme()) && host!=null &&
+                        (host.equalsIgnoreCase("mp3quran.net") || host.toLowerCase().endsWith(".mp3quran.net") || host.equalsIgnoreCase("mp3quran.com") || host.toLowerCase().endsWith(".mp3quran.com"));
+                    allowedAudio=("nasheed".equals(kind)||"ruqyah".equals(kind)) && "https".equalsIgnoreCase(parsed.getScheme()) && host!=null &&
+                        (host.equalsIgnoreCase("archive.org") || host.toLowerCase().endsWith(".archive.org") || host.toLowerCase().endsWith(".us.archive.org") ||
+                         host.equalsIgnoreCase("nourelquran.com") || host.equalsIgnoreCase("www.nourelquran.com"));
+                }
+            } catch(Exception ignored) {}
+        }
         if(!allowedRadio && !allowedQuran && !allowedLocal && !allowedAudio) { stopRadio(); return START_NOT_STICKY; }
         String label=intent==null?null:intent.getStringExtra("label");
         getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",true).putBoolean("radio_ready",false).remove("radio_last_error").putString("active_kind",kind==null?"radio":kind).putString("radio_station",intent==null?"":intent.getStringExtra("station"))
@@ -146,6 +175,28 @@ public class RadioPlaybackService extends Service {
         QuranHomeWidget.refreshAll(this);
         play(url,allowedLocal?localFile:null);
         return START_STICKY;
+    }
+    private boolean isAllowedDuaUrl(String address){
+        try{android.net.Uri parsed=android.net.Uri.parse(address);String host=parsed.getHost();
+            if(!"https".equalsIgnoreCase(parsed.getScheme())||host==null)return false;
+            return host.equalsIgnoreCase("ourquraan.com")||host.equalsIgnoreCase("www.ourquraan.com")||
+                   host.equalsIgnoreCase("archive.org")||host.toLowerCase().endsWith(".archive.org");
+        }catch(Exception e){return false;}
+    }
+    private boolean isAllowedDuaLocalFile(String path){
+        try{File candidate=new File(path).getCanonicalFile();File duaDir=new File(getFilesDir(),"duas").getCanonicalFile();
+            File sharawy=new File(new File(getFilesDir(),"reminders"),"dua.mp3").getCanonicalFile();
+            return candidate.isFile()&&candidate.length()>10000&&(candidate.getPath().startsWith(duaDir.getPath()+File.separator)||candidate.equals(sharawy));
+        }catch(Exception e){return false;}
+    }
+    private void restoreDuaQueueExtras(Intent target,android.content.SharedPreferences saved){
+        if(!"dua".equals(saved.getString("active_kind","")))return;
+        target.putStringArrayListExtra("queue_urls",readStringArray(saved.getString("dua_queue_urls","[]")));
+        target.putStringArrayListExtra("queue_titles",readStringArray(saved.getString("dua_queue_titles","[]")));
+        target.putStringArrayListExtra("queue_local_paths",readStringArray(saved.getString("dua_queue_local_paths","[]")));
+    }
+    private ArrayList<String> readStringArray(String raw){
+        ArrayList<String> result=new ArrayList<>();try{JSONArray a=new JSONArray(raw);for(int i=0;i<a.length();i++)result.add(a.optString(i,""));}catch(Exception ignored){}return result;
     }
     // Continue sequential Quran playback when the current surah reaches its end.
     private void playNextQuranSurah() {
@@ -280,7 +331,7 @@ public class RadioPlaybackService extends Service {
                         playNextQuranSurah();
                         return;
                     }
-                    if (state == Player.STATE_BUFFERING) {
+                    if(state==Player.STATE_ENDED && "dua".equals(getSharedPreferences("zad_audio",MODE_PRIVATE).getString("active_kind",""))){\n                        getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_paused",true).apply();\n                        updateRadioNotification(playbackTitle(),"اكتملت قائمة الأدعية");return;\n                    }\n                    if (state == Player.STATE_BUFFERING) {
                         getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_ready", false).apply();
                         updateRadioNotification(playbackTitle(), "جارٍ الاتصال بالبث...");
                     } else if (state == Player.STATE_READY) {
@@ -300,7 +351,7 @@ public class RadioPlaybackService extends Service {
                         }
                     }
                 }
-                @Override public void onIsPlayingChanged(boolean isPlaying) {
+                @Override public void onMediaItemTransition(MediaItem mediaItem,int reason){\n                    if(mediaItem!=null && "dua".equals(getSharedPreferences("zad_audio",MODE_PRIVATE).getString("active_kind",""))){\n                        String title=mediaItem.mediaId==null?"الأدعية الصوتية":mediaItem.mediaId;\n                        getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putString("radio_title",title).apply();\n                        updateRadioNotification(title,"انتقل التشغيل تلقائيًا إلى الدعاء التالي");\n                    }\n                }\n                @Override public void onIsPlayingChanged(boolean isPlaying) {
                     setPlaybackWakeLock(isPlaying);
                     getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_paused", player == null || !player.getPlayWhenReady()).apply();
                     updateRadioNotification(playbackTitle(), isPlaying ? "يعمل الآن" : "متوقف مؤقتًا");
@@ -330,7 +381,19 @@ public class RadioPlaybackService extends Service {
             MediaItem item = hls
                     ? new MediaItem.Builder().setUri(source).setMimeType(androidx.media3.common.MimeTypes.APPLICATION_M3U8).build()
                     : MediaItem.fromUri(source);
-            player.setMediaItem(item);
+            if("dua".equals(activeKind)&&!duaQueueUrls.isEmpty()){
+                ArrayList<MediaItem> playlist=new ArrayList<>();
+                for(int i=0;i<duaQueueUrls.size();i++){
+                    String itemPath=i<duaQueueLocalPaths.size()?duaQueueLocalPaths.get(i):"";
+                    File itemLocal=itemPath==null||itemPath.isEmpty()?null:(isAllowedDuaLocalFile(itemPath)?new File(itemPath):null);
+                    Uri itemUri=itemLocal!=null?Uri.fromFile(itemLocal):Uri.parse(duaQueueUrls.get(i));
+                    String itemTitle=i<duaQueueTitles.size()?duaQueueTitles.get(i):"دعاء";
+                    playlist.add(new MediaItem.Builder().setUri(itemUri).setMediaId(itemTitle).build());
+                }
+                player.setMediaItems(playlist,0,0L);
+            }else{
+                player.setMediaItem(item);
+            }
             player.prepare();
             if (adhanPauseRequested) {
                 positionBeforeAdhan = 0L;
@@ -536,7 +599,7 @@ public class RadioPlaybackService extends Service {
             player = null;
         }
     }
-    private void stopRadio() { adhanPauseRequested=false; pausedForAdhan=false; resumeAfterAdhan=false; getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").putString("radio_title","").remove("stream_url").remove("stream_local_path")
+    private void stopRadio() { adhanPauseRequested=false; pausedForAdhan=false; resumeAfterAdhan=false; getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_ready",false).putString("active_kind","").putString("radio_title","").remove("stream_url").remove("stream_local_path").remove("dua_queue_urls").remove("dua_queue_titles").remove("dua_queue_local_paths")
         .putBoolean("radio_paused",false).putBoolean("waiting_for_audio_focus",false).apply(); QuranHomeWidget.refreshAll(this); releasePlayer(); stopForeground(true); stopSelf(); }
     @Override public void onTaskRemoved(Intent rootIntent) {
         // Keep the user-started media session visible when the app is swiped from Recents.
