@@ -47,7 +47,8 @@ button,input,select{font:inherit}button{cursor:pointer}
 .row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.row>*{flex:1}
 input,select{border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px 12px;color:var(--ink);min-width:0}
 .small{font-size:12px;color:var(--muted)}.muted{color:var(--muted)}
-.quran-tools{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(220px,1.2fr) minmax(170px,1fr) auto;gap:9px;margin-bottom:13px}\n@media(max-width:700px){.quran-tools{grid-template-columns:1fr}}
+.quran-tools{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(220px,1.2fr) minmax(170px,1fr) auto;gap:9px;margin-bottom:13px}
+@media(max-width:700px){.quran-tools{grid-template-columns:1fr}}
 .surah-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 13px;background:#fff;border:1px solid var(--line);border-radius:12px;color:var(--green);text-decoration:none}.surah-item strong{font-size:13px;color:#987b43}
 .ayah{background:linear-gradient(135deg,#f7f4e9,#fff);border:1px solid #eee5cd;border-radius:17px;padding:18px;margin-top:12px}
 .ayah-text{font-family:"Times New Roman",serif;font-size:25px;line-height:2.1;text-align:center;color:#24483d}
@@ -252,7 +253,8 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 #mushafSwipeArea{width:100%!important;max-width:900px!important;min-height:0!important;height:auto!important;overflow:visible!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:4px!important;box-sizing:border-box!important}
 #mushafPageImage{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:none!important;object-fit:contain!important;object-position:center!important;margin:0 auto!important}
 @media(max-width:600px){#mushafSwipeArea{padding:2px!important}#mushafPageImage{width:100%!important;height:auto!important;max-height:none!important}}
-\n
+
+
 /* Friday khutbah archive: one compact card per sermon */
 #khutbahs .khutbah-list{display:flex;flex-direction:column;gap:12px}
 #khutbahs .khutbah-card{display:block;width:100%;margin:0;padding:18px}
@@ -2430,7 +2432,8 @@ function updateBookCategoryCount(root,category){
     const open=document.createElement("button");open.type="button";open.className="btn green";open.textContent="اقرأ داخل الموقع";open.addEventListener("click",()=>{const modal=document.getElementById("bookReaderModal"),frame=document.getElementById("bookReaderFrame"),title=document.getElementById("bookReaderTitle");if(modal&&frame){title.textContent=b.title||"قارئ الكتب";frame.src=url;modal.classList.add("active");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden"}});card.append(open);
    }
    const download=document.createElement("a");download.className="btn light";download.href=url;download.target="_blank";download.rel="noopener";download.textContent="فتح / تحميل الكتاب";download.style.display="inline-block";download.style.marginTop="8px";card.append(download);
-   ensureBookCategoryGrid(grid,b.category||"other").append(card);\n   updateBookCategoryCount(grid,bookCategoryMeta[b.category]?b.category:"other");
+   ensureBookCategoryGrid(grid,b.category||"other").append(card);
+   updateBookCategoryCount(grid,bookCategoryMeta[b.category]?b.category:"other");
   }
   if(status)status.textContent=books.length?"الكتب المضافة من لوحة الإدارة: "+books.length:"لا توجد كتب جديدة منشورة حاليًا.";
   const filters=[...document.querySelectorAll("[data-book-filter]")];
@@ -2438,7 +2441,8 @@ function updateBookCategoryCount(root,category){
  }catch(e){if(status)status.textContent="تعذر تحميل الكتب الجديدة حاليًا."}
 })();
 
-// فتح قارئ الكتب داخل الموقع\nconst bookModal=$('bookReaderModal');
+// فتح قارئ الكتب داخل الموقع
+const bookModal=$('bookReaderModal');
 const bookFrame=$('bookReaderFrame');
 function closeBookReader(){
  if(!bookModal)return;
