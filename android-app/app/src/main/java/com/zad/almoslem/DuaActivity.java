@@ -16,6 +16,11 @@ import java.net.URL;
 
 public class DuaActivity extends Activity {
     private static final String[][] ITEMS = {
+        {"دعاء ما بعد الأذان","الشيخ محمد متولي الشعراوي","https://archive.org/download/Islamic_Tape-258_uP_bY_mUSLEm/sharawy_doaa_24.mp3","sharawy_after_adhan"},
+        {"الدعاء الأول","الشيخ السيد عبدالعزيز السعدني","https://www.ourquraan.com/audio/prayers/Alsayed.Abdalzez.Alzadany%201.mp3","alsayed_abdalzez_1"},
+        {"الدعاء الثاني","الشيخ السيد عبدالعزيز السعدني","https://www.ourquraan.com/audio/prayers/Alsayed.Abdalzez.Alzadany%202.mp3","alsayed_abdalzez_2"},
+        {"دعاء","الشيخ محمد الأسيوطي","https://www.ourquraan.com/audio/prayers/Muhammed.Alasyouty.mp3","muhammed_alasyouty"},
+        {"دعاء الأنبياء","الشيخ صلاح الجمل","https://www.ourquraan.com/audio/prayers/Salah.Algamal%20-%20Doaa.Alanbiaa.mp3","salah_algamal"},
         {"دعاء خاشع","الشيخ إدريس أبكر","https://www.ourquraan.com/audio/prayers/Edres.Abkar.mp3","edres_abkar"},
         {"دعاء","الشيخ خالد الجليل","https://www.ourquraan.com/audio/prayers/Khalid.Aljalil.mp3","khalid_aljalil"},
         {"دعاء","الشيخ ماهر المعيقلي","https://www.ourquraan.com/audio/prayers/Maher.M3equly.mp3","maher_m3equly"},
@@ -62,17 +67,29 @@ public class DuaActivity extends Activity {
         Button download=new Button(this);download.setText(local.isFile()&&local.length()>10000?"✓ تم التنزيل":"⬇ تنزيل");style(download,0xFF9A773F);
         actions.addView(play,new LinearLayout.LayoutParams(0,dp(46),1f));actions.addView(download,new LinearLayout.LayoutParams(0,dp(46),1f));
         card.addView(actions);
-        play.setOnClickListener(v->playItem(item,local));
+        play.setOnClickListener(v->playQueue(index));
         download.setOnClickListener(v->downloadItem(item,download));
         LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(10);root.addView(card,lp);
     }
-    private File fileFor(String key){File dir=new File(getFilesDir(),"duas");return new File(dir,key+".mp3");}
-    private void playItem(String[] item,File local){
+    private File fileFor(String key){
+        if("sharawy_after_adhan".equals(key))return new File(new File(getFilesDir(),"reminders"),"dua.mp3");
+        File dir=new File(getFilesDir(),"duas");return new File(dir,key+".mp3");
+    }
+    private void playQueue(int startIndex){
+        java.util.ArrayList<String> urls=new java.util.ArrayList<>();
+        java.util.ArrayList<String> titles=new java.util.ArrayList<>();
+        java.util.ArrayList<String> localPaths=new java.util.ArrayList<>();
+        for(int i=Math.max(0,startIndex);i<ITEMS.length;i++){
+            String[] item=ITEMS[i];File local=fileFor(item[3]);
+            urls.add(item[2]);titles.add(item[0]+" — "+item[1]);
+            localPaths.add(local.isFile()&&local.length()>10000?local.getAbsolutePath():"");
+        }
+        if(urls.isEmpty())return;
         Intent intent=new Intent(this,RadioPlaybackService.class);intent.setAction(RadioPlaybackService.ACTION_PLAY);
-        intent.putExtra("url",item[2]);intent.putExtra("kind","dua");intent.putExtra("label",item[0]+" — "+item[1]);
-        if(local.isFile()&&local.length()>10000)intent.putExtra("local_path",local.getAbsolutePath());
-        try{if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);if(status!=null)status.setText("يتم تشغيل "+item[0]+" بصوت "+item[1]);}
-        catch(Exception e){if(status!=null)status.setText("تعذر بدء التشغيل: "+e.getMessage());}
+        intent.putExtra("url",urls.get(0));intent.putExtra("kind","dua");intent.putExtra("label",titles.get(0));
+        intent.putStringArrayListExtra("queue_urls",urls);intent.putStringArrayListExtra("queue_titles",titles);intent.putStringArrayListExtra("queue_local_paths",localPaths);
+        try{if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);if(status!=null)status.setText("بدأت قائمة الأدعية. سينتقل التشغيل تلقائيًا إلى الدعاء التالي.");}
+        catch(Exception ex){if(status!=null)status.setText("تعذر بدء التشغيل: "+ex.getMessage());}
     }
     private void downloadItem(String[] item,Button button){
         File target=fileFor(item[3]);if(target.isFile()&&target.length()>10000){button.setText("✓ تم التنزيل");return;}
