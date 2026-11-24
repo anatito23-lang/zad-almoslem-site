@@ -65,7 +65,14 @@ public class RamadanAudioService extends Service {
         updatePlaybackNotification();
         stopCurrent();
         SharedPreferences prefs=getSharedPreferences("zad_ramadan",MODE_PRIVATE);
-        if ("ramadan_suhoor_nasheed_preview".equals(key) || "ramadan_suhoor".equals(key)) {
+        if ("ramadan_suhoor_nasheed_preview".equals(key)) {
+            String previewUrl=intent==null?"":intent.getStringExtra("nasheed_url");
+            if(previewUrl.startsWith("https://")){
+                playRemote(previewUrl,volume);
+                return START_NOT_STICKY;
+            }
+        }
+        if ("ramadan_suhoor".equals(key)) {
             String nasheedUrl=prefs.getString("suhoor_nasheed_url","");
             if(nasheedUrl.startsWith("https://")){
                 playRemote(nasheedUrl,volume);
