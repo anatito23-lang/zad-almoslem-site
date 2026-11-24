@@ -138,26 +138,25 @@ public class DuaActivity extends Activity {
 
     private void loadContent() {
         FirebaseFirestore.getInstance().collection("site_content")
-            .whereEqualTo("sectionId", SECTION_ID)
-            .whereEqualTo("published", true)
             .get()
             .addOnSuccessListener(snapshot -> {
                 ArrayList<JSONObject> items = new ArrayList<>();
                 for (QueryDocumentSnapshot doc : snapshot) {
+                    if (!SECTION_ID.equals(doc.getString("sectionId"))) continue;
+                    if (!Boolean.TRUE.equals(doc.getBoolean("published"))) continue;
                     JSONObject row = new JSONObject();
                     try {
                         row.put("title", doc.getString("title") == null ? "نفحة إيمانية" : doc.getString("title"));
                         row.put("body", doc.getString("body") == null ? "" : doc.getString("body"));
                         row.put("source", doc.getString("source") == null ? "" : doc.getString("source"));
-                        row.put("order", doc.getLong("order") == null ? 0 : doc.getLong("order"));
-                        row.put("createdAt", doc.getLong("createdAt") == null ? 0 : doc.getLong("createdAt"));
+                        Long orderValue = doc.getLong("order");
+                        row.put("order", orderValue == null ? 0 : orderValue);
                     } catch (Exception ignored) {}
                     items.add(row);
                 }
-                Collections.sort(items, (a, b) -> {
-                    int order = Integer.compare(a.optInt("order", 0), b.optInt("order", 0));
-                    return order != 0 ? order : Long.compare(b.optLong("createdAt", 0), a.optLong("createdAt", 0));
-                });
+                Collections.sort(items, (a, b) ->
+                    Integer.compare(a.optInt("order", 0), b.optInt("order", 0))
+                );
                 JSONArray rows = new JSONArray();
                 for (JSONObject item : items) rows.put(item);
                 saveCache(rows);
