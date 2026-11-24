@@ -33,7 +33,12 @@ public class DuaActivity extends Activity {
         {"دعاء","الشيخ ناصر القطامي","https://www.ourquraan.com/audio/prayers/Naser.Alqutamy%201.mp3","naser_alqutamy"},
         {"دعاء","الشيخ ياسر الدوسري","https://www.ourquraan.com/audio/prayers/Yaser.Aldosy.mp3","yaser_aldosy"},
         {"الدعاء","القارئ أحمد البطل","https://www.ourquraan.com/audio/prayers/Ahmed.Albatal.mp3","ahmed_albatal"},
-        {"دعاء","الشيخ مشاري راشد العفاسي","https://www.ourquraan.com/audio/prayers/Mashary.Rashed.mp3","mashary_rashed"}
+        {"دعاء","الشيخ مشاري راشد العفاسي","https://www.ourquraan.com/audio/prayers/Mashary.Rashed.mp3","mashary_rashed"},
+        {"دعاء من الحرم المكي","الشيخ بندر بليلة","https://www.ourquraan.com/audio/prayers/Shikh.Bander.mp3","bandar_baleelah"},
+        {"دعاء","الشيخ عبدالرشيد بن الشيخ علي صوفي","https://www.ourquraan.com/audio/prayers/Abdalrashed.Ali.Alsofy.mp3","abdalrashed_sofi"},
+        {"دعاء","الشيخ سلمان العتيبي","https://www.ourquraan.com/audio/prayers/Soliman.Alotiby.mp3","salman_alotaibi"},
+        {"دعاء","الشيخ أحمد أبا الخيل","https://www.ourquraan.com/audio/prayers/Ahmed.Aba-Alkhail.mp3","ahmed_abaalkhail"},
+        {"دعاء","الشيخ أحمد سعود","https://www.ourquraan.com/audio/prayers/Ahmed.Saoud.mp3","ahmed_saoud"}
     };
     private TextView status, selectedSheikh, nowPlaying;
     private LinearLayout root, tracksBox, playerCard;
@@ -117,7 +122,7 @@ public class DuaActivity extends Activity {
         try{
             if(Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);
             selectedIndex=index;playerCard.setVisibility(View.VISIBLE);nowPlaying.setText(item[0]+"\n"+item[1]);
-            pauseButton.setText("⏸ إيقاف مؤقت");status.setText("بدأ تشغيل الدعاء المختار. يمكنك الخروج وسيستمر الصوت في الخلفية.");
+            pauseButton.setText("⏸ إيقاف مؤقت");status.setText("بدأ تشغيل الدعاء المختار. يمكنك الخروج وسيستمر الصوت في الخلفية، وتحكم فيه من الإشعار.");
         }catch(Exception ex){status.setText("تعذر بدء التشغيل: "+ex.getMessage());}
     }
     private void sendPlayback(String action){
