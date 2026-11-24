@@ -91,6 +91,15 @@ public class RamadanActivity extends Activity {
         addDua(adhkar,"ذكر يسير","سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر.");
         addDua(adhkar,"الصلاة على النبي ﷺ","اللهم صل وسلم وبارك على نبينا محمد.");
 
+        LinearLayout ramadanGuide=card("زادك في رمضان — آيات وأحاديث وأعمال");
+        addDua(ramadanGuide,"رمضان شهر القرآن","قال الله تعالى: ﴿شَهْرُ رَمَضَانَ الَّذِي أُنْزِلَ فِيهِ الْقُرْآنُ هُدًى لِلنَّاسِ وَبَيِّنَاتٍ مِنَ الْهُدَى وَالْفُرْقَانِ﴾ [البقرة: 185].");
+        addDua(ramadanGuide,"فضل الصيام","قال رسول الله ﷺ: «من صام رمضان إيمانًا واحتسابًا غُفر له ما تقدم من ذنبه» متفق عليه.");
+        addDua(ramadanGuide,"فضل قيام ليلة القدر","قال رسول الله ﷺ: «من قام ليلة القدر إيمانًا واحتسابًا غُفر له ما تقدم من ذنبه» متفق عليه.");
+        addDua(ramadanGuide,"اغتنم أيام الشهر","اجعل لك وردًا ثابتًا من القرآن، واحفظ لسانك، وأكثر من الدعاء والاستغفار، وتفقد المحتاجين، وأحسن إلى أهلك وجيرانك.");
+        addDua(ramadanGuide,"لا تؤجل التوبة","ابدأ من اليوم؛ فالعبرة ليست بكثرة ما نخطط له، وإنما بصدق العمل والثبات عليه.");
+        Button guideMushaf=new Button(this);guideMushaf.setText("📖  انتقل إلى المصحف");ramadanGuide.addView(guideMushaf,full());
+        guideMushaf.setOnClickListener(v->{Intent open=new Intent(this,MushafPageActivity.class);open.putExtra("page",getSharedPreferences("zad_mushaf",MODE_PRIVATE).getInt("last_page",1));startActivity(open);});
+
         LinearLayout settings=card("إعدادات الشهر والتنبيهات");
         Switch enabled=new Switch(this);enabled.setText("تفعيل تنبيهات رمضان");enabled.setTextColor(AppThemeColors.text(this));enabled.setChecked(prefs.getBoolean("enabled",false));settings.addView(enabled,full());
         TextView startLabel=text("",13,AppThemeColors.muted(this),false);settings.addView(startLabel,full());
