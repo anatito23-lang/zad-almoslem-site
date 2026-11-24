@@ -2333,7 +2333,7 @@ $('showSurah').addEventListener('click',()=>{
   $('audio').play().catch(()=>{$('quranStatus').textContent+=' اضغط زر التشغيل في مشغل الصوت.';});
  }
 });
-loadSurahs();loadOldEgyptianReciters();
+loadSurahs();
 
 let zadCurrentTrackIndex=-1;
 function zadFormatTime(seconds){
@@ -3353,6 +3353,8 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
    }
    function chooseReader(r){
     selected=r;
+    window.zadReciterData=window.zadReciterData||{};
+    window.zadReciterData['mp3real_'+r.id]=r;
     const oldSelect=$id('reciter');
     if(oldSelect){
      let opt=Array.from(oldSelect.options).find(o=>o.value==='mp3real_'+r.id);
@@ -3454,6 +3456,8 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
       if(!successfulLists||!arr.length)throw new Error('لم تصل بيانات قراء صالحة من المصدر');
       arr.forEach(r=>delete r._sourceLanguage);
       reciters=arr;
+      window.zadReciterData=window.zadReciterData||{};
+      arr.forEach(r=>{window.zadReciterData['mp3real_'+r.id]=r;});
       try{localStorage.setItem('zad_mp3quran_real_catalog_v2',JSON.stringify(arr));localStorage.setItem('zad_mp3quran_real_catalog_v1',JSON.stringify(arr));}catch(e){}
       drawReaders();
       const reads=arr.reduce((sum,r)=>sum+(r.moshaf||[]).length,0);
