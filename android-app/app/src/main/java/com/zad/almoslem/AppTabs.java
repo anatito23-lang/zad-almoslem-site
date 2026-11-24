@@ -23,10 +23,10 @@ import org.json.JSONObject;
 
 public final class AppTabs {
     private static final String PREFS = "zad_app_navigation";
-    private static final String[] KEYS = {"more","ramadan","tasbeeh","calendar","radio","quran","mushaf","home"};
-    private static final String[] LABELS = {"المزيد","رمضان","السبحة","التقويم","الإذاعة","استماع","المصحف","الرئيسية"};
-    private static final String[] ICONS = {"⋯","☾","۞","▦","◉","♫","📖","⌂"};
-    private static final Class<?>[] SCREENS = {MoreActivity.class,RamadanActivity.class,TasbeehActivity.class,CalendarActivity.class,RadioActivity.class,QuranListeningActivity.class,MushafPageActivity.class,HomeActivity.class};
+    private static final String[] KEYS = {"more","ramadan","dua","tasbeeh","calendar","radio","quran","mushaf","home"};
+    private static final String[] LABELS = {"المزيد","رمضان","دعاء","السبحة","التقويم","الإذاعة","استماع","المصحف","الرئيسية"};
+    private static final String[] ICONS = {"⋯","☾","🤲","۞","▦","◉","♫","📖","⌂"};
+    private static final Class<?>[] SCREENS = {MoreActivity.class,RamadanActivity.class,DuaActivity.class,TasbeehActivity.class,CalendarActivity.class,RadioActivity.class,QuranListeningActivity.class,MushafPageActivity.class,HomeActivity.class};
     private AppTabs() {}
 
     public static View wrap(Activity a, View content, String active) {
@@ -153,7 +153,7 @@ public final class AppTabs {
                 if(!contentSection&&key.matches("[A-Za-z][A-Za-z0-9_-]{0,59}"))rows.add(row);
             }
         }
-        JSONObject home=new JSONObject();
+        boolean hasDua=false;for(JSONObject row:rows)if("dua".equals(row.optString("key",""))){hasDua=true;break;}\n        if(!hasDua){JSONObject dua=new JSONObject();try{dua.put("key","dua");dua.put("label","دعاء");dua.put("icon","🤲");dua.put("visible",true);}catch(Exception ignored){}rows.add(dua);}\n        JSONObject home=new JSONObject();
         try{home.put("key","home");home.put("label","الرئيسية");home.put("icon","⌂");home.put("visible",true);}catch(Exception ignored){}
         homeSlot.addView(makeTabItem(a,home,active,li),new LinearLayout.LayoutParams(-1,-1));
         JSONObject more=new JSONObject();
@@ -406,7 +406,7 @@ public final class AppTabs {
     private static String emojiForTab(String key, String fallback) {
         switch (key) {
             case "mushaf": return "📖";
-            case "ramadan": return "🏮";
+            case "ramadan": return "🏮";\n            case "dua": return "🤲";
             case "radio": return "🎙️";
             case "quran": case "listening": case "listen": return "🎧";
             case "calendar": return "📆";
@@ -419,7 +419,7 @@ public final class AppTabs {
     }
 
     private static String localizedLabel(int index,int lang,String fallback) {
-        String[][] names={{"المزيد","More","Plus","مزید","Daha Fazla"},{"رمضان","Ramadan","Ramadan","رمضان","Ramazan"},{"السبحة","Tasbeeh","Tasbih","تسبیح","Tesbih"},{"النتيجة","Calendar","Calendrier","کیلنڈر","Takvim"},{"الإذاعة","Radio","Radio","ریڈیو","Radyo"},{"استماع","Listen","Écoute","تلاوت","Dinle"},{"المصحف","Mushaf","Coran","قرآن","Mushaf"},{"الرئيسية","Home","Accueil","مرکزی","Ana Sayfa"}};
+        String[][] names={{"المزيد","More","Plus","مزید","Daha Fazla"},{"رمضان","Ramadan","Ramadan","رمضان","Ramazan"},{"دعاء","Dua","Prière","دعا","Dua"},{"السبحة","Tasbeeh","Tasbih","تسبیح","Tesbih"},{"النتيجة","Calendar","Calendrier","کیلنڈر","Takvim"},{"الإذاعة","Radio","Radio","ریڈیو","Radyo"},{"استماع","Listen","Écoute","تلاوت","Dinle"},{"المصحف","Mushaf","Coran","قرآن","Mushaf"},{"الرئيسية","Home","Accueil","مرکزی","Ana Sayfa"}};
         return index>=0&&index<names.length?names[index][lang]:fallback;
     }
     private static int indexOf(String key){for(int i=0;i<KEYS.length;i++)if(KEYS[i].equals(key))return i;return -1;}
