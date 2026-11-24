@@ -413,7 +413,7 @@ const reminderSettings=$('daily-reminder-settings');
 if(reminderSettings)$('zadReminderSettingsSlot').append(reminderSettings);
 const themeNames=['light','dark','blue','sand'];
 function applySettings(){
- const theme=localStorage.getItem('zad_theme')||'light';
+ const theme=publicWebsite?'light':(localStorage.getItem('zad_theme')||'light');
  document.body.classList.remove('zad-theme-dark','zad-theme-blue','zad-theme-sand');
  if(theme!=='light')document.body.classList.add('zad-theme-'+theme);
  document.querySelectorAll('[data-zad-theme]').forEach(b=>b.classList.toggle('active',b.dataset.zadTheme===theme));
