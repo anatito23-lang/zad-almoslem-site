@@ -1167,6 +1167,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
     .zad-player-cover span{color:#173d32!important}
     .zad-reciter-select-wrap{display:none!important}
     .zad-reciter-catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:9px;margin:14px 0}
+    .zad-reciter-catalog:empty{display:none}
     .zad-reciter-card{display:flex;align-items:center;gap:9px;text-align:right;width:100%;min-height:62px;padding:10px;border:1px solid #dfe8e2;border-radius:13px;background:#fff;color:#18332d;cursor:pointer}
     .zad-reciter-card:active,.zad-reciter-card.active{border-color:#155b49;background:#edf5ef}
     .zad-reciter-avatar{flex:0 0 38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#e8dfc9;color:#174638;font-size:20px}
@@ -2252,8 +2253,9 @@ async function loadOldEgyptianReciters(){
  if(cached.length){
   status.textContent='نعرض القائمة المحفوظة على جهازك؛ تعذر تحديثها من المصدر الآن.';
  }else{
-  box.innerHTML='<div class="notice"><b>تعذر الاتصال بمصدر أسماء القراء.</b><p>جرّب زر إعادة تحميل القائمة بعد التأكد من الإنترنت.</p></div>';
-  status.textContent='لم يصل الموقع إلى خدمة القراء. لم نعرض أسماء أو روابط صوتية غير مؤكدة.';
+  renderZadFallbackReciterCatalog();
+  const moshafSelect=$('zadMoshafSelect');moshafSelect.innerHTML='<option value="">اختر القارئ ثم السورة</option>';
+  status.textContent='القائمة الاحتياطية جاهزة: اختر قارئًا، ثم اختر السورة واضغط استمع الآن.';
  }
  console.warn('MP3Quran reciter list failed',lastError);
 }
@@ -2377,6 +2379,31 @@ zadAudio.addEventListener('pause',()=>$('zadPlayerToggle').textContent='▶');
 zadAudio.addEventListener('ended',()=>stepZadQuranTrack(1));
 
 // مكتبة زاد قرآن: فهرسة الروايات والسور مع تشغيل MP3 وروابط التحميل
+function renderZadFallbackReciterCatalog(){
+ const box=$('zadReciterCatalog');if(!box)return;
+ const query=normalizeReciterName($('zadReciterSearch')?.value||'');
+ const readers=[
+  {key:'basit',name:'عبد الباسط عبد الصمد',edition:'ar.abdulbasit',detail:'القارئ المصري'},
+  {key:'minshawi',name:'محمد صديق المنشاوي',edition:'ar.minshawi',detail:'القارئ المصري'},
+  {key:'husary',name:'محمود خليل الحصري',edition:'ar.husary',detail:'القارئ المصري'}
+ ].filter(r=>!query||normalizeReciterName(r.name).includes(query));
+ box.replaceChildren();
+ readers.forEach(reader=>{
+  const button=document.createElement('button');button.type='button';button.className='zad-reciter-card'+($('reciter')?.value===reader.key?' active':'');
+  const avatar=document.createElement('span');avatar.className='zad-reciter-avatar';avatar.textContent='♫';
+  const info=document.createElement('span'),name=document.createElement('strong'),meta=document.createElement('small');
+  name.textContent=reader.name;meta.textContent=reader.detail;
+  info.append(name,meta);button.append(avatar,info);
+  button.addEventListener('click',()=>{
+   $('reciter').value=reader.key;
+   $('reciter').dispatchEvent(new Event('change'));
+   renderZadFallbackReciterCatalog();
+   $('quranStatus').textContent='تم اختيار '+reader.name+'. اختر السورة ثم اضغط «استمع الآن».';
+  });
+  box.append(button);
+ });
+ if(!readers.length){const p=document.createElement('p');p.className='small';p.textContent='لا يوجد قارئ بهذا الاسم في القائمة الاحتياطية.';box.append(p);}
+}
 function renderZadReciterCatalog(rows){
  const box=$('zadReciterCatalog');if(!box)return;
  const query=normalizeReciterName($('zadReciterSearch')?.value||'');
@@ -2466,7 +2493,8 @@ $('reciter').addEventListener('change',()=>renderZadQuranLibrary());
 $('zadMoshafSelect').addEventListener('change',renderZadQuranTracks);
 $('zadSurahSearch').addEventListener('input',renderZadQuranTracks);
 $('zadReciterSearch').addEventListener('input',()=>{
- renderZadReciterCatalog(Object.values(window.zadReciterData||{}));
+ if(Object.keys(window.zadReciterData||{}).length)renderZadReciterCatalog(Object.values(window.zadReciterData||{}));
+ else renderZadFallbackReciterCatalog();
  const query=normalizeReciterName($('zadReciterSearch').value);
  Array.from($('reciter').options).forEach(option=>{
   const match=!query||normalizeReciterName(option.textContent).includes(query);
