@@ -37,7 +37,7 @@ public class RamadanActivity extends Activity {
         c.addView(text(title,18,AppThemeColors.text(this),true),full());return c;
     }
     @Override public void onCreate(Bundle state){
-        super.onCreate(state);AppThemeColors.apply(this);prefs=getSharedPreferences("zad_ramadan",MODE_PRIVATE);build();
+        super.onCreate(state);AppThemeColors.apply(this);prefs=getSharedPreferences("zad_ramadan",MODE_PRIVATE);RemoteAudioAssets.refresh(this);build();
     }
     private void build(){
         ScrollView scroll=new ScrollView(this);root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);
@@ -156,11 +156,17 @@ public class RamadanActivity extends Activity {
         });
 
         playButton.setOnClickListener(v->{
-            Intent play=new Intent(this,RamadanAudioService.class);
-            play.putExtra("key",key);
-            play.putExtra("volume",prefs.getInt(volumeKey,100)/100f);
-            try{if(android.os.Build.VERSION.SDK_INT>=26)startForegroundService(play);else startService(play);}
-            catch(Exception e){Toast.makeText(this,"تعذر تشغيل الصوت: "+e.getMessage(),Toast.LENGTH_LONG).show();}
+            playButton.setEnabled(false);
+            playButton.setText("جارٍ التحقق من التسجيل…");
+            RemoteAudioAssets.refresh(this,()->runOnUiThread(()->{
+                playButton.setEnabled(true);
+                playButton.setText(label);
+                Intent play=new Intent(this,RamadanAudioService.class);
+                play.putExtra("key",key);
+                play.putExtra("volume",prefs.getInt(volumeKey,100)/100f);
+                try{if(android.os.Build.VERSION.SDK_INT>=26)startForegroundService(play);else startService(play);}
+                catch(Exception e){Toast.makeText(this,"تعذر تشغيل الصوت: "+e.getMessage(),Toast.LENGTH_LONG).show();}
+            }));
         });
         stopButton.setOnClickListener(v->{
             Intent stop=new Intent(this,RamadanAudioService.class);stop.putExtra("key","stop");
