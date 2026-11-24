@@ -3503,7 +3503,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
     const m=(rec&&rec.moshaf||[])[Number(playerMoshaf.value)];
     if(!rec||!m||!m.server){window.zadQuranQueue=[];playerSurah.disabled=true;fillSelect(playerSurah,[],'اختر الرواية أولًا');return;}
     const ids=String(m.surah_list||'').split(',').map(Number).filter(n=>n>=1&&n<=114);
-    const server=String(m.server).replace(/\\/$/,'')+'/';
+    const rawServer=String(m.server);const server=rawServer.endsWith('/')?rawServer:rawServer+'/';
     window.zadQuranQueue=ids.map(n=>({id:n,name:names[n-1],artist:rec.name,url:server+String(n).padStart(3,'0')+'.mp3'}));
     fillSelect(playerSurah,ids.map(n=>({value:n,label:n+'. '+names[n-1]})),'اختر السورة');
     playerSurah.disabled=!ids.length;
