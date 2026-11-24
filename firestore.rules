@@ -6,52 +6,71 @@ service cloud.firestore {
         && request.auth.uid == "5UkeBQyyGGZcICXULT9LUD0S4lt2";
     }
 
-    // Preserve the existing publication behavior, including legacy Arabic flags.
-    // Missing publication fields are treated as unpublished.
     function isPublished() {
       return resource.data.get('published', false) == true
         || resource.data.get('تم النشر', false) == true
         || resource.data.get('النشر', false) == true;
     }
 
-    match /waqafat/app_navigation_config {
-      allow get: if true;
+    // Public content is explicitly allowlisted. All other collections are private by default.
+    match /azkar/{documentId} {
+      allow read: if isAdmin() || isPublished();
+      allow write: if isAdmin();
+    }
+    match /duas/{documentId} {
+      allow read: if isAdmin() || isPublished();
+      allow write: if isAdmin();
+    }
+    match /khutbahs/{documentId} {
+      allow read: if isAdmin() || isPublished();
+      allow write: if isAdmin();
+    }
+    match /site_content/{documentId} {
+      allow read: if isAdmin() || isPublished();
+      allow write: if isAdmin();
+    }
+    match /app_content/{documentId} {
+      allow read: if isAdmin() || isPublished();
+      allow write: if isAdmin();
+    }
+    match /library_books/{documentId} {
+      allow read: if isAdmin() || isPublished();
+      allow write: if isAdmin();
+    }
+    match /site_custom_content/{documentId} {
+      allow read: if isAdmin() || isPublished();
+      allow write: if isAdmin();
+    }
+    match /waqafat/{documentId} {
+      allow get: if documentId == "app_navigation_config"
+        || documentId == "custom_tabs_public"
+        || (documentId != "custom_tabs_config" && isAdmin())
+        || (documentId != "custom_tabs_config" && isPublished());
+      allow list: if isAdmin() || isPublished();
+      allow create, update, delete: if isAdmin();
+    }
+    match /site_custom_tabs/{documentId} {
+      allow get: if documentId == "site_custom_tabs_public" || isAdmin();
       allow list: if isAdmin();
       allow create, update, delete: if isAdmin();
     }
-
-    match /site_custom_tabs/site_custom_tabs_config {
-      allow read, write: if isAdmin();
-    }
-    match /site_custom_tabs/site_custom_tabs_public {
-      allow get: if true;
+    match /site_settings/{documentId} {
+      allow get: if documentId == "website" || isAdmin();
       allow list: if isAdmin();
       allow create, update, delete: if isAdmin();
     }
-
-    // Full configuration (including hidden tabs) is private.
-    match /waqafat/custom_tabs_config {
-      allow read, write: if isAdmin();
-    }
-
-    // Visitors can read only the public navigation projection.
-    match /waqafat/custom_tabs_public {
-      allow get: if true;
-      allow list: if isAdmin();
-      allow create, update, delete: if isAdmin();
-    }
-
-    // Keep the existing app contract for every top-level content collection:
-    // public reads are allowed only for published documents; writes are admin-only.
-    // This avoids breaking any current or future collection used by the app.
     match /app_audio_assets/{documentId} {
       allow get: if true;
       allow list: if isAdmin();
       allow create, update, delete: if isAdmin();
     }
-    match /{collection}/{documentId} {
-      allow read: if isAdmin() || isPublished();
-      allow create, update, delete: if isAdmin();
+    match /app_admin_config/{documentId} {
+      allow read, write: if isAdmin();
+    }
+
+    // No catch-all public read rule: unknown and future collections stay private.
+    match /{document=**} {
+      allow read, write: if isAdmin();
     }
   }
 }
