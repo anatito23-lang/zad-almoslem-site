@@ -1984,6 +1984,7 @@ async function loadSurahs(){
  try{
   const r=await zadFetchTimeout('https://api.alquran.cloud/v1/surah',{},8000);if(!r.ok)throw new Error('surah list');const j=await r.json();if(!j.data||!Array.isArray(j.data))throw new Error('surah data');surahs=j.data;
   $('surahSelect').innerHTML=surahs.map(s=>`<option value="${s.number}">${s.number}. ${s.name}</option>`).join('');
+  if(typeof renderZadQuranLibrary==='function')renderZadQuranLibrary();
  }catch(e){$('surahSelect').innerHTML='<option value="">تعذر تحميل السور</option>';}
 }
 let mushafSurahs=[];
