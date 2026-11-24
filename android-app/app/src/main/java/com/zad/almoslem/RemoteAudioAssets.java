@@ -39,16 +39,24 @@ public final class RemoteAudioAssets {
         }
     }
     public static void refresh(Context context){
+        refresh(context,null);
+    }
+    public static void refresh(Context context,Runnable onComplete){
         Context app=context.getApplicationContext();
         FirebaseFirestore.getInstance().collection("app_audio_assets").document("ramadan").get()
           .addOnSuccessListener(snapshot->{
-            if(!snapshot.exists()||snapshot.getData()==null)return;
-            SharedPreferences prefs=app.getSharedPreferences("zad_ramadan",Context.MODE_PRIVATE);
-            Map<String,Object> values=snapshot.getData();
-            syncOne(app,prefs,values,"cannonUrl","ramadan_iftar_cannon","iftar_cannon.mp3");
-            syncOne(app,prefs,values,"iftarVoiceUrl","ramadan_iftar_voice","iftar_announcement.mp3");
-            syncOne(app,prefs,values,"suhoorVoiceUrl","ramadan_suhoor","suhoor_voice.mp3");
-          }).addOnFailureListener(error->Log.w(TAG,"Could not read remote audio configuration",error));
+            if(snapshot.exists()&&snapshot.getData()!=null){
+                SharedPreferences prefs=app.getSharedPreferences("zad_ramadan",Context.MODE_PRIVATE);
+                Map<String,Object> values=snapshot.getData();
+                syncOne(app,prefs,values,"cannonUrl","ramadan_iftar_cannon","iftar_cannon.mp3");
+                syncOne(app,prefs,values,"iftarVoiceUrl","ramadan_iftar_voice","iftar_announcement.mp3");
+                syncOne(app,prefs,values,"suhoorVoiceUrl","ramadan_suhoor","suhoor_voice.mp3");
+            }
+            if(onComplete!=null)onComplete.run();
+          }).addOnFailureListener(error->{
+            Log.w(TAG,"Could not read remote audio configuration",error);
+            if(onComplete!=null)onComplete.run();
+          });
     }
     private static void syncOne(Context context,SharedPreferences prefs,Map<String,Object> data,String field,String key,String fileName){
         Object raw=data.get(field);if(!(raw instanceof String))return;
