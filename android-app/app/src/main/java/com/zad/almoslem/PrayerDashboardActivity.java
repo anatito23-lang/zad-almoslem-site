@@ -41,13 +41,13 @@ public class PrayerDashboardActivity extends Activity {
     @Override public void onCreate(Bundle b){
         super.onCreate(b);prefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);green=AppThemeColors.primary(this);AppThemeColors.apply(this);
         build();handler.post(ticker);
-        String today=new SimpleDateFormat("yyyyMMdd",Locale.US).format(new Date());
+        String today=todayInCityZone();
         boolean missing=false;for(String prayer:PRAYERS)if(prefs.getInt("native_time_hour_"+prayer,-1)<0)missing=true;
-        int currentOffset=TimeZone.getDefault().getOffset(System.currentTimeMillis())/60000;
+        int currentOffset=cityTimeZone().getOffset(System.currentTimeMillis())/60000;
         boolean timezoneOffsetChanged=currentOffset!=prefs.getInt("native_times_utc_offset",Integer.MIN_VALUE);
         if(missing||timezoneOffsetChanged||!today.equals(prefs.getString("native_times_date","")))updateButton.post(()->fetchTimes(updateButton));
     }
-    private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
+    private TimeZone cityTimeZone(){String id=prefs.getString("native_city_timezone","");if(id.isEmpty()&&"Egypt".equals(prefs.getString("native_country","Egypt")))id="Africa/Cairo";if(id.isEmpty())id=TimeZone.getDefault().getID();return TimeZone.getTimeZone(id);}\n    private String todayInCityZone(){SimpleDateFormat f=new SimpleDateFormat("yyyyMMdd",Locale.US);f.setTimeZone(cityTimeZone());return f.format(new Date());}\n    private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
     private GradientDrawable bg(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
     private TextView label(String s,int size,int color,boolean bold){TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.RIGHT);t.setTextDirection(View.TEXT_DIRECTION_RTL);if(bold)t.setTypeface(Typeface.DEFAULT,Typeface.BOLD);return t;}
     private LinearLayout col(){LinearLayout l=new LinearLayout(this);l.setOrientation(LinearLayout.VERTICAL);return l;}
@@ -118,7 +118,7 @@ public class PrayerDashboardActivity extends Activity {
         int displayHour=h%12;if(displayHour==0)displayHour=12;
         return String.format(Locale.getDefault(),"%d:%02d %s",displayHour,m,h<12?"ص":"م");
     }
-    private long nextTime(String p){int h=prefs.getInt("native_time_hour_"+p,-1);if(h<0)return -1;Calendar c=Calendar.getInstance();c.set(Calendar.HOUR_OF_DAY,h);c.set(Calendar.MINUTE,prefs.getInt("native_time_minute_"+p,0));c.set(Calendar.SECOND,0);c.set(Calendar.MILLISECOND,0);if(c.getTimeInMillis()<=System.currentTimeMillis())c.add(Calendar.DAY_OF_YEAR,1);return c.getTimeInMillis();}
+    private long nextTime(String p){int h=prefs.getInt("native_time_hour_"+p,-1);if(h<0)return -1;Calendar c=Calendar.getInstance(cityTimeZone());c.set(Calendar.HOUR_OF_DAY,h);c.set(Calendar.MINUTE,prefs.getInt("native_time_minute_"+p,0));c.set(Calendar.SECOND,0);c.set(Calendar.MILLISECOND,0);if(c.getTimeInMillis()<=System.currentTimeMillis())c.add(Calendar.DAY_OF_YEAR,1);return c.getTimeInMillis();}
     private void refreshCountdowns(){
         if(sunriseView!=null)sunriseView.setText(savedSunrise());
         long now=System.currentTimeMillis(),soon=Long.MAX_VALUE;int next=-1;long[] times=new long[5];
@@ -127,7 +127,7 @@ public class PrayerDashboardActivity extends Activity {
         int active=-1;
         for(int i=0;i<5;i++){
             int h=prefs.getInt("native_time_hour_"+PRAYERS[i],-1);
-            if(h>=0){Calendar prayer=Calendar.getInstance();prayer.set(Calendar.HOUR_OF_DAY,h);prayer.set(Calendar.MINUTE,prefs.getInt("native_time_minute_"+PRAYERS[i],0));prayer.set(Calendar.SECOND,0);prayer.set(Calendar.MILLISECOND,0);long elapsed=now-prayer.getTimeInMillis();if(elapsed>=0&&elapsed<15*60*1000L)active=i;}
+            if(h>=0){Calendar prayer=Calendar.getInstance(cityTimeZone());prayer.set(Calendar.HOUR_OF_DAY,h);prayer.set(Calendar.MINUTE,prefs.getInt("native_time_minute_"+PRAYERS[i],0));prayer.set(Calendar.SECOND,0);prayer.set(Calendar.MILLISECOND,0);long elapsed=now-prayer.getTimeInMillis();if(elapsed>=0&&elapsed<15*60*1000L)active=i;}
         }
         if(active>=0||prefs.getBoolean("adhan_active",false)){adhanNow.setText(active>=0?"🕌 حان الآن وقت صلاة "+PRAYERS[active]+" — تقبّل الله":"🕌 يرفع الأذان الآن — تقبّل الله");prayerHero.setBackgroundResource(R.drawable.azhar_mosque_bg);}
         else {if(next>=0)adhanNow.setText("الصلاة القادمة: "+PRAYERS[next]);prayerHero.setBackground(bg(green,18));}
@@ -146,8 +146,8 @@ public class PrayerDashboardActivity extends Activity {
             ByteArrayOutputStream out=new ByteArrayOutputStream();try(InputStream in=c.getInputStream()){byte[] b=new byte[4096];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}
             JSONObject data=new JSONObject(out.toString("UTF-8")).getJSONObject("data");JSONObject timings=data.getJSONObject("timings");String[] api={"Fajr","Dhuhr","Asr","Maghrib","Isha"};String cityTimezone=data.getJSONObject("meta").optString("timezone",TimeZone.getDefault().getID());prefs.edit().putString("native_city_timezone",cityTimezone).apply();
             String sunriseRaw=timings.getString("Sunrise").split(" ")[0];String[] sunriseHm=sunriseRaw.split(":");prefs.edit().putInt("native_sunrise_hour",Integer.parseInt(sunriseHm[0])).putInt("native_sunrise_minute",Integer.parseInt(sunriseHm[1])).apply();
-            for(int i=0;i<5;i++){String raw=timings.getString(api[i]).split(" ")[0];String[] hm=raw.split(":");int h=Integer.parseInt(hm[0]),m=Integer.parseInt(hm[1]);prefs.edit().putInt("native_time_hour_"+PRAYERS[i],h).putInt("native_time_minute_"+PRAYERS[i],m).apply();Calendar next=Calendar.getInstance();next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,m);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);if(prefs.getBoolean("prayer_enabled_"+PRAYERS[i],true))ReminderReceiver.schedulePrayer(this,PRAYERS[i],next.getTimeInMillis());}
-            prefs.edit().putString("native_times_date",new SimpleDateFormat("yyyyMMdd",Locale.US).format(new Date())).putInt("native_times_utc_offset",TimeZone.getDefault().getOffset(System.currentTimeMillis())/60000).apply();RamadanReminderReceiver.scheduleAll(this);
+            for(int i=0;i<5;i++){String raw=timings.getString(api[i]).split(" ")[0];String[] hm=raw.split(":");int h=Integer.parseInt(hm[0]),m=Integer.parseInt(hm[1]);prefs.edit().putInt("native_time_hour_"+PRAYERS[i],h).putInt("native_time_minute_"+PRAYERS[i],m).apply();Calendar next=Calendar.getInstance(TimeZone.getTimeZone(cityTimezone));next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,m);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);if(prefs.getBoolean("prayer_enabled_"+PRAYERS[i],true))ReminderReceiver.schedulePrayer(this,PRAYERS[i],next.getTimeInMillis());}
+            prefs.edit().putString("native_times_date",new SimpleDateFormat("yyyyMMdd",Locale.US).format(new Date())).putInt("native_times_utc_offset",TimeZone.getTimeZone(cityTimezone).getOffset(System.currentTimeMillis())/60000).apply();RamadanReminderReceiver.scheduleAll(this);
             runOnUiThread(()->{result.setText(pos==0?"تم تحديث المواقيت بطريقة الحساب المصرية رقم 5؛ وقد تختلف دقائق عن جدول الهيئة الرسمي المنشور.":"تم تحديث مواقيت "+COUNTRIES[pos]+" — "+city+" بطريقة الحساب المعتمدة لهذه الدولة.");refreshCountdowns();});
         }catch(Exception e){runOnUiThread(()->result.setText("تعذر تحديث المواقيت: "+(e.getMessage()==null?"تحقق من اسم المدينة والإنترنت":e.getMessage())));}
         finally{if(c!=null)c.disconnect();runOnUiThread(()->button.setEnabled(true));}}).start();
