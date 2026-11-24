@@ -2920,13 +2920,22 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
  function addText(parent,tag,text,cls){const el=document.createElement(tag);el.textContent=text||"";if(cls)el.className=cls;parent.append(el);return el;}
  async function init(){
   try{
-   const [{initializeApp,getApps},{getFirestore,collection,getDocs}]=await Promise.all([
+   const [{initializeApp,getApps},{getFirestore,collection,getDocs,query,where}]=await Promise.all([
     import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
     import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")
    ]);
    const app=getApps().length?getApps()[0]:initializeApp(cfg),db=getFirestore(app);
-   const snap=await getDocs(collection(db,"site_content"));
-   const rows=snap.docs.map(d=>({id:d.id,...d.data()}))
+   const contentRef=collection(db,"site_content");
+   // Firestore rules only permit public reads of published records. Query each
+   // supported publication flag at the server, then merge without duplicates.
+   const publishedSnapshots=await Promise.all([
+    getDocs(query(contentRef,where("published","==",true))),
+    getDocs(query(contentRef,where("تم النشر","==",true))),
+    getDocs(query(contentRef,where("النشر","==",true)))
+   ]);
+   const publishedDocs=new Map();
+   publishedSnapshots.forEach(result=>result.docs.forEach(doc=>publishedDocs.set(doc.id,doc)));
+   const rows=Array.from(publishedDocs.values()).map(d=>({id:d.id,...d.data()}))
     .filter(x=>(x.published===true||x["تم النشر"]===true||x["النشر"]===true)&&x.sectionId&&escId.test(x.sectionId))
     .sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
    const main=document.querySelector("main.wrap");if(!main)return;
