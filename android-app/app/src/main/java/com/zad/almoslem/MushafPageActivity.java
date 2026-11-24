@@ -507,6 +507,7 @@ public class MushafPageActivity extends Activity {
         }
         page = number;
         getSharedPreferences("zad_mushaf", MODE_PRIVATE).edit().putInt("last_page", page).apply();
+        QuranKhatmaTracker.markPageRead(this, page);
         pageLabel.setText("صفحة " + page + " من 604");
         previous.setEnabled(page > 1);
         next.setEnabled(page < 604);
