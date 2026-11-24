@@ -112,8 +112,8 @@ public class IslamicReelsActivity extends Activity {
         }
         Collections.sort(fresh, Comparator.comparingInt(o -> o.optInt("order", 0)));
         posts.clear(); posts.addAll(fresh);
-        // Keep a starter set available until the owner publishes their own reels.
-        addBuiltInPosts();
+        // Show the starter collection only when no published reels are available.
+        if (posts.isEmpty()) addBuiltInPosts();
         if (index >= posts.size()) index = 0;
         showPost();
     }
