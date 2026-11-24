@@ -98,6 +98,12 @@ public class ReminderReceiver extends BroadcastReceiver {
             cancel(context,alertKey);
         }
     }
+    public static void cancelPrayer(Context context,String name) {
+        String key="prayer_"+name;
+        cancel(context,key);
+        cancel(context,"approach_"+name);
+        context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE).edit().remove(key).apply();
+    }
     public static void schedulePrayer(Context context,String name,long at) {
         if(at<=System.currentTimeMillis()) return;
         String key="prayer_"+name;
