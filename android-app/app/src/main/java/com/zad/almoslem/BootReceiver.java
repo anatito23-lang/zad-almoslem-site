@@ -24,7 +24,7 @@ public class BootReceiver extends BroadcastReceiver {
             int minute=p.getInt("native_time_minute_"+name,0);
             long now=System.currentTimeMillis();
             if(hour>=0 && hour<=23 && minute>=0 && minute<=59) {
-                Calendar next=Calendar.getInstance();
+                String zoneId=p.getString("native_city_timezone","");if(zoneId.isEmpty()&&"Egypt".equals(p.getString("native_country","Egypt")))zoneId="Africa/Cairo";if(zoneId.isEmpty())zoneId=java.util.TimeZone.getDefault().getID();\n                Calendar next=Calendar.getInstance(java.util.TimeZone.getTimeZone(zoneId));
                 next.set(Calendar.HOUR_OF_DAY,hour);
                 next.set(Calendar.MINUTE,minute);
                 next.set(Calendar.SECOND,0);
