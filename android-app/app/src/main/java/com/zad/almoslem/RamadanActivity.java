@@ -5,6 +5,9 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
@@ -21,6 +24,7 @@ public class RamadanActivity extends Activity {
     private SharedPreferences prefs;
     private LinearLayout root;
     private TextView fastCount, khatmaProgress, audioStatus;
+    private KhatmaRing khatmaRing;
     private Button khatmaToggle;
     private static final int PICK_IFTAR=4101, PICK_CANNON=4102, PICK_SUHOOR=4103, PICK_MUSIC=4104;
 
@@ -65,8 +69,9 @@ public class RamadanActivity extends Activity {
         LinearLayout khatma=card("ختمة القرآن الكريم");
         TextView invitation=text("اجعل لك وردًا من القرآن في رمضان 🌙\\nاضغط على الزر لفتح المصحف، وسنتابع الصفحات التي تتنقل بينها تلقائيًا ما دامت الختمة قيد التشغيل.",14,AppThemeColors.text(this),false);
         invitation.setPadding(0,dp(8),0,dp(10));khatma.addView(invitation,full());
-        khatmaProgress=text("",15,AppThemeColors.accent(this),true);khatma.addView(khatmaProgress,full());
-        TextView note=text("يُحسب كل رقم صفحة مرة واحدة فقط، سواء قرأت من المصحف المصوّر أو عرض النص. التقدم محفوظ عند إيقاف الختمة والعودة إليها.",12,AppThemeColors.muted(this),false);
+        khatmaRing=new KhatmaRing();LinearLayout ringHolder=new LinearLayout(this);ringHolder.setGravity(Gravity.CENTER);ringHolder.addView(khatmaRing,new LinearLayout.LayoutParams(dp(178),dp(178)));khatma.addView(ringHolder,full());
+        khatmaProgress=text("",15,AppThemeColors.accent(this),true);khatmaProgress.setGravity(Gravity.CENTER);khatma.addView(khatmaProgress,full());
+        TextView note=text("يتابع المؤشر صفحات المصحف التي تفتحها أثناء تشغيل الختمة، ولا يدّعي التحقق من القراءة الفعلية. تقدمك محفوظ عند الإيقاف والعودة.",12,AppThemeColors.muted(this),false);
         note.setPadding(0,dp(7),0,dp(8));khatma.addView(note,full());
         Button openMushaf=new Button(this);openMushaf.setText("📖  افتح المصحف وابدأ القراءة");khatma.addView(openMushaf,full());
         khatmaToggle=new Button(this);khatma.addView(khatmaToggle,full());
@@ -143,9 +148,22 @@ public class RamadanActivity extends Activity {
     private void addDua(LinearLayout box,String heading,String body){TextView h=text(heading,14,AppThemeColors.accent(this),true);h.setPadding(0,dp(9),0,dp(2));box.addView(h,full());box.addView(text(body,14,AppThemeColors.text(this),false),full());}
     private void updateFastCount(){int n=0;for(int i=1;i<=30;i++)if(prefs.getBoolean("fast_"+i,false))n++;if(fastCount!=null)fastCount.setText("أيام الصيام المسجلة: "+n+" من 30");}
     private void updateKhatma(){
-        int n=QuranKhatmaTracker.getReadPageCount(this);
-        if(khatmaProgress!=null)khatmaProgress.setText("تابعت "+n+" من 604 صفحة — "+Math.round(n*100f/604)+"٪");
-        if(khatmaToggle!=null)khatmaToggle.setText(QuranKhatmaTracker.isTracking(this)?"إيقاف الختمة":"تشغيل الختمة");
+        int n=Math.min(604,QuranKhatmaTracker.getReadPageCount(this));int percent=Math.round(n*100f/604);
+        if(khatmaProgress!=null)khatmaProgress.setText("تمت متابعة "+n+" صفحة من 604  •  المتبقي "+(604-n)+" صفحة");
+        if(khatmaRing!=null){khatmaRing.setProgress(percent);khatmaRing.setActive(QuranKhatmaTracker.isTracking(this));}
+        if(khatmaToggle!=null)khatmaToggle.setText(QuranKhatmaTracker.isTracking(this)?"Ⅱ إيقاف متابعة الختمة":"▶ تشغيل متابعة الختمة");
+    }
+    private final class KhatmaRing extends View{
+        private final Paint paint=new Paint(Paint.ANTI_ALIAS_FLAG);private final RectF arc=new RectF();private int percent=0;private boolean active=false;
+        KhatmaRing(){super(RamadanActivity.this);setLayerType(View.LAYER_TYPE_SOFTWARE,null);}
+        void setProgress(int value){percent=Math.max(0,Math.min(100,value));invalidate();}
+        void setActive(boolean value){active=value;invalidate();}
+        @Override protected void onDraw(Canvas canvas){super.onDraw(canvas);float cx=getWidth()/2f,cy=getHeight()/2f;float radius=Math.min(getWidth(),getHeight())*.39f;float stroke=dp(12);
+            paint.setStyle(Paint.Style.STROKE);paint.setStrokeWidth(stroke);paint.setStrokeCap(Paint.Cap.ROUND);paint.setColor(0x335B8A70);canvas.drawCircle(cx,cy,radius,paint);
+            arc.set(cx-radius,cy-radius,cx+radius,cy+radius);paint.setColor(active?0xFF2D8A62:0xFF9A875F);canvas.drawArc(arc,-90,360f*percent/100f,false,paint);
+            paint.setStyle(Paint.Style.FILL);paint.setTextAlign(Paint.Align.CENTER);paint.setTypeface(Typeface.create(Typeface.DEFAULT,Typeface.BOLD));paint.setColor(AppThemeColors.text(RamadanActivity.this));paint.setTextSize(dp(31));canvas.drawText(percent+"٪",cx,cy+dp(5),paint);
+            paint.setTextSize(dp(12));paint.setTypeface(Typeface.DEFAULT);paint.setColor(AppThemeColors.muted(RamadanActivity.this));canvas.drawText(active?"متابعة الختمة تعمل":"المتابعة متوقفة",cx,cy+dp(29),paint);
+        }
     }
     private void addMinutesControl(LinearLayout box,String title,String key,int def,int min,int max){
         box.addView(text(title,13,AppThemeColors.text(this),false),full());TextView value=text(prefs.getInt(key,def)+" دقيقة",13,AppThemeColors.accent(this),true);box.addView(value,full());
