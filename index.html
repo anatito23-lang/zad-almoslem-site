@@ -2433,7 +2433,7 @@ $('zadPlayerPrev').addEventListener('click',()=>stepZadQuranTrack(-1));
 $('zadPlayerNext').addEventListener('click',()=>stepZadQuranTrack(1));
 $('zadPlayerPause')?.addEventListener('click',()=>{zadAudio.pause();$('quranStatus').textContent='تم إيقاف التلاوة مؤقتًا.';});
 $('zadPlayerStop')?.addEventListener('click',()=>{zadAudio.pause();try{zadAudio.currentTime=0;}catch(e){}$('zadPlayerSeek').value='0';$('zadPlayerCurrent').textContent='00:00';$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='تم إيقاف التلاوة وإرجاعها إلى البداية.';});
-zadAudio.addEventListener('error',()=>{$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='تعذر تحميل الملف الصوتي من المصدر. جرّب رواية أخرى أو تحقق من الاتصال.';});
+zadAudio.addEventListener('error',()=>{const e=zadAudio.error,code=e?e.code:'غير معروف';$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='فشل تحميل التلاوة (رمز '+code+'). '+(zadAudio.currentSrc||zadAudio.src||'لا يوجد رابط صوت').slice(0,180);});
 $('zadPlayerSeek').addEventListener('input',()=>{
  if(Number.isFinite(zadAudio.duration)&&zadAudio.duration>0)zadAudio.currentTime=(Number($('zadPlayerSeek').value)/1000)*zadAudio.duration;
 });
@@ -2465,14 +2465,15 @@ zadAudio.addEventListener('ended',()=>{
   return fresh;
  };
  replaceButton('zadPlayerToggle',async()=>{
-  const queue=window.zadQuranQueue||[];
-  const selected=document.getElementById('zadPlayerSurah'),selectedId=selected&&selected.value?Number(selected.value):null;
-  const selectedIndex=queue.findIndex(track=>track.id===selectedId);
-  if(selectedIndex<0){$('quranStatus').textContent='اختر القارئ والرواية والسورة من قوائم المشغل أولًا.';return;}
-  const selectedTrack=queue[selectedIndex];
-  if(!audio.getAttribute('src')||audio.getAttribute('src')!==selectedTrack.url){playZadQuranTrack(selectedId);return;}
+  const queue=window.zadQuranQueue||[],selected=document.getElementById('zadPlayerSurah');
+  const selectedId=selected&&selected.value?Number(selected.value):NaN;
+  const selectedTrack=queue.find(track=>Number(track.id)===selectedId);
+  if(!selectedTrack){$('quranStatus').textContent='اختَر القارئ ثم الرواية ثم السورة، وبعدها اضغط تشغيل.';return;}
+  const currentUrl=audio.currentSrc||audio.src||'';
+  if(currentUrl!==selectedTrack.url){playZadQuranTrack(selectedTrack.id);return;}
   if(audio.paused){
-   try{await audio.play();}catch(error){$('quranStatus').textContent='تعذر تشغيل الملف الصوتي. تحقق من الاتصال أو جرّب رواية أخرى، ثم أعد المحاولة.';}
+   $('quranStatus').textContent='جارٍ استئناف التلاوة...';
+   try{await audio.play();}catch(error){$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='تعذر بدء الصوت ('+(error&&error.name||'PlaybackError')+'). '+(error&&error.message||'تحقق من الاتصال أو جرّب رواية أخرى.');}
   }else audio.pause();
  });
  replaceButton('zadPlayerPause',()=>{audio.pause();$('quranStatus').textContent='تم إيقاف التلاوة مؤقتًا.';});
@@ -3483,6 +3484,22 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
 .zad-search-results{gap:4px!important;margin:4px 0 7px!important}
 .zad-search-result{padding:7px 10px!important;font-size:12px!important}
 </style>
+<style id="zad-quran-compact-player-final">
+@media(max-width:600px){
+ .zad-quran-search-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
+ .zad-quran-search-grid label{min-width:0!important;font-size:11px!important}
+ .zad-quran-search-grid label:has(#zadSurahSearch){grid-column:auto!important}
+ .zad-quran-search-grid input{width:100%!important;min-width:0!important;height:36px!important;padding:6px 8px!important;font-size:12px!important}
+ .zad-search-results{max-height:120px!important;overflow:auto!important;margin:3px 0 5px!important}
+ .zad-search-result{padding:6px 8px!important;font-size:12px!important}
+ .zad-player-picker{gap:7px!important}
+ .zad-player-picker label{font-size:12px!important}
+ .zad-player-picker select{height:43px!important;font-size:14px!important}
+ .zad-player{background:#0d4938!important}
+ .zad-player-info,.zad-player-info strong,.zad-player-info span,.zad-player-info small,.zad-player-timeline{opacity:1!important;color:#fff!important}
+ .zad-player-controls button{opacity:1!important;filter:none!important}
+}
+</style>
 <script id="zad-real-mp3quran-loader">
   (function(){
    const $id=id=>document.getElementById(id);
@@ -3549,7 +3566,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
     const r=reciters.find(x=>String(x.id)===playerReciter.value),m=(r&&r.moshaf||[])[Number(playerMoshaf.value)];
     if(!r||!m||!m.server){window.zadQuranQueue=[];playerSurah.disabled=true;fillSelect(playerSurah,[],'اختر الرواية أولًا');return;}
     const ids=String(m.surah_list||'').split(',').map(Number).filter(n=>n>=1&&n<=114),raw=String(m.server).trim(),server=raw.endsWith('/')?raw:raw+'/';
-    window.zadQuranQueue=ids.map(n=>({id:n,name:names[n-1],artist:r.name,reciter:r.name,moshaf:m.name||m.moshaf_name||'',url:server+String(n).padStart(3,'0')+'.mp3'}));
+    window.zadQuranQueue=ids.map(n=>({id:n,name:names[n-1],artist:r.name,reciter:r.name,moshaf:m.name||m.moshaf_name||'',url:m.edition?'https://cdn.islamic.network/quran/audio-surah/128/'+m.edition+'/'+n+'.mp3':server+String(n).padStart(3,'0')+'.mp3'}));
     const previous=keepSurah?playerSurah.value:'';
     fillSelect(playerSurah,ids.map(n=>({value:n,label:n+'. '+names[n-1]})),'اختر السورة',previous);
     playerSurah.disabled=!ids.length;
