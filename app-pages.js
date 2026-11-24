@@ -55,7 +55,7 @@ if(!nativeApp || publicWebsite){
  }
 const prayerTitle=document.querySelector('#prayer .section-head p');if(prayerTitle)prayerTitle.textContent='مواقيت الصلوات الخمس والوقت المتبقي للصلاة القادمة';
  const quick=document.createElement('nav');quick.className='zad-web-shortcuts';quick.setAttribute('aria-label','اختصارات الموقع');
- quick.innerHTML=[['#prayer','🕌','مواقيت الصلاة'],['#quran','📖','استماع القرآن'],['#hadith-dua','ﷺ','الحديث الشريف'],['#azkar','☀️','الأذكار'],['#mushaf','۞','المصحف'],['#radio-egypt','📻','الإذاعة'],['#ruqyah','🤲','الرقية'],['#books-library','📚','المكتبة'],['#khutbahs','🎙️','الخطب']].map(([href,ico,label])=>'<a href="'+href+'"><span>'+ico+'</span><b>'+label+'</b></a>').join('');
+ quick.innerHTML=[['#prayer','🕌','مواقيت الصلاة'],['#quran','📖','استماع القرآن'],['#hadith-dua','ﷺ','الحديث الشريف'],['#azkar','☀️','الأذكار'],['#mushaf','۞','المصحف'],['#radio-egypt','📻','الإذاعة'],['#ruqyah','🤲','الرقية'],['#books-library','📚','المكتبة الإسلامية'],['#khutbahs','🎙️','الخطب']].map(([href,ico,label])=>'<a href="'+href+'"><span>'+ico+'</span><b>'+label+'</b></a>').join('');
  if(header&&!document.querySelector('.zad-web-shortcuts'))header.insertAdjacentElement('afterend',quick);
  const topNav=document.querySelector('.top nav');
  if(topNav){topNav.querySelectorAll('a').forEach(link=>{if(['#kids','#reminders','#daily-reminder-settings','#qibla','#tasbeehFab'].includes(link.getAttribute('href')))link.remove();});if(!topNav.querySelector('a[href="#hadith-dua"]')){const l=document.createElement('a');l.href='#hadith-dua';l.textContent='الحديث الشريف';topNav.append(l);}}
@@ -176,7 +176,7 @@ if(nativeApp && !publicWebsite){
 if(!nativeApp || publicWebsite)return;
 if(!main||!header||$('zadAppPages'))return;
 
-const meta=[['calendar','التقويم الشهري','🗓️'],['prayer','مواقيت الصلاة','🕰️'],['quran','استماع القرآن','📖'],['mushaf','المصحف الشريف','۞'],['ruqyah','الرقية الشرعية','🤲'],['radio-egypt','إذاعة القرآن الكريم','📻'],['azkar','الأذكار اليومية','☀️'],['books-library','مكتبة الكتب الإسلامية','📚'],...(!nativeApp?[['kids','ركن الأطفال','🧒']]:[]),['reminders',nativeApp?'تنبيهات الصلاة والأذان':'التنبيهات اليومية',nativeApp?'🕌':'🔔'],['hadith-dua','السنة والدعاء','🌿'],['daily-wird','وردي اليومي','📿'],['friday-wird','ورد الجمعة','🌙'],['qalbi-itmaann','قلبي اطمأن','💚'],['library','نفحات إيمانية','✨'],['khutbahs','خطب الجمعة','🎙️'],['nasheed','الإنشاد والابتهالات','🎵']];
+const meta=[['calendar','التقويم الشهري','🗓️'],['prayer','مواقيت الصلاة','🕰️'],['quran','استماع القرآن','📖'],['mushaf','المصحف الشريف','۞'],['ruqyah','الرقية الشرعية','🤲'],['radio-egypt','إذاعة القرآن الكريم','📻'],['azkar','الأذكار اليومية','☀️'],['books-library','المكتبة الإسلامية','📚'],...(!nativeApp?[['kids','ركن الأطفال','🧒']]:[]),['reminders',nativeApp?'تنبيهات الصلاة والأذان':'التنبيهات اليومية',nativeApp?'🕌':'🔔'],['hadith-dua','السنة والدعاء','🌿'],['daily-wird','وردي اليومي','📿'],['friday-wird','ورد الجمعة','🌙'],['qalbi-itmaann','قلبي اطمأن','💚'],['library','نفحات إيمانية','✨'],['khutbahs','خطب الجمعة','🎙️'],['nasheed','الإنشاد والابتهالات','🎵']];
 const root=document.createElement('div');root.id='zadAppPages';
 const home=document.createElement('div');home.className='zad-page is-active';home.id='zad-page-home';home.dataset.page='home';
 const pages=document.createElement('div');pages.className='zad-pages-content';
