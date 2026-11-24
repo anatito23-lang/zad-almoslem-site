@@ -138,6 +138,7 @@ public class DuaActivity extends Activity {
 
     private void loadContent() {
         FirebaseFirestore.getInstance().collection("site_content")
+            .whereEqualTo("published", true)
             .get()
             .addOnSuccessListener(snapshot -> {
                 ArrayList<JSONObject> items = new ArrayList<>();
