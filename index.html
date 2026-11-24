@@ -2207,7 +2207,7 @@ mushafSwipeArea.addEventListener('pointercancel',()=>{mushafMouseStart=null;});
 async function loadOldEgyptianReciters(){
  const cacheKeys=['zad_mp3quran_reciters_multi_v4','zad_mp3quran_reciters_multi_v3','zad_mp3quran_reciters_multi_v2'];
  const select=$('reciter'),box=$('zadReciterCatalog'),status=$('quranStatus');
- renderZadFallbackReciterCatalog();
+ box.innerHTML='<p class="small">جارٍ الاتصال بمكتبة القراء الحقيقية...</p>';
  $('zadMoshafSelect').closest('label').hidden=false;
  renderZadQuranLibrary();
  function populate(all,fromCache){
@@ -2253,7 +2253,7 @@ async function loadOldEgyptianReciters(){
  if(cached.length){
   status.textContent='نعرض القائمة المحفوظة على جهازك؛ تعذر تحديثها من المصدر الآن.';
  }else{
-  renderZadFallbackReciterCatalog();
+  box.innerHTML='<p class="small">تعذر الاتصال بمكتبة القراء. تحقق من الإنترنت ثم أعد المحاولة.</p>';
   renderZadQuranLibrary();
   status.textContent='قائمة القراء جاهزة. اختر الشيخ ثم اختر أي سورة للاستماع أو التحميل.';
  }
@@ -3284,5 +3284,118 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
 </script>
 
 <script src="./site-resilience.js?v=20261124-prayer-fallback-v2"></script>
+
+  <style id="zad-real-quran-library-style">
+    .zad-quran-library .quran-tools{display:none!important}
+    .zad-quran-library .zad-reciter-select-wrap{display:none!important}
+    #zadReloadReciters{display:none!important}
+    #zadReciterCatalog{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+    #zadReciterCatalog .zad-reciter-card{min-height:68px;border:1px solid #d9e3dc;border-radius:14px;background:#fff;padding:10px;display:flex;gap:9px;align-items:center;text-align:right;color:#173d32}
+    #zadReciterCatalog .zad-reciter-card.active{border:2px solid #47745d;background:#f0f5f0}
+    #zadQuranLibraryTracks .zad-quran-track{background:#fff;border:1px solid #e0e7e1;border-radius:13px;padding:12px;margin:8px 0}
+    #zadQuranLibraryTracks .zad-quran-track-actions{display:flex;gap:8px;flex-wrap:wrap}
+    #zadQuranLibraryTracks .zad-quran-track-actions button,#zadQuranLibraryTracks .zad-quran-track-actions a{border:0;border-radius:10px;padding:9px 13px;font-weight:700;text-decoration:none}
+    #zadQuranLibraryTracks .zad-quran-play{background:#315f4a;color:#fff}
+    #zadQuranLibraryTracks .zad-quran-download{background:#eee6d1;color:#214b3d}
+    #zadMoshafSelect{width:100%;border:1px solid #dce5dc;border-radius:12px;padding:12px;background:#fff;font:inherit}
+    @media(max-width:390px){#zadReciterCatalog{grid-template-columns:1fr}}
+  </style>
+  <script id="zad-real-mp3quran-loader">
+  (function(){
+   const $id=id=>document.getElementById(id);
+   const catalog=$id('zadReciterCatalog'),tracks=$id('zadQuranLibraryTracks'),readerSearch=$id('zadReciterSearch'),surahSearch=$id('zadSurahSearch'),moshafSelect=$id('zadMoshafSelect'),audio=$id('audio');
+   if(!catalog||!tracks||!readerSearch||!surahSearch||!moshafSelect||!audio)return;
+   const names=['الفاتحة','البقرة','آل عمران','النساء','المائدة','الأنعام','الأعراف','الأنفال','التوبة','يونس','هود','يوسف','الرعد','إبراهيم','الحجر','النحل','الإسراء','الكهف','مريم','طه','الأنبياء','الحج','المؤمنون','النور','الفرقان','الشعراء','النمل','القصص','العنكبوت','الروم','لقمان','السجدة','الأحزاب','سبأ','فاطر','يس','الصافات','ص','الزمر','غافر','فصلت','الشورى','الزخرف','الدخان','الجاثية','الأحقاف','محمد','الفتح','الحجرات','ق','الذاريات','الطور','النجم','القمر','الرحمن','الواقعة','الحديد','المجادلة','الحشر','الممتحنة','الصف','الجمعة','المنافقون','التغابن','الطلاق','التحريم','الملك','القلم','الحاقة','المعارج','نوح','الجن','المزمل','المدثر','القيامة','الإنسان','المرسلات','النبأ','النازعات','عبس','التكوير','الانفطار','المطففين','الانشقاق','البروج','الطارق','الأعلى','الغاشية','الفجر','البلد','الشمس','الليل','الضحى','الشرح','التين','العلق','القدر','البينة','الزلزلة','العاديات','القارعة','التكاثر','العصر','الهمزة','الفيل','قريش','الماعون','الكوثر','الكافرون','النصر','المسد','الإخلاص','الفلق','الناس'];
+   let reciters=[],selected=null;
+   const norm=v=>(v||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[^\u0621-\u064A\w]/g,'').toLowerCase();
+   const status=msg=>{const e=$id('quranStatus');if(e)e.textContent=msg;};
+   const fileUrl=(moshaf,n)=>String(moshaf.server).replace(/\/$/,'/')+String(n).padStart(3,'0')+'.mp3';
+   function drawReaders(){
+    const q=norm(readerSearch.value);
+    const shown=reciters.filter(r=>!q||norm(r.name).includes(q));
+    catalog.replaceChildren();
+    if(!shown.length){const p=document.createElement('p');p.textContent='لا يوجد قارئ بهذا الاسم.';catalog.append(p);return;}
+    shown.forEach(r=>{
+     const b=document.createElement('button');b.type='button';b.className='zad-reciter-card'+(selected&&selected.id===r.id?' active':'');
+     const icon=document.createElement('span');icon.className='zad-reciter-avatar';icon.textContent='۞';
+     const txt=document.createElement('span'),name=document.createElement('strong'),meta=document.createElement('small');
+     name.textContent=r.name;meta.textContent=(r.moshaf||[]).length+' مصحف / رواية';
+     txt.append(name,meta);b.append(icon,txt);b.addEventListener('click',()=>chooseReader(r));catalog.append(b);
+    });
+   }
+   function chooseReader(r){
+    selected=r;
+    const oldSelect=$id('reciter');
+    if(oldSelect){
+     let opt=Array.from(oldSelect.options).find(o=>o.value==='mp3real_'+r.id);
+     if(!opt){opt=document.createElement('option');opt.value='mp3real_'+r.id;opt.textContent=r.name;oldSelect.append(opt);}
+     oldSelect.value=opt.value;
+    }
+    moshafSelect.replaceChildren();
+    (r.moshaf||[]).forEach((m,i)=>{const o=document.createElement('option');o.value=String(i);o.textContent=m.name||('الرواية '+(i+1));moshafSelect.append(o);});
+    drawTracks();drawReaders();status('اختر سورة من تلاوات '+r.name+' ثم اضغط استمع أو تحميل MP3.');
+   }
+   function drawTracks(){
+    tracks.replaceChildren();
+    if(!selected){const p=document.createElement('p');p.textContent='اختر قارئًا من القائمة لعرض تلاواته.';tracks.append(p);return;}
+    const m=selected.moshaf[Number(moshafSelect.value)||0];
+    if(!m||!m.server){const p=document.createElement('p');p.textContent='لا توجد روابط صوتية لهذه الرواية.';tracks.append(p);return;}
+    const ids=String(m.surah_list||'').split(',').map(Number).filter(n=>n>=1&&n<=114);
+    const q=norm(surahSearch.value);
+    const filtered=ids.filter(n=>!q||norm(names[n-1]).includes(q)||String(n)===q);
+    if(!filtered.length){const p=document.createElement('p');p.textContent='لا توجد سورة مطابقة في هذه الرواية.';tracks.append(p);return;}
+    filtered.forEach(n=>{
+     const url=fileUrl(m,n),row=document.createElement('div');row.className='surah-item zad-quran-track';
+     const info=document.createElement('div'),title=document.createElement('b'),sub=document.createElement('small');
+     title.textContent=n+'. سورة '+names[n-1];sub.textContent=selected.name+' — '+(m.name||'الرواية المختارة');sub.style.display='block';info.append(title,sub);
+     const actions=document.createElement('div');actions.className='zad-quran-track-actions';
+     const play=document.createElement('button');play.type='button';play.className='zad-quran-play';play.textContent='▶ استمع';
+     play.addEventListener('click',()=>{
+      audio.src=url;audio.load();
+      if($id('zadPlayerTitle'))$id('zadPlayerTitle').textContent='سورة '+names[n-1];
+      if($id('zadPlayerArtist'))$id('zadPlayerArtist').textContent=selected.name;
+      if($id('zadPlayerDownload')){$id('zadPlayerDownload').href=url;$id('zadPlayerDownload').download=String(n).padStart(3,'0')+'.mp3';}
+      status('جارٍ تشغيل سورة '+names[n-1]+' بصوت '+selected.name);
+      audio.play().then(()=>status('يعمل الآن: سورة '+names[n-1]+' — '+selected.name)).catch(()=>status('تعذر التشغيل تلقائيًا؛ اضغط زر التشغيل في المشغّل.'));
+     });
+     const download=document.createElement('a');download.className='zad-quran-download';download.href=url;download.target='_blank';download.rel='noopener';download.textContent='⬇ تحميل MP3';
+     actions.append(play,download);row.append(info,actions);tracks.append(row);
+    });
+   }
+   readerSearch.addEventListener('input',drawReaders);
+   surahSearch.addEventListener('input',drawTracks);
+   moshafSelect.addEventListener('change',drawTracks);
+   async function load(){
+    catalog.innerHTML='<p class="small">جارٍ جلب أسماء القراء والتسجيلات الحقيقية...</p>';
+    tracks.innerHTML='<p class="small">يتم تجهيز قائمة السور...</p>';
+    status('جارٍ الاتصال بمكتبة MP3Quran الرسمية لتحميل أسماء القراء وروابط التلاوات.');
+    let last;
+    for(const url of ['https://mp3quran.net/api/v3/reciters?language=ar','https://www.mp3quran.net/api/v3/reciters?language=ar']){
+     try{
+      const res=await fetch(url,{mode:'cors',cache:'no-store'});
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      const data=await res.json();
+      const arr=(data.reciters||[]).filter(r=>r&&r.id&&Array.isArray(r.moshaf)&&r.moshaf.some(m=>m&&m.server&&m.surah_list));
+      if(!arr.length)throw new Error('قائمة فارغة');
+      reciters=arr;
+      try{localStorage.setItem('zad_mp3quran_real_catalog_v1',JSON.stringify(arr));}catch(e){}
+      drawReaders();
+      status('تم تحميل '+arr.length+' قارئًا حقيقيًا من MP3Quran. اختر الشيخ لعرض تسجيلاته.');
+      const preferred=arr.find(r=>norm(r.name).includes(norm('عبد الباسط'))) || arr[0];
+      if(preferred)chooseReader(preferred);
+      return;
+     }catch(e){last=e;}
+    }
+    try{
+     const cache=JSON.parse(localStorage.getItem('zad_mp3quran_real_catalog_v1')||'[]');
+     if(cache.length){reciters=cache;drawReaders();status('نعرض قائمة القراء الحقيقية المحفوظة على جهازك.');return;}
+    }catch(e){}
+    catalog.innerHTML='<p class="small">تعذر جلب قائمة القراء الحقيقية من المصدر. تحقق من الإنترنت وحاول مرة أخرى.</p>';
+    tracks.innerHTML='<p class="small">لا توجد تلاوات محملة. لم نعرض أسماء غير موثقة.</p>';
+    status('لم نتمكن من الاتصال بمصدر التلاوات الآن. '+(last&&last.message?last.message:''));
+   }
+   load();
+  })();
+  </script>
 </body>
 </html>
