@@ -202,6 +202,17 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 
 
 /* مكتبة الكتب وقارئها داخل الموقع */
+/* المكتبة الإسلامية: تصنيف الكتب حسب التخصص */
+.book-category-groups{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+.book-category-group{border:1px solid var(--line);border-radius:16px;background:var(--paper);overflow:hidden}
+.book-category-group>summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 17px;cursor:pointer;list-style:none;color:var(--green);font-weight:800;background:linear-gradient(110deg,#f6f8f3,#edf4ee)}
+.book-category-group>summary::-webkit-details-marker{display:none}
+.book-category-group>summary::after{content:"＋";font-size:19px;color:var(--gold)}
+.book-category-group[open]>summary::after{content:"−"}
+.book-category-count{margin-right:auto;color:var(--muted);font-size:12px;font-weight:600;white-space:nowrap}
+.book-category-group>.book-grid{padding:14px}
+.book-category-group .book-card{margin:0}
+
 .book-library-filters,.nasheed-artist-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .book-filter-btn,.nasheed-artist-btn{border:1px solid var(--line);background:#fff;color:var(--green);border-radius:12px;padding:10px 16px;font:inherit;font-weight:800;cursor:pointer}
 .book-filter-btn.active,.nasheed-artist-btn.active{background:var(--green);border-color:var(--green);color:#fff}
@@ -973,7 +984,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
   <div class="top">
     <div class="brand"><span class="brand-mark">۞</span><span>زاد المسلم</span></div>
     <nav aria-label="التنقل الرئيسي">
-<a href="#prayer">العبادة والمواقيت</a><a href="#quran">القرآن الكريم</a><a href="#azkar">الأذكار</a><a href="#hadith-dua">السنة والأدعية</a><a href="#books-library">المكتبة</a><a href="#khutbahs">الخطب والمواعظ</a>
+<a href="#prayer">العبادة والمواقيت</a><a href="#quran">القرآن الكريم</a><a href="#azkar">الأذكار</a><a href="#hadith-dua">السنة والأدعية</a><a href="#books-library">المكتبة الإسلامية</a><a href="#khutbahs">الخطب والمواعظ</a>
 </nav>
   </div>
   <div class="hero-content">
@@ -1014,7 +1025,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
 <div class="site-directory-grid">
 <article class="directory-card"><span>🕌</span><h3>العبادة اليومية</h3><p>الصلاة والذكر والورد.</p><div><a href="#prayer">مواقيت الصلاة</a><a href="#calendar">التقويم</a><a href="#azkar">الأذكار</a><a href="#daily-wird">وردي اليومي</a><a href="#friday-wird">ورد الجمعة</a><a href="#duas">الأدعية</a></div></article>
 <article class="directory-card"><span>📖</span><h3>القرآن والتلاوات</h3><p>استمع واقرأ وتدبر.</p><div><a href="#quran">استماع القرآن</a><a href="#mushaf">المصحف الشريف</a><a href="#radio-egypt">إذاعات القرآن</a><a href="#ruqyah">الرقية الشرعية</a><a href="#nasheed">الإنشاد والابتهالات</a></div></article>
-<article class="directory-card"><span>📚</span><h3>السنة والعلم</h3><p>زاد معرفتك بالحديث والكتب.</p><div><a href="#hadith-dua">الحديث الشريف</a><a href="#books-library">مكتبة الكتب</a><a href="#library">المكتبة الإيمانية</a><a href="#shaaraawi">خواطر الشعراوي</a><a href="#islamic-knowledge">زاد العلم والإيمان</a></div></article>
+<article class="directory-card"><span>📚</span><h3>السنة والعلم</h3><p>زاد معرفتك بالحديث والكتب.</p><div><a href="#hadith-dua">الحديث الشريف</a><a href="#books-library">المكتبة الإسلامية</a><a href="#library">المكتبة الإيمانية</a><a href="#shaaraawi">خواطر الشعراوي</a><a href="#islamic-knowledge">زاد العلم والإيمان</a></div></article>
 <article class="directory-card"><span>💚</span><h3>الخطب والخواطر</h3><p>كلمات إيمانية توقظ القلب.</p><div><a href="#qalbi-itmaann">قلبي اطمئن</a><a href="#khutbahs">خطب الجمعة</a><a href="#friday-live">بث خطبة الجمعة</a></div></article>
 <article class="directory-card"><span>🌱</span><h3>الأسرة والناشئة</h3><p>مساحة مبسطة للتعلم.</p><div><a href="#kids">ركن الأطفال</a><a href="#daily-reminder-settings">التنبيهات اليومية</a></div></article>
 </div></section>
@@ -1248,92 +1259,32 @@ remove-prayer-tracker    <div class="small">المواقيت تُجلب عبر �
   
   <section class="section" id="books-library">
     <div class="section-head">
-      <div><h2>مكتبة الكتب الإسلامية</h2><p>مكتبة واحدة تضم كتب الفقه والسيرة النبوية والتفسير، وتقرأ الكتاب داخل زاد المسلم دون الانتقال إلى صفحة أخرى.</p></div>
+      <div><h2>المكتبة الإسلامية</h2><p>كل الكتب في مكان واحد، مرتبة حسب تخصصها؛ الحديث مع الحديث، والفقه مع الفقه، والتفسير مع التفسير.</p></div>
     </div>
     <div class="card">
       <p class="small" id="dynamicLibraryStatus" aria-live="polite">جارٍ تحميل الكتب المضافة حديثًا…</p>
-  <div class="book-library-filters" role="group" aria-label="تصنيف الكتب">
-        <button type="button" class="book-filter-btn active" data-book-filter="all" aria-pressed="true">كل الكتب</button>
-        <button type="button" class="book-filter-btn" data-book-filter="fiqh" aria-pressed="false">كتب الفقه</button>
-        <button type="button" class="book-filter-btn" data-book-filter="seerah" aria-pressed="false">كتب السيرة</button>
-        <button type="button" class="book-filter-btn" data-book-filter="tafsir" aria-pressed="false">كتب التفسير</button>
-        <button type="button" class="book-filter-btn" data-book-filter="hadith" aria-pressed="false">كتب الحديث</button>
-      </div>
-      <p class="small" id="bookLibraryCount" aria-live="polite">كل الكتب المتاحة في المكتبة.</p>
-      <div class="book-grid" id="bookLibraryGrid">
-        <article class="card book-card" data-book-category="fiqh">
+      <div class="book-category-groups" id="bookLibraryGrid"><details class="book-category-group" data-book-group="fiqh"><summary><span>⚖️ كتب الفقه</span><span class="book-category-count">3 كتب</span></summary><div class="book-grid" data-book-category-container="fiqh"><article class="card book-card" data-book-category="fiqh">
           <div class="icon">📘</div><h3>الفقه الميسر في ضوء الكتاب والسنة</h3>
           <div class="book-author">وزارة الشؤون الإسلامية والدعوة والإرشاد</div>
           <p>مدخل واضح إلى أبواب الطهارة والصلاة وأحكام العبادات، مناسب للقراءة والتعلّم.</p>
           <div class="book-level">كتاب تمهيدي</div>
           <button class="btn green book-open" type="button" data-book-id="FP93430" data-book-title="الفقه الميسر في ضوء الكتاب والسنة">اقرأ داخل الموقع</button>
         </article>
-        <article class="card book-card" data-book-category="fiqh">
+<article class="card book-card" data-book-category="fiqh">
           <div class="icon">📗</div><h3>منهاج المسلم</h3>
           <div class="book-author">أبو بكر جابر الجزائري</div>
           <p>كتاب جامع في العقيدة والآداب والعبادات والمعاملات، مرتب في أبواب سهلة الرجوع إليها.</p>
           <div class="book-level">مرجع عام للمسلم</div>
           <button class="btn green book-open" type="button" data-book-id="FP170221" data-book-title="منهاج المسلم">اقرأ داخل الموقع</button>
         </article>
-        <article class="card book-card" data-book-category="fiqh">
+<article class="card book-card" data-book-category="fiqh">
           <div class="icon">📙</div><h3>المغني</h3>
           <div class="book-author">الإمام ابن قدامة المقدسي</div>
           <p>من الموسوعات الفقهية المعروفة، يعرض المسائل وأدلتها وأقوال أهل العلم.</p>
           <div class="book-level">مرجع فقهي موسّع</div>
           <button class="btn green book-open" type="button" data-book-id="FPelmoghni" data-book-title="المغني — ابن قدامة">اقرأ داخل الموقع</button>
-        </article>
-
-        <article class="card book-card" data-book-category="seerah">
-          <div class="icon">📘</div><h3>الرحيق المختوم</h3>
-          <div class="book-author">صفي الرحمن المباركفوري</div>
-          <p>عرض مرتب لأحداث السيرة النبوية من أحوال العرب قبل البعثة إلى وفاة النبي ﷺ.</p>
-          <div class="book-level">مناسب للمبتدئ</div>
-          <button class="btn green book-open" type="button" data-book-id="waq34663" data-book-title="الرحيق المختوم">اقرأ داخل الموقع</button>
-        </article>
-        <article class="card book-card" data-book-category="seerah">
-          <div class="icon">📗</div><h3>السيرة النبوية — ابن هشام</h3>
-          <div class="book-author">عبد الملك بن هشام</div>
-          <p>من أمهات المصادر التراثية في أخبار السيرة ومغازي النبي ﷺ.</p>
-          <div class="book-level">مصدر تراثي موسّع</div>
-          <button class="btn green book-open" type="button" data-book-id="FP30626" data-book-title="السيرة النبوية — ابن هشام">اقرأ داخل الموقع</button>
-        </article>
-        <article class="card book-card" data-book-category="seerah">
-          <div class="icon">📙</div><h3>زاد المعاد في هدي خير العباد</h3>
-          <div class="book-author">ابن قيم الجوزية</div>
-          <p>يتناول هدي النبي ﷺ في عباداته ومعاملاته وأخلاقه وسفره وغزواته.</p>
-          <div class="book-level">للقراءة المتعمقة</div>
-          <button class="btn green book-open" type="button" data-book-id="80184s" data-book-title="زاد المعاد في هدي خير العباد">اقرأ داخل الموقع</button>
-        </article>
-        <article class="card book-card" data-book-category="seerah">
-          <div class="icon">📕</div><h3>الشمائل المحمدية</h3>
-          <div class="book-author">الإمام الترمذي</div>
-          <p>كتاب في صفات النبي ﷺ وأخلاقه ولباسه وطعامه وعبادته وتواضعه.</p>
-          <div class="book-level">في معرفة شمائل النبي ﷺ</div>
-          <button class="btn green book-open" type="button" data-book-id="3840waq" data-book-title="الشمائل المحمدية">اقرأ داخل الموقع</button>
-        </article>
-
-        <article class="card book-card" data-book-category="tafsir">
-          <div class="icon">📘</div><h3>تفسير القرآن العظيم — ابن كثير</h3>
-          <div class="book-author">الحافظ ابن كثير</div>
-          <p>تفسير مشهور يجمع الآيات والأحاديث والآثار وأقوال أهل العلم في بيان معاني القرآن.</p>
-          <div class="book-level">تفسير موسّع</div>
-          <button class="btn green book-open" type="button" data-book-id="72411" data-book-title="تفسير القرآن العظيم — ابن كثير">اقرأ داخل الموقع</button>
-        </article>
-        <article class="card book-card" data-book-category="tafsir">
-          <div class="icon">📗</div><h3>تيسير الكريم الرحمن — تفسير السعدي</h3>
-          <div class="book-author">الشيخ عبد الرحمن بن ناصر السعدي</div>
-          <p>تفسير واضح العبارة، يقرّب معاني الآيات ويبرز الهدايات والفوائد.</p>
-          <div class="book-level">مناسب للقراءة العامة</div>
-          <button class="btn green book-open" type="button" data-book-id="WAQ100585" data-book-title="تفسير السعدي">اقرأ داخل الموقع</button>
-        </article>
-        <article class="card book-card" data-book-category="tafsir">
-          <div class="icon">📙</div><h3>جامع البيان — تفسير الطبري</h3>
-          <div class="book-author">الإمام ابن جرير الطبري</div>
-          <p>من أمهات كتب التفسير بالمأثور، يعرض الروايات وأقوال السلف في تفسير الآيات.</p>
-          <div class="book-level">مرجع تراثي موسّع</div>
-          <button class="btn green book-open" type="button" data-book-id="FP59561" data-book-title="جامع البيان — تفسير الطبري">اقرأ داخل الموقع</button>
-        </article>
-        <article class="card book-card" data-book-category="hadith">
+        </article></div></details>
+<details class="book-category-group" data-book-group="hadith"><summary><span>📜 كتب الحديث</span><span class="book-category-count">2 كتب</span></summary><div class="book-grid" data-book-category-container="hadith"><article class="card book-card" data-book-category="hadith">
           <div class="icon">📕</div><h3>رياض الصالحين</h3>
           <div class="book-author">الإمام أبو زكريا يحيى بن شرف النووي — مراجعة ماهر ياسين الفحل</div>
           <p>كتاب يجمع أبوابًا من العبادات والآداب والأخلاق والرقائق، بأحاديث مرتبة تسهّل القراءة اليومية.</p>
@@ -1341,24 +1292,72 @@ remove-prayer-tracker    <div class="small">المواقيت تُجلب عبر �
           <a class="btn green" href="https://islamhouse.com/ar/books/111275/" target="_blank" rel="noopener noreferrer">عرض الكتاب وملف PDF</a>
           <div class="small">المصدر: IslamHouse؛ صفحة الكتاب تذكر المؤلف والمراجع وتتيح ملف PDF.</div>
         </article>
-        <article class="card book-card" data-book-category="hadith">
+<article class="card book-card" data-book-category="hadith">
           <div class="icon">📗</div><h3>الأذكار النووية</h3>
           <div class="book-author">الإمام أبو زكريا يحيى بن شرف النووي — مراجعة عامر بن علي ياسين</div>
           <p>مرجع واسع لأذكار اليوم والليلة وأدعية الأحوال المختلفة، مع أبواب في آداب الذكر وأحكامه.</p>
           <div class="book-level">كتاب في الأذكار والعبادات</div>
           <a class="btn green" href="https://islamhouse.com/ar/books/2431/" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميل PDF</a>
           <div class="small">المصدر: IslamHouse؛ الناشر المذكور: دار ابن خزيمة للنشر والتوزيع، والصفحة تتيح ملف PDF.</div>
+        </article></div></details>
+<details class="book-category-group" data-book-group="tafsir"><summary><span>📖 كتب التفسير</span><span class="book-category-count">3 كتب</span></summary><div class="book-grid" data-book-category-container="tafsir"><article class="card book-card" data-book-category="tafsir">
+          <div class="icon">📘</div><h3>تفسير القرآن العظيم — ابن كثير</h3>
+          <div class="book-author">الحافظ ابن كثير</div>
+          <p>تفسير مشهور يجمع الآيات والأحاديث والآثار وأقوال أهل العلم في بيان معاني القرآن.</p>
+          <div class="book-level">تفسير موسّع</div>
+          <button class="btn green book-open" type="button" data-book-id="72411" data-book-title="تفسير القرآن العظيم — ابن كثير">اقرأ داخل الموقع</button>
         </article>
-        <article class="card book-card" data-book-category="aqeedah">
+<article class="card book-card" data-book-category="tafsir">
+          <div class="icon">📗</div><h3>تيسير الكريم الرحمن — تفسير السعدي</h3>
+          <div class="book-author">الشيخ عبد الرحمن بن ناصر السعدي</div>
+          <p>تفسير واضح العبارة، يقرّب معاني الآيات ويبرز الهدايات والفوائد.</p>
+          <div class="book-level">مناسب للقراءة العامة</div>
+          <button class="btn green book-open" type="button" data-book-id="WAQ100585" data-book-title="تفسير السعدي">اقرأ داخل الموقع</button>
+        </article>
+<article class="card book-card" data-book-category="tafsir">
+          <div class="icon">📙</div><h3>جامع البيان — تفسير الطبري</h3>
+          <div class="book-author">الإمام ابن جرير الطبري</div>
+          <p>من أمهات كتب التفسير بالمأثور، يعرض الروايات وأقوال السلف في تفسير الآيات.</p>
+          <div class="book-level">مرجع تراثي موسّع</div>
+          <button class="btn green book-open" type="button" data-book-id="FP59561" data-book-title="جامع البيان — تفسير الطبري">اقرأ داخل الموقع</button>
+        </article></div></details>
+<details class="book-category-group" data-book-group="seerah"><summary><span>🌙 كتب السيرة</span><span class="book-category-count">4 كتب</span></summary><div class="book-grid" data-book-category-container="seerah"><article class="card book-card" data-book-category="seerah">
+          <div class="icon">📘</div><h3>الرحيق المختوم</h3>
+          <div class="book-author">صفي الرحمن المباركفوري</div>
+          <p>عرض مرتب لأحداث السيرة النبوية من أحوال العرب قبل البعثة إلى وفاة النبي ﷺ.</p>
+          <div class="book-level">مناسب للمبتدئ</div>
+          <button class="btn green book-open" type="button" data-book-id="waq34663" data-book-title="الرحيق المختوم">اقرأ داخل الموقع</button>
+        </article>
+<article class="card book-card" data-book-category="seerah">
+          <div class="icon">📗</div><h3>السيرة النبوية — ابن هشام</h3>
+          <div class="book-author">عبد الملك بن هشام</div>
+          <p>من أمهات المصادر التراثية في أخبار السيرة ومغازي النبي ﷺ.</p>
+          <div class="book-level">مصدر تراثي موسّع</div>
+          <button class="btn green book-open" type="button" data-book-id="FP30626" data-book-title="السيرة النبوية — ابن هشام">اقرأ داخل الموقع</button>
+        </article>
+<article class="card book-card" data-book-category="seerah">
+          <div class="icon">📙</div><h3>زاد المعاد في هدي خير العباد</h3>
+          <div class="book-author">ابن قيم الجوزية</div>
+          <p>يتناول هدي النبي ﷺ في عباداته ومعاملاته وأخلاقه وسفره وغزواته.</p>
+          <div class="book-level">للقراءة المتعمقة</div>
+          <button class="btn green book-open" type="button" data-book-id="80184s" data-book-title="زاد المعاد في هدي خير العباد">اقرأ داخل الموقع</button>
+        </article>
+<article class="card book-card" data-book-category="seerah">
+          <div class="icon">📕</div><h3>الشمائل المحمدية</h3>
+          <div class="book-author">الإمام الترمذي</div>
+          <p>كتاب في صفات النبي ﷺ وأخلاقه ولباسه وطعامه وعبادته وتواضعه.</p>
+          <div class="book-level">في معرفة شمائل النبي ﷺ</div>
+          <button class="btn green book-open" type="button" data-book-id="3840waq" data-book-title="الشمائل المحمدية">اقرأ داخل الموقع</button>
+        </article></div></details>
+<details class="book-category-group" data-book-group="aqeedah"><summary><span>🕌 كتب العقيدة</span><span class="book-category-count">1 كتب</span></summary><div class="book-grid" data-book-category-container="aqeedah"><article class="card book-card" data-book-category="aqeedah">
           <div class="icon">📘</div><h3>شرح أصول الإيمان</h3>
           <div class="book-author">صالح بن عبد العزيز آل الشيخ</div>
           <p>شرح يجمع مباحث الإيمان بالله وملائكته وكتبه ورسله واليوم الآخر والقدر، مع التنبيه إلى مسائل التوحيد والتحذير من الشرك.</p>
           <div class="book-level">كتاب في العقيدة وأصول الإيمان</div>
           <a class="btn green" href="https://islamhouse.com/ar/books/420070/" target="_blank" rel="noopener noreferrer">قراءة الكتاب وتحميل PDF</a>
           <div class="small">المصدر: IslamHouse؛ الصفحة تتيح نسخة مصورة PDF، وتذكر دار العاصمة للنشر والتوزيع مصدرًا للكتاب.</div>
-        </article>
-      </div>
-      <div class="notice" style="margin-top:14px">تُفتح الكتب داخل نافذة قراءة في زاد المسلم، وتُحمّل صفحاتها من أرشيف الكتب الرقمي؛ لذلك يلزم الاتصال بالإنترنت، لكنك لن تنتقل إلى صفحة خارجية لمجرد فتح الكتاب.</div>
+        </article></div></details></div>
+="notice" style="margin-top:14px">تُفتح الكتب داخل نافذة قراءة في زاد المسلم، وتُحمّل صفحاتها من أرشيف الكتب الرقمي؛ لذلك يلزم الاتصال بالإنترنت، لكنك لن تنتقل إلى صفحة خارجية لمجرد فتح الكتاب.</div>
     </div>
   </section>
 
@@ -2306,7 +2305,33 @@ if(new Date().getDay()===5){$('fridayBadge').textContent='اليوم يوم ال
  
 
  
- // الكتب التي يضيفها المسؤول من لوحة إدارة الموقع — ملفات Supabase Storage
+ // تنظيم كتب المكتبة حسب التصنيف، بما فيها الكتب التي تضاف من لوحة الإدارة
+const bookCategoryMeta={
+ fiqh:{label:"كتب الفقه",icon:"⚖️"},hadith:{label:"كتب الحديث",icon:"📜"},
+ tafsir:{label:"كتب التفسير",icon:"📖"},seerah:{label:"كتب السيرة",icon:"🌙"},
+ aqeedah:{label:"كتب العقيدة",icon:"🕌"},akhlaq:{label:"كتب الأخلاق والآداب",icon:"🌿"},
+ other:{label:"كتب متنوعة",icon:"📚"}
+};
+function ensureBookCategoryGrid(root,category){
+ const key=bookCategoryMeta[category]?category:"other",meta=bookCategoryMeta[key];
+ let group=[...root.querySelectorAll("[data-book-group]")].find(node=>node.dataset.bookGroup===key);
+ if(!group){
+  group=document.createElement("details");group.className="book-category-group";group.dataset.bookGroup=key;
+  const summary=document.createElement("summary"),label=document.createElement("span"),count=document.createElement("span");
+  label.textContent=meta.icon+" "+meta.label;count.className="book-category-count";count.textContent="0 كتب";
+  summary.append(label,count);
+  const cards=document.createElement("div");cards.className="book-grid";cards.dataset.bookCategoryContainer=key;
+  group.append(summary,cards);root.append(group);
+ }
+ return group.querySelector(".book-grid");
+}
+function updateBookCategoryCount(root,category){
+ const group=[...root.querySelectorAll("[data-book-group]")].find(node=>node.dataset.bookGroup===category);
+ if(!group)return;
+ const count=group.querySelector(".book-category-count"),total=group.querySelectorAll(".book-card").length;
+ if(count)count.textContent=total+" كتب";
+}
+// الكتب التي يضيفها المسؤول من لوحة إدارة الموقع — ملفات Supabase Storage
 (async()=>{
  const grid=document.getElementById("bookLibraryGrid"),status=document.getElementById("dynamicLibraryStatus");
  if(!grid)return;
@@ -2338,7 +2363,7 @@ if(new Date().getDay()===5){$('fridayBadge').textContent='اليوم يوم ال
     const open=document.createElement("button");open.type="button";open.className="btn green";open.textContent="اقرأ داخل الموقع";open.addEventListener("click",()=>{const modal=document.getElementById("bookReaderModal"),frame=document.getElementById("bookReaderFrame"),title=document.getElementById("bookReaderTitle");if(modal&&frame){title.textContent=b.title||"قارئ الكتب";frame.src=url;modal.classList.add("active");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden"}});card.append(open);
    }
    const download=document.createElement("a");download.className="btn light";download.href=url;download.target="_blank";download.rel="noopener";download.textContent="فتح / تحميل الكتاب";download.style.display="inline-block";download.style.marginTop="8px";card.append(download);
-   grid.append(card);
+   ensureBookCategoryGrid(grid,b.category||"other").append(card);\n   updateBookCategoryCount(grid,bookCategoryMeta[b.category]?b.category:"other");
   }
   if(status)status.textContent=books.length?"الكتب المضافة من لوحة الإدارة: "+books.length:"لا توجد كتب جديدة منشورة حاليًا.";
   const filters=[...document.querySelectorAll("[data-book-filter]")];
@@ -2346,28 +2371,7 @@ if(new Date().getDay()===5){$('fridayBadge').textContent='اليوم يوم ال
  }catch(e){if(status)status.textContent="تعذر تحميل الكتب الجديدة حاليًا."}
 })();
 
-// تصفية مكتبة الكتب وفتح القارئ داخل الموقع
-const bookFilterButtons=[...document.querySelectorAll('[data-book-filter]')];
-const bookCards=[...document.querySelectorAll('[data-book-category]')];
-function filterBookLibrary(category){
- bookFilterButtons.forEach(button=>{
-  const active=button.dataset.bookFilter===category;
-  button.classList.toggle('active',active);
-  button.setAttribute('aria-pressed',String(active));
- });
- let visible=0;
- bookCards.forEach(card=>{
-  const show=category==='all'||card.dataset.bookCategory===category;
-  card.hidden=!show;
-  if(show)visible++;
- });
- const count=$('bookLibraryCount');
- if(count)count.textContent='عدد الكتب الظاهرة: '+visible+' من '+bookCards.length;
-}
-bookFilterButtons.forEach(button=>button.addEventListener('click',()=>filterBookLibrary(button.dataset.bookFilter)));
-filterBookLibrary('all');
-
-const bookModal=$('bookReaderModal');
+// فتح قارئ الكتب داخل الموقع\nconst bookModal=$('bookReaderModal');
 const bookFrame=$('bookReaderFrame');
 function closeBookReader(){
  if(!bookModal)return;
