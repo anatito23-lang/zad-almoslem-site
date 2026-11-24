@@ -893,14 +893,11 @@ public class MainActivity extends Activity {
     private String buildAudioDiagnostics() {
         StringBuilder report = new StringBuilder();
         android.content.SharedPreferences audioPrefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
-        report.append("نتيجة آخر تجربة: ").append(audioPrefs.getBoolean("adhan_playback_started", false) ? "وصل المشغل إلى حالة الجاهزية" : "لم يؤكد المشغل بدء الصوت").append("
-");
+        report.append("نتيجة آخر تجربة: ").append(audioPrefs.getBoolean("adhan_playback_started", false) ? "وصل المشغل إلى حالة الجاهزية" : "لم يؤكد المشغل بدء الصوت").append("\n");
         String lastError = audioPrefs.getString("adhan_last_playback_error", "");
-        if (!lastError.isEmpty()) report.append("سبب التعذر: ").append(lastError).append("
-");
+        if (!lastError.isEmpty()) report.append("سبب التعذر: ").append(lastError).append("\n");
         String startError = audioPrefs.getString("adhan_last_start_error", "");
-        if (!startError.isEmpty()) report.append("خطأ بدء الخدمة: ").append(startError).append("
-");
+        if (!startError.isEmpty()) report.append("خطأ بدء الخدمة: ").append(startError).append("\n");
         File dir = new File(getFilesDir(), "adhan");
         int valid = 0;
         for (int i = 0; i < PRAYERS.length; i++) {
@@ -912,11 +909,9 @@ public class MainActivity extends Activity {
             File ogg = new File(dir, fileVoice + ".ogg");
             File chosen = isAudioFileValid(mp3) ? mp3 : (isAudioFileValid(ogg) ? ogg : null);
             if (chosen != null) valid++;
-            report.append(prayer).append(": ").append(chosen == null ? "ملف غير موجود/غير صالح" : "ملف سليم — " + android.text.format.Formatter.formatShortFileSize(this, chosen.length())).append("
-");
+            report.append(prayer).append(": ").append(chosen == null ? "ملف غير موجود/غير صالح" : "ملف سليم — " + android.text.format.Formatter.formatShortFileSize(this, chosen.length())).append("\n");
         }
-        report.append("ملفات الأذان الصالحة للصلاة المختارة: ").append(valid).append(" من 5").append("
-");
+        report.append("ملفات الأذان الصالحة للصلاة المختارة: ").append(valid).append(" من 5").append("\n");
         File duaFile = new File(new File(getFilesDir(), "reminders"), "dua.mp3");
         report.append("دعاء الشعراوي بعد الأذان: ")
                 .append(isAudioFileValid(duaFile)
