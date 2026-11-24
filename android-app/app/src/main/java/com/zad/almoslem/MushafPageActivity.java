@@ -100,7 +100,7 @@ public class MushafPageActivity extends Activity {
         root.setOrientation(LinearLayout.VERTICAL);
         // Respect Android status/navigation bar insets so the toolbar never
         // sits underneath the screen edge or system icons on edge-to-edge devices.
-        root.setPadding(dp(12), dp(12), dp(12), dp(12));
+        root.setPadding(dp(4), dp(3), dp(4), dp(3));
         root.setOnApplyWindowInsetsListener((view, insets) -> {
             if (!fullScreen) {
                 view.setPadding(
@@ -127,8 +127,8 @@ public class MushafPageActivity extends Activity {
         // Put the controls above the page and let the page consume all remaining
         // available height. A fixed pixel-derived height left a large blank area
         // on phones with different density and navigation-bar sizes.
-        LinearLayout.LayoutParams toolbarLp = new LinearLayout.LayoutParams(-1, dp(46));
-        toolbarLp.bottomMargin = dp(8);
+        LinearLayout.LayoutParams toolbarLp = new LinearLayout.LayoutParams(-1, dp(38));
+        toolbarLp.bottomMargin = dp(3);
         root.addView(toolbar, toolbarLp);
 
         offlineRow = new LinearLayout(this);
@@ -149,8 +149,8 @@ public class MushafPageActivity extends Activity {
         root.addView(pageFrame, imageLp);
 
         pageLabel = label("الصفحة 1 من 604", 13, AppThemeColors.text(this), true);
-        pageLabel.setPadding(0, dp(3), 0, dp(3));
-        root.addView(pageLabel, new LinearLayout.LayoutParams(-1, dp(25)));
+        pageLabel.setPadding(0, dp(1), 0, dp(1));
+        root.addView(pageLabel, new LinearLayout.LayoutParams(-1, dp(20)));
 
         gesture = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override public boolean onDown(MotionEvent e) { return true; }
@@ -178,7 +178,7 @@ public class MushafPageActivity extends Activity {
 
         status = label("صفحات المصحف تُحمّل وتُحفظ تلقائيًا على الهاتف", 12, AppThemeColors.muted(this), false);
         status.setTextSize(10);
-        status.setPadding(0, dp(2), 0, dp(2));
+        status.setPadding(0, 0, 0, 0);
         root.addView(status);
         attribution = label("صور صفحات المصحف: Quran-Images — ترخيص MIT", 9, AppThemeColors.muted(this), false);
         root.addView(attribution);
@@ -193,8 +193,8 @@ public class MushafPageActivity extends Activity {
         previous.setText("السابق");
         next = new Button(this);
         next.setText("التالي");
-        nav.addView(previous, new LinearLayout.LayoutParams(0, dp(40), 1));
-        nav.addView(next, new LinearLayout.LayoutParams(0, dp(40), 1));
+        nav.addView(previous, new LinearLayout.LayoutParams(0, dp(34), 1));
+        nav.addView(next, new LinearLayout.LayoutParams(0, dp(34), 1));
         root.addView(nav);
         previous.setOnClickListener(v -> { if (page > 1) showPage(page - 1); });
         next.setOnClickListener(v -> { if (page < 604) showPage(page + 1); });
@@ -229,7 +229,7 @@ public class MushafPageActivity extends Activity {
         } else {
             getWindow().getDecorView().setSystemUiVisibility(0);
             AppThemeColors.apply(this);
-            root.setPadding(dp(6), dp(2), dp(6), dp(2));
+            root.setPadding(dp(3), dp(1), dp(3), dp(1));
             toolbar.setVisibility(View.VISIBLE);
             offlineRow.setVisibility(View.GONE);
             pageLabel.setVisibility(View.VISIBLE);
