@@ -357,7 +357,7 @@ public class RadioPlaybackService extends Service {
                         } else {
                             getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_ready", true).apply();
                             String title = "quran".equals(active) ? "استماع القرآن الكريم" :
-                                    ("nasheed".equals(active) ? "الإنشاد والابتهالات" : "الرقية الشرعية");
+                                    ("nasheed".equals(active) ? "الإنشاد والابتهالات" : ("dua".equals(active) ? playbackTitle() : "الرقية الشرعية"));
                             updateRadioNotification(title, "يعمل الآن");
                         }
                     }
