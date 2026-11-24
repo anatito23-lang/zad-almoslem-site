@@ -136,8 +136,8 @@ public class IslamicReelsActivity extends Activity {
 
             String body = post.optString("description", "");
             if (post.optBoolean("builtin", false)) {
-                body = post.optString("verse", "") + "\\n" + post.optString("reference", "") +
-                        (body.isEmpty() ? "" : "\\n" + body);
+                body = post.optString("verse", "") + "\n" + post.optString("reference", "") +
+                        (body.isEmpty() ? "" : "\n" + body);
             }
             TextView caption = label(body, 15, 0xfff5f5f0, false);
             caption.setGravity(Gravity.RIGHT | Gravity.CENTER_VERTICAL);
@@ -174,9 +174,7 @@ public class IslamicReelsActivity extends Activity {
                     }
                     Bitmap result = bitmap;
                     runOnUiThread(() -> {
-                        if (result != null && photo.getParent() == reelFeed.getChildAt(i)) {
-                            photo.setImageBitmap(result);
-                        } else if (result != null && page.getParent() == reelFeed) {
+                        if (result != null && page.getParent() == reelFeed) {
                             photo.setImageBitmap(result);
                         }
                     });
