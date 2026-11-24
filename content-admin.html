@@ -237,11 +237,50 @@ $("siteContentForm").addEventListener("submit",async e=>{
 $("siteContentCancel").addEventListener("click",resetSiteForm);
 $("siteContentRefresh").addEventListener("click",loadSiteContent);
 
+
+function qalbiMsg(value,error=false){const el=$("qalbiContentMessage");el.textContent=value;el.classList.remove("hidden","error");if(error)el.classList.add("error")}
+function resetQalbiForm(){
+ $("qalbiContentForm").reset();$("qalbiContentId").value="";$("qalbiContentOrder").value="0";
+ $("qalbiContentPublished").checked=true;$("qalbiContentSave").textContent="حفظ ونشر النفحة";clearMessage("qalbiContentMessage");
+}
+async function loadQalbiContent(){
+ if(auth.currentUser?.uid!==ADMIN_UID)return;
+ $("qalbiContentList").innerHTML='<p class="small">جارٍ تحميل النفحات…</p>';
+ try{
+  const snap=await getDocs(collection(db,"site_content"));
+  const rows=snap.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.sectionId==="qalbi-itmaann")
+   .sort((a,b)=>(Number(a.order)||0)-(Number(b.order)||0)||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  if(!rows.length){$("qalbiContentList").innerHTML='<p class="small">لا توجد نفحات مسجلة حتى الآن.</p>';return}
+  $("qalbiContentList").innerHTML=rows.map(x=>'<article class="item"><div class="row"><strong>'+escapeHtml(x.title||"نفحة إيمانية")+'</strong><span class="tag">'+(isPublished(x)?"منشور":"مسودة")+'</span></div><p>'+escapeHtml((x.body||"").slice(0,260))+'</p><p class="small">المصدر: '+escapeHtml(x.source||"غير محدد")+' · الترتيب: '+escapeHtml(String(x.order??0))+'</p><div class="actions"><button type="button" class="secondary" data-qalbi-edit="'+escapeHtml(x.id)+'">تعديل</button><button type="button" class="gold" data-qalbi-toggle="'+escapeHtml(x.id)+'" data-published="'+isPublished(x)+'">'+(isPublished(x)?"إلغاء النشر":"نشر")+'</button><button type="button" class="danger" data-qalbi-delete="'+escapeHtml(x.id)+'">حذف</button></div></article>').join("");
+  $("qalbiContentList").querySelectorAll("[data-qalbi-edit]").forEach(b=>b.addEventListener("click",()=>{const x=rows.find(r=>r.id===b.dataset.qalbiEdit);if(!x)return;$("qalbiContentId").value=x.id;$("qalbiContentTitle").value=x.title||"";$("qalbiContentBody").value=x.body||"";$("qalbiContentSource").value=x.source||"";$("qalbiContentOrder").value=String(x.order??0);$("qalbiContentPublished").checked=isPublished(x);$("qalbiContentSave").textContent="حفظ التعديلات";window.scrollTo({top:$("qalbiAdminCard").offsetTop,behavior:"smooth"});clearMessage("qalbiContentMessage")}));
+  $("qalbiContentList").querySelectorAll("[data-qalbi-toggle]").forEach(b=>b.addEventListener("click",async()=>{const next=b.dataset.published!=="true";try{await updateDoc(doc(db,"site_content",b.dataset.qalbiToggle),{published:next,"تم النشر":next,updatedAt:serverTimestamp()});qalbiMsg(next?"تم نشر النفحة.":"تم إلغاء نشر النفحة.");await loadQalbiContent()}catch(e){qalbiMsg("تعذر تحديث حالة النشر: "+e.message,true)}}));
+  $("qalbiContentList").querySelectorAll("[data-qalbi-delete]").forEach(b=>b.addEventListener("click",async()=>{if(!confirm("هل تريد حذف هذه النفحة نهائيًا؟"))return;try{await deleteDoc(doc(db,"site_content",b.dataset.qalbiDelete));qalbiMsg("تم حذف النفحة.");await loadQalbiContent()}catch(e){qalbiMsg("تعذر حذف النفحة: "+e.message,true)}}));
+ }catch(e){$("qalbiContentList").textContent="تعذر تحميل النفحات: "+e.message;qalbiMsg("تعذر تحميل المحتوى. تحقق من الاتصال والصلاحيات.",true)}
+}
+$("qalbiContentForm").addEventListener("submit",async e=>{
+ e.preventDefault();
+ if(auth.currentUser?.uid!==ADMIN_UID){qalbiMsg("انتهت الجلسة. سجّل الدخول مرة أخرى.",true);return}
+ const title=$("qalbiContentTitle").value.trim(),body=$("qalbiContentBody").value.trim(),source=$("qalbiContentSource").value.trim(),order=Number($("qalbiContentOrder").value);
+ if(!title||!body||!source){qalbiMsg("اكتب العنوان والنص والمصدر قبل الحفظ.",true);return}
+ if(!Number.isInteger(order)||order<0||order>9999){qalbiMsg("ترتيب الظهور يجب أن يكون رقمًا من 0 إلى 9999.",true);return}
+ const published=$("qalbiContentPublished").checked,id=$("qalbiContentId").value;
+ const data={sectionId:"qalbi-itmaann",title,body,source,order,published,"تم النشر":published,updatedAt:serverTimestamp()};
+ const button=$("qalbiContentSave");button.disabled=true;button.textContent="جارٍ الحفظ…";
+ try{
+  if(id)await updateDoc(doc(db,"site_content",id),data);
+  else{data.createdAt=serverTimestamp();await addDoc(collection(db,"site_content"),data)}
+  resetQalbiForm();qalbiMsg(id?"تم حفظ تعديلات النفحة بنجاح.":"تم حفظ ونشر النفحة بنجاح.");await loadQalbiContent();
+ }catch(err){qalbiMsg("تعذر الحفظ: "+(err?.message||"خطأ غير معروف"),true)}
+ finally{button.disabled=false;if(!$("qalbiContentId").value)button.textContent="حفظ ونشر النفحة"}
+});
+$("qalbiContentCancel").addEventListener("click",resetQalbiForm);
+$("qalbiContentRefresh").addEventListener("click",loadQalbiContent);
+
 onAuthStateChanged(auth,async user=>{
  if(!user){$("loginCard").classList.remove("hidden");$("adminPanel").classList.add("hidden");$("listCard").classList.add("hidden");$("customTabsCard").classList.add("hidden");$("qalbiAdminCard").classList.add("hidden");$("siteContentCard").classList.add("hidden");return;}
  if(user.uid!==ADMIN_UID){await signOut(auth);message("loginMessage","هذا الحساب غير مصرح له بإدارة المحتوى.",true);return;}
  $("loginCard").classList.add("hidden");$("adminPanel").classList.remove("hidden");$("listCard").classList.remove("hidden");$("customTabsCard").classList.remove("hidden");$("qalbiAdminCard").classList.remove("hidden");$("siteContentCard").classList.add("hidden");$("adminEmail").textContent=user.email||"حساب المسؤول";
  await loadItems();await loadQalbiContent();try{await readCustomTabs()}catch(e){customMessage("تعذر تحميل التبويبات: "+e.message,true);}
 });
-</script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=20261122-admin-pwa",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));}</script>
+</script><script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js?v=20261124-qalbi-save-fix",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));}</script>
 </body></html>
