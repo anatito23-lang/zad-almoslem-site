@@ -165,8 +165,8 @@ public class RadioPlaybackService extends Service {
                 if(!allowedLocal){
                     android.net.Uri parsed=android.net.Uri.parse(url);
                     String host=parsed.getHost();
-                    allowedQuran="quran".equals(kind) && "https".equalsIgnoreCase(parsed.getScheme()) && host!=null &&
-                        (host.equalsIgnoreCase("mp3quran.net") || host.toLowerCase().endsWith(".mp3quran.net") || host.equalsIgnoreCase("mp3quran.com") || host.toLowerCase().endsWith(".mp3quran.com"));
+                    allowedQuran=("quran".equals(kind) || "quran_ayah".equals(kind)) && "https".equalsIgnoreCase(parsed.getScheme()) && host!=null &&
+                        (("quran_ayah".equals(kind) && host.equalsIgnoreCase("cdn.islamic.network")) || host.equalsIgnoreCase("mp3quran.net") || host.toLowerCase().endsWith(".mp3quran.net") || host.equalsIgnoreCase("mp3quran.com") || host.toLowerCase().endsWith(".mp3quran.com"));
                     allowedAudio=("nasheed".equals(kind)||"ruqyah".equals(kind)) && "https".equalsIgnoreCase(parsed.getScheme()) && host!=null &&
                         (host.equalsIgnoreCase("archive.org") || host.toLowerCase().endsWith(".archive.org") || host.toLowerCase().endsWith(".us.archive.org") ||
                          host.equalsIgnoreCase("nourelquran.com") || host.equalsIgnoreCase("www.nourelquran.com"));
@@ -333,6 +333,10 @@ public class RadioPlaybackService extends Service {
                     .build(), false);
             player.addListener(new Player.Listener() {
                 @Override public void onPlaybackStateChanged(int state) {
+                    if (state == Player.STATE_ENDED && "quran_ayah".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""))) {
+                        getSharedPreferences("zad_audio",MODE_PRIVATE).edit().putBoolean("radio_playing",false).putBoolean("radio_paused",true).apply();
+                        updateRadioNotification(playbackTitle(),"انتهت الآية الصوتية"); return;
+                    }
                     if (state == Player.STATE_ENDED &&
                             "quran".equals(getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", ""))) {
                         playNextQuranSurah();
@@ -356,7 +360,7 @@ public class RadioPlaybackService extends Service {
                             updateRadioNotification(playbackTitle(), "البث يعمل الآن");
                         } else {
                             getSharedPreferences("zad_audio", MODE_PRIVATE).edit().putBoolean("radio_ready", true).apply();
-                            String title = "quran".equals(active) ? "استماع القرآن الكريم" :
+                            String title = ("quran".equals(active) || "quran_ayah".equals(active)) ? "استماع القرآن الكريم" :
                                     ("nasheed".equals(active) ? "الإنشاد والابتهالات" : ("dua".equals(active) ? playbackTitle() : "الرقية الشرعية"));
                             updateRadioNotification(title, "يعمل الآن");
                         }
@@ -509,7 +513,7 @@ public class RadioPlaybackService extends Service {
     }
 
     private String defaultTitle(String kind) {
-        if ("quran".equals(kind)) return "استماع القرآن الكريم";
+        if ("quran".equals(kind) || "quran_ayah".equals(kind)) return "استماع القرآن الكريم";
         if ("ruqyah".equals(kind)) return "الرقية الشرعية";
         if ("nasheed".equals(kind)) return "الإنشاد والابتهالات";
         if ("dua".equals(kind)) return "الأدعية الصوتية";
@@ -524,10 +528,11 @@ public class RadioPlaybackService extends Service {
 
     private Notification buildPlaybackNotification(String title, String message) {
         String kind = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", "radio");
-        Class<?> destination = "quran".equals(kind) ? QuranListeningActivity.class :
-                "ruqyah".equals(kind) ? RuqyahActivity.class : RadioActivity.class;
+        Class<?> destination = "quran_ayah".equals(kind) ? QuranTextActivity.class : ("quran".equals(kind) ? QuranListeningActivity.class :
+                "ruqyah".equals(kind) ? RuqyahActivity.class : RadioActivity.class);
         Intent open = new Intent(this, destination);
         open.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if ("quran_ayah".equals(kind)) { android.content.SharedPreferences prefs=getSharedPreferences("zad_audio",MODE_PRIVATE); open.putExtra("surah_number",prefs.getInt("current_ayah_surah",1)); open.putExtra("target_ayah",prefs.getInt("current_ayah_number",1)); }
         PendingIntent content = PendingIntent.getActivity(this, 7411, open,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         boolean playing = player != null && (player.getPlayWhenReady() || resumeOnAudioFocusGain || (adhanPauseRequested && resumeAfterAdhan));
