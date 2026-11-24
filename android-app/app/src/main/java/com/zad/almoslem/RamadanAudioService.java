@@ -73,6 +73,11 @@ public class RamadanAudioService extends Service {
             }
         }
         if ("ramadan_suhoor".equals(key)) {
+            File savedNasheed=new File(new File(getFilesDir(),"ramadan_audio"),"suhoor_nasheed.mp3");
+            if(savedNasheed.isFile()&&savedNasheed.length()>4096){
+                playFile(savedNasheed,volume);
+                return START_NOT_STICKY;
+            }
             String nasheedUrl=prefs.getString("suhoor_nasheed_url","");
             if(nasheedUrl.startsWith("https://")){
                 playRemote(nasheedUrl,volume);
@@ -102,7 +107,9 @@ public class RamadanAudioService extends Service {
                 // Use the bundled, human-recorded CC0 adhan as the default suhoor alert.
                 // An administrator-published suhoor recording may still override it.
                 if("ramadan_suhoor_voice_test".equals(key)||"ramadan_suhoor".equals(key)){
-                    playBundledAdhan();
+                    File savedNasheed=new File(new File(getFilesDir(),"ramadan_audio"),"suhoor_nasheed.mp3");
+                    if(savedNasheed.isFile()&&savedNasheed.length()>4096)playFile(savedNasheed,volume);
+                    else playBundledAdhan();
                     return START_NOT_STICKY;
                 }
                 showMissingRecording();

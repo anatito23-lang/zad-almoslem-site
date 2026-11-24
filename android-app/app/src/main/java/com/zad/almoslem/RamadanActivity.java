@@ -16,6 +16,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class RamadanActivity extends Activity {
     private SharedPreferences prefs;
@@ -111,16 +112,27 @@ public class RamadanActivity extends Activity {
         addDua(ramadanGuide,"فضل قيام ليلة القدر","قال رسول الله ﷺ: «من قام ليلة القدر إيمانًا واحتسابًا غُفر له ما تقدم من ذنبه» متفق عليه.");
         addDua(ramadanGuide,"اغتنم أيام الشهر","اجعل لك وردًا ثابتًا من القرآن، واحفظ لسانك، وأكثر من الدعاء والاستغفار، وتفقد المحتاجين، وأحسن إلى أهلك وجيرانك.");
         addDua(ramadanGuide,"لا تؤجل التوبة","ابدأ من اليوم؛ فالعبرة ليست بكثرة ما نخطط له، وإنما بصدق العمل والثبات عليه.");
+        addDua(ramadanGuide,"خطة يومية بسيطة","بعد الفجر: أذكار الصباح وورد القرآن. أثناء النهار: حفظ اللسان وإتقان العمل. قبل المغرب: دعاء واستغفار. بعد العشاء: التراويح وما تيسر من القيام.");
+        addDua(ramadanGuide,"الصيام جُنّة","قال رسول الله ﷺ: «الصيام جُنّة، فلا يرفث ولا يجهل» متفق عليه. فاحفظ صيامك من الغيبة والخصومة وسوء الخلق.");
+        addDua(ramadanGuide,"باب الصدقة مفتوح","قال ابن عباس رضي الله عنهما: «كان رسول الله ﷺ أجود الناس، وكان أجود ما يكون في رمضان» متفق عليه. تصدق ولو بالقليل، وأطعم صائمًا، وتفقد محتاجًا.");
+        addDua(ramadanGuide,"رمضان وصلة الرحم","اجعل في شهرك زيارة أو اتصالًا برحمك، وابدأ بالسلام والعفو، ولا تجعل خلافًا قديمًا يحرمك أجر الصلة.");
+        addDua(ramadanGuide,"رمضان وحفظ اللسان","قال رسول الله ﷺ: «من لم يدع قول الزور والعمل به فليس لله حاجة في أن يدع طعامه وشرابه» رواه البخاري. ليس الصيام جوعًا وعطشًا فقط؛ بل تهذيب للقلب واللسان.");
+        addDua(ramadanGuide,"العشر الأواخر","كان النبي ﷺ إذا دخل العشر شد مئزره وأحيا ليله وأيقظ أهله، متفق عليه. فاستعد لها من الآن، ولا تجعل آخر الشهر أضعف أيامك.");
+        addDua(ramadanGuide,"ليلة القدر","قال الله تعالى: ﴿لَيْلَةُ الْقَدْرِ خَيْرٌ مِنْ أَلْفِ شَهْرٍ﴾ [القدر: 3]. وأكثر من الدعاء الذي علّمه النبي ﷺ لعائشة: «اللهم إنك عفو تحب العفو فاعف عني» رواه الترمذي وصححه.");
+        addDua(ramadanGuide,"زكاة الفطر","تذكّر إخراج زكاة الفطر قبل صلاة العيد، طُهرةً للصائم وطُعمةً للمساكين؛ وأخرجها وفق المقدار المعتمد في بلدك.");
+        addDua(ramadanGuide,"أدب الاختلاف","لا تجعل الصيام سببًا للغضب ورفع الصوت. إذا جادلك أحد فقل: إني صائم، كما أرشد النبي ﷺ في الحديث المتفق عليه.");
+        addDua(ramadanGuide,"اجعل للقرآن أثرًا","لا يكن همّك عدد الصفحات وحده؛ اقرأ بتدبر، واسأل نفسك: ما الآية التي سأعمل بها اليوم؟ ثم خذ منها خطوة عملية.");
+
         Button guideMushaf=new Button(this);guideMushaf.setText("📖  انتقل إلى المصحف");ramadanGuide.addView(guideMushaf,full());
         guideMushaf.setOnClickListener(v->{Intent open=new Intent(this,MushafPageActivity.class);open.putExtra("from_ramadan",true);open.putExtra("page",getSharedPreferences("zad_mushaf",MODE_PRIVATE).getInt("last_page",1));startActivity(open);});
 
         LinearLayout settings=card("إعدادات الشهر والتنبيهات");
         Switch enabled=new Switch(this);enabled.setText("تفعيل تنبيهات رمضان");enabled.setTextColor(AppThemeColors.text(this));enabled.setChecked(prefs.getBoolean("enabled",false));settings.addView(enabled,full());
-        TextView startLabel=text("",13,AppThemeColors.muted(this),false);settings.addView(startLabel,full());
+        TextView startLabel=text("الموعد الفلكي المتوقع لأول رمضان 1448: الاثنين 8 فبراير 2027؛ ويُعتمد الموعد النهائي بعد إعلان رؤية الهلال في مصر.",13,AppThemeColors.muted(this),false);settings.addView(startLabel,full());
         Button chooseStart=new Button(this);chooseStart.setText("تحديد أول يوم في رمضان");settings.addView(chooseStart,full());
         updateStartLabel(startLabel);
-        chooseStart.setOnClickListener(v->{Calendar now=Calendar.getInstance();long saved=prefs.getLong("start_at",0L);if(saved>0)now.setTimeInMillis(saved);
-            new DatePickerDialog(this,(picker,y,m,d)->{Calendar first=Calendar.getInstance();first.set(y,m,d,0,0,0);first.set(Calendar.MILLISECOND,0);prefs.edit().putLong("start_at",first.getTimeInMillis()).apply();updateStartLabel(startLabel);RamadanReminderReceiver.scheduleAll(this);},now.get(Calendar.YEAR),now.get(Calendar.MONTH),now.get(Calendar.DAY_OF_MONTH)).show();});
+        chooseStart.setOnClickListener(v->{Calendar now=Calendar.getInstance(TimeZone.getTimeZone("Africa/Cairo"));long saved=prefs.getLong("start_at",0L);if(saved>0)now.setTimeInMillis(saved);else now.set(2027,Calendar.FEBRUARY,8,0,0,0);
+            new DatePickerDialog(this,(picker,y,m,d)->{Calendar first=Calendar.getInstance(TimeZone.getTimeZone("Africa/Cairo"));first.set(y,m,d,0,0,0);first.set(Calendar.MILLISECOND,0);prefs.edit().putLong("start_at",first.getTimeInMillis()).apply();updateStartLabel(startLabel);RamadanReminderReceiver.scheduleAll(this);},now.get(Calendar.YEAR),now.get(Calendar.MONTH),now.get(Calendar.DAY_OF_MONTH)).show();});
         settings.addView(text("تنبيه السحور",15,AppThemeColors.accent(this),true),full());
         TextView suhoorUploadLabel=text("اختر من مكتبة الابتهالات صوتًا لتنبيه السحور، أو اترك الاختيار الافتراضي ليعمل أذان التطبيق المرفق.",12,AppThemeColors.muted(this),false);settings.addView(suhoorUploadLabel,full());
         Switch suhoor=new Switch(this);suhoor.setText("تشغيل تنبيه السحور");suhoor.setTextColor(AppThemeColors.text(this));suhoor.setChecked(prefs.getBoolean("suhoor_enabled",true));settings.addView(suhoor,full());
@@ -204,9 +216,39 @@ public class RamadanActivity extends Activity {
         String title=AudioLibraryActivity.getTrackName(artist,track);
         prefs.edit().putInt("suhoor_nasheed_artist",artist).putInt("suhoor_nasheed_track",track)
                 .putString("suhoor_nasheed_url",url).putString("suhoor_nasheed_title",title)
-                .putString("suhoor_nasheed_artist_name",AudioLibraryActivity.getArtistName(artist)).apply();
+                .putString("suhoor_nasheed_artist_name",AudioLibraryActivity.getArtistName(artist))
+                .putBoolean("suhoor_nasheed_downloaded",false).apply();
+        downloadSuhoorNasheed(url,title);
         updateSuhoorNasheedStatus();
         return true;
+    }
+    private void downloadSuhoorNasheed(String url,String title){
+        if(!url.startsWith("https://"))return;
+        if(suhoorNasheedStatus!=null)suhoorNasheedStatus.setText("جارٍ حفظ صوت السحور على الهاتف لاستخدامه دون إنترنت...");
+        new Thread(()->{
+            java.net.HttpURLConnection connection=null;
+            try{
+                connection=(java.net.HttpURLConnection)new java.net.URL(url).openConnection();
+                connection.setConnectTimeout(20000);connection.setReadTimeout(30000);connection.setInstanceFollowRedirects(true);
+                connection.setRequestProperty("User-Agent","ZadAlmoslem Android");
+                if(connection.getResponseCode()!=200)throw new java.io.IOException("HTTP "+connection.getResponseCode());
+                java.io.File dir=new java.io.File(getFilesDir(),"ramadan_audio");if(!dir.exists()&&!dir.mkdirs())throw new java.io.IOException("تعذر إنشاء مجلد الصوت");
+                java.io.File temp=new java.io.File(dir,"suhoor_nasheed.tmp"),target=new java.io.File(dir,"suhoor_nasheed.mp3");
+                try(java.io.InputStream in=connection.getInputStream();java.io.FileOutputStream out=new java.io.FileOutputStream(temp)){
+                    byte[] buffer=new byte[8192];int n;long total=0;
+                    while((n=in.read(buffer))!=-1){total+=n;if(total>80L*1024*1024)throw new java.io.IOException("حجم التسجيل أكبر من الحد المسموح");out.write(buffer,0,n);}
+                    out.getFD().sync();
+                }
+                if(temp.length()<4096)throw new java.io.IOException("ملف الصوت غير مكتمل");
+                if(target.exists()&&!target.delete())throw new java.io.IOException("تعذر استبدال التسجيل القديم");
+                if(!temp.renameTo(target))throw new java.io.IOException("تعذر حفظ التسجيل");
+                prefs.edit().putBoolean("suhoor_nasheed_downloaded",true).apply();
+                runOnUiThread(()->{if(suhoorNasheedStatus!=null)suhoorNasheedStatus.setText("تم حفظ «"+title+"» على الهاتف — سيعمل دون إنترنت.");});
+            }catch(Exception e){
+                android.util.Log.e("ZadRamadan","Could not download suhoor audio",e);
+                runOnUiThread(()->{if(suhoorNasheedStatus!=null)suhoorNasheedStatus.setText("تعذر الحفظ دون إنترنت. تحقق من الاتصال ثم أعد اعتماد التسجيل.");});
+            }finally{if(connection!=null)connection.disconnect();}
+        }).start();
     }
     private void updateSuhoorNasheedStatus(){
         if(suhoorNasheedStatus==null)return;
@@ -215,7 +257,7 @@ public class RamadanActivity extends Activity {
         if(title.isEmpty())suhoorNasheedStatus.setText("لم يتم اختيار ابتهال بعد؛ سيعمل أذان التطبيق المرفق كصوت افتراضي.");
         else suhoorNasheedStatus.setText("صوت السحور المعتمد: "+title+" — "+artist);
     }
-    private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("لم يتم تحديد بداية الشهر بعد؛ اختر أول يوم حتى تتوقف التنبيهات تلقائيًا بعد 30 يومًا.");return;}Calendar c=Calendar.getInstance();c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
+    private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("الموعد الفلكي المتوقع: الاثنين 8 فبراير 2027 (1 رمضان 1448). انتظر إعلان دار الإفتاء المصرية لتأكيد بداية الشهر.");return;}Calendar c=Calendar.getInstance(TimeZone.getTimeZone("Africa/Cairo"));c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
     private void addDua(LinearLayout box,String heading,String body){TextView h=text(heading,14,AppThemeColors.accent(this),true);h.setPadding(0,dp(9),0,dp(2));box.addView(h,full());box.addView(text(body,14,AppThemeColors.text(this),false),full());}
     private void updateFastCount(){int n=0;for(int i=1;i<=30;i++)if(prefs.getBoolean("fast_"+i,false))n++;if(fastCount!=null)fastCount.setText("أيام الصيام المسجلة: "+n+" من 30");}
     private void updateKhatma(){

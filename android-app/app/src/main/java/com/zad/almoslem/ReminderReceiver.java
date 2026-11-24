@@ -98,6 +98,12 @@ public class ReminderReceiver extends BroadcastReceiver {
             cancel(context,alertKey);
         }
     }
+    public static void cancelPrayer(Context context,String name) {
+        String key="prayer_"+name;
+        cancel(context,key);
+        cancel(context,"approach_"+name);
+        context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE).edit().remove(key).apply();
+    }
     public static void schedulePrayer(Context context,String name,long at) {
         if(at<=System.currentTimeMillis()) return;
         String key="prayer_"+name;
@@ -249,7 +255,10 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
         if(prayer) {
             // Advance by one local calendar day, not a fixed 24-hour duration.
-            Calendar nextPrayer = Calendar.getInstance();
+            String zoneId=prefs.getString("native_city_timezone","");
+            if(zoneId.isEmpty() && "Egypt".equals(prefs.getString("native_country","Egypt"))) zoneId="Africa/Cairo";
+            if(zoneId.isEmpty()) zoneId=java.util.TimeZone.getDefault().getID();
+            Calendar nextPrayer = Calendar.getInstance(java.util.TimeZone.getTimeZone(zoneId));
             long previous = prefs.getLong(key, 0L);
             if (previous <= 0L) previous = System.currentTimeMillis();
             nextPrayer.setTimeInMillis(previous);
@@ -343,7 +352,8 @@ public class ReminderReceiver extends BroadcastReceiver {
         else if(prayer && adhanEnabled && thisPrayerEnabled && "off".equals(adhanMode)) { /* no alert */ }
         else if(powerSaverEnabled || (gentle && exactAlarmAudioAllowed) || fallbackAudioNotification) b.setDefaults(0);
         else b.setDefaults(Notification.DEFAULT_VIBRATE);
-        if(!prayer || (adhanEnabled && thisPrayerEnabled && !"off".equals(adhanMode))) nm.notify(key.hashCode(),b.build());
+        // "off" means silent prayer alert, not suppressing the notification itself.
+        if(!prayer || (adhanEnabled && thisPrayerEnabled)) nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
             String k=key.replace("daily_","");
             if(prefs.getBoolean(k+"_enabled",false)) scheduleDaily(context,k,prefs.getInt(k+"_hour",7),prefs.getInt(k+"_minute",0),prefs.getString(k+"_title","تذكير من سكينة"));

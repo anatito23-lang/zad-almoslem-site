@@ -568,52 +568,14 @@ public class MainActivity extends Activity {
     }
 
     private void addPrayerTimesUpdater(LinearLayout root) {
-        TextView title=text("مواقيت الصلاة حسب مدينتك",18,Color.rgb(20,55,43),true);
+        TextView title=text("مواقيت الصلاة حسب الدولة والمدينة",18,Color.rgb(20,55,43),true);
         title.setPadding(0,dp(18),0,dp(8));root.addView(title);
         LinearLayout card=column();card.setBackground(shape(Color.WHITE,16));card.setPadding(dp(14),dp(12),dp(14),dp(12));
-        TextView hint=text("اختر المدينة لتحديث المواقيت وحفظ تنبيهات الصلوات على الهاتف. آخر مواقيت محفوظة تظل متاحة دون إنترنت.",13,Color.DKGRAY,false);
+        TextView hint=text("اختر الدولة والمدينة وطريقة الحساب المناسبة، وسيحفظ التطبيق المواقيت ويضبط تنبيهات الصلوات حسب التوقيت المحلي للمدينة، بما في ذلك التوقيت الصيفي والشتوي.",13,Color.DKGRAY,false);
         card.addView(hint);
-        String[] cities={"القاهرة","الجيزة","الزقازيق","الإسكندرية","المنصورة","طنطا","بنها","الإسماعيلية","بورسعيد","السويس","أسيوط","الأقصر","أسوان"};
-        String[] english={"Cairo","Giza","Zagazig","Alexandria","Mansoura","Tanta","Banha","Ismailia","Port Said","Suez","Asyut","Luxor","Aswan"};
-        Spinner city=new Spinner(this);
-        city.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,cities));
-        city.setSelection(Math.max(0,Arrays.asList(english).indexOf(prefs.getString("native_prayer_city","Cairo"))));
-        card.addView(city,matchWrap());
-        Button update=new Button(this);update.setText("تحديث مواقيت الصلاة");card.addView(update,matchWrap());
-        TextView result=text("لم يتم تحديث المواقيت بعد.",12,Color.rgb(80,100,90),false);card.addView(result);
-        update.setOnClickListener(v->{
-            int selected=city.getSelectedItemPosition();String cityEn=english[selected],cityAr=cities[selected];
-            prefs.edit().putString("native_prayer_city",cityEn).apply();
-            update.setEnabled(false);result.setText("جارٍ جلب المواقيت...");
-            new Thread(()->{
-                HttpURLConnection connection=null;
-                try{
-                    String url="https://api.aladhan.com/v1/timingsByCity?city="+java.net.URLEncoder.encode(cityEn,"UTF-8")+"&country=Egypt&method=5&school=0";
-                    connection=(HttpURLConnection)new URL(url).openConnection();connection.setConnectTimeout(15000);connection.setReadTimeout(20000);
-                    connection.setRequestMethod("GET");
-                    if(connection.getResponseCode()!=200)throw new Exception("تعذر الاتصال بخدمة المواقيت");
-                    ByteArrayOutputStream output=new ByteArrayOutputStream();
-                    try(InputStream in=connection.getInputStream()){byte[] buffer=new byte[4096];int n;while((n=in.read(buffer))!=-1)output.write(buffer,0,n);}
-                    org.json.JSONObject rootJson=new org.json.JSONObject(output.toString("UTF-8"));
-                    org.json.JSONObject timings=rootJson.getJSONObject("data").getJSONObject("timings");
-                    String[] apiKeys={"Fajr","Dhuhr","Asr","Maghrib","Isha"};
-                    long now=System.currentTimeMillis();
-                    for(int i=0;i<PRAYERS.length;i++){
-                        String raw=timings.getString(apiKeys[i]).split(" ")[0];
-                        String[] hm=raw.split(":");int hour=Integer.parseInt(hm[0]),minute=Integer.parseInt(hm[1]);
-                        prefs.edit().putInt("native_time_hour_"+PRAYERS[i],hour).putInt("native_time_minute_"+PRAYERS[i],minute).apply();
-                        Calendar next=Calendar.getInstance();next.set(Calendar.HOUR_OF_DAY,hour);next.set(Calendar.MINUTE,minute);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);
-                        if(next.getTimeInMillis()<=now)next.add(Calendar.DAY_OF_YEAR,1);
-                        if(prefs.getBoolean("prayer_enabled_"+PRAYERS[i],true))ReminderReceiver.schedulePrayer(this,PRAYERS[i],next.getTimeInMillis());
-                        final String label=String.format(Locale.getDefault(),"%02d:%02d",hour,minute);
-                        final String prayer=PRAYERS[i];
-                        runOnUiThread(()->{TextView tv=timeLabels.get(prayer);if(tv!=null)tv.setText(label);});
-                    }
-                    runOnUiThread(()->result.setText("تم تحديث مواقيت "+cityAr+" وحفظ التنبيهات بنجاح."));
-                }catch(Exception e){runOnUiThread(()->result.setText("تعذر تحديث المواقيت: "+(e.getMessage()==null?"تحقق من الإنترنت":e.getMessage())));}
-                finally{if(connection!=null)connection.disconnect();runOnUiThread(()->update.setEnabled(true));}
-            }).start();
-        });
+        Button open=new Button(this);open.setText("اختيار الدولة والمدينة وضبط المواقيت");
+        open.setOnClickListener(v->startActivity(new Intent(MainActivity.this,PrayerDashboardActivity.class)));
+        card.addView(open,matchWrap());
         addCard(root,card);
     }
 
@@ -665,7 +627,11 @@ public class MainActivity extends Activity {
         LinearLayout actions=row();
         Switch enabled=new Switch(this); enabled.setText("تفعيل الصلاة"); enabled.setTextSize(12);
         enabled.setChecked(prefs.getBoolean("prayer_enabled_"+prayer,true));
-        enabled.setOnCheckedChangeListener((b,checked)->prefs.edit().putBoolean("prayer_enabled_"+prayer,checked).apply());
+        enabled.setOnCheckedChangeListener((b,checked)->{
+            prefs.edit().putBoolean("prayer_enabled_"+prayer,checked).apply();
+            if(!checked){ReminderReceiver.cancelPrayer(MainActivity.this,prayer);status.setText("تم إيقاف تنبيه صلاة "+prayer+".");}
+            else {int h=prefs.getInt("native_time_hour_"+prayer,-1),m=prefs.getInt("native_time_minute_"+prayer,0);if(h>=0){String zone=prefs.getString("native_city_timezone","Africa/Cairo");Calendar next=Calendar.getInstance(java.util.TimeZone.getTimeZone(zone));next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,m);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);ReminderReceiver.schedulePrayer(MainActivity.this,prayer,next.getTimeInMillis());status.setText("تم تفعيل تنبيه صلاة "+prayer+" من جديد.");}}
+        });
         actions.addView(enabled,new LinearLayout.LayoutParams(0,dp(48),1));
         Button test=new Button(this); test.setText("تجربة الأذان"); test.setTextSize(11); actions.addView(test);
         Button stopTest=new Button(this); stopTest.setText("إيقاف التجربة"); stopTest.setTextSize(11); actions.addView(stopTest);
@@ -708,7 +674,7 @@ public class MainActivity extends Activity {
         new TimePickerDialog(this,(view,hour,minute)->{
             prefs.edit().putInt("native_time_hour_"+prayer,hour).putInt("native_time_minute_"+prayer,minute).apply();
             label.setText(String.format(Locale.getDefault(),"%02d:%02d",hour,minute));
-            Calendar next=Calendar.getInstance(); next.set(Calendar.HOUR_OF_DAY,hour); next.set(Calendar.MINUTE,minute); next.set(Calendar.SECOND,0); next.set(Calendar.MILLISECOND,0);
+            Calendar next=Calendar.getInstance(java.util.TimeZone.getTimeZone(prefs.getString("native_city_timezone","Africa/Cairo"))); next.set(Calendar.HOUR_OF_DAY,hour); next.set(Calendar.MINUTE,minute); next.set(Calendar.SECOND,0); next.set(Calendar.MILLISECOND,0);
             if(next.getTimeInMillis()<=System.currentTimeMillis()) next.add(Calendar.DAY_OF_YEAR,1);
             ReminderReceiver.schedulePrayer(this,prayer,next.getTimeInMillis());
             status.setText("تم حفظ تنبيه "+prayer+" على "+label.getText());
@@ -927,11 +893,11 @@ public class MainActivity extends Activity {
     private String buildAudioDiagnostics() {
         StringBuilder report = new StringBuilder();
         android.content.SharedPreferences audioPrefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
-        report.append("نتيجة آخر تجربة: ").append(audioPrefs.getBoolean("adhan_playback_started", false) ? "وصل المشغل إلى حالة الجاهزية" : "لم يؤكد المشغل بدء الصوت").append("\\n");
+        report.append("نتيجة آخر تجربة: ").append(audioPrefs.getBoolean("adhan_playback_started", false) ? "وصل المشغل إلى حالة الجاهزية" : "لم يؤكد المشغل بدء الصوت").append("\n");
         String lastError = audioPrefs.getString("adhan_last_playback_error", "");
-        if (!lastError.isEmpty()) report.append("سبب التعذر: ").append(lastError).append("\\n");
+        if (!lastError.isEmpty()) report.append("سبب التعذر: ").append(lastError).append("\n");
         String startError = audioPrefs.getString("adhan_last_start_error", "");
-        if (!startError.isEmpty()) report.append("خطأ بدء الخدمة: ").append(startError).append("\\n");
+        if (!startError.isEmpty()) report.append("خطأ بدء الخدمة: ").append(startError).append("\n");
         File dir = new File(getFilesDir(), "adhan");
         int valid = 0;
         for (int i = 0; i < PRAYERS.length; i++) {
@@ -943,9 +909,9 @@ public class MainActivity extends Activity {
             File ogg = new File(dir, fileVoice + ".ogg");
             File chosen = isAudioFileValid(mp3) ? mp3 : (isAudioFileValid(ogg) ? ogg : null);
             if (chosen != null) valid++;
-            report.append(prayer).append(": ").append(chosen == null ? "ملف غير موجود/غير صالح" : "ملف سليم — " + android.text.format.Formatter.formatShortFileSize(this, chosen.length())).append("\\n");
+            report.append(prayer).append(": ").append(chosen == null ? "ملف غير موجود/غير صالح" : "ملف سليم — " + android.text.format.Formatter.formatShortFileSize(this, chosen.length())).append("\n");
         }
-        report.append("ملفات الأذان الصالحة للصلاة المختارة: ").append(valid).append(" من 5").append("\\n");
+        report.append("ملفات الأذان الصالحة للصلاة المختارة: ").append(valid).append(" من 5").append("\n");
         File duaFile = new File(new File(getFilesDir(), "reminders"), "dua.mp3");
         report.append("دعاء الشعراوي بعد الأذان: ")
                 .append(isAudioFileValid(duaFile)
