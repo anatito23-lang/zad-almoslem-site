@@ -1143,7 +1143,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
         <div><strong id="nasheedNowTitle">اختر ابتهالًا للاستماع</strong><p class="small" id="nasheedStatus" role="status">اختر المنشد ثم اختر التسجيل.</p></div>
       </div>
       <audio id="nasheedAudio" controls preload="none" style="width:100%;margin:8px 0 14px"></audio>
-      <details class="nasheed-list-disclosure">
+      <details class="nasheed-list-disclosure" open>
         <summary>عرض قائمة الابتهالات</summary>
         <div id="nasheedTracks" class="list" aria-label="قائمة الابتهالات"></div>
       </details>
@@ -2136,16 +2136,24 @@ async function loadOldEgyptianReciters(){
  }
  let cached=[];try{cached=JSON.parse(localStorage.getItem(cacheKey)||'[]');}catch(e){}
  if(Array.isArray(cached)&&cached.length)populate(cached,true);
- try{
-  const r=await zadFetchTimeout('https://mp3quran.net/api/v3/reciters?language=ar',{},12000);
-  if(!r.ok)throw new Error('reciter api');
-  const data=await r.json(),all=(data.reciters||[]).filter(rec=>rec&&rec.id&&Array.isArray(rec.moshaf)&&rec.moshaf.length);
-  if(!all.length)throw new Error('empty reciter list');
+ let apiError=null,all=[];
+ for(const endpoint of ['https://mp3quran.net/api/v3/reciters?language=ar','https://api.mp3quran.net/api/v3/reciters?language=ar']){
+  try{
+   const response=await zadFetchTimeout(endpoint,{},10000);
+   if(!response.ok)throw new Error('HTTP '+response.status);
+   const data=await response.json();
+   all=(data.reciters||[]).filter(rec=>rec&&rec.id&&Array.isArray(rec.moshaf)&&rec.moshaf.length);
+   if(!all.length)throw new Error('empty reciter list');
+   break;
+  }catch(error){apiError=error;}
+ }
+ if(all.length){
   try{localStorage.setItem(cacheKey,JSON.stringify(all));}catch(e){}
   populate(all,false);
- }catch(e){
-  if(!cached.length)$('quranStatus').textContent='تعذر الاتصال بمكتبة القراء. ستظل قائمة القراء الأساسية متاحة، ويمكنك إعادة المحاولة عند عودة الاتصال.';
+ }else{
+  if(!cached.length)$('quranStatus').textContent='تعذر الاتصال بمكتبة القراء. ستظل القائمة الأساسية متاحة، ويمكنك إعادة المحاولة عند عودة الاتصال.';
   else $('quranStatus').textContent='تعذر تحديث المكتبة الآن؛ نعرض القائمة المحفوظة ('+cached.length+' قارئًا).';
+  console.warn('تعذر تحميل قائمة القراء من المصدرين',apiError);
  }
 }
 function showShuaishaTracks(){
@@ -2440,7 +2448,11 @@ const nasheedTracks={
   {title:'يا ودودا',url:'https://www.nourelquran.com/force_download.php?id=5701'},
   {title:'الواحد المعبود',url:'https://www.nourelquran.com/force_download.php?id=5702'},
   {title:'الله رب الوجود',url:'https://www.nourelquran.com/force_download.php?id=5703'},
-  {title:'الأمر أمرك',url:'https://www.nourelquran.com/force_download.php?id=5704'}
+  {title:'الأمر أمرك',url:'https://www.nourelquran.com/force_download.php?id=5704'},
+  {title:'جل المنادي — إذاعة القرآن الكريم',page:'https://misrquran.gov.eg/audio-details/1c006068-9050-49f7-aa20-0ce71752088a'},
+  {title:'جل المنادي — استماع خارجي',page:'https://doaatv.com/listen/8391/%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84-%D8%AC%D9%84-%D8%A7%D9%84%D9%85%D9%86%D8%A7%D8%AF%D9%8A-%D8%A7%D9%84%D8%B4%D9%8A%D8%AE-%D9%86%D8%B5%D8%B1-%D8%A7%D9%84%D8%AF%D9%8A%D9%86-%D8%B7%D9%88%D8%A8%D8%A7%D8%B1'},
+  {title:'يا مالك الملك',page:'https://doaatv.com/mp3/%D8%A7%D8%B0%D8%A7%D9%86_%D8%A7%D9%84%D8%B4%D9%8A%D8%AE_%D9%86%D8%B5%D8%B1%D8%A7%D9%84%D8%AF%D9%8A%D9%86_%D8%B7%D9%88%D8%A8%D8%A7%D8%B1'},
+  {title:'يا منقذي في شدتي',page:'https://doaatv.com/mp3/%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84%D8%A7%D8%AA_%D9%84%D9%86%D8%B5%D8%B1_%D8%A7%D9%84%D8%AF%D9%8A%D9%86_%D8%B7%D9%88%D8%A8%D8%A7%D8%B1_%D9%81%D9%8A_%D8%B4%D9%87%D8%B1_%D8%B0%D9%88_%D8%A7%D9%84%D8%AD%D8%AC%D9%87'}
  ],
  naqshbandi:[
   {title:'مولاي إني ببابك',file:'01 - مولاي.mp3'},
@@ -2462,7 +2474,11 @@ const nasheedTracks={
   {title:'أتيت إليك يا رب العباد',file:'أتيت إليك يارب العباد.mp3'},
   {title:'أدعوك في غمضي',file:'أدعوك في غمضي.mp3'},
   {title:'إذا ما تلاقى الأفق بالأرض في المدى',file:'إذا ماتلاقى الأفق بالأرض في المدى.mp3'},
-  {title:'أسعى لخلاقي',file:'أسعى لخلاقي.mp3'}
+  {title:'أسعى لخلاقي',file:'أسعى لخلاقي.mp3'},
+  {title:'يا ربي إن عظمت ذنوبي',page:'https://doaatv.com/listen/6464/%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84-%D9%8A%D8%A7%D8%B1%D8%A8%D9%8A-%D8%A5%D9%86-%D8%B9%D8%B8%D9%85%D8%AA-%D8%B0%D9%86%D9%88%D8%A8%D9%8A-%D8%B3%D9%8A%D8%AF-%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%8A-%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84%D8%A7%D8%AA-%D8%A3%D9%86%D8%A7%D8%Bش%D9%8A%D8%AF-'},
+  {title:'سيدي يا رسول الله',page:'https://doaatv.com/listen/8364/%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84-%D8%B3%D9%8A%D8%AF%D9%8A-%D9%8A%D8%A7%D8%B1%D8%B3%D9%88%D9%84-%D8%A7%D9%84%D9%84%D9%87-%D8%A7%D9%84%D8%B4%D9%8A%D8%AE-%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%8A'},
+  {title:'الله مولانا',page:'https://doaatv.com/listen/6411/%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84-%D8%A7%D9%84%D9%84%D9%87-%D9%85%D9%88%D9%84%D8%A7%D9%86%D8%A7-%D8%A8%D9%86%D8%AA-%D9%88%D9%87%D8%A8-%D8%A7%D9%86%D8%AC%D8%A8%D8%AA-%D9%88%D9%84%D8%AF%D8%A7-%D8%B3%D9%8A%D8%AF-%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%8A-%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84%D8%A7%D8%AA-%D8%A3%D9%86%D8%A7%D8ش%D9%يد-'},
+  {title:'إلهي',page:'https://doaatv.com/listen/6405/%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84-%D8%A5%D9%84%D9%87%D9%8A-%D8%B3%D9%8A%D8%AF-%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%8A-%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84%D8%A7%D8%AA-%D8%A3%D9%86%D8%Aاش%D9%يد-'}
  ]
 };
 const nasheedAudio=$('nasheedAudio');
@@ -2477,12 +2493,13 @@ function renderNasheedTracks(artist){
  $('nasheedNowTitle').textContent=artist==='tobar'?'ابتهالات الشيخ نصر الدين طوبار':'ابتهالات الشيخ سيد النقشبندي';
  $('nasheedStatus').textContent='اختر من '+nasheedTracks[artist].length+' تسجيلًا للاستماع.';
  nasheedList.innerHTML=nasheedTracks[artist].map((track,index)=>
-  '<button type="button" class="surah-item nasheed-track-btn" data-track-index="'+index+'"><span><b>'+track.title+'</b><span class="small" style="display:block">تسجيل صوتي</span></span><strong>استمع ▶</strong></button>'
+  '<button type="button" class="surah-item nasheed-track-btn" data-track-index="'+index+'"><span><b>'+track.title+'</b><span class="small" style="display:block">'+(track.page?'مصدر استماع خارجي':'تسجيل صوتي')+'</span></span><strong>'+(track.page?'افتح المصدر ↗':'استمع ▶')+'</strong></button>'
  ).join('');
  nasheedList.querySelectorAll('[data-track-index]').forEach(button=>{
   button.addEventListener('click',()=>{
    const track=nasheedTracks[artist][Number(button.dataset.trackIndex)];
    nasheedList.querySelectorAll('.nasheed-track-btn').forEach(item=>item.classList.toggle('active',item===button));
+   if(track.page){window.open(track.page,'_blank','noopener,noreferrer');$('nasheedNowTitle').textContent=track.title;$('nasheedStatus').textContent='فتحنا صفحة الاستماع من المصدر الخارجي.';return;}
    nasheedAudio.src=track.url||('https://archive.org/download/qr_20201208/'+encodeURIComponent(track.file));
    nasheedAudio.load();
    $('nasheedNowTitle').textContent=track.title;
