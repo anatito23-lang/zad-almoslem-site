@@ -77,11 +77,24 @@ public class IslamicReelsActivity extends Activity {
         root.addView(description, new LinearLayout.LayoutParams(-1, -2));
         status = label("اسحب للأعلى للتنقل بين الريلز", 12, 0xffd7e4dc, false);
         status.setPadding(0, dp(7), 0, dp(7)); root.addView(status);
-        frame.setOnTouchListener((v, e) -> {
-            if (e.getAction() == 0) { downY = e.getY(); return true; }
-            if (e.getAction() == 1) { float d = downY - e.getY(); if (Math.abs(d) > dp(45)) move(d > 0 ? 1 : -1); return true; }
+        // The image fills the frame and receives the touch first, so attach the
+        // same vertical gesture handler to the image itself (and the frame).
+        View.OnTouchListener swipe = (v, e) -> {
+            if (e.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                downY = e.getY();
+                return true;
+            }
+            if (e.getAction() == android.view.MotionEvent.ACTION_UP) {
+                float distance = downY - e.getY();
+                if (Math.abs(distance) > dp(55)) move(distance > 0 ? 1 : -1);
+                return true;
+            }
             return true;
-        });
+        };
+        frame.setOnTouchListener(swipe);
+        image.setOnTouchListener(swipe);
+        image.setClickable(true);
+        image.setFocusable(true);
         setContentView(AppTabs.wrap(this, root, "more"));
     }
 
