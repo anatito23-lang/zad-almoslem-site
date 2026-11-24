@@ -21,7 +21,7 @@ import java.util.TimeZone;
 public class RamadanActivity extends Activity {
     private SharedPreferences prefs;
     private LinearLayout root;
-    private TextView fastCount, khatmaProgress, audioStatus;
+    private TextView fastCount, fastCompleted, fastRemaining, fastPercent, khatmaProgress, audioStatus;
     private KhatmaRing khatmaRing;
     private Button khatmaToggle;
 
@@ -50,17 +50,57 @@ public class RamadanActivity extends Activity {
         TextView subtitle=text("أهلًا بشهر الصيام والقرآن • جدّد نيتك واملأ أيامك بالطاعة",12,0xFFFFE9BE,false);subtitle.setGravity(Gravity.CENTER);hero.addView(subtitle,full());
         root.addView(hero,full());
 
-        LinearLayout fast=card("متتبع الصيام — ثلاثون يومًا");
-        fastCount=text("",14,AppThemeColors.accent(this),true);fast.addView(fastCount,full());
-        GridLayout days=new GridLayout(this);days.setColumnCount(6);days.setUseDefaultMargins(true);
-        for(int i=1;i<=30;i++){
-            final int day=i;CheckBox check=new CheckBox(this);check.setText(String.valueOf(i));check.setTextSize(11);
-            check.setButtonTintList(android.content.res.ColorStateList.valueOf(AppThemeColors.accent(this)));
-            check.setTextColor(AppThemeColors.text(this));check.setChecked(prefs.getBoolean("fast_"+i,false));
-            check.setOnCheckedChangeListener((b,checked)->{prefs.edit().putBoolean("fast_"+day,checked).apply();updateFastCount();});
-            GridLayout.LayoutParams p=new GridLayout.LayoutParams();p.width=0;p.columnSpec=GridLayout.spec(GridLayout.UNDEFINED,1f);days.addView(check,p);
+        LinearLayout fast=new LinearLayout(this);
+        fast.setOrientation(LinearLayout.VERTICAL);
+        fast.setPadding(dp(14),dp(14),dp(14),dp(14));
+        fast.setBackground(shape(Color.rgb(25,36,61),22));
+        LinearLayout.LayoutParams fastParams=full();fastParams.topMargin=dp(10);root.addView(fast,fastParams);
+        TextView fastTitle=text("🌙 رحلتي مع الصيام",21,0xFFFFE2A3,true);
+        fastTitle.setGravity(Gravity.CENTER);fast.addView(fastTitle,full());
+        TextView fastSubtitle=text("ثلاثون يومًا من الطاعة والقرب من الله",12,0xFFFFE9BE,false);
+        fastSubtitle.setGravity(Gravity.CENTER);fastSubtitle.setPadding(0,dp(4),0,dp(12));fast.addView(fastSubtitle,full());
+        LinearLayout stats=new LinearLayout(this);stats.setOrientation(LinearLayout.HORIZONTAL);
+        fast.addView(stats,full());
+        fastCompleted=text("",14,0xFFFFE2A3,true);
+        fastRemaining=text("",14,0xFFFFE2A3,true);
+        fastPercent=text("",14,0xFFFFE2A3,true);
+        for(TextView stat:new TextView[]{fastCompleted,fastRemaining,fastPercent}){
+            stat.setGravity(Gravity.CENTER);stat.setPadding(dp(3),dp(10),dp(3),dp(10));
+            stat.setBackground(shape(Color.rgb(42,55,81),12));
+            LinearLayout.LayoutParams sp=new LinearLayout.LayoutParams(0,-2,1f);sp.setMargins(dp(3),0,dp(3),dp(8));stats.addView(stat,sp);
         }
-        fast.addView(days,full());updateFastCount();
+        fastCount=text("أيام الصيام المسجلة",12,0xFFFFE9BE,false);
+        fastCount.setGravity(Gravity.CENTER);fast.addView(fastCount,full());
+        ProgressBar fastProgress=new ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal);
+        fastProgress.setMax(30);fastProgress.setProgressTintList(android.content.res.ColorStateList.valueOf(0xFFE1B96D));
+        fastProgress.setProgressBackgroundTintList(android.content.res.ColorStateList.valueOf(0xFF46516A));
+        fastProgress.setProgress(0);
+        LinearLayout.LayoutParams progressParams=full();progressParams.setMargins(0,dp(5),0,dp(12));fast.addView(fastProgress,progressParams);
+        TextView daysTitle=text("اضغط على اليوم لتسجيل صيامك أو إلغاء التسجيل",12,0xFFFFE9BE,false);
+        daysTitle.setGravity(Gravity.CENTER);daysTitle.setPadding(0,dp(3),0,dp(8));fast.addView(daysTitle,full());
+        GridLayout days=new GridLayout(this);days.setColumnCount(5);days.setUseDefaultMargins(true);
+        for(int i=1;i<=30;i++){
+            final int day=i;
+            TextView cell=text(String.format(java.util.Locale.getDefault(),"%02d",day),14,0xFFFFE9BE,true);
+            cell.setGravity(Gravity.CENTER);cell.setPadding(0,dp(11),0,dp(11));
+            boolean done=prefs.getBoolean("fast_"+day,false);
+            cell.setBackground(shape(done?0xFFE1B96D:Color.rgb(48,60,84),12));
+            if(done)cell.setTextColor(Color.rgb(31,39,57));
+            cell.setOnClickListener(v->{
+                boolean next=!prefs.getBoolean("fast_"+day,false);
+                prefs.edit().putBoolean("fast_"+day,next).apply();
+                cell.setBackground(shape(next?0xFFE1B96D:Color.rgb(48,60,84),12));
+                cell.setTextColor(next?Color.rgb(31,39,57):0xFFFFE9BE);
+                cell.setText(next?"✓ "+String.format(java.util.Locale.getDefault(),"%02d",day):String.format(java.util.Locale.getDefault(),"%02d",day));
+                updateFastCount();
+            });
+            GridLayout.LayoutParams dp=new GridLayout.LayoutParams();
+            dp.width=0;dp.columnSpec=GridLayout.spec(GridLayout.UNDEFINED,1f);
+            dp.setMargins(dp(3),dp(3),dp(3),dp(3));days.addView(cell,dp);
+        }
+        fast.addView(days,full());
+        updateFastCount();
+        fastProgress.setTag("fastTrackerProgress");
 
         LinearLayout khatma=card("ختمة القرآن الكريم");
         TextView invitation=text("اجعل لك وردًا يوميًا من القرآن 🌙\\nافتح المصحف، وسجّل تقدمك تلقائيًا أثناء تشغيل الختمة.",13,AppThemeColors.text(this),false);
@@ -268,7 +308,15 @@ public class RamadanActivity extends Activity {
     }
     private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("الموعد الفلكي المتوقع: الاثنين 8 فبراير 2027 (1 رمضان 1448). انتظر إعلان دار الإفتاء المصرية لتأكيد بداية الشهر.");return;}Calendar c=Calendar.getInstance(TimeZone.getTimeZone("Africa/Cairo"));c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
     private void addDua(LinearLayout box,String heading,String body){TextView h=text(heading,14,AppThemeColors.accent(this),true);h.setPadding(0,dp(9),0,dp(2));box.addView(h,full());box.addView(text(body,14,AppThemeColors.text(this),false),full());}
-    private void updateFastCount(){int n=0;for(int i=1;i<=30;i++)if(prefs.getBoolean("fast_"+i,false))n++;if(fastCount!=null)fastCount.setText("أيام الصيام المسجلة: "+n+" من 30");}
+    private void updateFastCount(){
+        int n=0;for(int i=1;i<=30;i++)if(prefs.getBoolean("fast_"+i,false))n++;
+        if(fastCount!=null)fastCount.setText("أيام الصيام المسجلة");
+        if(fastCompleted!=null)fastCompleted.setText("✓ "+n+"\nيوم صيام");
+        if(fastRemaining!=null)fastRemaining.setText((30-n)+"\nيوم متبقٍ");
+        if(fastPercent!=null)fastPercent.setText(Math.round(n*100f/30)+"٪\nإنجاز");
+        View tracker=root==null?null:root.findViewWithTag("fastTrackerProgress");
+        if(tracker instanceof ProgressBar)((ProgressBar)tracker).setProgress(n);
+    }
     private void updateKhatma(){
         int n=Math.min(604,QuranKhatmaTracker.getReadPageCount(this));int percent=Math.round(n*100f/604);
         if(khatmaProgress!=null)khatmaProgress.setText("تمت متابعة "+n+" صفحة من 604  •  المتبقي "+(604-n)+" صفحة");
