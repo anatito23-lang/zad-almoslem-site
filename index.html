@@ -1825,16 +1825,27 @@ async function fetchPrayerJson(url){
  return data;
 }
 async function getPrayerData(city,day=new Date()){
- const date=prayerApiDate(day),s=prayerSettings(),params=new URLSearchParams();
+ const date=prayerApiDate(day),s=prayerSettings(),chosenCity=(city||s.city||'').trim(),chosenCountry=(s.country||'').trim();
+ if(!chosenCity||!chosenCountry)throw new Error('أدخل الدولة والمدينة');
+ const params=new URLSearchParams();
  if(s.method!=='auto')params.set('method',s.method);
- if(!s.city||!s.country)throw new Error('أدخل الدولة والمدينة');
- params.set('city',s.city);params.set('country',s.country);
- return await fetchPrayerJson(`https://api.aladhan.com/v1/timingsByCity/${date}?${params.toString()}`);
+ params.set('city',chosenCity);params.set('country',chosenCountry);
+ const attempts=[
+  'https://api.aladhan.com/v1/timingsByCity/'+date+'?'+params.toString(),
+  'https://api.aladhan.com/v1/timingsByAddress/'+date+'?'+new URLSearchParams({address:chosenCity+', '+chosenCountry,...(s.method!=='auto'?{method:s.method}:{})}).toString()
+ ];
+ let lastError=null;
+ for(const url of attempts){
+  try{return await fetchPrayerJson(url);}
+  catch(error){lastError=error;console.warn('مصدر مواقيت الصلاة لم يستجب، نجرب المصدر البديل',url,error);}
+ }
+ throw lastError||new Error('تعذر جلب مواقيت الصلاة');
 }
 async function loadPrayer(){
  savePrayerSettings();const settings=prayerSettings(),city=settings.city;
  const cacheToday=new Date();const cacheDayKey=cacheToday.getFullYear()+'-'+String(cacheToday.getMonth()+1).padStart(2,'0')+'-'+String(cacheToday.getDate()).padStart(2,'0');const locationKey=settings.city+','+settings.country;const cacheKey='zad_prayer_cache_'+encodeURIComponent(locationKey)+'_'+settings.method+'_country-times_'+cacheDayKey;
- try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&cached.timings){window.zadPrayerTimings=cached.timings;$('prayerGrid').innerHTML=[['الفجر','Fajr'],['الشروق','Sunrise'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']].map(([n,k])=>`<div class="prayer"><div class="pname">${n}</div><div class="ptime">${fmtTime(cached.timings[k])}</div></div>`).join('');if(cached.hijri)$('hijriDate').textContent=cached.hijri;else $('hijriDate').textContent=hijriArabicLocal();$('prayerStatus').textContent='مواقيت محفوظة لهذا اليوم — جارٍ التحقق من التحديث';}}catch(e){}
+ window.zadPrayerTimings=null;
+ try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&cached.timings&&['Fajr','Sunrise','Dhuhr','Asr','Maghrib','Isha'].every(k=>cached.timings[k])){window.zadPrayerTimings=cached.timings;$('prayerGrid').innerHTML=[['الفجر','Fajr'],['الشروق','Sunrise'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']].map(([n,k])=>`<div class="prayer"><div class="pname">${n}</div><div class="ptime">${fmtTime(cached.timings[k])}</div></div>`).join('');$('hijriDate').textContent=cached.hijri||hijriArabicLocal();$('prayerStatus').textContent='مواقيت محفوظة لهذا اليوم — جارٍ التحقق من التحديث';}}catch(e){console.warn('تعذر قراءة مواقيت الصلاة المحفوظة',e);}
  $('prayerStatus').textContent=window.zadPrayerTimings?'مواقيت محفوظة — جارٍ التحديث...':'جارٍ تحديث المواقيت...';
  try{
   const j=await getPrayerData(city);
