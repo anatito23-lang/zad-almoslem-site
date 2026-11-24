@@ -1,5 +1,5 @@
-const CACHE_NAME = "zad-almoslem-shell-v126-themefix";
-const APP_SHELL = ["./", "./index.html", "./ramadan.html", "./manifest.webmanifest", "./icon.svg", "./daily-reminders.js?v=20261119native-diagnostics1", "./app-pages.js?v=20261122-full-site-admin-v3", "./website-cleanup.js?v=20261122-full-site-admin-v3", "./site-resilience.js?v=20261122-prayer-quran-fallback3"];
+const CACHE_NAME = "zad-almoslem-shell-v127-prayer-ramadan";
+const APP_SHELL = ["./", "./index.html", "./ramadan.html", "./manifest.webmanifest", "./icon.svg", "./daily-reminders.js?v=20261119native-diagnostics1", "./app-pages.js?v=20261124-prayer-ramadan-layout-v1", "./website-cleanup.js?v=20261122-full-site-admin-v3", "./site-resilience.js?v=20261122-prayer-quran-fallback3"];
 self.addEventListener("install", event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE_NAME);
