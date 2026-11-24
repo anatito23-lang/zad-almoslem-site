@@ -105,6 +105,7 @@ async function uploadToGitHub(file, kind, env) {
     method: "PUT",
     headers: {
       "Authorization": "Bearer " + githubToken,
+      "User-Agent": "Zad-Almoslem-Worker",
       "Accept": "application/vnd.github+json",
       "Content-Type": "application/json",
       "X-GitHub-Api-Version": "2022-11-28"
