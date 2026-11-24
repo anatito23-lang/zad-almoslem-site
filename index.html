@@ -1109,6 +1109,8 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
   <section class="section" id="quran">
     <div class="section-head"><div><h2>🎧 زاد قرآن — المكتبة الصوتية</h2><p>مكتبة تلاوات واسعة؛ اختر القارئ والرواية والسورة، واستمع أو حمّل ملف MP3 على هاتفك.</p></div></div>
     <div class="card zad-quran-library">
+      <details class="zad-all-readers" open>
+        <summary class="zad-all-readers-summary"><span>۞ كل القراء</span><small>اضغط على اسم القارئ لعرض الروايات والسور</small></summary>
       <div class="zad-quran-search-grid">
         <label class="small">ابحث عن قارئ
           <input id="zadReciterSearch" type="search" placeholder="اكتب اسم الشيخ..." autocomplete="off">
@@ -1132,6 +1134,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
       </div>
       <button type="button" id="zadReloadReciters" class="btn light" style="width:100%;margin:8px 0">إعادة تحميل قائمة القراء ↻</button>
       <div id="zadReciterCatalog" class="zad-reciter-catalog" aria-label="قائمة القراء"><p class="small">جارٍ تحميل قائمة القراء...</p></div>
+      </details>
       <div class="quran-tools" style="display:none" aria-hidden="true">
         <select id="surahSelect" aria-label="اختر السورة"><option value="">جارٍ تحميل السور...</option></select>
         <button class="btn green" id="showSurah" type="button">استمع الآن</button>
@@ -1158,6 +1161,12 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
     </div>
   </section>
   <style id="zad-quran-library-style">
+    .zad-all-readers{border:1px solid #d8e5dc;border-radius:18px;padding:12px;background:linear-gradient(180deg,#fbfcf8,#f1f6f0);margin:10px 0 16px}
+    .zad-all-readers-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;color:#174638;font-weight:800;padding:5px 2px}
+    .zad-all-readers-summary::-webkit-details-marker{display:none}
+    .zad-all-readers-summary span{font-size:17px}
+    .zad-all-readers-summary small{font-size:11px;color:#71817b;font-weight:500}
+    .zad-all-readers[open] .zad-all-readers-summary{padding-bottom:12px;border-bottom:1px solid #dce7df}
     .zad-reciter-select-wrap{display:none!important}
     .zad-reciter-catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:9px;margin:14px 0}
     .zad-reciter-catalog:empty{display:none}
