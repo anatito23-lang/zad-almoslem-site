@@ -235,6 +235,7 @@ public class ReminderAudioService extends Service {
                 android.util.Log.w("ZadAlmoslem", "Could not resume background audio after post-adhan dua", error);
             }
         }
+        if(resumeRadio)RamadanAudioService.resumeAfterAdhan(this);
         stopForeground(true);
         activeKind = null;
         stopSelf();
