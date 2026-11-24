@@ -21,6 +21,7 @@ public class RamadanActivity extends Activity {
     private SharedPreferences prefs;
     private LinearLayout root;
     private TextView fastCount, khatmaProgress, audioStatus;
+    private Button khatmaToggle;
     private static final int PICK_IFTAR=4101, PICK_CANNON=4102, PICK_SUHOOR=4103, PICK_MUSIC=4104;
 
     private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
@@ -62,14 +63,26 @@ public class RamadanActivity extends Activity {
         fast.addView(days,full());updateFastCount();
 
         LinearLayout khatma=card("ختمة القرآن الكريم");
+        TextView invitation=text("اجعل لك وردًا من القرآن في رمضان 🌙\\nاضغط على الزر لفتح المصحف، وسنتابع الصفحات التي تتنقل بينها تلقائيًا ما دامت الختمة قيد التشغيل.",14,AppThemeColors.text(this),false);
+        invitation.setPadding(0,dp(8),0,dp(10));khatma.addView(invitation,full());
         khatmaProgress=text("",15,AppThemeColors.accent(this),true);khatma.addView(khatmaProgress,full());
-        TextView target=text("الهدف التقريبي: 20 صفحة يوميًا لإتمام 604 صفحات في ثلاثين يومًا.",13,AppThemeColors.muted(this),false);target.setPadding(0,dp(7),0,dp(7));khatma.addView(target,full());
-        SeekBar page=new SeekBar(this);page.setMax(604);page.setProgress(prefs.getInt("khatma_page",0));khatma.addView(page,full());
-        page.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){public void onProgressChanged(SeekBar b,int n,boolean u){if(u){prefs.edit().putInt("khatma_page",n).apply();updateKhatma();}}public void onStartTrackingTouch(SeekBar b){}public void onStopTrackingTouch(SeekBar b){}});
-        LinearLayout buttons=new LinearLayout(this);Button plus=new Button(this);plus.setText("+ 20 صفحة");Button reset=new Button(this);reset.setText("بدء ختمة جديدة");
-        buttons.addView(plus,new LinearLayout.LayoutParams(0,dp(48),1));buttons.addView(reset,new LinearLayout.LayoutParams(0,dp(48),1));khatma.addView(buttons,full());
-        plus.setOnClickListener(v->{int n=Math.min(604,prefs.getInt("khatma_page",0)+20);prefs.edit().putInt("khatma_page",n).apply();page.setProgress(n);updateKhatma();});
-        reset.setOnClickListener(v->{prefs.edit().putInt("khatma_page",0).apply();page.setProgress(0);updateKhatma();});updateKhatma();
+        TextView note=text("يُحسب كل رقم صفحة مرة واحدة فقط، سواء قرأت من المصحف المصوّر أو عرض النص. التقدم محفوظ عند إيقاف الختمة والعودة إليها.",12,AppThemeColors.muted(this),false);
+        note.setPadding(0,dp(7),0,dp(8));khatma.addView(note,full());
+        Button openMushaf=new Button(this);openMushaf.setText("📖  افتح المصحف وابدأ القراءة");khatma.addView(openMushaf,full());
+        khatmaToggle=new Button(this);khatma.addView(khatmaToggle,full());
+        openMushaf.setOnClickListener(v->{
+            if(!QuranKhatmaTracker.isTracking(this))QuranKhatmaTracker.start(this);
+            updateKhatma();
+            Intent open=new Intent(this,MushafPageActivity.class);
+            open.putExtra("page",getSharedPreferences("zad_mushaf",MODE_PRIVATE).getInt("last_page",1));
+            startActivity(open);
+        });
+        khatmaToggle.setOnClickListener(v->{
+            if(QuranKhatmaTracker.isTracking(this))QuranKhatmaTracker.stop(this);
+            else QuranKhatmaTracker.start(this);
+            updateKhatma();
+        });
+        updateKhatma();
 
         LinearLayout adhkar=card("أذكار وأدعية رمضانية");
         addDua(adhkar,"دعاء الإفطار","ذهب الظمأ وابتلت العروق وثبت الأجر إن شاء الله.");
@@ -120,7 +133,11 @@ public class RamadanActivity extends Activity {
     private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("لم يتم تحديد بداية الشهر بعد؛ اختر أول يوم حتى تتوقف التنبيهات تلقائيًا بعد 30 يومًا.");return;}Calendar c=Calendar.getInstance();c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
     private void addDua(LinearLayout box,String heading,String body){TextView h=text(heading,14,AppThemeColors.accent(this),true);h.setPadding(0,dp(9),0,dp(2));box.addView(h,full());box.addView(text(body,14,AppThemeColors.text(this),false),full());}
     private void updateFastCount(){int n=0;for(int i=1;i<=30;i++)if(prefs.getBoolean("fast_"+i,false))n++;if(fastCount!=null)fastCount.setText("أيام الصيام المسجلة: "+n+" من 30");}
-    private void updateKhatma(){int n=prefs.getInt("khatma_page",0);if(khatmaProgress!=null)khatmaProgress.setText("أنجزت "+n+" من 604 صفحة — "+Math.round(n*100f/604)+"٪");}
+    private void updateKhatma(){
+        int n=QuranKhatmaTracker.getReadPageCount(this);
+        if(khatmaProgress!=null)khatmaProgress.setText("تابعت "+n+" من 604 صفحة — "+Math.round(n*100f/604)+"٪");
+        if(khatmaToggle!=null)khatmaToggle.setText(QuranKhatmaTracker.isTracking(this)?"إيقاف الختمة":"تشغيل الختمة");
+    }
     private void addMinutesControl(LinearLayout box,String title,String key,int def,int min,int max){
         box.addView(text(title,13,AppThemeColors.text(this),false),full());TextView value=text(prefs.getInt(key,def)+" دقيقة",13,AppThemeColors.accent(this),true);box.addView(value,full());
         SeekBar bar=new SeekBar(this);bar.setMax(max-min);bar.setProgress(Math.max(0,Math.min(max-min,prefs.getInt(key,def)-min)));box.addView(bar,full());
@@ -191,5 +208,5 @@ public class RamadanActivity extends Activity {
             RamadanReminderReceiver.scheduleAll(this);
         }catch(Exception e){Toast.makeText(this,"تعذر حفظ التسجيل: "+e.getMessage(),Toast.LENGTH_LONG).show();}
     }
-    @Override protected void onResume(){super.onResume();if(prefs!=null&&prefs.getBoolean("enabled",false))RamadanReminderReceiver.scheduleAll(this);}
+    @Override protected void onResume(){super.onResume();if(prefs!=null){updateKhatma();if(prefs.getBoolean("enabled",false))RamadanReminderReceiver.scheduleAll(this);}}
 }
