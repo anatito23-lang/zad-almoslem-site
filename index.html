@@ -1138,8 +1138,8 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
       </div>
       <p id="quranStatus" class="small" role="status" style="margin:8px 0 12px">جارٍ تحميل قائمة القراء والتسجيلات الصوتية...</p>
       <div class="zad-player" id="zadPlayer">
-        <div class="zad-player-cover">۞<span>زاد قرآن</span></div>
-        <div class="zad-player-info"><strong id="zadPlayerTitle">اختر تلاوة من المكتبة</strong><span id="zadPlayerArtist">مكتبة القراء والتلاوات</span></div>
+        <div class="zad-player-cover" aria-label="هوية زاد قرآن"><span class="zad-player-ornament">۞</span><span>زاد قرآن</span><i></i></div>
+        <div class="zad-player-info"><span class="zad-player-live">● الآن يُتلى</span><strong id="zadPlayerTitle">اختر تلاوة من المكتبة</strong><span id="zadPlayerArtist">مكتبة القراء والتلاوات</span><small id="zadPlayerUpNext">التشغيل التلقائي للسورة التالية مفعّل</small></div>
         <div class="zad-player-timeline"><span id="zadPlayerCurrent">00:00</span><input id="zadPlayerSeek" type="range" min="0" max="1000" value="0" aria-label="موضع التشغيل"><span id="zadPlayerDuration">00:00</span></div>
         <div class="zad-player-controls">
           <button type="button" id="zadPlayerPrev" aria-label="التلاوة السابقة">⏮</button>
@@ -1169,7 +1169,27 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
     .zad-quran-track-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
     .zad-quran-track-actions button,.zad-quran-track-actions a{white-space:nowrap}
     @media(max-width:420px){.zad-reciter-catalog{grid-template-columns:repeat(2,minmax(0,1fr))}.zad-reciter-card{padding:8px;gap:7px}}
-    .zad-player{background:#f7f8f5!important;color:#173d32!important;border:1px solid #dce5dc;border-radius:22px;padding:18px;margin:14px 0;display:grid;grid-template-columns:68px minmax(0,1fr);gap:14px;align-items:center;box-shadow:0 8px 24px rgba(20,55,43,.08)}
+    .zad-player{position:sticky;bottom:10px;z-index:40;background:linear-gradient(145deg,#102f28 0%,#174638 58%,#244f40 100%)!important;color:#f8f3e7!important;border:1px solid rgba(218,190,125,.48);border-radius:24px;padding:16px;margin:18px 0;display:grid;grid-template-columns:76px minmax(0,1fr);gap:13px;align-items:center;box-shadow:0 14px 36px rgba(8,35,27,.28);overflow:hidden;isolation:isolate}
+    .zad-player:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.13;background:repeating-radial-gradient(circle at 88% 10%,transparent 0 13px,#e7d7ae 14px 15px,transparent 16px 27px)}
+    .zad-player-cover{position:relative;width:76px;height:76px;border-radius:19px;border:1px solid rgba(224,199,139,.65);background:linear-gradient(145deg,#e9dcb8,#bda875)!important;color:#174638!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font-weight:800;box-shadow:inset 0 0 0 4px rgba(255,255,255,.2),0 5px 14px rgba(0,0,0,.15)}
+    .zad-player-cover .zad-player-ornament{font-size:39px;line-height:1;color:#174638!important}
+    .zad-player-cover span:last-of-type{font-size:10px;color:#174638!important;letter-spacing:.5px}
+    .zad-player-cover i{position:absolute;inset:6px;border:1px solid rgba(23,70,56,.28);border-radius:14px;pointer-events:none}
+    .zad-player-info{min-width:0;display:grid;gap:4px}
+    .zad-player-live{font-size:10px;color:#dfc98e!important;font-weight:800;letter-spacing:.3px}
+    .zad-player-info strong{font-size:15px;line-height:1.5;color:#fff8e9!important;overflow-wrap:anywhere}
+    .zad-player-info span:not(.zad-player-live){font-size:12px;color:#d3ddcf!important}
+    .zad-player-info small{font-size:10px;color:#d9c995!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .zad-player-timeline{grid-column:1/-1;display:grid;grid-template-columns:42px minmax(0,1fr) 42px;gap:8px;align-items:center;font-size:11px;color:#e4e8dc!important;font-variant-numeric:tabular-nums}
+    .zad-player-timeline input{width:100%;accent-color:#ddc58a;cursor:pointer}
+    .zad-player-controls{grid-column:1/-1;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}
+    .zad-player-controls button{border:1px solid rgba(226,211,171,.25);background:rgba(255,255,255,.08);color:#f6efd9!important;font-size:21px;padding:9px 12px;border-radius:14px;cursor:pointer;min-width:43px}
+    .zad-player-controls button:active{transform:scale(.96)}
+    .zad-player-controls .zad-player-main{background:linear-gradient(145deg,#ead9ad,#c8ae73)!important;color:#173d32!important;border:0;border-radius:50%;width:58px;height:58px;font-size:23px;box-shadow:0 6px 17px rgba(0,0,0,.22)}
+    .zad-player-controls #zadPlayerPause,.zad-player-controls #zadPlayerStop{font-size:12px;background:rgba(255,255,255,.09);color:#f6efd9;border:1px solid rgba(226,211,171,.3);border-radius:12px;padding:10px}
+    .zad-player-controls #zadPlayerStop{background:rgba(132,62,48,.3);color:#ffe5dc;border-color:rgba(234,170,150,.35)}
+    .zad-player-controls a{background:#e8d8b1!important;color:#173d32!important;text-decoration:none;border-radius:12px;padding:10px 13px;font-size:12px;font-weight:800}
+    @media(max-width:430px){.zad-player{padding:13px;grid-template-columns:64px minmax(0,1fr);gap:10px}.zad-player-cover{width:64px;height:64px}.zad-player-cover .zad-player-ornament{font-size:32px}.zad-player-controls{gap:7px}.zad-player-controls button{padding:8px;min-width:39px}.zad-player-controls #zadPlayerPause,.zad-player-controls #zadPlayerStop{font-size:11px;padding:8px}}
     .zad-player-cover{width:68px;height:68px;border-radius:16px;background:#e8dfc9!important;color:#174638!important;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:30px;font-weight:800}
     .zad-player-cover span{font-size:10px;color:#174638!important}
     .zad-player-info{min-width:0;display:grid;gap:5px}
@@ -2370,21 +2390,25 @@ function playZadQuranTrack(id){
  if(index<0)return;
  zadCurrentTrackIndex=index;
  const track=queue[index],audio=$('audio');
- audio.src=track.url;audio.load();
  $('zadPlayerTitle').textContent='سورة '+track.name;
  $('zadPlayerArtist').textContent=track.artist;
+ const next=queue[index+1];
+ $('zadPlayerUpNext').textContent=next?'التالي تلقائيًا: سورة '+next.name:'آخر سورة في قائمة هذه الرواية';
  $('zadPlayerDownload').href=track.url;
  $('zadPlayerDownload').download=String(track.id).padStart(3,'0')+'.mp3';
+ $('zadPlayerSeek').value='0';$('zadPlayerCurrent').textContent='00:00';$('zadPlayerDuration').textContent='00:00';
+ audio.src=track.url;audio.load();
  $('zadPlayerToggle').textContent='Ⅱ';
  $('quranStatus').textContent='جارٍ تشغيل سورة '+track.name+' بصوت '+track.artist+'.';
- audio.play().then(()=>$('quranStatus').textContent='يعمل الآن: سورة '+track.name+' — '+track.artist).catch(()=>{$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='اضغط زر التشغيل في المشغّل لبدء التلاوة.';});
+ audio.play().then(()=>$('quranStatus').textContent='يعمل الآن: سورة '+track.name+' — '+track.artist).catch(()=>{$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='تعذر بدء التلاوة. اضغط تشغيل مرة أخرى أو جرّب ملفًا آخر.';});
 }
 function stepZadQuranTrack(delta){
  const queue=window.zadQuranQueue||[];
  if(!queue.length)return;
  let index=zadCurrentTrackIndex;
- if(index<0)index=delta>0?-1:0;
- index=(index+delta+queue.length)%queue.length;
+ if(index<0){index=delta>0?0:queue.length-1;}
+ else index=Math.max(0,Math.min(queue.length-1,index+delta));
+ if(index===zadCurrentTrackIndex&&zadCurrentTrackIndex>=0){if(delta>0&&index===queue.length-1)$('quranStatus').textContent='وصلت إلى آخر سورة في هذه الرواية.';return;}
  playZadQuranTrack(queue[index].id);
 }
 const zadAudio=$('audio');
@@ -2408,7 +2432,14 @@ zadAudio.addEventListener('timeupdate',()=>{
 zadAudio.addEventListener('loadedmetadata',()=>{$('zadPlayerDuration').textContent=zadFormatTime(zadAudio.duration);});
 zadAudio.addEventListener('play',()=>$('zadPlayerToggle').textContent='Ⅱ');
 zadAudio.addEventListener('pause',()=>$('zadPlayerToggle').textContent='▶');
-zadAudio.addEventListener('ended',()=>stepZadQuranTrack(1));
+zadAudio.addEventListener('ended',()=>{
+ const queue=window.zadQuranQueue||[];
+ if(zadCurrentTrackIndex>=0&&zadCurrentTrackIndex<queue.length-1){stepZadQuranTrack(1);return;}
+ $('zadPlayerToggle').textContent='▶';
+ $('zadPlayerSeek').value='1000';
+ $('quranStatus').textContent='انتهت تلاوات هذه الرواية. جزاكم الله خيرًا.';
+ $('zadPlayerUpNext').textContent='انتهت قائمة التلاوة';
+});
 
 // مكتبة زاد قرآن: فهرسة الروايات والسور مع تشغيل MP3 وروابط التحميل
 function renderZadFallbackReciterCatalog(){
