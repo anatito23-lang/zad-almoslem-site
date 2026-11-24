@@ -2111,22 +2111,38 @@ mushafSwipeArea.addEventListener('pointerup',event=>{
 mushafSwipeArea.addEventListener('pointercancel',()=>{mushafMouseStart=null;});
 
 async function loadOldEgyptianReciters(){
- try{
-  const r=await zadFetchTimeout('https://mp3quran.net/api/v3/reciters?language=ar',{},12000);
-  if(!r.ok)throw new Error('reciter api');
-  const data=await r.json(),all=data.reciters||[],select=$('reciter'),known=new Set();
+ const cacheKey='zad_mp3quran_reciters_ar_v1',select=$('reciter');
+ const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp());
+ function populate(all,fromCache){
+  if(!Array.isArray(all))return 0;
+  select.querySelectorAll('option[data-api-reciter="1"]').forEach(option=>option.remove());
+  const known=new Set();
   Object.entries(reciterMatches).forEach(([key,tokens])=>{
    const found=all.find(rec=>{const n=normalizeReciterName(rec.name);return tokens.some(token=>n.includes(normalizeReciterName(token)));});
    if(found){window.zadReciterData[key]=found;known.add(String(found.id));}
   });
-  const nativeApp=!!(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.ZadAndroid.isNativeApp());
   if(!nativeApp)all.forEach(rec=>{
    if(!rec||!rec.id||!Array.isArray(rec.moshaf)||!rec.moshaf.length)return;
    window.zadReciterData['api_'+rec.id]=rec;if(known.has(String(rec.id)))return;
-   const option=document.createElement('option');option.value='api_'+rec.id;option.textContent=rec.name+(rec.moshaf.length>1?' — '+rec.moshaf.length+' روايات':'');select.append(option);
+   const option=document.createElement('option');option.value='api_'+rec.id;option.dataset.apiReciter='1';option.textContent=rec.name+(rec.moshaf.length>1?' — '+rec.moshaf.length+' روايات':'');select.append(option);
   });
-  $('quranStatus').textContent='تم تحميل '+all.length+' قارئًا من مكتبة MP3Quran. ابحث باسم الشيخ ثم اختر السورة.';
- }catch(e){$('quranStatus').textContent='تعذر تحميل قائمة القراء الآن. يمكنك اختيار القراء الأساسيين أو إعادة تحميل الصفحة.';}
+  if(fromCache)$('quranStatus').textContent='نعرض قائمة القراء المحفوظة سابقًا ('+all.length+' قارئًا) — جارٍ تحديثها.';
+  else $('quranStatus').textContent='تم تحديث قائمة القراء: '+all.length+' قارئًا من مكتبة MP3Quran.';
+  return all.length;
+ }
+ let cached=[];try{cached=JSON.parse(localStorage.getItem(cacheKey)||'[]');}catch(e){}
+ if(Array.isArray(cached)&&cached.length)populate(cached,true);
+ try{
+  const r=await zadFetchTimeout('https://mp3quran.net/api/v3/reciters?language=ar',{},12000);
+  if(!r.ok)throw new Error('reciter api');
+  const data=await r.json(),all=(data.reciters||[]).filter(rec=>rec&&rec.id&&Array.isArray(rec.moshaf)&&rec.moshaf.length);
+  if(!all.length)throw new Error('empty reciter list');
+  try{localStorage.setItem(cacheKey,JSON.stringify(all));}catch(e){}
+  populate(all,false);
+ }catch(e){
+  if(!cached.length)$('quranStatus').textContent='تعذر الاتصال بمكتبة القراء. ستظل قائمة القراء الأساسية متاحة، ويمكنك إعادة المحاولة عند عودة الاتصال.';
+  else $('quranStatus').textContent='تعذر تحديث المكتبة الآن؛ نعرض القائمة المحفوظة ('+cached.length+' قارئًا).';
+ }
 }
 function showShuaishaTracks(){
  const tracks=[
