@@ -2210,6 +2210,7 @@ mushafSwipeArea.addEventListener('pointercancel',()=>{mushafMouseStart=null;});
 async function loadOldEgyptianReciters(){
  const cacheKeys=['zad_mp3quran_reciters_multi_v4','zad_mp3quran_reciters_multi_v3','zad_mp3quran_reciters_multi_v2'];
  const select=$('reciter'),box=$('zadReciterCatalog'),status=$('quranStatus');
+ renderZadFallbackReciterCatalog();
  function populate(all,fromCache){
   if(!Array.isArray(all)||!all.length)return false;
   select.querySelectorAll('option[data-api-reciter="1"]').forEach(option=>option.remove());
