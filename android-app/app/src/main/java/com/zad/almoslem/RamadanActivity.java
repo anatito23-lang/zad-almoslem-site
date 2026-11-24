@@ -248,5 +248,17 @@ public class RamadanActivity extends Activity {
             RamadanReminderReceiver.scheduleAll(this);
         }catch(Exception e){Toast.makeText(this,"تعذر حفظ التسجيل: "+e.getMessage(),Toast.LENGTH_LONG).show();}
     }
-    @Override protected void onResume(){super.onResume();if(prefs!=null){updateKhatma();if(prefs.getBoolean("enabled",false))RamadanReminderReceiver.scheduleAll(this);}}
+    @Override protected void onResume(){
+        super.onResume();
+        if(prefs!=null){
+            updateKhatma();
+            if(prefs.getBoolean("enabled",false))RamadanReminderReceiver.scheduleAll(this);
+            // Re-read the admin-published URLs whenever the Ramadan tab returns
+            // to the foreground, then refresh the local audio cache.
+            if(audioStatus!=null)audioStatus.setText("جارٍ تحديث تسجيلات رمضان المنشورة من لوحة الإدارة…");
+            RemoteAudioAssets.refresh(this,()->{
+                if(audioStatus!=null)audioStatus.setText("تم فحص روابط تسجيلات رمضان. جرّب التسجيل المطلوب من الأزرار أدناه.");
+            });
+        }
+    }
 }
