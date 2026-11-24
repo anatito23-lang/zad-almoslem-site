@@ -176,10 +176,13 @@ public class RamadanActivity extends Activity {
             public void onStopTrackingTouch(SeekBar bar){}
         });
         preview.setOnClickListener(v->{
-            if(!saveSelectedSuhoorNasheed())return;
+            int artist=suhoorArtistPicker.getSelectedItemPosition(),track=suhoorTrackPicker.getSelectedItemPosition();
+            if(artist<0||track<0){Toast.makeText(this,"اختر الشيخ والابتهال أولًا",Toast.LENGTH_SHORT).show();return;}
+            String previewUrl=AudioLibraryActivity.getTrackUrl(artist,track);
+            if(previewUrl==null||!previewUrl.startsWith("https://")){suhoorNasheedStatus.setText("رابط التسجيل غير متاح.");return;}
             Intent play=new Intent(this,RamadanAudioService.class);play.putExtra("key","ramadan_suhoor_nasheed_preview");
-            play.putExtra("volume",prefs.getInt("ramadan_volume_nasheed",100)/100f);
-            try{if(android.os.Build.VERSION.SDK_INT>=26)startForegroundService(play);else startService(play);suhoorNasheedStatus.setText("جارٍ تشغيل: "+prefs.getString("suhoor_nasheed_title","الابتهال المختار"));}
+            play.putExtra("nasheed_url",previewUrl);play.putExtra("volume",prefs.getInt("ramadan_volume_nasheed",100)/100f);
+            try{if(android.os.Build.VERSION.SDK_INT>=26)startForegroundService(play);else startService(play);suhoorNasheedStatus.setText("معاينة: "+AudioLibraryActivity.getTrackName(artist,track));}
             catch(Exception e){suhoorNasheedStatus.setText("تعذر تشغيل الابتهال: "+e.getMessage());}
         });
         apply.setOnClickListener(v->{
