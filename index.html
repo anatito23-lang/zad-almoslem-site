@@ -1184,6 +1184,9 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
     .zad-player-controls #zadPlayerStop{background:#f7e9e5;color:#873f32;border-color:#ead4ce}
     .zad-quran-library .zad-quran-search-grid label:has(#zadMoshafSelect){display:none!important}
     #zadReciterCatalog{display:grid;grid-template-columns:1fr;gap:8px;margin:12px 0}
+    #zadReloadReciters,.zad-quran-library .quran-tools,#zadQuranLibraryTracks,#zadMoshafSelect{display:none!important}
+    .zad-quran-library .zad-quran-search-grid label:has(#zadSurahSearch){grid-column:1/-1}
+
     #zadReciterCatalog .zad-reader-accordion{border:1px solid #dce5dc;border-radius:13px;background:#fff;overflow:hidden}
     #zadReciterCatalog .zad-reader-accordion[open]{border-color:#9db9a6;background:#fbfdfb}
     #zadReciterCatalog .zad-reader-accordion summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;cursor:pointer;list-style:none;color:#173d32;font-weight:800}
@@ -3464,6 +3467,8 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
     catalog.innerHTML='<p class="small">تعذر جلب قائمة القراء. تحقق من الإنترنت ثم أعد فتح المكتبة.</p>';
     status('تعذر الاتصال بمصدر التلاوات. '+(last&&last.message?last.message:''));
    }
+   window.zadReloadQuranCatalog=load;
+   const reloadButton=$id('zadReloadReciters');if(reloadButton)reloadButton.addEventListener('click',load);
    load();
   })();
   </script>t>
