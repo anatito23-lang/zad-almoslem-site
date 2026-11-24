@@ -35,7 +35,6 @@ public class IslamicReelsActivity extends Activity {
     private float downY;
     private ImageView image;
     private TextView title, description, counter, status;
-    private Button previousButton, nextButton;
 
     private int dp(float n) { return (int)(n * getResources().getDisplayMetrics().density + .5f); }
     private TextView label(String value, int size, int color, boolean bold) {
@@ -78,12 +77,6 @@ public class IslamicReelsActivity extends Activity {
         root.addView(description, new LinearLayout.LayoutParams(-1, -2));
         status = label("اسحب للأعلى للتنقل بين الريلز", 12, 0xffd7e4dc, false);
         status.setPadding(0, dp(7), 0, dp(7)); root.addView(status);
-        LinearLayout nav = new LinearLayout(this); nav.setGravity(Gravity.CENTER);
-        previousButton = button("السابق"); nextButton = button("التالي");
-        nav.addView(previousButton, new LinearLayout.LayoutParams(0, dp(48), 1));
-        nav.addView(nextButton, new LinearLayout.LayoutParams(0, dp(48), 1)); root.addView(nav);
-        previousButton.setOnClickListener(v -> move(-1));
-        nextButton.setOnClickListener(v -> move(1));
         frame.setOnTouchListener((v, e) -> {
             if (e.getAction() == 0) { downY = e.getY(); return true; }
             if (e.getAction() == 1) { float d = downY - e.getY(); if (Math.abs(d) > dp(45)) move(d > 0 ? 1 : -1); return true; }
@@ -119,7 +112,6 @@ public class IslamicReelsActivity extends Activity {
         title.setText(post.optString("title", "تذكرة إيمانية"));
         description.setText(post.optString("description", ""));
         counter.setText((index + 1) + " / " + posts.size());
-        previousButton.setEnabled(posts.size() > 1); nextButton.setEnabled(posts.size() > 1);
         image.setImageDrawable(null);
         if (post.optBoolean("builtin", false)) {
             image.setImageBitmap(makeBuiltInCard(post.optString("verse"), post.optString("reference")));
@@ -151,7 +143,21 @@ public class IslamicReelsActivity extends Activity {
             {"ألا بذكر الله تطمئن القلوب", "سورة الرعد • الآية ٢٨", "طمئن قلبك بذكر الله، ولا تجعل ضجيج الدنيا يسرق منك سكينة القرب منه."},
             {"فإن مع العسر يسرا", "سورة الشرح • الآية ٥", "لا تيأس إذا ضاقت بك الأسباب؛ ففرج الله قريب، ورحمته أوسع من همك."},
             {"ومن يتق الله يجعل له مخرجا", "سورة الطلاق • الآية ٢", "اجعل تقوى الله طريقك، وثق أن من صدق مع الله لم يضيعه الله."},
-            {"فاذكروني أذكركم", "سورة البقرة • الآية ١٥٢", "يا لها من كرامة! تذكر ربك فيذكرك، وتقبل عليه فيفتح لك أبواب رحمته."}
+            {"فاذكروني أذكركم", "سورة البقرة • الآية ١٥٢", "تذكر ربك فيذكرك، وأقبل عليه بقلبك."},
+            {"ولا تيأسوا من روح الله", "سورة يوسف • الآية ٨٧", "مهما طال البلاء، لا تغلق باب الرجاء في رحمة الله."},
+            {"إن الله مع الصابرين", "سورة البقرة • الآية ١٥٣", "اصبر واحتسب، فمعية الله أعظم عون في الشدائد."},
+            {"وقل رب زدني علما", "سورة طه • الآية ١١٤", "اجعل يومك خطوة في طريق العلم النافع والعمل الصالح."},
+            {"إن ربي قريب مجيب", "سورة هود • الآية ٦١", "ارفع يديك بالدعاء، فربك قريب يسمع ويرى."},
+            {"والله خير الرازقين", "سورة الجمعة • الآية ١١", "لا يحملنك القلق على الرزق أن تنسى الرزاق."},
+            {"إن مع العسر يسرا", "سورة الشرح • الآية ٦", "لا يدوم عسر، ووعد الله حق."},
+            {"واستعينوا بالصبر والصلاة", "سورة البقرة • الآية ٤٥", "إذا أثقلتك الدنيا، فافزع إلى الصلاة والصبر."},
+            {"ومن يتوكل على الله فهو حسبه", "سورة الطلاق • الآية ٣", "خذ بالأسباب، ثم فوض أمرك إلى الله."},
+            {"فاصفح الصفح الجميل", "سورة الحجر • الآية ٨٥", "سامح ابتغاء وجه الله، ولا تجعل قلبك أسير الخصومة."},
+            {"إن الله يحب التوابين", "سورة البقرة • الآية ٢٢٢", "عد إلى الله مهما كثرت عثراتك، فباب التوبة مفتوح."},
+            {"رب اشرح لي صدري", "سورة طه • الآية ٢٥", "اجعل هذا الدعاء رفيقك عند كل أمر عسير."},
+            {"وهو معكم أينما كنتم", "سورة الحديد • الآية ٤", "راقب الله في السر والعلن، واستحضر قربه وعلمه."},
+            {"فمن يعمل مثقال ذرة خيرا يره", "سورة الزلزلة • الآية ٧", "لا تستصغر معروفا، فكل خير محفوظ عند الله."},
+            {"إن الله يحب المحسنين", "سورة البقرة • الآية ١٩٥", "أحسن في قولك وعملك، فالإحسان طريق محبة الله."}
         };
         for (String[] item : cards) {
             JSONObject row = new JSONObject();
