@@ -530,8 +530,9 @@ public class RadioPlaybackService extends Service {
 
     private Notification buildPlaybackNotification(String title, String message) {
         String kind = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", "radio");
-        Class<?> destination = "quran_ayah".equals(kind) ? QuranTextActivity.class : ("quran".equals(kind) ? QuranListeningActivity.class :
-                "ruqyah".equals(kind) ? RuqyahActivity.class : RadioActivity.class);
+        Class<?> destination = "dua".equals(kind) ? DuaActivity.class :
+                ("quran_ayah".equals(kind) ? QuranTextActivity.class : ("quran".equals(kind) ? QuranListeningActivity.class :
+                "ruqyah".equals(kind) ? RuqyahActivity.class : RadioActivity.class));
         Intent open = new Intent(this, destination);
         open.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
         if ("quran_ayah".equals(kind)) { android.content.SharedPreferences prefs=getSharedPreferences("zad_audio",MODE_PRIVATE); open.putExtra("surah_number",prefs.getInt("current_ayah_surah",1)); open.putExtra("target_ayah",prefs.getInt("current_ayah_number",1)); }
@@ -571,7 +572,9 @@ public class RadioPlaybackService extends Service {
 
     private void showRadioFailure(String detail) {
         try {
-            Intent open = new Intent(this, MainActivity.class);
+            String kind = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", "radio");
+            Class<?> destination = "dua".equals(kind) ? DuaActivity.class : MainActivity.class;
+            Intent open = new Intent(this, destination);
             PendingIntent content = PendingIntent.getActivity(this, 7411, open,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             Intent stop = new Intent(this, RadioPlaybackService.class);
