@@ -1154,7 +1154,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
           <button type="button" id="zadPlayerPause" aria-label="إيقاف مؤقت" title="إيقاف مؤقت">⏸ إيقاف مؤقت</button>
           <button type="button" id="zadPlayerStop" aria-label="إيقاف التلاوة" title="إيقاف وإرجاع للبداية">■ إيقاف</button>
           <button type="button" id="zadPlayerNext" aria-label="التلاوة التالية">⏭</button>
-          <a id="zadPlayerDownload" href="#" download="tilawa.mp3">⬇ تحميل MP3</a>
+          <a id="zadPlayerDownload" aria-disabled="true" class="is-disabled">⬇ تحميل MP3</a>
         </div>
         <audio id="audio" preload="none"></audio>
       </div>
@@ -2411,7 +2411,7 @@ function playZadQuranTrack(id){
  audio.src=track.url;audio.load();
  $('zadPlayerToggle').textContent='Ⅱ';
  $('quranStatus').textContent='جارٍ تشغيل سورة '+track.name+' بصوت '+track.artist+'.';
- audio.play().then(()=>$('quranStatus').textContent='يعمل الآن: سورة '+track.name+' — '+track.artist).catch(()=>{$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='تعذر بدء الصوت من الرابط الحالي: '+track.url+' — جرّب فتح الرابط أو اختيار رواية أخرى.';});
+ audio.play().then(()=>$('quranStatus').textContent='يعمل الآن: سورة '+track.name+' — '+track.artist).catch(error=>{$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='تعذر تشغيل التلاوة ('+(error&&error.name||'PlaybackError')+'): '+(error&&error.message||'فشل تشغيل الملف')+' — '+track.url;});
 }
 window.playZadQuranTrack=playZadQuranTrack;
 function stepZadQuranTrack(delta){
@@ -3500,6 +3500,10 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
  .zad-player-controls button{opacity:1!important;filter:none!important}
 }
 </style>
+<style id="zad-download-disabled-state">
+#zadPlayerDownload.is-disabled{opacity:.48!important;filter:grayscale(.35)!important;cursor:not-allowed!important;pointer-events:auto!important}
+#zadPlayerDownload[aria-disabled="true"]{text-decoration:none!important}
+</style>
 <script id="zad-real-mp3quran-loader">
   (function(){
    const $id=id=>document.getElementById(id);
@@ -3561,7 +3565,12 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
     items.forEach(x=>{const o=document.createElement('option');o.value=String(x.value);o.textContent=x.label;el.append(o);});
     if(selectedValue!==undefined&&selectedValue!==null&&items.some(x=>String(x.value)===String(selectedValue)))el.value=String(selectedValue);
    }
-   function syncDownload(){const t=(window.zadQuranQueue||[]).find(x=>String(x.id)===playerSurah.value),d=$id('zadPlayerDownload');if(t&&d){d.href=t.url;d.download=String(t.id).padStart(3,'0')+'.mp3';}}
+   function syncDownload(){
+    const t=(window.zadQuranQueue||[]).find(x=>String(x.id)===playerSurah.value),d=$id('zadPlayerDownload');
+    if(!d)return;
+    if(t){d.href=t.url;d.download=String(t.id).padStart(3,'0')+'.mp3';d.removeAttribute('aria-disabled');d.classList.remove('is-disabled');d.title='تحميل سورة '+t.name;}
+    else{d.removeAttribute('href');d.removeAttribute('download');d.setAttribute('aria-disabled','true');d.classList.add('is-disabled');d.title='اختر السورة أولًا لتفعيل التحميل';}
+   }
    function updateQueue(keepSurah){
     const r=reciters.find(x=>String(x.id)===playerReciter.value),m=(r&&r.moshaf||[])[Number(playerMoshaf.value)];
     if(!r||!m||!m.server){window.zadQuranQueue=[];playerSurah.disabled=true;fillSelect(playerSurah,[],'اختر الرواية أولًا');return;}
