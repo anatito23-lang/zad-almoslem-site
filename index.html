@@ -2465,13 +2465,11 @@ zadAudio.addEventListener('ended',()=>{
   return fresh;
  };
  replaceButton('zadPlayerToggle',async()=>{
-  if(!audio.src){
-   const queue=window.zadQuranQueue||[];
-   const selected=$id('zadPlayerSurah'),id=selected&&selected.value?Number(selected.value):null;
-   if(id&&queue.some(track=>track.id===id))playZadQuranTrack(id);
-   else $('quranStatus').textContent='اختر القارئ والرواية والسورة من قوائم المشغل أولًا.';
-   return;
-  }
+  const queue=window.zadQuranQueue||[];
+  const selected=$id('zadPlayerSurah'),selectedId=selected&&selected.value?Number(selected.value):null;
+  const selectedIndex=queue.findIndex(track=>track.id===selectedId);
+  if(selectedIndex<0){$('quranStatus').textContent='اختر القارئ والرواية والسورة من قوائم المشغل أولًا.';return;}
+  if(!audio.src||selectedIndex!==zadCurrentTrackIndex){playZadQuranTrack(selectedId);return;}
   if(audio.paused){
    try{await audio.play();}catch(error){$('quranStatus').textContent='تعذر تشغيل التلاوة. اضغط على «استمع» أمام السورة لاختيار الملف أولًا.';}
   }else audio.pause();
@@ -3436,7 +3434,30 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
     #zadMoshafSelect{width:100%;border:1px solid #dce5dc;border-radius:12px;padding:12px;background:#fff;font:inherit}
     @media(max-width:390px){#zadReciterCatalog{grid-template-columns:1fr}}
   </style>
-  <script id="zad-real-mp3quran-loader">
+  <style id="zad-player-layout-fix">
+.zad-player{position:relative!important;inset:auto!important;grid-template-columns:64px minmax(0,1fr)!important;align-items:center!important;gap:12px!important;padding:16px!important;margin:16px 0!important;overflow:visible!important}
+.zad-player:before{opacity:.055!important;pointer-events:none}
+.zad-player-picker{grid-column:1/-1!important;display:grid!important;grid-template-columns:1fr!important;gap:10px!important;width:100%!important;margin:0 0 4px!important;position:relative!important;z-index:1!important}
+.zad-player-picker label{display:grid!important;grid-template-columns:1fr!important;gap:5px!important;color:#fff!important;font-size:14px!important;font-weight:800!important;text-shadow:none!important}
+.zad-player-picker select{display:block!important;width:100%!important;min-width:0!important;height:48px!important;padding:0 14px!important;border:1px solid #d9c99f!important;border-radius:13px!important;background:#fff!important;color:#173d32!important;font-family:inherit!important;font-size:15px!important;font-weight:600!important;line-height:1.4!important;opacity:1!important;box-shadow:0 2px 7px rgba(0,0,0,.12)!important}
+.zad-player-picker select:disabled{background:#e9ece8!important;color:#68766f!important;opacity:1!important}
+.zad-player-cover{grid-column:1!important;width:64px!important;height:64px!important}
+.zad-player-info{grid-column:2!important;min-width:0!important}
+.zad-player-live{color:#f1d995!important;font-size:12px!important}
+.zad-player-info strong{color:#fff!important;font-size:17px!important}
+.zad-player-info span:not(.zad-player-live){color:#f0f4ee!important;font-size:14px!important}
+.zad-player-info small{color:#f3dda5!important;font-size:12px!important;white-space:normal!important;line-height:1.5!important}
+.zad-player-timeline{grid-column:1/-1!important;color:#fff!important;font-size:12px!important}
+.zad-player-timeline input{accent-color:#f0d58e!important;min-width:0}
+.zad-player-controls{grid-column:1/-1!important;display:flex!important;justify-content:center!important;align-items:center!important;gap:9px!important;flex-wrap:wrap!important}
+.zad-player-controls button{color:#fff!important;background:#285b49!important;border:1px solid #8cae9a!important;min-height:46px!important}
+.zad-player-controls .zad-player-main{background:#f0dba9!important;color:#143c30!important;border:2px solid #fff0c9!important;width:62px!important;height:62px!important}
+.zad-player-controls #zadPlayerPause{background:#f3ead5!important;color:#174638!important;border:1px solid #d6c59b!important}
+.zad-player-controls #zadPlayerStop{background:#7d382f!important;color:#fff!important;border:1px solid #d99b8e!important}
+.zad-player-controls a{background:#f0dba9!important;color:#173d32!important;border:1px solid #fff0c9!important}
+@media(max-width:430px){.zad-player{position:relative!important;grid-template-columns:54px minmax(0,1fr)!important;padding:13px!important;border-radius:20px!important}.zad-player-cover{width:54px!important;height:54px!important}.zad-player-cover .zad-player-ornament{font-size:29px!important}.zad-player-controls{gap:7px!important}.zad-player-controls button{min-width:42px!important;padding:8px!important}.zad-player-controls #zadPlayerPause,.zad-player-controls #zadPlayerStop{font-size:12px!important;padding:9px!important}}
+</style>
+<script id="zad-real-mp3quran-loader">
   (function(){
    const $id=id=>document.getElementById(id);
    const catalog=$id('zadReciterCatalog'),readerSearch=$id('zadReciterSearch'),surahSearch=$id('zadSurahSearch'),audio=$id('audio'),playerReciter=$id('zadPlayerReciter'),playerMoshaf=$id('zadPlayerMoshaf'),playerSurah=$id('zadPlayerSurah');
