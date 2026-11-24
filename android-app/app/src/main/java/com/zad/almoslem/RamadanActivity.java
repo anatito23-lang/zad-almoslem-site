@@ -10,14 +10,10 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.util.Calendar;
 
 public class RamadanActivity extends Activity {
@@ -26,7 +22,6 @@ public class RamadanActivity extends Activity {
     private TextView fastCount, khatmaProgress, audioStatus;
     private KhatmaRing khatmaRing;
     private Button khatmaToggle;
-    private static final int PICK_IFTAR=4101, PICK_CANNON=4102, PICK_SUHOOR=4103, PICK_MUSIC=4104;
 
     private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
     private GradientDrawable shape(int color,int radius){GradientDrawable d=new GradientDrawable();d.setColor(color);d.setCornerRadius(dp(radius));return d;}
@@ -127,7 +122,7 @@ public class RamadanActivity extends Activity {
             new DatePickerDialog(this,(picker,y,m,d)->{Calendar first=Calendar.getInstance();first.set(y,m,d,0,0,0);first.set(Calendar.MILLISECOND,0);prefs.edit().putLong("start_at",first.getTimeInMillis()).apply();updateStartLabel(startLabel);RamadanReminderReceiver.scheduleAll(this);},now.get(Calendar.YEAR),now.get(Calendar.MONTH),now.get(Calendar.DAY_OF_MONTH)).show();});
         settings.addView(text("اختيار تنبيه المغرب",15,AppThemeColors.accent(this),true),full());
         RadioGroup iftarMode=new RadioGroup(this);iftarMode.setOrientation(RadioGroup.VERTICAL);
-        RadioButton iftarUploadMode=new RadioButton(this);iftarUploadMode.setText("تسجيل صوتي مرفوع");iftarUploadMode.setId(6);
+        RadioButton iftarUploadMode=new RadioButton(this);iftarUploadMode.setText("تسجيل إعلان المغرب المنشور من لوحة الإدارة");iftarUploadMode.setId(6);
         
         RadioButton iftarCannonMode=new RadioButton(this);iftarCannonMode.setText("مدفع الإفطار");iftarCannonMode.setId(5);
         iftarMode.addView(iftarUploadMode);iftarMode.addView(iftarCannonMode);
@@ -135,7 +130,7 @@ public class RamadanActivity extends Activity {
         iftarMode.check("cannon".equals(savedIftarMode)?5:6);settings.addView(iftarMode,full());
         Switch cannon=new Switch(this);cannon.setText("تشغيل صوت مدفع الإفطار عند المغرب");cannon.setTextColor(AppThemeColors.text(this));cannon.setChecked(prefs.getBoolean("cannon_enabled",true));settings.addView(cannon,full());
         settings.addView(text("اختيار تنبيه السحور",15,AppThemeColors.accent(this),true),full());
-        TextView suhoorUploadLabel=text("سيُستخدم تسجيل المسحراتي الذي ترفعه من قسم أصوات رمضان.",12,AppThemeColors.muted(this),false);settings.addView(suhoorUploadLabel,full());
+        TextView suhoorUploadLabel=text("سيُستخدم تسجيل المسحراتي المنشور من لوحة الإدارة.",12,AppThemeColors.muted(this),false);settings.addView(suhoorUploadLabel,full());
         Switch suhoor=new Switch(this);suhoor.setText("تشغيل تنبيه السحور");suhoor.setTextColor(AppThemeColors.text(this));suhoor.setChecked(prefs.getBoolean("suhoor_enabled",true));settings.addView(suhoor,full());
         addMinutesControl(settings,"التنبيه قبل المغرب بدقائق","iftar_lead_minutes",5,1,30);
         addMinutesControl(settings,"تنبيه السحور قبل الفجر بدقائق","suhoor_lead_minutes",45,10,120);
@@ -146,11 +141,8 @@ public class RamadanActivity extends Activity {
         suhoor.setOnCheckedChangeListener((b,v)->{prefs.edit().putBoolean("suhoor_enabled",v).apply();RamadanReminderReceiver.scheduleAll(this);});
 
         LinearLayout audio=card("أصوات رمضان — تسجيلات تعمل دون إنترنت");
-        audioStatus=text("ارفع التسجيل مرة واحدة؛ سيُحفظ داخل التطبيق ويعمل لاحقًا دون إنترنت، مثل الأذان.",12,AppThemeColors.muted(this),false);
+        audioStatus=text("تُدار تسجيلات المغرب والمدفع والمسحراتي من لوحة الإدارة، ويحدّثها التطبيق تلقائيًا للعمل حتى دون إنترنت.",12,AppThemeColors.muted(this),false);
         audio.addView(audioStatus,full());
-        addAudioPicker(audio,"اختيار تسجيل إعلان المغرب","iftar_announcement.mp3",PICK_IFTAR);
-        addAudioPicker(audio,"اختيار تسجيل مدفع الإفطار","iftar_cannon.mp3",PICK_CANNON);
-        addAudioPicker(audio,"اختيار تسجيل المسحراتي","suhoor_voice.mp3",PICK_SUHOOR);
         addAudioTestButton(audio,"تجربة تسجيل إعلان المغرب","ramadan_iftar_voice_test");
         addAudioTestButton(audio,"تجربة صوت مدفع الإفطار","ramadan_cannon_test");
         addAudioTestButton(audio,"تجربة تسجيل المسحراتي","ramadan_suhoor_voice_test");
@@ -230,23 +222,6 @@ public class RamadanActivity extends Activity {
             try{startService(stop);}
             catch(Exception e){Toast.makeText(this,"تعذر إيقاف الصوت: "+e.getMessage(),Toast.LENGTH_LONG).show();}
         });
-    }
-    private void addAudioPicker(LinearLayout box,String label,String file,int request){
-        Button b=new Button(this);b.setText(label);box.addView(b,full());b.setOnClickListener(v->{Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.setType("audio/*");i.addCategory(Intent.CATEGORY_OPENABLE);i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);startActivityForResult(i,request);});
-    }
-    @Override protected void onActivityResult(int request,int result,Intent data){
-        super.onActivityResult(request,result,data);if(result!=RESULT_OK||data==null||data.getData()==null)return;
-        String name=request==PICK_IFTAR?"iftar_announcement.mp3":request==PICK_CANNON?"iftar_cannon.mp3":request==PICK_SUHOOR?"suhoor_voice.mp3":"ramadan_music.mp3";
-        try{
-            File dir=new File(getFilesDir(),"ramadan_audio");if(!dir.exists()&&!dir.mkdirs())throw new Exception("تعذر إنشاء مجلد الأصوات");
-            Uri uri=data.getData();try(InputStream in=getContentResolver().openInputStream(uri);FileOutputStream out=new FileOutputStream(new File(dir,name))){
-                if(in==null)throw new Exception("تعذر فتح التسجيل");byte[] buf=new byte[8192];int len;while((len=in.read(buf))!=-1)out.write(buf,0,len);
-            }
-            if(request==PICK_IFTAR)prefs.edit().putString("iftar_mode","upload").apply();
-            if(request==PICK_CANNON)prefs.edit().putString("iftar_mode","cannon").putBoolean("cannon_enabled",true).apply();
-            Toast.makeText(this,"تم حفظ التسجيل داخل التطبيق، وسيعمل دون إنترنت.",Toast.LENGTH_LONG).show();
-            RamadanReminderReceiver.scheduleAll(this);
-        }catch(Exception e){Toast.makeText(this,"تعذر حفظ التسجيل: "+e.getMessage(),Toast.LENGTH_LONG).show();}
     }
     @Override protected void onResume(){
         super.onResume();
