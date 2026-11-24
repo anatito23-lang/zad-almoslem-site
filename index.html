@@ -2408,10 +2408,10 @@ function playZadQuranTrack(id){
  $('zadPlayerDownload').href=track.url;
  $('zadPlayerDownload').download=String(track.id).padStart(3,'0')+'.mp3';
  $('zadPlayerSeek').value='0';$('zadPlayerCurrent').textContent='00:00';$('zadPlayerDuration').textContent='00:00';
- audio.src=track.url;audio.load();
+ audio.preload='auto';audio.src=track.url;/* لا نستدعِ load() هنا: بعض متصفحات أندرويد تفقد إذن التشغيل الناتج عن ضغطة المستخدم بعد إعادة تحميل عنصر الصوت برمجيًا. تعيين src ثم play مباشرة يحافظ على تفاعل المستخدم. */
  $('zadPlayerToggle').textContent='Ⅱ';
  $('quranStatus').textContent='جارٍ تشغيل سورة '+track.name+' بصوت '+track.artist+'.';
- audio.play().then(()=>$('quranStatus').textContent='يعمل الآن: سورة '+track.name+' — '+track.artist).catch(error=>{$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='تعذر تشغيل التلاوة ('+(error&&error.name||'PlaybackError')+'): '+(error&&error.message||'فشل تشغيل الملف')+' — '+track.url;});
+ audio.play().then(()=>$('quranStatus').textContent='يعمل الآن: سورة '+track.name+' — '+track.artist).catch(error=>{$('zadPlayerToggle').textContent='▶';$('quranStatus').textContent='تعذر تشغيل الصوت داخل المشغل ('+(error&&error.name||'PlaybackError')+'): '+(error&&error.message||'فشل تشغيل الملف')+' — افتح رابط التحميل مؤقتًا إذا أردت الاستماع، وأرسل هذه الرسالة للدعم.';});
 }
 window.playZadQuranTrack=playZadQuranTrack;
 function stepZadQuranTrack(delta){
@@ -2457,7 +2457,7 @@ zadAudio.addEventListener('ended',()=>{
 (function bindSingleZadPlayer(){
  const audio=$('audio'),player=$('zadPlayer');
  if(!audio||!player)return;
- audio.setAttribute('playsinline','');audio.preload='metadata';audio.controls=false;
+ audio.setAttribute('playsinline','');audio.preload='auto';audio.controls=false;audio.removeAttribute('muted');audio.volume=1;
  const replaceButton=(id,handler)=>{
   const old=$(id);if(!old)return;
   const fresh=old.cloneNode(true);old.replaceWith(fresh);
