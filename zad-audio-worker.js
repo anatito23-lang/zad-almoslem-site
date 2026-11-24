@@ -125,7 +125,7 @@ async function uploadToGitHub(file, kind, env) {
       : (responseText ? responseText.slice(0, 500) : "No response body from GitHub.");
     throw new Error("فشل رفع الملف إلى GitHub (HTTP " + response.status + "): " + safeMessage);
   }
-  return "https://zad-almoslem.github.io/" + path;
+  return "https://raw.githubusercontent.com/" + GITHUB_OWNER + "/" + GITHUB_REPO + "/" + GITHUB_BRANCH + "/" + path;
 }
 export default {
   async fetch(request, env) {
