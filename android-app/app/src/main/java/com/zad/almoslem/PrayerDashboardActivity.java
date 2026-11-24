@@ -32,6 +32,7 @@ public class PrayerDashboardActivity extends Activity {
     private EditText cityInput;
     private String selectedCountryCode;
     private TextView result,nextCountdown,trackerCount,adhanNow;
+    private final CheckBox[] trackerChecks=new CheckBox[5];
     private LinearLayout prayerHero;
     private final TextView[] timeViews=new TextView[5];
     private final TextView[] remainingViews=new TextView[5];
@@ -103,17 +104,36 @@ public class PrayerDashboardActivity extends Activity {
         TextView trackerTitle=label("متتبع الصلوات اليومي",19,AppThemeColors.text(this),true);trackerTitle.setPadding(0,dp(16),0,dp(5));root.addView(trackerTitle);
         TextView trackerHint=label("علّم الصلاة بعد أدائها، وسيُحفظ إنجازك لهذا اليوم على الهاتف.",12,AppThemeColors.muted(this),false);root.addView(trackerHint);
         trackerCount=label("",14,green,true);trackerCount.setPadding(0,dp(7),0,dp(7));root.addView(trackerCount);
-        for(String p:PRAYERS){
-            CheckBox cb=new CheckBox(this);cb.setText(p+" — صليت");cb.setTextSize(16);cb.setTextColor(AppThemeColors.text(this));cb.setChecked(prefs.getBoolean(trackerKey(p),false));
-            cb.setOnCheckedChangeListener((button,checked)->{prefs.edit().putBoolean(trackerKey(p),checked).apply();refreshTracker();});
+        for(int i=0;i<PRAYERS.length;i++){
+            final String p=PRAYERS[i];
+            CheckBox cb=new CheckBox(this);trackerChecks[i]=cb;cb.setText(p+" — صليت");cb.setTextSize(16);cb.setTextColor(AppThemeColors.text(this));cb.setChecked(prefs.getBoolean(trackerKey(p),false));
+            bindTrackerCheckbox(i);
             root.addView(cb,full());
         }
         Button reset=new Button(this);reset.setText("إعادة تعيين متتبع اليوم");root.addView(reset,full());reset.setOnClickListener(v->{for(String p:PRAYERS)prefs.edit().remove(trackerKey(p)).apply();recreate();});
         Button settings=new Button(this);settings.setText("إعدادات الأذان وأصوات المؤذنين");root.addView(settings,full());settings.setOnClickListener(v->finish());
         refreshTracker();refreshCountdowns();
     }
-    private String trackerKey(String p){return "prayer_tracker_"+new SimpleDateFormat("yyyyMMdd",Locale.US).format(new Date())+"_"+p;}
-    private void refreshTracker(){int done=0;for(String p:PRAYERS)if(prefs.getBoolean(trackerKey(p),false))done++;if(trackerCount!=null)trackerCount.setText("أنجزت "+done+" من 5 صلوات اليوم");}
+    private String trackerKey(String p){return "prayer_tracker_"+todayInCityZone()+"_"+p;}
+    private void bindTrackerCheckbox(int index){
+        CheckBox cb=trackerChecks[index];if(cb==null)return;final String prayer=PRAYERS[index];
+        cb.setOnCheckedChangeListener((button,checked)->{prefs.edit().putBoolean(trackerKey(prayer),checked).apply();refreshTrackerCount();});
+    }
+    private void refreshTrackerCount(){
+        int done=0;for(String prayer:PRAYERS)if(prefs.getBoolean(trackerKey(prayer),false))done++;
+        if(trackerCount!=null)trackerCount.setText("أنجزت "+done+" من 5 صلوات اليوم");
+    }
+    private void refreshTracker(){
+        int done=0;
+        for(int i=0;i<PRAYERS.length;i++){
+            boolean checked=prefs.getBoolean(trackerKey(PRAYERS[i]),false);
+            if(checked)done++;
+            CheckBox cb=trackerChecks[i];
+            if(cb!=null&&cb.isChecked()!=checked){cb.setOnCheckedChangeListener(null);cb.setChecked(checked);bindTrackerCheckbox(i);}
+        }
+        if(trackerCount!=null)trackerCount.setText("أنجزت "+done+" من 5 صلوات اليوم");
+    }
+    @Override protected void onResume(){super.onResume();if(prefs!=null)refreshTracker();}
     private String savedSunrise(){int h=prefs.getInt("native_sunrise_hour",-1),m=prefs.getInt("native_sunrise_minute",0);if(h<0)return "—";if(prefs.getBoolean("prayer_time_format_24",true))return String.format(Locale.getDefault(),"%02d:%02d",h,m);int dh=h%12;if(dh==0)dh=12;return String.format(Locale.getDefault(),"%d:%02d %s",dh,m,h<12?"ص":"م");}
     private String savedTime(String p){
         int h=prefs.getInt("native_time_hour_"+p,-1),m=prefs.getInt("native_time_minute_"+p,0);
@@ -152,7 +172,7 @@ public class PrayerDashboardActivity extends Activity {
             String sunriseRaw=timings.getString("Sunrise").split(" ")[0];String[] sunriseHm=sunriseRaw.split(":");prefs.edit().putInt("native_sunrise_hour",Integer.parseInt(sunriseHm[0])).putInt("native_sunrise_minute",Integer.parseInt(sunriseHm[1])).apply();
             for(int i=0;i<5;i++){String raw=timings.getString(api[i]).split(" ")[0];String[] hm=raw.split(":");int h=Integer.parseInt(hm[0]),m=Integer.parseInt(hm[1]);prefs.edit().putInt("native_time_hour_"+PRAYERS[i],h).putInt("native_time_minute_"+PRAYERS[i],m).apply();Calendar next=Calendar.getInstance(TimeZone.getTimeZone(cityTimezone));next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,m);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);if(prefs.getBoolean("prayer_enabled_"+PRAYERS[i],true))ReminderReceiver.schedulePrayer(this,PRAYERS[i],next.getTimeInMillis());}
             prefs.edit().putString("native_times_date",todayInCityZone()).putInt("native_times_utc_offset",TimeZone.getTimeZone(cityTimezone).getOffset(System.currentTimeMillis())/60000).apply();RamadanReminderReceiver.scheduleAll(this);
-            runOnUiThread(()->{result.setText(pos==0?"تم تحديث المواقيت بطريقة الحساب المصرية رقم 5؛ وقد تختلف دقائق عن جدول الهيئة الرسمي المنشور.":"تم تحديث مواقيت "+COUNTRIES[pos]+" — "+city+" بطريقة الحساب المعتمدة لهذه الدولة.");refreshCountdowns();});
+            runOnUiThread(()->{result.setText(pos==0?"تم تحديث المواقيت بطريقة الحساب المصرية رقم 5؛ وقد تختلف دقائق عن جدول الهيئة الرسمي المنشور.":"تم تحديث مواقيت "+COUNTRIES[pos]+" — "+city+" بطريقة الحساب المعتمدة لهذه الدولة.");refreshTracker();refreshCountdowns();});
         }catch(Exception e){runOnUiThread(()->result.setText("تعذر تحديث المواقيت: "+(e.getMessage()==null?"تحقق من اسم المدينة والإنترنت":e.getMessage())));}
         finally{if(c!=null)c.disconnect();runOnUiThread(()->button.setEnabled(true));}}).start();
     }
