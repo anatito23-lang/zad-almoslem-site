@@ -2097,7 +2097,8 @@ function updateBookCategoryCount(root,category){
     const open=document.createElement("button");open.type="button";open.className="btn green";open.textContent="اقرأ داخل الموقع";open.addEventListener("click",()=>{const modal=document.getElementById("bookReaderModal"),frame=document.getElementById("bookReaderFrame"),title=document.getElementById("bookReaderTitle");if(modal&&frame){title.textContent=b.title||"قارئ الكتب";frame.src=url;modal.classList.add("active");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden"}});card.append(open);
    }
    const download=document.createElement("a");download.className="btn light";download.href=url;download.textContent="فتح النسخة المحلية";download.style.display="inline-block";download.style.marginTop="8px";download.setAttribute("download","");card.append(download);
-   ensureBookCategoryGrid(grid,b.category||"other").append(card);\n   updateBookCategoryCount(grid,bookCategoryMeta[b.category]?b.category:"other");
+   ensureBookCategoryGrid(grid,b.category||"other").append(card);
+   updateBookCategoryCount(grid,bookCategoryMeta[b.category]?b.category:"other");
   }
   if(status)status.textContent=books.length?"الكتب المضافة من لوحة الإدارة: "+books.length:"لا توجد كتب جديدة منشورة حاليًا.";
   const filters=[...document.querySelectorAll("[data-book-filter]")];
