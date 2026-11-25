@@ -11,7 +11,7 @@
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
     <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" />
-    <application android:allowBackup="true" android:label="سكينة أذان وقرآن وصلاة" android:icon="@drawable/launcher_icon" android:roundIcon="@drawable/launcher_icon" android:usesCleartextTraffic="false" android:networkSecurityConfig="@xml/network_security_config" android:theme="@style/AppTheme">
+    <application android:allowBackup="true" android:label="سكينة أذان وقرآن وصلاة" android:icon="@drawable/launcher_icon_3d" android:roundIcon="@drawable/launcher_icon_3d" android:usesCleartextTraffic="false" android:networkSecurityConfig="@xml/network_security_config" android:theme="@style/AppTheme">
         <activity android:name=".HomeActivity" android:exported="true"><intent-filter><action android:name="android.intent.action.MAIN" /><category android:name="android.intent.category.LAUNCHER" /></intent-filter></activity>
         <activity android:name=".TasbeehActivity" android:exported="false" />
         <activity android:name=".IslamicReelsActivity" android:exported="false" />
@@ -38,13 +38,13 @@
         <activity android:name=".DailyWirdActivity" android:exported="false" />
         <activity android:name=".DailyReminderSettingsActivity" android:exported="false" />
         <activity android:name=".MainActivity" android:exported="false" android:configChanges="orientation|screenSize|keyboardHidden" />
-        <service android:name=".RadioTileService" android:label="إذاعة القرآن" android:icon="@drawable/launcher_icon" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:exported="true"><intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter></service>
+        <service android:name=".RadioTileService" android:label="إذاعة القرآن" android:icon="@drawable/launcher_icon_3d" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:exported="true"><intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter></service>
         <receiver android:name=".QuranHomeWidget" android:exported="true">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <intent-filter><action android:name="com.zad.almoslem.WIDGET_QURAN_TOGGLE" /><action android:name="com.zad.almoslem.WIDGET_QURAN_NEXT" /><action android:name="com.zad.almoslem.WIDGET_QURAN_PREVIOUS" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/quran_widget_info" />
         </receiver>
-        <service android:name=".QuranTileService" android:label="استماع القرآن" android:icon="@drawable/launcher_icon" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:exported="true"><intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter></service>
+        <service android:name=".QuranTileService" android:label="استماع القرآن" android:icon="@drawable/launcher_icon_3d" android:permission="android.permission.BIND_QUICK_SETTINGS_TILE" android:exported="true"><intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter></service>
         <service android:name=".RadioPlaybackService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
         <service android:name=".AdhanPlaybackService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
         <service android:name=".ReminderAudioService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
