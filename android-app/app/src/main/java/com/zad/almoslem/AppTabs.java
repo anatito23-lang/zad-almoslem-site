@@ -68,27 +68,8 @@ public final class AppTabs {
     }
 
     private static void syncNavigation(Activity a,String active,LinearLayout bar) {
-        // Navigation configuration is optional. Never let Firebase initialization/network
-        // failures crash the app's startup; the cached/default navigation is already rendered.
-        try {
-            FirebaseFirestore.getInstance().collection("waqafat").document("__app_navigation__").get()
-            .addOnSuccessListener(snapshot->{
-                if(!snapshot.exists()||!snapshot.contains("tabs"))return;
-                Object value=snapshot.get("tabs");if(!(value instanceof java.util.List))return;
-                JSONArray tabs=new JSONArray();
-                for(Object item:(java.util.List<?>)value){
-                    if(item instanceof java.util.Map){
-                        JSONObject row=new JSONObject((java.util.Map<?,?>)item);
-                        tabs.put(row);
-                    }
-                }
-                if(tabs.length()==0)return;
-                a.getSharedPreferences(PREFS,Activity.MODE_PRIVATE).edit().putString("tabs",tabs.toString()).apply();
-                render(a,active,bar,tabs);
-            });
-        } catch (RuntimeException startupFailure) {
-            // Keep the locally rendered tabs and allow HomeActivity to remain usable.
-        }
+        // Remote tab configuration is temporarily disabled during startup-stability
+        // investigation. Cached or default local tabs are rendered synchronously.
     }
 
     private static void render(Activity a,String active,LinearLayout outer,JSONArray config) {
