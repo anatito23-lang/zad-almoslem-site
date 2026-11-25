@@ -1249,11 +1249,18 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
   <section class="section" id="zad-mushaf" aria-labelledby="zadMushafTitle">
     <div class="section-head"><div><h2 id="zadMushafTitle">مصحف زاد</h2><p>اقرأ القرآن الكريم صفحةً صفحةً بتنسيق هادئ قريب من صفحات المصحف</p></div></div>
     <div class="zad-mushaf-shell">
-      <div class="zad-mushaf-toolbar">
-        <button type="button" id="zmPrev" class="btn light" aria-label="الصفحة السابقة">السابق</button>
-        <label>رقم الصفحة <input id="zmPage" type="number" min="1" max="604" value="1" inputmode="numeric"></label>
-        <button type="button" id="zmNext" class="btn light" aria-label="الصفحة التالية">التالي</button>
+      <div class="zad-mushaf-controls">
+        <label class="zm-surah-label">اختر السورة
+          <select id="zmSurahSelect" aria-label="قائمة أسماء السور"><option value="">تحميل أسماء السور...</option></select>
+        </label>
+        <button type="button" id="zmToggle" class="btn light" aria-expanded="true">إغلاق المصحف</button>
       </div>
+      <div id="zmReaderBody">
+        <div class="zad-mushaf-toolbar">
+          <button type="button" id="zmPrev" class="btn light" aria-label="الصفحة السابقة">السابق</button>
+          <label>رقم الصفحة <input id="zmPage" type="number" min="1" max="604" value="1" inputmode="numeric"></label>
+          <button type="button" id="zmNext" class="btn light" aria-label="الصفحة التالية">التالي</button>
+        </div>
       <div class="zad-mushaf-meta"><span id="zmSurah">سورة الفاتحة</span><span id="zmJuz">الجزء ١</span></div>
       <article class="zad-mushaf-page" id="zmPageContent" aria-live="polite" aria-label="نص صفحة المصحف">
         <div class="zad-mushaf-bism">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
@@ -1261,9 +1268,16 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
       </article>
       <div class="zad-mushaf-footer"><button type="button" id="zmFirst" class="btn light">أول المصحف</button><span id="zmPageLabel">صفحة ١ من ٦٠٤</span><button type="button" id="zmLast" class="btn light">آخر المصحف</button></div>
       <p class="small" id="zmStatus" role="status">يتم تحميل نص القرآن بالرسم العثماني من مصدر Quran.com. يلزم الاتصال بالإنترنت.</p>
+      </div>
     </div>
   </section>
   <style id="zad-mushaf-styles">
+    .zad-mushaf-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .zm-surah-label{display:flex;align-items:center;gap:8px;color:#365541;font-weight:700;font-size:14px}
+    #zmSurahSelect{max-width:220px;min-width:170px;padding:10px;border:1px solid #c9bea2;border-radius:10px;background:#fffdf5;color:#243e30;font:600 14px Tahoma,Arial}
+    #zmReaderBody[hidden]{display:none!important}
+    .zad-mushaf-page{min-height:440px!important;padding:30px 24px!important;font-size:clamp(23px,5.3vw,32px)!important;line-height:2.2!important}
+    @media(max-width:520px){.zad-mushaf-page{min-height:430px!important;padding:24px 16px!important;font-size:clamp(23px,6vw,30px)!important}}
     .zad-mushaf-shell{max-width:760px;margin:auto;padding:14px;border:1px solid #d9cfb5;border-radius:18px;background:linear-gradient(145deg,#f5f0df,#ebe2ca);box-shadow:0 12px 30px #263d2d12}
     .zad-mushaf-toolbar,.zad-mushaf-footer,.zad-mushaf-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
     .zad-mushaf-toolbar label{display:flex;align-items:center;gap:7px;font-size:13px;color:#365541}
@@ -1284,6 +1298,10 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
    if(!pageInput||!content||pageInput.dataset.ready)return;pageInput.dataset.ready='1';
    let current=Number(localStorage.getItem('zadMushafPage')||1),busy=false;
    const ar=n=>new Intl.NumberFormat('ar-EG').format(n);
+   const surahSelect=$('zmSurahSelect'),readerBody=$('zmReaderBody'),toggle=$('zmToggle');
+   toggle.addEventListener('click',()=>{const closed=!readerBody.hidden;readerBody.hidden=closed;toggle.textContent=closed?'فتح المصحف':'إغلاق المصحف';toggle.setAttribute('aria-expanded',String(!closed));});
+   fetch('https://api.quran.com/api/v4/chapters?language=ar').then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{surahSelect.innerHTML='<option value="">اختر اسم السورة</option>';(data.chapters||[]).forEach(ch=>{const o=document.createElement('option');o.value=ch.id;o.textContent=ch.name_arabic;surahSelect.append(o);});}).catch(()=>{surahSelect.innerHTML='<option value="">تعذر تحميل السور</option>';});
+   surahSelect.addEventListener('change',async()=>{if(!surahSelect.value)return;try{const r=await fetch('https://api.quran.com/api/v4/verses/by_chapter/'+surahSelect.value+'?fields=page_number&per_page=1');if(!r.ok)throw Error();const d=await r.json();if(d.verses&&d.verses[0]){readerBody.hidden=false;toggle.textContent='إغلاق المصحف';toggle.setAttribute('aria-expanded','true');setPage(d.verses[0].page_number);}}catch(e){status.textContent='تعذر الانتقال إلى السورة. تحقق من الإنترنت.';}});
    function setPage(n){current=Math.max(1,Math.min(604,Number(n)||1));pageInput.value=current;$('zmPageLabel').textContent='صفحة '+ar(current)+' من ٦٠٤';localStorage.setItem('zadMushafPage',String(current));load();}
    async function load(){
     if(busy)return;busy=true;status.textContent='جارٍ تحميل الصفحة...';content.innerHTML='<p>جارٍ تحميل الصفحة...</p>';
