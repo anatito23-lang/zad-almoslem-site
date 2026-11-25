@@ -1638,11 +1638,9 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
     <div><h2 id="khutbahsTitle">خطب زاد</h2><p>أرشيف خطب زاد المسلم؛ اختر عنوان الخطبة لقراءة نصها كاملًا</p></div>
     <a class="btn light" href="./website-admin.html">إدارة الخطب</a>
   </div>
-  <div class="card ministry-khutbah-link" style="margin:0 0 16px">
-    <span class="topic-tag">المصدر الرسمي · وزارة الأوقاف المصرية</span>
-    <h3>أحدث خطب الجمعة</h3>
-    <p>تابع موضوع الخطبة الأسبوعية ونصوص الخطب المنشورة عبر الموقع الرسمي لوزارة الأوقاف.</p>
-    <a class="btn green" href="https://awkafonline.gov.eg/friday-sermon" target="_blank" rel="noopener noreferrer">افتح خطب وزارة الأوقاف</a>
+  <div class="khutbah-archive-tools" style="margin:0 0 14px">
+    <input id="khutbahSearch" type="search" placeholder="ابحث في عناوين الخطب ومحتواها…" aria-label="ابحث في الخطب">
+    <p id="khutbahArchiveCount" class="small" aria-live="polite">كل الخطب المنشورة في أرشيف زاد</p>
   </div>
   <div id="khutbahList" class="khutbah-list" aria-live="polite">
     <article class="card khutbah-card"><p>جارٍ تحميل الخطب…</p></article>
@@ -2517,6 +2515,16 @@ window.zadReloadQuranCatalog=load;load();
    }
    const empty=list.querySelectorAll('.khutbah-card').length===0;
    if(empty)list.innerHTML='<article class="card khutbah-card"><p>لا توجد خطب منشورة حاليًا.</p></article>';
+   const search=document.getElementById('khutbahSearch'),count=document.getElementById('khutbahArchiveCount');
+   function filterArchive(){
+    const q=(search?.value||'').trim().toLocaleLowerCase('ar');
+    const cards=[...list.querySelectorAll('.khutbah-card')];
+    let shown=0;
+    cards.forEach(card=>{const match=!q||card.textContent.toLocaleLowerCase('ar').includes(q);card.hidden=!match;if(match&&card.dataset.legacyKhutbah)shown++;});
+    if(count)count.textContent=q?'نتائج البحث في أرشيف الخطب':'تظهر هنا جميع الخطب المنشورة في أرشيف زاد';
+   }
+   if(search&&!search.dataset.bound){search.dataset.bound='1';search.addEventListener('input',filterArchive);new MutationObserver(filterArchive).observe(list,{childList:true,subtree:true});}
+   filterArchive();
   }catch(e){console.warn('تعذر تحميل أرشيف الخطب القديم',e);}
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
