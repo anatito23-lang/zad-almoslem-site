@@ -68,7 +68,10 @@ public final class AppTabs {
     }
 
     private static void syncNavigation(Activity a,String active,LinearLayout bar) {
-        FirebaseFirestore.getInstance().collection("waqafat").document("__app_navigation__").get()
+        // Navigation configuration is optional. Never let Firebase initialization/network
+        // failures crash the app's startup; the cached/default navigation is already rendered.
+        try {
+            FirebaseFirestore.getInstance().collection("waqafat").document("__app_navigation__").get()
             .addOnSuccessListener(snapshot->{
                 if(!snapshot.exists()||!snapshot.contains("tabs"))return;
                 Object value=snapshot.get("tabs");if(!(value instanceof java.util.List))return;
@@ -83,6 +86,9 @@ public final class AppTabs {
                 a.getSharedPreferences(PREFS,Activity.MODE_PRIVATE).edit().putString("tabs",tabs.toString()).apply();
                 render(a,active,bar,tabs);
             });
+        } catch (RuntimeException startupFailure) {
+            // Keep the locally rendered tabs and allow HomeActivity to remain usable.
+        }
     }
 
     private static void render(Activity a,String active,LinearLayout outer,JSONArray config) {
