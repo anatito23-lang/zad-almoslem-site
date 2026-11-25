@@ -2497,7 +2497,7 @@ window.zadReloadQuranCatalog=load;load();
     import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
     import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
    ]);
-   const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ9nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
+   const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
    const app=getApps().length?getApps()[0]:initializeApp(cfg),db=getFirestore(app);
    const snap=await getDocs(collection(db,'khutbahs'));
    const published=snap.docs.map(d=>({id:d.id,...d.data()}))
