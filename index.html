@@ -936,7 +936,7 @@ main.wrap>.date-strip,main.wrap>.site-directory,main.wrap>.section-divider{displ
   <div class="top">
     <div class="brand"><span class="brand-mark">۞</span><span>قلبي اطمأن</span></div>
     <nav aria-label="التنقل الرئيسي">
-<a href="#prayer-times">مواقيت الصلاة</a><a href="#quran">استماع القرآن</a><a href="#khutbahs">خطب زاد</a><a href="#awqaf-khutbah">خطب وزارة الأوقاف المصرية</a><a href="#azkar">أذكار زاد</a><a href="#books-library">المكتبة الإسلامية</a><a href="#qalbi-itmaann">قلبي اطمأن</a>
+<a href="#prayer-times">مواقيت الصلاة</a><a href="#quran">استماع القرآن</a><a href="#zad-mushaf">مصحف زاد</a><a href="#khutbahs">خطب زاد</a><a href="#awqaf-khutbah">خطب وزارة الأوقاف المصرية</a><a href="#azkar">أذكار زاد</a><a href="#books-library">المكتبة الإسلامية</a><a href="#qalbi-itmaann">قلبي اطمأن</a>
 </nav>
   </div>
   <div class="hero-content">
@@ -1156,6 +1156,69 @@ main.wrap>.date-strip,main.wrap>.site-directory,main.wrap>.section-divider{displ
 
 
   
+
+  <section class="section" id="zad-mushaf" aria-labelledby="zadMushafTitle">
+    <div class="section-head"><div><h2 id="zadMushafTitle">مصحف زاد</h2><p>اقرأ القرآن الكريم صفحةً صفحةً بتنسيق هادئ قريب من صفحات المصحف</p></div></div>
+    <div class="zad-mushaf-shell">
+      <div class="zad-mushaf-toolbar">
+        <button type="button" id="zmPrev" class="btn light" aria-label="الصفحة السابقة">السابق</button>
+        <label>رقم الصفحة <input id="zmPage" type="number" min="1" max="604" value="1" inputmode="numeric"></label>
+        <button type="button" id="zmNext" class="btn light" aria-label="الصفحة التالية">التالي</button>
+      </div>
+      <div class="zad-mushaf-meta"><span id="zmSurah">سورة الفاتحة</span><span id="zmJuz">الجزء ١</span></div>
+      <article class="zad-mushaf-page" id="zmPageContent" aria-live="polite" aria-label="نص صفحة المصحف">
+        <div class="zad-mushaf-bism">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+        <p>جارٍ تحميل صفحة المصحف...</p>
+      </article>
+      <div class="zad-mushaf-footer"><button type="button" id="zmFirst" class="btn light">أول المصحف</button><span id="zmPageLabel">صفحة ١ من ٦٠٤</span><button type="button" id="zmLast" class="btn light">آخر المصحف</button></div>
+      <p class="small" id="zmStatus" role="status">يتم تحميل نص القرآن بالرسم العثماني من مصدر Quran.com. يلزم الاتصال بالإنترنت.</p>
+    </div>
+  </section>
+  <style id="zad-mushaf-styles">
+    .zad-mushaf-shell{max-width:760px;margin:auto;padding:14px;border:1px solid #d9cfb5;border-radius:18px;background:linear-gradient(145deg,#f5f0df,#ebe2ca);box-shadow:0 12px 30px #263d2d12}
+    .zad-mushaf-toolbar,.zad-mushaf-footer,.zad-mushaf-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+    .zad-mushaf-toolbar label{display:flex;align-items:center;gap:7px;font-size:13px;color:#365541}
+    .zad-mushaf-toolbar input{width:76px;padding:8px;border:1px solid #c9bea2;border-radius:9px;background:#fffdf5;color:#243e30}
+    .zad-mushaf-meta{padding:12px 5px;color:#735b2d;font-weight:700;font-size:14px}
+    .zad-mushaf-page{min-height:390px;padding:24px 20px;border:3px double #b49a62;border-radius:9px;background:#fffdf4;color:#202e24;box-shadow:inset 0 0 0 5px #f4ecd8;text-align:justify;direction:rtl;font-family:"Amiri","Noto Naskh Arabic",serif;font-size:clamp(21px,4.8vw,29px);line-height:2.15}
+    .zad-mushaf-page p{margin:0;color:#202e24}
+    .zad-mushaf-bism{text-align:center;font-size:22px;color:#765d2f;margin:0 0 12px}
+    .zad-mushaf-ayah{white-space:normal}
+    .zad-mushaf-marker{color:#98783e;font-size:.78em;white-space:nowrap}
+    .zad-mushaf-footer{padding:12px 2px 2px;color:#735b2d;font-size:13px}
+    .zad-mushaf-shell button{font-size:13px;padding:8px 12px}
+    @media(max-width:520px){.zad-mushaf-shell{padding:9px}.zad-mushaf-page{min-height:360px;padding:18px 13px;line-height:2.05}.zad-mushaf-toolbar{justify-content:center}}
+  </style>
+  <script id="zad-mushaf-reader">
+  (function(){
+   const $=id=>document.getElementById(id),pageInput=$('zmPage'),content=$('zmPageContent'),status=$('zmStatus');
+   if(!pageInput||!content||pageInput.dataset.ready)return;pageInput.dataset.ready='1';
+   let current=Number(localStorage.getItem('zadMushafPage')||1),busy=false;
+   const ar=n=>new Intl.NumberFormat('ar-EG').format(n);
+   function setPage(n){current=Math.max(1,Math.min(604,Number(n)||1));pageInput.value=current;$('zmPageLabel').textContent='صفحة '+ar(current)+' من ٦٠٤';localStorage.setItem('zadMushafPage',String(current));load();}
+   async function load(){
+    if(busy)return;busy=true;status.textContent='جارٍ تحميل الصفحة...';content.innerHTML='<p>جارٍ تحميل الصفحة...</p>';
+    try{
+     const response=await fetch('https://api.quran.com/api/v4/verses/by_page/'+current+'?language=ar&fields=text_uthmani&per_page=50');
+     if(!response.ok)throw new Error('تعذر الوصول إلى مصدر المصحف');
+     const data=await response.json(),verses=data.verses||[];
+     if(!verses.length)throw new Error('لم تصل آيات لهذه الصفحة');
+     const first=verses[0],last=verses[verses.length-1];
+     $('zmSurah').textContent=first.chapter_name||('سورة '+first.verse_key.split(':')[0]);
+     $('zmJuz').textContent='الجزء '+ar(first.juz_number||1);
+     content.innerHTML='';
+     const text=document.createElement('p');
+     verses.forEach(v=>{const span=document.createElement('span');span.className='zad-mushaf-ayah';span.textContent=(v.text_uthmani||'')+' ';const mark=document.createElement('span');mark.className='zad-mushaf-marker';mark.textContent='۞'+ar(Number(v.verse_key.split(':')[1]));span.append(mark);text.append(span);});
+     content.append(text);status.textContent='الرسم العثماني · من الآية '+last.verse_key+' · آخر صفحة محفوظة تلقائيًا';
+    }catch(e){content.innerHTML='<p>تعذر تحميل الصفحة الآن. تحقق من اتصال الإنترنت ثم أعد المحاولة.</p>';status.textContent=e.message||'تعذر تحميل المصحف';}
+    finally{busy=false;}
+   }
+   $('zmPrev').addEventListener('click',()=>setPage(current-1));$('zmNext').addEventListener('click',()=>setPage(current+1));$('zmFirst').addEventListener('click',()=>setPage(1));$('zmLast').addEventListener('click',()=>setPage(604));
+   pageInput.addEventListener('change',()=>setPage(pageInput.value));
+   let touchX=0;content.addEventListener('touchstart',e=>{touchX=e.changedTouches[0].screenX},{passive:true});content.addEventListener('touchend',e=>{const dx=e.changedTouches[0].screenX-touchX;if(Math.abs(dx)>65)setPage(current+(dx<0?1:-1));},{passive:true});
+   setPage(current);
+  })();
+  </script>
 
   <section class="section" id="ruqyah">
     <div class="section-head"><div><h2>الرقية الشرعية — استماع مباشر</h2><p>بصوت الشيخ محمود خليل الحصري، من خلال مشغّل صوت داخل الموقع</p></div></div>
