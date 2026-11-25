@@ -1038,24 +1038,22 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
 
 
   <section class="section" id="nasheed">
-    <div class="section-head"><div><h2>الإنشاد الديني والابتهالات</h2><p>استمع إلى مختارات من ابتهالات الشيخ نصر الدين طوبار والشيخ سيد النقشبندي من مشغّل داخل الموقع.</p></div></div>
-    <div class="card">
-      <div class="nasheed-artist-tabs" role="group" aria-label="اختر المنشد">
-        <button type="button" class="nasheed-artist-btn active" data-munshid="tobar" aria-pressed="true">نصر الدين طوبار</button>
-        <button type="button" class="nasheed-artist-btn" data-munshid="naqshbandi" aria-pressed="false">سيد النقشبندي</button>
-      </div>
-      <div class="nasheed-player-card">
-        <div class="icon">♫</div>
-        <div><strong id="nasheedNowTitle">اختر ابتهالًا للاستماع</strong><p class="small" id="nasheedStatus" role="status">اختر المنشد ثم اختر التسجيل.</p></div>
-      </div>
-      <audio id="nasheedAudio" controls preload="none" style="width:100%;margin:8px 0 14px"></audio>
-      <details class="nasheed-list-disclosure" open>
-        <summary>عرض قائمة الابتهالات</summary>
-        <div id="nasheedTracks" class="list" aria-label="قائمة الابتهالات"></div>
-      </details>
-      <div class="notice" style="margin-top:12px">التسجيلات الصوتية تُشغّل من مشغّل زاد المسلم مباشرة، ويحتاج التشغيل إلى اتصال بالإنترنت.</div>
+  <div class="section-head"><div><h2>الابتهالات والتواشيح</h2><p>مشغل داخلي للابتهالات المصرية — اختر الشيخ ثم التسجيل، واستمع من داخل الموقع.</p></div></div>
+  <div class="card ibt-player">
+    <div class="ibt-head"><span class="ibt-symbol">۞</span><div><strong>مشغل الابتهالات</strong><small>تراث الابتهال المصري</small></div><span class="ibt-live">● جاهز</span></div>
+    <div class="nasheed-artist-tabs" role="group" aria-label="اختر المبتهل">
+      <button type="button" class="nasheed-artist-btn active" data-munshid="tobar" aria-pressed="true">نصر الدين طوبار</button>
+      <button type="button" class="nasheed-artist-btn" data-munshid="naqshbandi" aria-pressed="false">سيد النقشبندي</button>
     </div>
-  </section>
+    <div class="ibt-now"><span class="ibt-cover">♫</span><div><small id="nasheedArtistName">الشيخ نصر الدين طوبار</small><strong id="nasheedNowTitle">اختر ابتهالًا</strong><p id="nasheedStatus" role="status" aria-live="polite">اختر المبتهل ثم التسجيل من القائمة.</p></div></div>
+    <div class="ibt-time"><span id="ibtCurrent">00:00</span><input id="ibtSeek" type="range" min="0" max="1000" value="0" aria-label="موضع الصوت"><span id="ibtDuration">00:00</span></div>
+    <div class="ibt-controls"><button type="button" id="ibtPrev" aria-label="السابق">⏮</button><button type="button" class="ibt-play" id="ibtPlay" aria-label="تشغيل">▶</button><button type="button" id="ibtStop" aria-label="إيقاف">■</button><button type="button" id="ibtNext" aria-label="التالي">⏭</button></div>
+    <div class="ibt-volume"><span>🔉</span><input id="ibtVolume" type="range" min="0" max="100" value="85" aria-label="مستوى الصوت"></div>
+    <audio id="nasheedAudio" preload="none"></audio>
+    <details class="nasheed-list-disclosure" open><summary>قائمة التسجيلات</summary><div id="nasheedTracks" class="list"></div></details>
+    <div class="notice">التشغيل داخل المشغل فقط؛ وعند انتهاء التسجيل ينتقل تلقائيًا للتالي. يلزم الإنترنت.</div>
+  </div>
+</section>
 
 
 
@@ -1849,7 +1847,7 @@ $('closeBookReader').addEventListener('click',closeBookReader);
 bookModal.addEventListener('click',event=>{if(event.target===bookModal)closeBookReader();});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&bookModal.classList.contains('active'))closeBookReader();});
 
-// مشغّل الابتهالات داخل الموقع
+// مشغل الابتهالات الجديد — تحكم داخلي وانتقال تلقائي
 const nasheedTracks={
  tobar:[
   {title:'جل المنادي',url:'https://archive.org/download/20201209_20201209_0854/%D8%AC%D9%84%20%D8%A7%D9%84%D9%85%D9%86%D8%A7%D8%AF%D9%89.mp3'},
@@ -1861,29 +1859,11 @@ const nasheedTracks={
   {title:'يا من رضيت لنا',url:'https://www.nourelquran.com/force_download.php?id=5693'},
   {title:'بك أستجير',url:'https://www.nourelquran.com/force_download.php?id=5694'},
   {title:'يا بارئ الكون',url:'https://www.nourelquran.com/force_download.php?id=5695'},
-  {title:'تواشيح',url:'https://www.nourelquran.com/force_download.php?id=5696'},
   {title:'الحوت والعنكبوت',url:'https://www.nourelquran.com/force_download.php?id=5697'},
   {title:'يا ليلة القدر',url:'https://www.nourelquran.com/force_download.php?id=5698'},
   {title:'يا من ملكت قلوبنا',url:'https://www.nourelquran.com/force_download.php?id=5699'},
   {title:'يا منقذي في شدتي',url:'https://www.nourelquran.com/force_download.php?id=5700'},
-  {title:'يا ودودا',url:'https://www.nourelquran.com/force_download.php?id=5701'},
-  {title:'الواحد المعبود',url:'https://www.nourelquran.com/force_download.php?id=5702'},
-  {title:'الله رب الوجود',url:'https://www.nourelquran.com/force_download.php?id=5703'},
-  {title:'الأمر أمرك',url:'https://www.nourelquran.com/force_download.php?id=5704'},
-  {title:'جل المنادي — استماع خارجي',page:'https://doaatv.com/listen/8391/%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84-%D8%AC%D9%84-%D8%A7%D9%84%D9%85%D9%86%D8%A7%D8%AF%D9%8A-%D8%A7%D9%84%D8%B4%D9%8A%D8%AE-%D9%86%D8%B5%D8%B1-%D8%A7%D9%84%D8%AF%D9%8A%D9%86-%D8%B7%D9%88%D8%A8%D8%A7%D8%B1'},
-  {title:'يا مالك الملك',page:'https://doaatv.com/mp3/%D8%A7%D8%B0%D8%A7%D9%86_%D8%A7%D9%84%D8%B4%D9%8A%D8%AE_%D9%86%D8%B5%D8%B1%D8%A7%D9%84%D8%AF%D9%8A%D9%86_%D8%B7%D9%88%D8%A8%D8%A7%D8%B1'},
-  {title:'يا منقذي في شدتي',page:'https://doaatv.com/mp3/%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84%D8%A7%D8%AA_%D9%84%D9%86%D8%B5%D8%B1_%D8%A7%D9%84%D8%AF%D9%8A%D9%86_%D8%B7%D9%88%D8%A8%D8%A7%D8%B1_%D9%81%D9%8A_%D8%B4%D9%87%D8%B1_%D8%B0%D9%88_%D8%A7%D9%84%D8%AD%D8%AC%D9%87'},
-  {title:'هو الله رب الوجود',page:'https://misrquran.gov.eg/audio-details/9481e3e7-3d78-48fb-b719-ab4cd0724071'},
-  {title:'سبحانه ذو الجلال الحق',page:'https://misrquran.gov.eg/audio-details/3cbadc2f-a12c-4aa9-9e40-31874381312e'},
-  {title:'حسبي رضاك ولا أرجو سواك',page:'https://misrquran.gov.eg/audio-details/766deed6-48b1-4ef2-9605-cd01533d1afb'},
-  {title:'يا إله العالمين',page:'https://misrquran.gov.eg/audio-details/525068d3-d74e-45a9-88ae-e69165a15abf'},
-  {title:'لا إله إلا الله من يقيني وإيماني',page:'https://misrquran.gov.eg/audio-details/136b930d-aafc-4857-ac76-7cb52ada6b81'},
-  {title:'لا إله إلا الله',page:'https://misrquran.gov.eg/audio-details/2d85d7c3-1ff8-4fce-9ad0-caa4aeed835a'},
-  {title:'سبحانك يا رب الأرباب',page:'https://misrquran.gov.eg/audio-details/a51ab9d3-e00c-4628-9411-2b024039a68d'},
-  {title:'يا من تجلى للبرية رحمة',page:'https://misrquran.gov.eg/audio-details/50a27962-6236-4bbc-bd93-bcce32ef2e3d'},
-  {title:'بين الحجيج وفي ساحة البشراء',page:'https://misrquran.gov.eg/audio-details/6bf76d01-bd82-4705-b8d8-2449917c0d74'},
-  {title:'دعوتك يا مفرج كل كرب',page:'https://misrquran.gov.eg/audio-details/11f3429d-bbeb-484c-aec8-e139dbf5d322'},
-  {title:'يا رسول الله يا سندي',page:'https://misrquran.gov.eg/audio-details/db9c6f58-45e3-43f6-9326-0f26747e8243'}
+  {title:'يا ودودا',url:'https://www.nourelquran.com/force_download.php?id=5701'}
  ],
  naqshbandi:[
   {title:'مولاي إني ببابك',file:'01 - مولاي.mp3'},
@@ -1905,51 +1885,38 @@ const nasheedTracks={
   {title:'أتيت إليك يا رب العباد',file:'أتيت إليك يارب العباد.mp3'},
   {title:'أدعوك في غمضي',file:'أدعوك في غمضي.mp3'},
   {title:'إذا ما تلاقى الأفق بالأرض في المدى',file:'إذا ماتلاقى الأفق بالأرض في المدى.mp3'},
-  {title:'أسعى لخلاقي',file:'أسعى لخلاقي.mp3'},
-  {title:'يا ربي إن عظمت ذنوبي',page:'https://doaatv.com/listen/6464/%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84-%D9%8A%D8%A7%D8%B1%D8%A8%D9%8A-%D8%A5%D9%86-%D8%B9%D8%B8%D9%85%D8%AA-%D8%B0%D9%86%D9%88%D8%A8%D9%8A-%D8%B3%D9%8A%D8%AF-%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%8A-%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84%D8%A7%D8%AA-%D8%A3%D9%86%D8%A7%D8%Bش%D9%8A%D8%AF-'},
-  {title:'سيدي يا رسول الله',page:'https://doaatv.com/listen/8364/%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84-%D8%B3%D9%8A%D8%AF%D9%8A-%D9%8A%D8%A7%D8%B1%D8%B3%D9%88%D9%84-%D8%A7%D9%84%D9%84%D9%87-%D8%A7%D9%84%D8%B4%D9%8A%D8%AE-%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%8A'},
-  {title:'الله مولانا',page:'https://doaatv.com/listen/6411/%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84-%D8%A7%D9%84%D9%84%D9%87-%D9%85%D9%88%D9%84%D8%A7%D9%86%D8%A7-%D8%A8%D9%86%D8%AA-%D9%88%D9%87%D8%A8-%D8%A7%D9%86%D8%AC%D8%A8%D8%AA-%D9%88%D9%84%D8%AF%D8%A7-%D8%B3%D9%8A%D8%AF-%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%8A-%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84%D8%A7%D8%AA-%D8%A3%D9%86%D8%A7%D8ش%D9%يد-'},
-  {title:'إلهي',page:'https://doaatv.com/listen/6405/%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84-%D8%A5%D9%84%D9%87%D9%8A-%D8%B3%D9%8A%D8%AF-%D8%A7%D9%84%D9%86%D9%82%D8%B4%D8%A8%D9%86%D8%AF%D9%8A-%D8%A7%D8%A8%D8%AA%D9%87%D8%A7%D9%84%D8%A7%D8%AA-%D8%A3%D9%86%D8%Aاش%D9%يد-'},
+  {title:'أسعى لخلاقي',file:'أسعى لخلاقي.mp3'}
  ]
 };
-const nasheedAudio=$('nasheedAudio');
-const nasheedList=$('nasheedTracks');
-function renderNasheedTracks(artist){
- document.querySelectorAll('[data-munshid]').forEach(button=>{
-  const active=button.dataset.munshid===artist;
-  button.classList.toggle('active',active);
-  button.setAttribute('aria-pressed',String(active));
- });
- if(nasheedAudio){nasheedAudio.pause();nasheedAudio.removeAttribute('src');nasheedAudio.load();}
- $('nasheedNowTitle').textContent=artist==='tobar'?'ابتهالات الشيخ نصر الدين طوبار':'ابتهالات الشيخ سيد النقشبندي';
- $('nasheedStatus').textContent='اختر من '+nasheedTracks[artist].length+' تسجيلًا للاستماع.';
- nasheedList.innerHTML=nasheedTracks[artist].map((track,index)=>
-  '<button type="button" class="surah-item nasheed-track-btn" data-track-index="'+index+'"><span><b>'+track.title+'</b><span class="small" style="display:block">'+(track.page?'مصدر استماع خارجي':'تسجيل صوتي')+'</span></span><strong>'+(track.page?'افتح المصدر ↗':'استمع ▶')+'</strong></button>'
- ).join('');
- nasheedList.querySelectorAll('[data-track-index]').forEach(button=>{
-  button.addEventListener('click',()=>{
-   const track=nasheedTracks[artist][Number(button.dataset.trackIndex)];
-   nasheedList.querySelectorAll('.nasheed-track-btn').forEach(item=>item.classList.toggle('active',item===button));
-   if(track.page){window.open(track.page,'_blank','noopener,noreferrer');$('nasheedNowTitle').textContent=track.title;$('nasheedStatus').textContent='فتحنا صفحة الاستماع من المصدر الخارجي.';return;}
-   nasheedAudio.src=track.url||('https://archive.org/download/qr_20201208/'+encodeURIComponent(track.file));
-   nasheedAudio.load();
-   $('nasheedNowTitle').textContent=track.title;
-   $('nasheedStatus').textContent='جارٍ تشغيل: '+track.title;
-   nasheedAudio.play().then(()=>{
-    $('nasheedStatus').textContent='يعمل الآن: '+track.title;
-   }).catch(()=>{
-    $('nasheedStatus').textContent='اضغط زر التشغيل في مشغّل الصوت لبدء الاستماع.';
-   });
-  });
- });
-}
-document.querySelectorAll('[data-munshid]').forEach(button=>button.addEventListener('click',()=>renderNasheedTracks(button.dataset.munshid)));
-renderNasheedTracks('tobar');
-nasheedAudio.addEventListener('error',()=>{
- $('nasheedStatus').textContent='تعذر تحميل هذا التسجيل الآن. جرّب تسجيلًا آخر أو أعد المحاولة لاحقًا.';
-});
-
-</script>
+(function(){
+ const audio=$('nasheedAudio'),list=$('nasheedTracks'),title=$('nasheedNowTitle'),status=$('nasheedStatus'),artistLabel=$('nasheedArtistName'),playBtn=$('ibtPlay'),seek=$('ibtSeek');
+ let artist='tobar',index=-1,queue=[];
+ const artists={tobar:'الشيخ نصر الدين طوبار',naqshbandi:'الشيخ سيد النقشبندي'};
+ const fmt=t=>!Number.isFinite(t)||t<0?'00:00':String(Math.floor(t/60)).padStart(2,'0')+':'+String(Math.floor(t%60)).padStart(2,'0');
+ function trackUrl(t){return t.url||('https://archive.org/download/qr_20201208/'+encodeURIComponent(t.file))}
+ function paint(){
+  queue=nasheedTracks[artist]||[];artistLabel.textContent=artists[artist];title.textContent=artists[artist]+' — اختر تسجيلًا';
+  status.textContent='عدد التسجيلات: '+queue.length+' — اختر من القائمة للبدء.';
+  list.innerHTML=queue.map((t,i)=>'<button type="button" class="surah-item nasheed-track-btn" data-index="'+i+'"><span><b>'+t.title+'</b><span class="small" style="display:block">تشغيل داخل المشغل</span></span><strong>▶</strong></button>').join('');
+  list.querySelectorAll('[data-index]').forEach(b=>b.addEventListener('click',()=>start(Number(b.dataset.index))));
+ }
+ function start(i){
+  if(i<0||i>=queue.length)return;index=i;const t=queue[i];audio.pause();audio.src=trackUrl(t);audio.load();title.textContent=t.title;status.textContent='جارٍ تحميل: '+t.title;seek.value=0;
+  list.querySelectorAll('.nasheed-track-btn').forEach((b,n)=>b.classList.toggle('active',n===i));
+  audio.play().then(()=>{status.textContent='يعمل الآن: '+t.title;playBtn.textContent='Ⅱ'}).catch(()=>{status.textContent='لم يبدأ الصوت تلقائيًا؛ اضغط تشغيل في المشغل.';playBtn.textContent='▶'});
+ }
+ function move(d){if(!queue.length)return;let n=index<0?(d>0?0:queue.length-1):Math.max(0,Math.min(queue.length-1,index+d));if(n===index){status.textContent=d>0?'وصلت لآخر تسجيل.':'هذا أول تسجيل.';return}start(n)}
+ document.querySelectorAll('[data-munshid]').forEach(b=>b.addEventListener('click',()=>{artist=b.dataset.munshid;index=-1;audio.pause();audio.removeAttribute('src');audio.load();document.querySelectorAll('[data-munshid]').forEach(x=>{let active=x.dataset.munshid===artist;x.classList.toggle('active',active);x.setAttribute('aria-pressed',String(active))});paint()}));
+ $('ibtPlay').addEventListener('click',()=>{if(index<0){start(0);return}if(audio.paused)audio.play().then(()=>{playBtn.textContent='Ⅱ'}).catch(()=>status.textContent='تعذر تشغيل الصوت.');else audio.pause()});
+ $('ibtPrev').addEventListener('click',()=>move(-1));$('ibtNext').addEventListener('click',()=>move(1));$('ibtStop').addEventListener('click',()=>{audio.pause();audio.currentTime=0;seek.value=0;status.textContent='تم إيقاف التسجيل.';playBtn.textContent='▶'});
+ $('ibtVolume').addEventListener('input',e=>audio.volume=Number(e.target.value)/100);audio.volume=.85;
+ seek.addEventListener('input',()=>{if(audio.duration>0)audio.currentTime=Number(seek.value)/1000*audio.duration});
+ audio.addEventListener('timeupdate',()=>{$('ibtCurrent').textContent=fmt(audio.currentTime);if(audio.duration>0)seek.value=Math.round(audio.currentTime/audio.duration*1000)});
+ audio.addEventListener('loadedmetadata',()=>$('ibtDuration').textContent=fmt(audio.duration));audio.addEventListener('play',()=>playBtn.textContent='Ⅱ');audio.addEventListener('pause',()=>playBtn.textContent='▶');
+ audio.addEventListener('ended',()=>{if(index<queue.length-1){status.textContent='انتهى '+queue[index].title+' — ينتقل تلقائيًا للتالي.';start(index+1)}else{status.textContent='انتهت قائمة الابتهالات المتاحة لهذا الشيخ.';seek.value=1000;playBtn.textContent='▶'}});
+ audio.addEventListener('error',()=>status.textContent='تعذر تشغيل التسجيل الحالي. جرّب تسجيلًا آخر؛ قد يكون المصدر لا يسمح بالتشغيل المباشر.');
+ paint();
+})();</script>
 
 
 <script>
@@ -2482,7 +2449,13 @@ window.zadReloadQuranCatalog=load;load();
 @media(max-width:430px){.zq-controls{gap:5px}.zq-controls button{min-width:38px;padding:7px}.zq-controls .zq-main-control{width:53px;height:53px}.zq-reader-tools{grid-template-columns:1fr}#zadReciterCatalog{grid-template-columns:1fr}}
 </style>
 
-<style id="zad-prayer-clean-style">.zpt-location{display:grid!important;grid-template-columns:1fr 1fr;gap:10px!important;align-items:end;margin:14px 0!important;padding:14px;border:1px solid #d8e6dd;border-radius:16px;background:#f8fbf8}.zpt-location label{display:block;font-size:13px;font-weight:700;color:#1c5442;margin-bottom:6px}.zpt-location select,.zpt-location input{box-sizing:border-box;width:100%;min-height:45px;padding:10px;border:1px solid #cbdcd2;border-radius:10px;background:#fff;color:#153e30;font-size:15px}.zpt-location button{min-height:45px;grid-column:1/-1}.zpt-location [hidden]{display:none!important}.zpt-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:15px 0}.zpt-cards .prayer{padding:12px 6px;border-radius:13px;border:1px solid #e1e9e3;background:#f8fbf8;text-align:center}.zpt-cards .pname{font-size:13px;color:#6e8177}.zpt-cards .ptime{font-size:clamp(18px,4vw,24px);font-weight:800;color:#155b49}.zpt-next{display:grid;grid-template-columns:1fr 1.2fr;gap:12px;padding:16px;border-radius:18px;background:linear-gradient(140deg,#0d382d,#1c604a);color:#fff}.zpt-next>div{display:grid;gap:5px}.zpt-next small{color:#f1d99e!important;font-size:12px!important}.zpt-next strong{color:#fff!important;font-size:22px!important}.zpt-next span{color:#f0f5f1!important;font-size:12px!important}.zpt-count strong{color:#fff!important}.zpt-count{border-right:1px solid #ffffff30;padding-right:12px}.zpt-count strong{font-size:clamp(22px,5vw,32px);direction:ltr}.zpt-footnote{margin-top:10px}@media(max-width:520px){.zpt-location{grid-template-columns:1fr!important}.zpt-cards{gap:6px}.zpt-cards .prayer{padding:9px 3px}.zpt-cards .pname{font-size:11px}.zpt-cards .ptime{font-size:18px}.zpt-next{grid-template-columns:1fr 1fr;padding:12px}}</style>
+<style id="zad-prayer-clean-style">.zpt-location{display:grid!important;grid-template-columns:1fr 1fr;gap:10px!important;align-items:end;margin:14px 0!important;padding:14px;border:1px solid #d8e6dd;border-radius:16px;background:#f8fbf8}.zpt-location label{display:block;font-size:13px;font-weight:700;color:#1c5442;margin-bottom:6px}.zpt-location select,.zpt-location input{box-sizing:border-box;width:100%;min-height:45px;padding:10px;border:1px solid #cbdcd2;border-radius:10px;background:#fff;color:#153e30;font-size:15px}.zpt-location button{min-height:45px;grid-column:1/-1}.zpt-location [hidden]{display:none!important}.zpt-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:15px 0}.zpt-cards .prayer{padding:12px 6px;border-radius:13px;border:1px solid #e1e9e3;background:#f8fbf8;text-align:center}.zpt-cards .pname{font-size:13px;color:#6e8177}.zpt-cards .ptime{font-size:clamp(18px,4vw,24px);font-weight:800;color:#155b49}.zpt-next{display:grid;grid-template-columns:1fr 1.2fr;gap:12px;padding:16px;border-radius:18px;background:linear-gradient(140deg,#0d382d,#1c604a);color:#fff}.zpt-next>div{display:grid;gap:5px}.zpt-next small{color:#f1d99e!important;font-size:12px!important}.zpt-next strong{color:#fff!important;font-size:22px!important}.zpt-next span{color:#f0f5f1!important;font-size:12px!important}.zpt-count strong{color:#fff!important}.zpt-count{border-right:1px solid #ffffff30;padding-right:12px}.zpt-count strong{font-size:clamp(22px,5vw,32px);direction:ltr}.zpt-footnote{margin-top:10px}@media(max-width:520px){.zpt-location{grid-template-columns:1fr!important}.zpt-cards{gap:6px}.zpt-cards .prayer{padding:9px 3px}.zpt-cards .pname{font-size:11px}.zpt-cards .ptime{font-size:18px}.zpt-next{grid-template-columns:1fr 1fr;padding:12px}}</style><style id="ibt-player-rebuild-style">
+.ibt-player{padding:17px;background:linear-gradient(145deg,#102a40,#0b1d2b);border:1px solid #25435a;border-radius:22px;color:#e6f0f5}
+.ibt-head{display:flex;align-items:center;gap:10px;margin-bottom:13px}.ibt-head strong,.ibt-head small{display:block}.ibt-head strong{color:#fff;font-size:17px}.ibt-head small{font-size:11px;color:#afc5d5}.ibt-symbol{width:43px;height:43px;display:grid;place-items:center;border-radius:13px;background:#183c48;color:#3ad1bd;font-size:25px}.ibt-live{margin-right:auto;color:#49d1bb;font-size:11px}
+.ibt-player .nasheed-artist-tabs{margin-bottom:14px}.ibt-player .nasheed-artist-btn{background:#173047;color:#e0edf5;border-color:#2d4a60}.ibt-player .nasheed-artist-btn.active{background:#1db5a1;color:#08222a;border-color:#48d2bd}
+.ibt-now{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;background:#173047;margin:8px 0 13px}.ibt-cover{flex:0 0 58px;width:58px;height:58px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(145deg,#f3df9c,#b89a52);color:#18382f;font-size:31px}.ibt-now div{min-width:0}.ibt-now small,.ibt-now strong{display:block}.ibt-now small{font-size:11px;color:#3ed1bd}.ibt-now strong{font-size:16px;color:#fff;overflow-wrap:anywhere}.ibt-now p{font-size:12px;margin:4px 0 0;color:#b5c9d8}
+.ibt-time{display:grid;grid-template-columns:42px 1fr 42px;gap:8px;align-items:center;direction:ltr;color:#dce9f2;font-size:11px}.ibt-time input{width:100%;accent-color:#39cbbb}.ibt-controls{display:flex;justify-content:center;align-items:center;gap:8px;margin:13px 0}.ibt-controls button{min-width:42px;height:43px;border:1px solid #35566d;border-radius:12px;background:#24445a;color:#e9f2f7;font-weight:800}.ibt-controls .ibt-play{width:58px;height:58px;border-radius:50%;border:2px solid #f2dc9b;background:#f2dc9b;color:#122d3b;font-size:24px}.ibt-volume{display:flex;align-items:center;gap:10px;max-width:240px;margin:0 auto 12px}.ibt-volume input{width:100%;accent-color:#39cbbb}.ibt-player .nasheed-list-disclosure{background:#12283a;border-color:#2b485d}.ibt-player .nasheed-list-disclosure>summary{background:#18394c;color:#e8f2f7}.ibt-player .nasheed-track-btn{background:#122b40;border-color:#2c485c;color:#e7f0f5}.ibt-player .nasheed-track-btn.active{background:#1d4252;border-color:#e5c875}.ibt-player .notice{background:#18394b;color:#c6d8e5}
+</style>
 
 
 </body>
