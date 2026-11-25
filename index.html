@@ -2114,6 +2114,19 @@ function closeBookReader(){
  document.body.style.overflow='';
 }
 document.querySelectorAll('.book-open[data-local-book]').forEach(button=>{
+ const path=button.dataset.localBook||'';
+ if(path.startsWith('/books/')&&!path.startsWith('//')){
+  const card=button.closest('.book-card')||button.parentElement;
+  if(card&&!card.querySelector('.book-download')){
+   const link=document.createElement('a');
+   link.className='btn light book-download';
+   link.href=path;
+   link.setAttribute('download','');
+   link.textContent='تحميل الكتاب';
+   link.setAttribute('aria-label','تحميل '+(button.dataset.bookTitle||'الكتاب')+' على الجهاز');
+   button.insertAdjacentElement('afterend',link);
+  }
+ }
  button.addEventListener('click',()=>{
   const path=button.dataset.localBook||'';
   if(!path.startsWith('/books/')||path.startsWith('//')||!bookModal||!bookFrame)return;
