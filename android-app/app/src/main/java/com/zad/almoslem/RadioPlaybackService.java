@@ -60,7 +60,7 @@ public class RadioPlaybackService extends Service {
             intent = new Intent(this, RadioPlaybackService.class);
             intent.putExtra("url", saved.getString("stream_url", null));
             intent.putExtra("kind", saved.getString("active_kind", "radio"));
-            intent.putExtra("label", saved.getString("radio_title", "زاد وطمأنينة"));
+            intent.putExtra("label", saved.getString("radio_title", "سكينة ودعاء وصلاة"));
             intent.putExtra("station", saved.getString("radio_station", ""));
             intent.putExtra("local_path", saved.getString("stream_local_path", null));
             restoreDuaQueueExtras(intent, saved);
@@ -94,7 +94,7 @@ public class RadioPlaybackService extends Service {
                     Intent restore = new Intent(this, RadioPlaybackService.class);
                     restore.putExtra("url", saved.getString("stream_url", null));
                     restore.putExtra("kind", saved.getString("active_kind", "radio"));
-                    restore.putExtra("label", saved.getString("radio_title", "زاد وطمأنينة"));
+                    restore.putExtra("label", saved.getString("radio_title", "سكينة ودعاء وصلاة"));
                     restore.putExtra("station", saved.getString("radio_station", ""));
                     restore.putExtra("local_path", saved.getString("stream_local_path", null));
                     restoreDuaQueueExtras(restore, saved);
@@ -115,7 +115,7 @@ public class RadioPlaybackService extends Service {
             return player == null ? START_NOT_STICKY : START_STICKY;
         }
         createChannel();
-        Notification n=buildPlaybackNotification("زاد وطمأنينة","جارٍ تجهيز الصوت");
+        Notification n=buildPlaybackNotification("سكينة ودعاء وصلاة","جارٍ تجهيز الصوت");
         if(Build.VERSION.SDK_INT>=29) startForeground(NOTIFICATION,n,android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
         else startForeground(NOTIFICATION,n);
         String url=intent==null?null:intent.getStringExtra("url");
@@ -298,7 +298,7 @@ public class RadioPlaybackService extends Service {
     private void createChannel() {
         if(Build.VERSION.SDK_INT>=26) {
             NotificationManager nm=getSystemService(NotificationManager.class);
-            NotificationChannel c=new NotificationChannel(CHANNEL,"إذاعة القرآن الكريم",NotificationManager.IMPORTANCE_LOW);
+            NotificationChannel c=new NotificationChannel(CHANNEL,"سكينة ودعاء وصلاة",NotificationManager.IMPORTANCE_LOW);
             c.setDescription("يظهر أثناء استمرار تشغيل الإذاعة في الخلفية"); nm.createNotificationChannel(c);
         }
     }
@@ -519,7 +519,7 @@ public class RadioPlaybackService extends Service {
         if ("ruqyah".equals(kind)) return "الرقية الشرعية";
         if ("nasheed".equals(kind)) return "الإنشاد والابتهالات";
         if ("dua".equals(kind)) return "الأدعية الصوتية";
-        return "إذاعة القرآن الكريم";
+        return "سكينة ودعاء وصلاة";
     }
 
     private String playbackTitle() {
@@ -550,7 +550,7 @@ public class RadioPlaybackService extends Service {
         Notification.Builder b = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
         b.setSmallIcon(android.R.drawable.ic_media_play)
-                .setContentTitle(title == null ? "سكينة – أذان وصلاة وقرآن" : title)
+                .setContentTitle(title == null ? "سكينة ودعاء وصلاة" : title)
                 .setContentText(message == null ? "تشغيل صوتي في الخلفية" : message)
                 .setContentIntent(content).setOngoing(true).setOnlyAlertOnce(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
