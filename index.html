@@ -987,12 +987,25 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
     let schedule=[],tickHandle=null;
     const say=t=>status.textContent=t;
     const formatTime=t=>{const m=String(t||'').match(/^(\d{1,2}):(\d{2})/);return m?String(m[1]).padStart(2,'0')+':'+m[2]:'--:--'};
+    let prayerTimezone=Intl.DateTimeFormat().resolvedOptions().timeZone;
+    function zonedParts(date){
+      const parts=new Intl.DateTimeFormat('en-CA',{timeZone:prayerTimezone,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'}).formatToParts(date);
+      const out={};parts.forEach(p=>{if(p.type!=='literal')out[p.type]=Number(p.value)});return out;
+    }
+    function zonedInstant(y,m,d,h,min){
+      const now=new Date(),p=zonedParts(now),localAsUtc=Date.UTC(p.year,p.month-1,p.day,p.hour,p.minute,p.second),offset=localAsUtc-now.getTime();
+      let instant=Date.UTC(y,m-1,d,h,min)-offset;
+      const check=zonedParts(new Date(instant));
+      if(check.year!==y||check.month!==m||check.day!==d||check.hour!==h||check.minute!==min)instant+=Date.UTC(y,m-1,d,h,min)-Date.UTC(check.year,check.month-1,check.day,check.hour,check.minute);
+      return new Date(instant);
+    }
     function updateCountdown(){
       if(!schedule.length)return;
-      const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+      const now=new Date(),p=zonedParts(now);
+      const today=new Date(Date.UTC(p.year,p.month-1,p.day));
       let next=null;
-      for(const p of schedule){const [h,m]=p.time.split(':').map(Number),at=new Date(today);at.setHours(h,m,0,0);if(at>now){next={...p,at};break}}
-      if(!next){const [h,m]=schedule[0].time.split(':').map(Number),at=new Date(today);at.setDate(at.getDate()+1);at.setHours(h,m,0,0);next={...schedule[0],at}}
+      for(const item of schedule){const [h,m]=item.time.split(':').map(Number),at=zonedInstant(p.year,p.month,p.day,h,m);if(at>now){next={...item,at};break}}
+      if(!next){const tomorrow=new Date(today);tomorrow.setUTCDate(tomorrow.getUTCDate()+1);const y=tomorrow.getUTCFullYear(),m=tomorrow.getUTCMonth()+1,d=tomorrow.getUTCDate(),[h,mi]=schedule[0].time.split(':').map(Number);next={...schedule[0],at:zonedInstant(y,m,d,h,mi)}}
       const seconds=Math.max(0,Math.floor((next.at-now)/1000)),hh=String(Math.floor(seconds/3600)).padStart(2,'0'),mm=String(Math.floor(seconds%3600/60)).padStart(2,'0'),ss=String(seconds%60).padStart(2,'0');
       $('prayerNextName').textContent=next.name;$('prayerNextTime').textContent='موعدها '+next.time;$('prayerCountdown').textContent=hh+':'+mm+':'+ss;
     }
