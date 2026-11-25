@@ -884,7 +884,7 @@ main.wrap>.date-strip,main.wrap>.site-directory,main.wrap>.section-divider{displ
 #prayer-times,#quran,#khutbahs,#azkar,#books-library,#qalbi-itmaann{display:block;width:100%}
 #azkar>.grid>.card:nth-child(n+3){display:none!important}
 #islamic-knowledge{display:none!important}
-.bottom-nav{display:none!important}
+.bottom-nav{display:flex!important}
 .hero .top nav{display:flex;flex-wrap:wrap;gap:9px 15px}
 .hero .top nav a{white-space:nowrap}
 @media(max-width:600px){.hero .top nav{gap:8px 12px}.hero .top nav a{font-size:12px}}
@@ -919,6 +919,15 @@ body.zad-public-website .bottom-nav a span{display:block!important;font-size:19p
 body.zad-public-website .bottom-nav a b{font-size:11px!important;font-weight:700!important;color:#fff!important}
 body.zad-public-website main.wrap{padding-bottom:94px!important}
 @media(min-width:760px){body.zad-public-website .bottom-nav{justify-content:center!important}body.zad-public-website .bottom-nav a{min-width:92px!important}}
+</style>
+
+<style id="zad-bottom-tabs-exact-top-links-20261125">
+body .bottom-nav{display:flex!important;visibility:visible!important;pointer-events:auto!important;position:fixed!important;z-index:99999!important;inset-inline:0!important;bottom:0!important;flex-direction:row!important;align-items:stretch!important;justify-content:flex-start!important;gap:5px!important;overflow-x:auto!important;overflow-y:hidden!important;white-space:nowrap!important;padding:7px 9px calc(7px + env(safe-area-inset-bottom))!important;background:#0b3b30!important;border-top:2px solid #c9a45c!important;box-shadow:0 -5px 18px rgba(8,35,27,.16)!important;scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important}
+body .bottom-nav::-webkit-scrollbar{display:none!important}
+body .bottom-nav a{display:flex!important;flex:0 0 auto!important;min-width:86px!important;max-width:125px!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;padding:5px 8px!important;color:#fff!important;background:transparent!important;text-decoration:none!important;font-size:11px!important;line-height:1.35!important;border-radius:10px!important;white-space:normal!important;text-align:center!important}
+body .bottom-nav a span{display:block!important;font-size:19px!important;line-height:1.2!important;color:#e5ce91!important}
+body .bottom-nav a b{display:block!important;font-size:11px!important;font-weight:700!important;color:#fff!important}
+body main.wrap{padding-bottom:105px!important}
 </style>
 </head>
 <body>
@@ -1787,13 +1796,14 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
   </div>
 </div>
 
-<nav class="bottom-nav" aria-label="التنقل السفلي">
-  <a href="#prayer-times"><span>🕌</span><b>الصلاة</b></a>
-  <a href="#quran"><span>🎧</span><b>القرآن</b></a>
+<nav class="bottom-nav" aria-label="اختصارات الأقسام الرئيسية">
+  <a href="#prayer-times"><span>🕌</span><b>مواقيت الصلاة</b></a>
+  <a href="#quran"><span>🎧</span><b>استماع القرآن</b></a>
+  <a href="#zad-mushaf"><span>📖</span><b>مصحف زاد</b></a>
   <a href="./khutbahs.html"><span>📜</span><b>خطب زاد</b></a>
-  <a href="./awqaf-khutbah.html"><span>📖</span><b>خطب الأوقاف</b></a>
-  <a href="#azkar"><span>🤲</span><b>الأذكار</b></a>
-  <a href="#books-library"><span>📚</span><b>المكتبة</b></a>
+  <a href="./awqaf-khutbah.html"><span>🕌</span><b>خطب الأوقاف</b></a>
+  <a href="#azkar"><span>🤲</span><b>أذكار زاد</b></a>
+  <a href="#books-library"><span>📚</span><b>المكتبة الإسلامية</b></a>
   <a href="#qalbi-itmaann"><span>💚</span><b>قلبي اطمأن</b></a>
 </nav>
  
