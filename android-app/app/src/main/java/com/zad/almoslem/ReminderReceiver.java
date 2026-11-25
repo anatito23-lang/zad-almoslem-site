@@ -12,7 +12,7 @@ import android.os.Build;
 import java.util.Calendar;
 
 public class ReminderReceiver extends BroadcastReceiver {
-    public static final String CHANNEL_ID = "zad_reminders_sakina_v2";
+    public static final String CHANNEL_ID = "zad_reminders_channel_sakina_v2";
     private static final String PRAYER_CHANNEL_ID = "zad_prayer_alerts_sakina_v4";
     private static final String PRAYER_TONE_CHANNEL_ID = "zad_prayer_tone_sakina_v2";
     private static final String GENTLE_CHANNEL_ID = "zad_gentle_reminders_sakina_v4";
