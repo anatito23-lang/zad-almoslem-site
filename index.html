@@ -1882,28 +1882,15 @@ updateMushafOfflineStatus();
 
 const mushafToggle=$('mushafToggle');
 const mushafContent=$('mushafContent');
-const mushafFloatingButton=$('mushafFloatingButton');
-const mushafFloatingLabel=$('mushafFloatingLabel');
-function syncMushafFloatingButton(isOpen){
- if(!mushafFloatingButton||!mushafFloatingLabel)return;
- mushafFloatingButton.setAttribute('aria-expanded',String(isOpen));
- mushafFloatingButton.title=isOpen?'إغلاق المصحف':'فتح المصحف';
- mushafFloatingLabel.textContent=isOpen?'إغلاق المصحف':'المصحف';
-}
 mushafToggle.addEventListener('click',()=>{
  const opening=mushafContent.classList.contains('hidden');
  mushafContent.classList.toggle('hidden');
  mushafToggle.setAttribute('aria-expanded',String(opening));
  mushafToggle.textContent=opening?'إغلاق المصحف':'فتح المصحف';
- syncMushafFloatingButton(opening);
  if(opening&&!mushafInitialized){
   mushafInitialized=true;
   loadMushafIndex();
  }
-});
-mushafFloatingButton.addEventListener('click',()=>{
- mushafToggle.click();
- $('mushaf').scrollIntoView({behavior:'smooth',block:'start'});
 });
 $('mushafSurahSelect').addEventListener('change',event=>loadMushafSurah(event.target.value));
 $('mushafGoPage').addEventListener('click',()=>loadMushafPage($('mushafPageNumber').value));
