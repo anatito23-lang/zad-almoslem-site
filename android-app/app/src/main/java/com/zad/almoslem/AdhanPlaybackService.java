@@ -29,7 +29,7 @@ public class AdhanPlaybackService extends Service {
     public static final String ACTION_STOP = "com.zad.almoslem.STOP_ADHAN";
     public static final String ACTION_SET_VOLUME = "com.zad.almoslem.SET_ADHAN_VOLUME";
     public static final String ACTION_SET_PRAYER_VOLUME = "com.zad.almoslem.SET_PRAYER_ADHAN_VOLUME";
-    private static final String CHANNEL_ID = "zad_adhan_playback_v3";
+    private static final String CHANNEL_ID = "zad_adhan_playback_sakina_v4";
     private static final int NOTIFICATION_ID = 7310;
     private ExoPlayer player;
     private boolean playDuaAfterCompletion;
@@ -160,7 +160,7 @@ public class AdhanPlaybackService extends Service {
             builder.setStyle(new Notification.BigPictureStyle()
                     .bigPicture(mosqueImage)
                     .bigLargeIcon((Bitmap) null)
-                    .setSummaryText("زاد وطمأنينة — تقبّل الله صلاتكم"));
+                    .setSummaryText("سكينة ودعاء وصلاة — تقبّل الله صلاتكم"));
         }
         Notification notification = builder.build();
         try {
@@ -195,7 +195,7 @@ public class AdhanPlaybackService extends Service {
         if (Build.VERSION.SDK_INT >= 26) {
             NotificationManager nm = getSystemService(NotificationManager.class);
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                    "تشغيل الأذان", NotificationManager.IMPORTANCE_HIGH);
+                    "سكينة ودعاء وصلاة", NotificationManager.IMPORTANCE_HIGH);
             channel.setDescription("إظهار شاشة الأذان على شاشة الهاتف عند دخول وقت الصلاة");
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             channel.setSound(null, null);
@@ -297,7 +297,7 @@ public class AdhanPlaybackService extends Service {
             uiProgressHandler.post(uiProgressTicker);
         } catch (Exception e) {
             getSharedPreferences("zad_reminders", MODE_PRIVATE).edit().putBoolean("adhan_playback_started", false).putString("adhan_last_playback_error", e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage()).apply();
-            showPlaybackErrorNotification("تعذر تشغيل الأذان: " + (e.getMessage() == null ? "خطأ في ملف الصوت" : e.getMessage()));
+            showPlaybackErrorNotification("تعذر سكينة ودعاء وصلاة: " + (e.getMessage() == null ? "خطأ في ملف الصوت" : e.getMessage()));
             stopPlayback();
         }
     }
@@ -395,7 +395,7 @@ public class AdhanPlaybackService extends Service {
             Notification.Builder b = Build.VERSION.SDK_INT >= 26
                     ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this);
             b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-                    .setContentTitle("تعذر تشغيل الأذان")
+                    .setContentTitle("تعذر سكينة ودعاء وصلاة")
                     .setContentText(message)
                     .setAutoCancel(true);
             nm.notify(NOTIFICATION_ID + 2, b.build());
@@ -420,7 +420,7 @@ public class AdhanPlaybackService extends Service {
                 ? new Notification.Builder(this, CHANNEL_ID) : new Notification.Builder(this);
         b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
                 .setContentTitle("ملف الأذان غير موجود")
-                .setContentText("افتح زاد وطمأنينة واتصل بالإنترنت لتحميل صوت الأذان مرة واحدة.")
+                .setContentText("افتح سكينة ودعاء وصلاة واتصل بالإنترنت لتحميل صوت الأذان مرة واحدة.")
                 .setAutoCancel(true);
         nm.notify(NOTIFICATION_ID + 1, b.build());
     }

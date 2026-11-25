@@ -20,7 +20,7 @@ public class ReminderAudioService extends Service {
     public static final String ACTION_STOP = "com.zad.almoslem.STOP_REMINDER_AUDIO";
     public static final String ACTION_TOGGLE = "com.zad.almoslem.TOGGLE_REMINDER_AUDIO";
     public static final String ACTION_SET_VOLUME = "com.zad.almoslem.SET_REMINDER_AUDIO_VOLUME";
-    private static final String CHANNEL = "zad_reminder_audio";
+    private static final String CHANNEL = "zad_reminder_audio_sakina_v2";
     private static final int NOTIFICATION_ID = 7520;
     private MediaPlayer player;
     private String activeKind;
@@ -162,7 +162,7 @@ public class ReminderAudioService extends Service {
     private void createChannel() {
         if (Build.VERSION.SDK_INT >= 26) {
             NotificationManager nm = getSystemService(NotificationManager.class);
-            NotificationChannel c = new NotificationChannel(CHANNEL, "التذكيرات الصوتية", NotificationManager.IMPORTANCE_LOW);
+            NotificationChannel c = new NotificationChannel(CHANNEL, "سكينة ودعاء وصلاة", NotificationManager.IMPORTANCE_LOW);
             c.setDescription("تشغيل أذكار الصباح والمساء ودعاء ما بعد الأذان");
             nm.createNotificationChannel(c);
         }

@@ -21,9 +21,18 @@ public class TasbeehWidget extends AppWidgetProvider {
         if (intent != null && ACTION_INCREMENT.equals(intent.getAction())) {
             android.content.SharedPreferences p = context.getSharedPreferences("zad_reminders", Context.MODE_PRIVATE);
             int goal = p.getInt("native_tasbeeh_goal", 33);
-            int count = p.getInt("native_tasbeeh_count", 0);
-            if (count < goal) count++;
-            p.edit().putInt("native_tasbeeh_count", count).apply();
+            int count = Math.max(0, p.getInt("native_tasbeeh_count", 0));
+            int index = Math.floorMod(p.getInt("native_tasbeeh_dhikr", 0), DHIKR.length);
+            count++;
+            android.content.SharedPreferences.Editor edit = p.edit();
+            if (count >= goal) {
+                // Finish this wird, then advance automatically to the next dhikr.
+                edit.putInt("native_tasbeeh_count", 0)
+                    .putInt("native_tasbeeh_dhikr", (index + 1) % DHIKR.length);
+            } else {
+                edit.putInt("native_tasbeeh_count", count);
+            }
+            edit.apply();
             refreshAll(context);
         }
     }
@@ -47,7 +56,7 @@ public class TasbeehWidget extends AppWidgetProvider {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.tasbeeh_widget);
         views.setTextViewText(R.id.tasbeeh_widget_phrase, DHIKR[index]);
         views.setTextViewText(R.id.tasbeeh_widget_count, count + " / " + goal);
-        views.setTextViewText(R.id.tasbeeh_widget_button, count >= goal ? "اكتمل الورد" : "سبّح +١");
+        views.setTextViewText(R.id.tasbeeh_widget_button, "سبّح +١");
         Intent increment = new Intent(context, TasbeehWidget.class).setAction(ACTION_INCREMENT);
         PendingIntent add = PendingIntent.getBroadcast(context, id, increment,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
