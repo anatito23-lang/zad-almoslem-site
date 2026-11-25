@@ -21,7 +21,6 @@ public class TasbeehWidget extends AppWidgetProvider {
         if (intent != null && ACTION_INCREMENT.equals(intent.getAction())) {
             android.content.SharedPreferences p = context.getSharedPreferences("zad_reminders", Context.MODE_PRIVATE);
             int goal = p.getInt("native_tasbeeh_goal", 33);
-            if (goal != 33 && goal != 66 && goal != 99) goal = 33;
             int count = Math.max(0, p.getInt("native_tasbeeh_count", 0));
             int index = Math.floorMod(p.getInt("native_tasbeeh_dhikr", 0), DHIKR.length);
             count++;
