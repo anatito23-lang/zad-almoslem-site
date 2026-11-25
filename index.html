@@ -2485,5 +2485,43 @@ window.zadReloadQuranCatalog=load;load();
 </style>
 
 
+
+<script id="zad-legacy-khutbah-archive">
+(function(){
+ 'use strict';
+ async function load(){
+  const list=document.getElementById('khutbahList');
+  if(!list)return;
+  try{
+   const [{initializeApp,getApps},{getFirestore,collection,getDocs}]=await Promise.all([
+    import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js'),
+    import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')
+   ]);
+   const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ9nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
+   const app=getApps().length?getApps()[0]:initializeApp(cfg),db=getFirestore(app);
+   const snap=await getDocs(collection(db,'khutbahs'));
+   const published=snap.docs.map(d=>({id:d.id,...d.data()}))
+    .filter(x=>x.published===true||x['تم النشر']===true||x['النشر']===true)
+    .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+   for(const item of published){
+    if(list.querySelector('[data-legacy-khutbah="'+CSS.escape(item.id)+'"]'))continue;
+    const body=item.body||item.text||item['نص']||'';
+    const card=document.createElement('article');card.className='card khutbah-card';card.dataset.legacyKhutbah=item.id;
+    const tag=document.createElement('span');tag.className='topic-tag';tag.textContent='خطبة من الأرشيف';card.append(tag);
+    const title=document.createElement('h3');title.textContent=item.title||'خطبة';card.append(title);
+    const meta=[item.date,item.category].filter(Boolean).join(' · ');
+    if(meta){const date=document.createElement('p');date.className='small khutbah-date';date.textContent=meta;card.append(date);}
+    if(body){const details=document.createElement('details');details.className='khutbah-reader';const summary=document.createElement('summary');summary.textContent='اقرأ الخطبة كاملة';const content=document.createElement('div');content.className='khutbah-full-text';content.textContent=body;content.style.whiteSpace='pre-wrap';details.append(summary,content);card.append(details);}
+    const source=item.source||item['مصدر'];if(source){const p=document.createElement('p');p.className='small';p.textContent='المصدر: '+source;card.append(p);}
+    list.append(card);
+   }
+   const empty=list.querySelectorAll('.khutbah-card').length===0;
+   if(empty)list.innerHTML='<article class="card khutbah-card"><p>لا توجد خطب منشورة حاليًا.</p></article>';
+  }catch(e){console.warn('تعذر تحميل أرشيف الخطب القديم',e);}
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load,{once:true});else load();
+})();
+</script>
+
 </body>
 </html>
