@@ -35,7 +35,7 @@ public class RadioPlaybackService extends Service {
     private boolean adhanPauseRequested;
     private boolean resumeAfterAdhan;
     private long positionBeforeAdhan;
-    private static final String CHANNEL="zad_radio_playback";
+    private static final String CHANNEL="zad_radio_playback_sakina_v2";
     private static final int NOTIFICATION=7410;
     private ExoPlayer player;
     private PowerManager.WakeLock playbackWakeLock;
