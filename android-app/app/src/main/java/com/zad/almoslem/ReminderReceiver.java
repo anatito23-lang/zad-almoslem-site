@@ -202,8 +202,15 @@ public class ReminderReceiver extends BroadcastReceiver {
         String adhanMode=prefs.getString("adhan_mode","adhan");
         String prayerName = prayer ? key.substring("prayer_".length()) : "";
         boolean thisPrayerEnabled = prayer && prefs.getBoolean("prayer_enabled_" + prayerName, true);
+        // Suppress duplicate alarm deliveries close together for the same prayer.
+        // The alarm still gets rescheduled below, but audio should only start once.
+        long nowForDedup = System.currentTimeMillis();
+        long lastAudioStart = prayer ? prefs.getLong("adhan_audio_started_" + prayerName, 0L) : 0L;
+        boolean duplicatePrayerAudio = prayer && lastAudioStart > 0L
+                && nowForDedup - lastAudioStart >= 0L && nowForDedup - lastAudioStart < 90_000L;
         if (prayer && prefs.getBoolean("prayer_silent_" + prayerName, false)) activateSilentMode(context);
-        if(prayer && adhanEnabled && thisPrayerEnabled && ("adhan".equals(adhanMode) || "takbeer".equals(adhanMode))) {
+        if(prayer && adhanEnabled && thisPrayerEnabled && !duplicatePrayerAudio
+                && ("adhan".equals(adhanMode) || "takbeer".equals(adhanMode))) {
             Intent audio=new Intent(context,AdhanPlaybackService.class);
             audio.setAction(AdhanPlaybackService.ACTION_PLAY);
             audio.putExtra("prayer",prayerName);
@@ -213,14 +220,19 @@ public class ReminderReceiver extends BroadcastReceiver {
             audio.putExtra("voice", selectedVoice);
             audio.putExtra("play_dua_after",prefs.getBoolean("dua_after_adhan_enabled",true));
             try {
+                // Exact-alarm permission controls timing precision, not whether audio
+                // playback should be attempted once this receiver has fired. Attempt the
+                // foreground playback service regardless; keep a diagnostic warning if
+                // Android is currently using an inexact alarm fallback.
                 if (!exactAlarmAudioAllowed) {
                     prefs.edit().putString("adhan_last_start_error",
-                            "فعّل إذن المنبهات الدقيقة من إعدادات التذكيرات لتشغيل الأذان صوتيًا").apply();
+                            "موعد التنبيه قد يكون غير دقيق لعدم تفعيل إذن المنبهات الدقيقة").apply();
                 } else {
                     prefs.edit().remove("adhan_last_start_error").apply();
-                    if(Build.VERSION.SDK_INT>=26) context.startForegroundService(audio);
-                    else context.startService(audio);
                 }
+                if(Build.VERSION.SDK_INT>=26) context.startForegroundService(audio);
+                else context.startService(audio);
+                prefs.edit().putLong("adhan_audio_started_" + prayerName, System.currentTimeMillis()).apply();
             } catch(Exception error) {
                 String detail = error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage();
                 prefs.edit().putString("adhan_last_start_error", detail).apply();
