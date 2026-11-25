@@ -929,6 +929,19 @@ body .bottom-nav a span{display:block!important;font-size:19px!important;line-he
 body .bottom-nav a b{display:block!important;font-size:11px!important;font-weight:700!important;color:#fff!important}
 body main.wrap{padding-bottom:105px!important}
 </style>
+<style id="zad-bottom-nav-force-visible-fix">
+/* إصلاح قاعدة قديمة كانت تخفي شريط التبويبات في نسخة الموقع */
+html body.zad-public-website nav.bottom-nav,
+body.zad-public-website .bottom-nav{
+ display:flex!important;visibility:visible!important;opacity:1!important;
+ pointer-events:auto!important;position:fixed!important;z-index:2147483000!important;
+ right:0!important;left:0!important;bottom:0!important;
+ background:#0b3b30!important;border-top:2px solid #c9a45c!important;
+}
+html body.zad-public-website nav.bottom-nav a,
+body.zad-public-website .bottom-nav a{color:#fff!important;opacity:1!important}
+body.zad-public-website main.wrap{padding-bottom:110px!important}
+</style>
 </head>
 <body>
 <script>
