@@ -972,7 +972,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
   <div class="top">
     <div class="brand"><span class="brand-mark">۞</span><span>زاد المسلم</span></div>
     <nav aria-label="التنقل الرئيسي">
-<a href="#prayer">العبادة والمواقيت</a><a href="#quran">القرآن الكريم</a><a href="#azkar">الأذكار</a><a href="#hadith-dua">السنة والأدعية</a><a href="#books-library">المكتبة الإسلامية</a><a href="#khutbahs">الخطب والمواعظ</a>
+<a href="#daily-wird">العبادة اليومية</a><a href="#quran">القرآن الكريم</a><a href="#azkar">الأذكار</a><a href="#hadith-dua">السنة والأدعية</a><a href="#books-library">المكتبة الإسلامية</a><a href="#khutbahs">الخطب والمواعظ</a>
 </nav>
   </div>
   <div class="hero-content">
@@ -1473,7 +1473,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
       <div class="card"><div class="icon">🌙</div><h3>قيام الليل</h3><p>تذكير قبل أذان الفجر بنصف ساعة، ويمكنك تغيير الموعد.</p><label class="small" for="qiyamReminderTime">وقت التذكير</label><input id="qiyamReminderTime" type="time" value="04:00" style="width:100%;margin:6px 0 12px"><label><input id="qiyamReminderEnabled" type="checkbox" checked> تفعيل تنبيه قيام الليل</label></div>
     </div>
     <div class="card" style="margin-top:12px"><div class="icon">🤲</div><h3>دعاء الشيخ الشعراوي بعد الأذان</h3><p>تشغيل التسجيل تلقائيًا بعد انتهاء الأذان مباشرة.</p><label><input id="duaAfterAdhanEnabled" type="checkbox" checked> تشغيل دعاء الشعراوي بعد كل أذان</label></div>
-    <div class="card" style="margin-top:12px"><div class="icon">🕌</div><h3>الأذان عند دخول وقت الصلاة</h3><p>يشغّل الأذان بصوته عند الفجر والظهر والعصر والمغرب والعشاء، حتى لو أغلقت التطبيق. يحتاج اتصالًا بالإنترنت وقت التشغيل.</p><p class="small">يمكنك ضبط صوت الأذان لكل صلاة من قسم مواقيت الصلاة.</p></div>
+    <div class="card" style="margin-top:12px"><div class="icon">🕌</div><h3>الأذان عند دخول وقت الصلاة</h3><p>يشغّل الأذان بصوته عند الفجر والظهر والعصر والمغرب والعشاء، حتى لو أغلقت التطبيق. يحتاج اتصالًا بالإنترنت وقت التشغيل.</p><p class="small">يمكنك ضبط تنبيهات الأذان من إعدادات التنبيهات اليومية.</p></div>
     <div class="row" style="margin-top:12px"><button class="btn green" id="saveDailyReminders">حفظ إعدادات التنبيهات</button><span class="small" id="dailyReminderStatus" role="status">أذكار الصباح 7:00 صباحًا، والمساء 5:00 مساءً، وقيام الليل 4:00 صباحًا.</span></div>
     <div class="notice">تنبيهات التطبيق على أندرويد تحتاج السماح بالإشعارات. وقد يطلب الهاتف السماح بالتنبيهات الدقيقة أو استثناء التطبيق من توفير البطارية لضمان وصولها في موعدها.</div>
   </section>
@@ -1706,7 +1706,7 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
 </button>
 
 <nav class="bottom-nav" aria-label="التنقل السفلي">
-  <a href="#prayer"><span>◷</span>المواقيت</a>
+  <a href="#daily-wird"><span>◷</span>وردي</a>
   <a href="#azkar"><span>☼</span>الأذكار</a>
   <a href="#quran"><span>▤</span>القرآن</a>
   <a href="#qibla"><span>◉</span>القبلة</a>
@@ -2682,7 +2682,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
 <script id="zad-site-content-renderer-20261122">
 (function(){
  if(!['zad-almoslem.github.io','anatito23-lang.github.io'].includes(location.hostname))return;
- const sectionNames={prayer:"مواقيت الصلاة",calendar:"التقويم الشهري",nasheed:"الإنشاد الديني والابتهالات",ruqyah:"الرقية الشرعية","radio-egypt":"إذاعة القرآن الكريم",azkar:"الأذكار اليومية","books-library":"مكتبة الكتب الإسلامية","hadith-dua":"الحديث الشريف",duas:"الأدعية","daily-wird":"وردي اليومي","qalbi-itmaann":"قلبي اطمأن",library:"المكتبة الإيمانية","friday-live":"بث خطبة الجمعة",khutbahs:"خطب الجمعة",shaaraawi:"خواطر الشعراوي","islamic-knowledge":"زاد العلم والإيمان",ramadan:"زادك في رمضان"};
+ const sectionNames={calendar:"التقويم الشهري",nasheed:"الإنشاد الديني والابتهالات",ruqyah:"الرقية الشرعية","radio-egypt":"إذاعة القرآن الكريم",azkar:"الأذكار اليومية","books-library":"مكتبة الكتب الإسلامية","hadith-dua":"الحديث الشريف",duas:"الأدعية","daily-wird":"وردي اليومي","qalbi-itmaann":"قلبي اطمأن",library:"المكتبة الإيمانية","friday-live":"بث خطبة الجمعة",khutbahs:"خطب الجمعة",shaaraawi:"خواطر الشعراوي","islamic-knowledge":"زاد العلم والإيمان",ramadan:"زادك في رمضان"};
  const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
  const escId=/^[A-Za-z][A-Za-z0-9_-]{0,59}$/;
  function addText(parent,tag,text,cls){const el=document.createElement(tag);el.textContent=text||"";if(cls)el.className=cls;parent.append(el);return el;}
