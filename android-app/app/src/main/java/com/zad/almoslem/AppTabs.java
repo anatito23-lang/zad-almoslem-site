@@ -73,7 +73,7 @@ public final class AppTabs {
     }
 
     private static void render(Activity a,String active,LinearLayout outer,JSONArray config) {
-        LinearLayout dock=(LinearLayout)outer.getChildAt(0);dock.removeAllViews();
+        LinearLayout dock=outer;dock.removeAllViews();
         String lang=a.getSharedPreferences("zad_settings",Activity.MODE_PRIVATE).getString("app_language","ar");
         int li="en".equals(lang)?1:"fr".equals(lang)?2:"ur".equals(lang)?3:"tr".equals(lang)?4:0;
         if("prayer".equals(active)||"library".equals(active)||"settings".equals(active))active="more";
