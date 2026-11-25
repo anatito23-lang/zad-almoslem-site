@@ -162,7 +162,7 @@ public class ReminderAudioService extends Service {
     private void createChannel() {
         if (Build.VERSION.SDK_INT >= 26) {
             NotificationManager nm = getSystemService(NotificationManager.class);
-            NotificationChannel c = new NotificationChannel(CHANNEL, "التذكيرات الصوتية", NotificationManager.IMPORTANCE_LOW);
+            NotificationChannel c = new NotificationChannel(CHANNEL, "سكينة ودعاء وصلاة", NotificationManager.IMPORTANCE_LOW);
             c.setDescription("تشغيل أذكار الصباح والمساء ودعاء ما بعد الأذان");
             nm.createNotificationChannel(c);
         }
