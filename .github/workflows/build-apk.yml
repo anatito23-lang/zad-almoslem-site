@@ -127,6 +127,11 @@ jobs:
         working-directory: android-app
         run: gradle bundleRelease
 
+      - name: Build signed release APK
+        if: env.ANDROID_SIGNING_READY == 'true'
+        working-directory: android-app
+        run: gradle assembleRelease
+
       - name: Remove temporary signing key
         if: always()
         run: rm -f android-app/app/release-key.jks
@@ -138,6 +143,15 @@ jobs:
           path: android-app/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Upload signed release APK
+        if: env.ANDROID_SIGNING_READY == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sakeena-signed-release-apk
+          path: android-app/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 90
 
       - name: Upload release AAB
         uses: actions/upload-artifact@v4
