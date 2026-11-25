@@ -158,45 +158,6 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 @media(max-width:520px){.tasbeeh-float{right:13px;bottom:13px}.tasbeeh-panel{bottom:64px}}
 
 
-/* المصحف الشريف */
-.mushaf-card{padding:20px}
-.mushaf-toggle{width:100%;margin-bottom:0}
-.mushaf-content-open{margin-top:14px}
-#mushafContent:not(.hidden){margin-top:14px}
-.mushaf-controls{display:grid;grid-template-columns:minmax(180px,.8fr) minmax(220px,1.2fr);gap:10px}
-.mushaf-controls select,.mushaf-controls input{width:100%}
-.mushaf-navigation{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 12px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-.mushaf-navigation button{flex:0 0 auto}
-.mushaf-heading{text-align:center;min-width:0}
-.mushaf-heading h3{margin:0;color:var(--green);font-size:21px}
-.mushaf-heading span{display:block;margin-top:2px}
-.mushaf-bismillah{text-align:center;color:#8a6b32;font-family:"Traditional Arabic","Noto Naskh Arabic",serif;font-size:30px;font-weight:700;margin:12px 0 18px}
-.mushaf-text{min-height:180px;padding:22px 20px;border:1px solid #e9e2d2;border-radius:16px;background:linear-gradient(135deg,#fffefa,#f8f5eb);color:#243e34;text-align:justify;text-align-last:center;direction:rtl;font-family:"Amiri Quran","Noto Naskh Arabic","Traditional Arabic",serif;font-size:clamp(24px,3.1vw,32px);line-height:2.35;word-spacing:2px}
-.mushaf-ayah{white-space:normal}
-.mushaf-marker{display:inline-block;white-space:nowrap;color:#987b43;font-size:.68em;margin:0 3px;font-family:"Traditional Arabic","Noto Naskh Arabic",serif}
-.mushaf-search-status{text-align:center;margin:9px 0 0}
-.mushaf-source{line-height:1.9}
-.mushaf-source a{color:#155b49;font-weight:700}
-#mushafStatus{margin:10px 0;text-align:center}
-.mushaf-page-jump{display:grid;grid-template-columns:auto minmax(72px,1fr) auto;align-items:center;gap:8px}
-.mushaf-page-jump label{font-size:13px;color:var(--muted);white-space:nowrap}
-.mushaf-page-jump input{width:100%;text-align:center;direction:ltr}
-.mushaf-page-frame{width:100%;max-width:900px;margin:12px auto 0;padding:5px;background:#f4efe2;border:1px solid #d8c9a8;border-radius:8px;box-shadow:0 8px 24px #47371b18;text-align:center;display:flex;align-items:center;justify-content:center;touch-action:pan-y pinch-zoom;user-select:none;-webkit-user-select:none;overscroll-behavior-x:contain}
-.mushaf-page-frame img{display:block;width:auto;max-width:100%;height:auto;max-height:calc(100dvh - 270px);margin:0 auto;background:#fff;object-fit:contain;object-position:center;pointer-events:none;-webkit-user-drag:none;user-select:none}
-@media(max-width:600px){.mushaf-page-frame{padding:3px}.mushaf-page-frame img{max-height:calc(100dvh - 245px)}}
-.mushaf-swipe-hint{text-align:center;margin:8px 0 0;color:var(--muted);font-size:12px}
-.mushaf-source{margin-top:14px}
-@media(max-width:600px){
- .mushaf-card{padding:13px}
- .mushaf-controls{grid-template-columns:1fr}
- .mushaf-navigation{gap:5px}
- .mushaf-navigation button{padding:8px 9px;font-size:12px}
- .mushaf-heading h3{font-size:18px}
- .mushaf-text{padding:17px 13px;font-size:25px;line-height:2.2}
- .mushaf-bismillah{font-size:26px}
-}
-
-
 /* مكتبة الكتب وقارئها داخل الموقع */
 /* المكتبة الإسلامية: تصنيف الكتب حسب التخصص */
 .book-category-groups{display:flex;flex-direction:column;gap:12px;margin-top:14px}
@@ -244,11 +205,6 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 }
 
 
-/* عرض صفحة المصحف كاملة بوضوح على الهاتف والكمبيوتر */
-#mushafSwipeArea{width:100%!important;max-width:900px!important;min-height:0!important;height:auto!important;overflow:visible!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:4px!important;box-sizing:border-box!important}
-#mushafPageImage{display:block!important;width:100%!important;max-width:100%!important;height:auto!important;max-height:none!important;object-fit:contain!important;object-position:center!important;margin:0 auto!important}
-@media(max-width:600px){#mushafSwipeArea{padding:2px!important}#mushafPageImage{width:100%!important;height:auto!important;max-height:none!important}}
-\n
 /* Friday khutbah archive: one compact card per sermon */
 #khutbahs .khutbah-list{display:flex;flex-direction:column;gap:12px}
 #khutbahs .khutbah-card{display:block;width:100%;margin:0;padding:18px}
@@ -996,7 +952,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
 <div class="section-head"><div><h2 id="siteDirectoryTitle">دليل زاد المسلم</h2><p>اختر ما تبحث عنه، وستصل إلى القسم مباشرة.</p></div></div>
 <div class="site-directory-grid">
 <article class="directory-card"><span>🕌</span><h3>العبادة اليومية</h3><p>الصلاة والذكر والورد.</p><div><a href="#calendar">التقويم</a><a href="#azkar">الأذكار</a><a href="#daily-wird">وردي اليومي</a><a href="#duas">الأدعية</a></div></article>
-<article class="directory-card"><span>📖</span><h3>القرآن والتلاوات</h3><p>استمع واقرأ وتدبر.</p><div><a href="#quran">استماع القرآن</a><a href="#mushaf">المصحف الشريف</a><a href="#radio-egypt">إذاعات القرآن</a><a href="#ruqyah">الرقية الشرعية</a><a href="#nasheed">الإنشاد والابتهالات</a></div></article>
+<article class="directory-card"><span>📖</span><h3>القرآن والتلاوات</h3><p>استمع واقرأ وتدبر.</p><div><a href="#quran">استماع القرآن</a><a href="#radio-egypt">إذاعات القرآن</a><a href="#ruqyah">الرقية الشرعية</a><a href="#nasheed">الإنشاد والابتهالات</a></div></article>
 <article class="directory-card"><span>📚</span><h3>السنة والعلم</h3><p>زاد معرفتك بالحديث والكتب.</p><div><a href="#hadith-dua">الحديث الشريف</a><a href="#books-library">المكتبة الإسلامية</a><a href="#library">المكتبة الإيمانية</a><a href="#shaaraawi">خواطر الشعراوي</a><a href="#islamic-knowledge">زاد العلم والإيمان</a></div></article>
 <article class="directory-card"><span>💚</span><h3>الخطب والخواطر</h3><p>كلمات إيمانية توقظ القلب.</p><div><a href="#qalbi-itmaann">قلبي اطمئن</a><a href="#khutbahs">خطب الجمعة</a><a href="#friday-live">بث خطبة الجمعة</a></div></article>
 <article class="directory-card"><span>🌱</span><h3>الأسرة والناشئة</h3><p>مساحة مبسطة للتعلم.</p><div><a href="#kids">ركن الأطفال</a><a href="#daily-reminder-settings">التنبيهات اليومية</a></div></article>
@@ -1104,51 +1060,6 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
 
 
   
-
-  <section class="section" id="mushaf">
-    <div class="section-head">
-      <div><h2>المصحف الشريف كاملًا</h2><p>تصفح صفحات مصحف المدينة النبوية صفحةً صفحة، من الفاتحة إلى الناس</p></div>
-    </div>
-    <div class="card mushaf-card">
-      <button class="btn green mushaf-toggle" id="mushafToggle" type="button" aria-expanded="false" aria-controls="mushafContent">فتح المصحف</button>
-      <div id="mushafContent" class="hidden">
-      <button class="btn light" id="mushafExitReader" type="button" aria-label="العودة إلى زاد المسلم">← العودة إلى زاد المسلم</button>
-      <div class="mushaf-offline-tools" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0">
-        <button class="btn light" id="mushafDownloadOffline" type="button">تنزيل المصحف للعمل بدون إنترنت (حوالي 32 ميجابايت)</button>
-        <span id="mushafOfflineStatus" class="small" role="status">لم يتم تنزيل المصحف بعد</span>
-      </div>
-      <div class="mushaf-controls">
-        <select id="mushafSurahSelect" aria-label="انتقل إلى سورة">
-          <option value="">جارٍ تحميل أسماء السور...</option>
-        </select>
-        <div class="mushaf-page-jump">
-          <label for="mushafPageNumber">رقم الصفحة</label>
-          <input id="mushafPageNumber" type="number" min="1" max="604" value="1" inputmode="numeric">
-          <button class="btn light" id="mushafGoPage" type="button">اذهب</button>
-        </div>
-      </div>
-      <div class="mushaf-navigation">
-        <button class="btn light" id="mushafPrev" type="button" disabled>الصفحة السابقة</button>
-        <div class="mushaf-heading">
-          <h3 id="mushafPageTitle">مصحف المدينة النبوية</h3>
-          <span id="mushafMeta" class="small">الصفحة 1 من 604</span>
-        </div>
-        <button class="btn light" id="mushafNext" type="button" disabled>الصفحة التالية</button>
-      </div>
-      <p id="mushafStatus" class="small" role="status">افتح المصحف لعرض الصفحات.</p>
-      <div class="mushaf-page-frame" id="mushafSwipeArea" aria-label="منطقة تقليب صفحات المصحف بالسحب">
-        <img id="mushafPageImage" alt="صفحة 1 من المصحف الشريف" decoding="async" draggable="false">
-      </div>
-      <p class="mushaf-swipe-hint">اسحب الصفحة إلى اليسار للصفحة التالية، أو إلى اليمين للصفحة السابقة</p>
-      <div class="notice mushaf-source">
-        يعرض هذا القسم صفحات المصحف كاملة بصورها الأصلية، مع ترتيب الصفحات والزخارف وأرقامها، وعددها 604 صفحة.
-        <br>مصدر النسخة: <a href="https://github.com/Miftah-Fentaw/Quran_webp" target="_blank" rel="noopener">Quran Images</a> — ترخيص MIT. حقوق النسخة: Copyright © 2026 Miftah Fentaw.
-        <br>المصدر الأصلي للصور: <a href="https://github.com/GovarJabbar/Quran-PNG" target="_blank" rel="noopener">Quran-PNG</a>، المولّد بواسطة <a href="https://github.com/quran/quran.com-images" target="_blank" rel="noopener">quran.com-images</a>.
-        <br>يلزم الاتصال بالإنترنت لتحميل الصفحة التي تختارها.
-      </div>
-      </div>
-    </div>
-  </section>
 
   <section class="section" id="ruqyah">
     <div class="section-head"><div><h2>الرقية الشرعية — استماع مباشر</h2><p>بصوت الشيخ محمود خليل الحصري، من خلال مشغّل صوت داخل الموقع</p></div></div>
@@ -1734,218 +1645,6 @@ const reciterMatches={
 };
 const normalizeReciterName=s=>(s||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/[\u064B-\u065F\u0670]/g,'').replace(/[^\u0621-\u064A]/g,'');
 window.zadReciterData={};
-let mushafSurahs=[];
-let mushafCurrentPage=1;
-let mushafRequestNumber=0;
-let mushafInitialized=false;
-
-// Local abortable fetch helper for Mushaf pages and metadata.
-async function mushafFetchWithTimeout(url,options={},timeoutMs=8000){
- const controller=new AbortController();
- const timer=setTimeout(()=>controller.abort(),timeoutMs);
- try{return await fetch(url,{...options,signal:controller.signal});}
- finally{clearTimeout(timer);}
-}
-
-function loadMushafPage(number){
- const page=Number(number);
- if(!Number.isInteger(page)||page<1||page>604){
-  $('mushafStatus').textContent='رقم الصفحة يجب أن يكون من 1 إلى 604.';
-  $('mushafPageNumber').value=String(mushafCurrentPage);
-  return;
- }
- const request=++mushafRequestNumber;
- mushafCurrentPage=page;
- $('mushafPageNumber').value=String(page);
- $('mushafMeta').textContent='الصفحة '+page+' من 604';
- $('mushafPageTitle').textContent='مصحف المدينة النبوية';
- $('mushafMeta').textContent='الصفحة '+page+' من 604';
- mushafFetchWithTimeout('https://api.alquran.cloud/v1/page/'+page+'/quran-uthmani',{},8000)
-  .then(response=>{if(!response.ok)throw new Error('page metadata');return response.json();})
-  .then(result=>{
-   if(request!==mushafRequestNumber||result.code!==200||!result.data||!Array.isArray(result.data.ayahs)||!result.data.ayahs.length)return;
-   const first=result.data.ayahs[0];
-   const surahName=first.surah&&first.surah.name?first.surah.name:'';
-   const juz=first.juz||'';
-   $('mushafPageTitle').textContent=surahName||'مصحف المدينة النبوية';
-   $('mushafMeta').textContent='الجزء '+(juz||'—')+' • الصفحة '+page+' من 604';
-   const select=$('mushafSurahSelect');
-   if(select&&first.surah&&first.surah.number)select.value=String(first.surah.number);
-  })
-  .catch(()=>{if(request===mushafRequestNumber)$('mushafMeta').textContent='الصفحة '+page+' من 604';});
-
- $('mushafPageImage').alt='صفحة '+page+' من المصحف الشريف';
- $('mushafStatus').textContent='جارٍ تحميل الصفحة '+page+'...';
- $('mushafPrev').disabled=page===1;
- $('mushafNext').disabled=page===604;
- try{localStorage.setItem('zad_mushaf_page',String(page));}catch(e){}
- const image=$('mushafPageImage');
- image.onload=()=>{
-  if(request!==mushafRequestNumber)return;
-  $('mushafStatus').textContent='صفحة '+page+' من 604 — تم تحميلها.';
-  [page+1,page-1].filter(p=>p>=1&&p<=604).forEach(p=>{
-   const warm=new Image();warm.src='https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran_webp@main/png/'+p+'.png';
-  });
-
- };
- image.onerror=()=>{
-  if(request!==mushafRequestNumber)return;
-  $('mushafStatus').textContent='تعذر تحميل الصفحة الآن. تحقق من اتصال الإنترنت ثم حاول مرة أخرى أو انتقل لصفحة أخرى.';
- };
- const pageSources=[
-  'https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran_webp@main/png/'+page+'.png',
-  'https://raw.githubusercontent.com/Miftah-Fentaw/Quran_webp/main/png/'+page+'.png',
-  'https://raw.githubusercontent.com/GovarJabbar/Quran-PNG/master/'+String(page).padStart(3,'0')+'.png'
- ];
- image.dataset.sourceIndex='0';
- image.onerror=()=>{
-  if(request!==mushafRequestNumber)return;
-  const nextSource=Number(image.dataset.sourceIndex||0)+1;
-  if(nextSource<pageSources.length){
-   image.dataset.sourceIndex=String(nextSource);
-   $('mushafStatus').textContent='نجرب مصدرًا بديلًا لتحميل الصفحة...';
-   image.src=pageSources[nextSource];
-   return;
-  }
-  $('mushafStatus').textContent='تعذر تحميل الصفحة من المصادر المتاحة. تحقق من الإنترنت ثم حاول مرة أخرى.';
- };
- image.src=pageSources[0];
-}
-async function loadMushafSurah(number){
- const surahNumber=Number(number);
- if(!surahNumber||surahNumber<1||surahNumber>114)return;
- const request=++mushafRequestNumber;
- $('mushafStatus').textContent='جارٍ تحديد أول صفحة من السورة...';
- try{
-  const response=await mushafFetchWithTimeout('https://api.alquran.cloud/v1/surah/'+surahNumber+'/quran-uthmani',{},8000);
-  if(!response.ok)throw new Error('surah lookup');
-  const result=await response.json();
-  if(request!==mushafRequestNumber)return;
-  const firstAyah=result.data&&result.data.ayahs&&result.data.ayahs[0];
-  if(result.code!==200||!firstAyah||!firstAyah.page)throw new Error('page mapping');
-  loadMushafPage(firstAyah.page);
-  $('mushafStatus').textContent='سورة '+(result.data.name||'')+' — الصفحة '+firstAyah.page+'.';
-  try{localStorage.setItem('zad_mushaf_surah',String(surahNumber));}catch(e){}
- }catch(error){
-  if(request!==mushafRequestNumber)return;
-  $('mushafStatus').textContent='تعذر تحديد صفحة السورة. يمكنك إدخال رقم الصفحة يدويًا.';
- }
-}
-async function loadMushafIndex(){
- let savedPage=1;
- try{
-  const saved=Number(localStorage.getItem('zad_mushaf_page')||0);
-  if(saved>=1&&saved<=604)savedPage=saved;
- }catch(e){}
- loadMushafPage(savedPage);
- try{
-  const response=await mushafFetchWithTimeout('https://api.alquran.cloud/v1/surah',{},8000);
-  if(!response.ok)throw new Error('surah index');
-  const result=await response.json();
-  if(result.code!==200||!Array.isArray(result.data)||result.data.length!==114)throw new Error('surah index');
-  mushafSurahs=result.data;
-  const select=$('mushafSurahSelect');
-  select.replaceChildren();
-  const placeholder=document.createElement('option');
-  placeholder.value='';
-  placeholder.textContent='اختر السورة للانتقال إلى بدايتها';
-  select.appendChild(placeholder);
-  mushafSurahs.forEach(surah=>{
-   const option=document.createElement('option');
-   option.value=String(surah.number);
-   option.textContent=surah.number+'. '+surah.name;
-   select.appendChild(option);
-  });
- }catch(error){
-  $('mushafSurahSelect').innerHTML='<option value="">تعذر تحميل أسماء السور — استخدم رقم الصفحة</option>';
- }
-}
-
-const MUSHAF_OFFLINE_CACHE='zad-mushaf-offline-pages-v2';
-const MUSHAF_CDN='https://cdn.jsdelivr.net/gh/Miftah-Fentaw/Quran_webp@main/png/';
-function mushafPngUrl(page){return MUSHAF_CDN+page+'.png';}
-async function updateMushafOfflineStatus(){
- const label=$('mushafOfflineStatus');if(!label||!('caches'in window))return;
- try{const cache=await caches.open(MUSHAF_OFFLINE_CACHE);const keys=await cache.keys();label.textContent=keys.length>=604?'المصحف محفوظ على هذا الجهاز — يعمل بدون إنترنت':('المحفوظ: '+keys.length+' من 604 صفحة');}catch(e){label.textContent='تعذر فحص التخزين المحلي';}
-}
-async function downloadMushafOffline(){
- const button=$('mushafDownloadOffline'),label=$('mushafOfflineStatus');
- if(!('caches'in window)){label.textContent='المتصفح لا يدعم حفظ الصفحات دون إنترنت';return;}
- button.disabled=true;button.textContent='جارٍ تجهيز المصحف...';
- try{
-  const cache=await caches.open(MUSHAF_OFFLINE_CACHE),keys=await cache.keys(),have=new Set(keys.map(k=>k.url));
-  let done=have.size,cursor=0,failed=0;
-  const pending=[];for(let p=1;p<=604;p++){const url=mushafPngUrl(p);if(!have.has(url))pending.push({p,url});}
-  label.textContent='المحفوظ: '+done+' من 604 صفحة';
-  async function worker(){while(cursor<pending.length){const item=pending[cursor++];try{const response=await fetch(item.url,{mode:'no-cors',cache:'reload'});if(response.type==='opaque'||response.ok){await cache.put(new Request(item.url,{mode:'no-cors'}),response);done++;}else failed++;}catch(e){failed++;}label.textContent='جارٍ حفظ صفحات المصحف: '+done+' من 604'+(failed?' — تعذر حفظ '+failed:'');}}
-  await Promise.all([worker(),worker(),worker(),worker()]);
-  await updateMushafOfflineStatus();
-  if(done>=604){button.textContent='المصحف محفوظ بدون إنترنت';label.textContent='اكتمل تنزيل صفحات المصحف الـ604. يمكنك القراءة دون إنترنت.';}
-  else{button.textContent='استكمال تنزيل المصحف';label.textContent='تم حفظ '+done+' من 604 صفحات. اضغط للاستكمال.';}
- }catch(e){label.textContent='تعذر التنزيل. تأكد من الاتصال ومساحة التخزين ثم حاول مجددًا.';button.textContent='إعادة تنزيل المصحف';}
- button.disabled=false;
-}
-$('mushafDownloadOffline').addEventListener('click',downloadMushafOffline);
-updateMushafOfflineStatus();
-
-const mushafToggle=$('mushafToggle');
-const mushafContent=$('mushafContent');
-mushafToggle.addEventListener('click',()=>{
- const opening=mushafContent.classList.contains('hidden');
- mushafContent.classList.toggle('hidden');
- mushafToggle.setAttribute('aria-expanded',String(opening));
- mushafToggle.textContent=opening?'إغلاق المصحف':'فتح المصحف';
- if(opening&&!mushafInitialized){
-  mushafInitialized=true;
-  loadMushafIndex();
- }
-});
-$('mushafSurahSelect').addEventListener('change',event=>loadMushafSurah(event.target.value));
-$('mushafGoPage').addEventListener('click',()=>loadMushafPage($('mushafPageNumber').value));
-$('mushafPageNumber').addEventListener('keydown',event=>{
- if(event.key==='Enter')loadMushafPage($('mushafPageNumber').value);
-});
-$('mushafPrev').addEventListener('click',()=>loadMushafPage(mushafCurrentPage-1));
-$('mushafNext').addEventListener('click',()=>loadMushafPage(mushafCurrentPage+1));
-
-// تقليب صفحات المصحف بالسحب: لمس مباشر للهاتف، وسحب بالماوس للكمبيوتر
-const mushafSwipeArea=$('mushafSwipeArea');
-let mushafTouchStart=null;
-let mushafMouseStart=null;
-function turnMushafBySwipe(deltaX,deltaY){
- if(mushafContent.classList.contains('hidden'))return;
- if(Math.abs(deltaX)<35||Math.abs(deltaX)<Math.abs(deltaY)*1.15)return;
- if(deltaX<0&&mushafCurrentPage<604){
-  loadMushafPage(mushafCurrentPage+1);
- }else if(deltaX>0&&mushafCurrentPage>1){
-  loadMushafPage(mushafCurrentPage-1);
- }
-}
-mushafSwipeArea.addEventListener('touchstart',event=>{
- if(!event.touches||event.touches.length!==1)return;
- const touch=event.touches[0];
- mushafTouchStart={x:touch.clientX,y:touch.clientY};
-},{passive:true});
-mushafSwipeArea.addEventListener('touchend',event=>{
- if(!mushafTouchStart||!event.changedTouches||!event.changedTouches.length)return;
- const touch=event.changedTouches[0];
- const start=mushafTouchStart;
- mushafTouchStart=null;
- turnMushafBySwipe(touch.clientX-start.x,touch.clientY-start.y);
-},{passive:true});
-mushafSwipeArea.addEventListener('touchcancel',()=>{mushafTouchStart=null;},{passive:true});
-mushafSwipeArea.addEventListener('pointerdown',event=>{
- if(event.pointerType!=='mouse'||event.button!==0)return;
- mushafMouseStart={x:event.clientX,y:event.clientY};
-});
-mushafSwipeArea.addEventListener('pointerup',event=>{
- if(event.pointerType!=='mouse'||!mushafMouseStart)return;
- const start=mushafMouseStart;
- mushafMouseStart=null;
- turnMushafBySwipe(event.clientX-start.x,event.clientY-start.y);
-});
-mushafSwipeArea.addEventListener('pointercancel',()=>{mushafMouseStart=null;});
-
 // تم استبدال أنظمة تشغيل القرآن القديمة بمشغل مستقل واحد.
 
 const azkar={
@@ -2286,7 +1985,7 @@ nasheedAudio.addEventListener('error',()=>{
  const brand=document.querySelector('.top .brand');
  (brand||document.querySelector('.top')||document.body).appendChild(picker);
  picker.classList.add('notranslate');picker.setAttribute('translate','no');
- ['quran','mushaf','mushafPageImage','mushafSwipeArea'].forEach(id=>{
+ ['quran'].forEach(id=>{
   const el=document.getElementById(id);
   if(el){el.classList.add('notranslate');el.setAttribute('translate','no');}
  });
@@ -2494,7 +2193,6 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
 
 <script>
   // Keep the Quran and tasbeeh sections available inside the page, but remove their floating shortcuts.
-  // زر المصحف العائم متاح الآن للمستخدم.
   document.querySelector('.tasbeeh-float')?.style.setProperty('display','none','important');
 </script>
 <script src="./app-pages.js?v=20261124-prayer-ramadan-layout-v1"></script>
