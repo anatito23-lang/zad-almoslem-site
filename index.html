@@ -1739,6 +1739,14 @@ let mushafCurrentPage=1;
 let mushafRequestNumber=0;
 let mushafInitialized=false;
 
+// Local abortable fetch helper for Mushaf pages and metadata.
+async function mushafFetchWithTimeout(url,options={},timeoutMs=8000){
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),timeoutMs);
+ try{return await fetch(url,{...options,signal:controller.signal});}
+ finally{clearTimeout(timer);}
+}
+
 function loadMushafPage(number){
  const page=Number(number);
  if(!Number.isInteger(page)||page<1||page>604){
@@ -1752,7 +1760,7 @@ function loadMushafPage(number){
  $('mushafMeta').textContent='الصفحة '+page+' من 604';
  $('mushafPageTitle').textContent='مصحف المدينة النبوية';
  $('mushafMeta').textContent='الصفحة '+page+' من 604';
- zadFetchTimeout('https://api.alquran.cloud/v1/page/'+page+'/quran-uthmani',{},8000)
+ mushafFetchWithTimeout('https://api.alquran.cloud/v1/page/'+page+'/quran-uthmani',{},8000)
   .then(response=>{if(!response.ok)throw new Error('page metadata');return response.json();})
   .then(result=>{
    if(request!==mushafRequestNumber||result.code!==200||!result.data||!Array.isArray(result.data.ayahs)||!result.data.ayahs.length)return;
@@ -1809,7 +1817,7 @@ async function loadMushafSurah(number){
  const request=++mushafRequestNumber;
  $('mushafStatus').textContent='جارٍ تحديد أول صفحة من السورة...';
  try{
-  const response=await zadFetchTimeout('https://api.alquran.cloud/v1/surah/'+surahNumber+'/quran-uthmani',{},8000);
+  const response=await mushafFetchWithTimeout('https://api.alquran.cloud/v1/surah/'+surahNumber+'/quran-uthmani',{},8000);
   if(!response.ok)throw new Error('surah lookup');
   const result=await response.json();
   if(request!==mushafRequestNumber)return;
@@ -1831,7 +1839,7 @@ async function loadMushafIndex(){
  }catch(e){}
  loadMushafPage(savedPage);
  try{
-  const response=await zadFetchTimeout('https://api.alquran.cloud/v1/surah',{},8000);
+  const response=await mushafFetchWithTimeout('https://api.alquran.cloud/v1/surah',{},8000);
   if(!response.ok)throw new Error('surah index');
   const result=await response.json();
   if(result.code!==200||!Array.isArray(result.data)||result.data.length!==114)throw new Error('surah index');
