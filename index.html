@@ -409,7 +409,6 @@ body.zad-public-website #tasbeehPanel,
 body.zad-public-website #tasbeehFab,
 body.zad-public-website #zad-page-tasbeeh,
 body.zad-public-website #daily-reminder-settings,
-body.zad-public-website .bottom-nav,
 body.zad-public-website #qibla,
 body.zad-public-website #adhan,
 body.zad-public-website #adhan-settings {display:none!important;visibility:hidden!important;pointer-events:none!important}
@@ -1814,7 +1813,7 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
   <a href="#quran"><span>🎧</span><b>استماع القرآن</b></a>
   <a href="#zad-mushaf"><span>📖</span><b>مصحف زاد</b></a>
   <a href="./khutbahs.html"><span>📜</span><b>خطب زاد</b></a>
-  <a href="./awqaf-khutbah.html"><span>🕌</span><b>خطب الأوقاف</b></a>
+  <a href="./awqaf-khutbah.html"><span>🕌</span><b>خطب وزارة الأوقاف المصرية</b></a>
   <a href="#azkar"><span>🤲</span><b>أذكار زاد</b></a>
   <a href="#books-library"><span>📚</span><b>المكتبة الإسلامية</b></a>
   <a href="#qalbi-itmaann"><span>💚</span><b>قلبي اطمأن</b></a>
@@ -2312,7 +2311,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
  const removeSelectors=[
   '.adhan-settings','.prayer-tracker',
   '#zad-page-tasbeeh','#daily-reminder-settings',
-  '.bottom-nav','#qibla','#adhan-settings','#adhan'
+  '#qibla','#adhan-settings','#adhan'
  ];
  function clean(){
   removeSelectors.forEach(selector=>document.querySelectorAll(selector).forEach(node=>node.remove()));
