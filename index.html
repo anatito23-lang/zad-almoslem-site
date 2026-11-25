@@ -2131,7 +2131,7 @@ document.querySelectorAll('.book-open[data-local-book]').forEach(button=>{
  button.addEventListener('click',()=>{
   const path=button.dataset.localBook||'';
   if(!path.startsWith('/books/')||path.startsWith('//')||!bookModal||!bookFrame)return;
-  $('bookReaderTitle').textContent=button.dataset.bookTitle||'قارئ الكتب';
+  document.getElementById('bookReaderTitle').textContent=button.dataset.bookTitle||'قارئ الكتب';
   bookFrame.src=path;
   bookFrame.title='قراءة '+(button.dataset.bookTitle||'الكتاب');
   bookModal.classList.add('active');
@@ -2139,7 +2139,7 @@ document.querySelectorAll('.book-open[data-local-book]').forEach(button=>{
   document.body.style.overflow='hidden';
  });
 });
-$('closeBookReader').addEventListener('click',closeBookReader);
+document.getElementById('closeBookReader').addEventListener('click',closeBookReader);
 bookModal.addEventListener('click',event=>{if(event.target===bookModal)closeBookReader();});
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&bookModal.classList.contains('active'))closeBookReader();});
 
