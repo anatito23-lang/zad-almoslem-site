@@ -943,6 +943,87 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
 </header>
 
 <main class="wrap">
+
+  <section class="section prayer-times-section" id="prayer-times" aria-labelledby="prayerTimesTitle">
+    <div class="section-head"><div><h2 id="prayerTimesTitle">مواقيت الصلاة</h2><p>اختر بلدك ومدينتك لمتابعة مواقيت الصلاة بدقة</p></div></div>
+    <div class="prayer-widget">
+      <div class="prayer-widget-top">
+        <div class="prayer-location-title"><span class="prayer-mosque">۞</span><div><strong id="prayerLocationLabel">مواقيت الصلاة</strong><small id="prayerHijriDate">جارٍ تحميل المواقيت...</small></div></div>
+        <span class="prayer-live-tag">صلاتك نور يومك</span>
+      </div>
+      <div class="prayer-location-controls">
+        <label>الدولة<select id="prayerCountry"><option value="Egypt" selected>مصر</option><option value="Saudi Arabia">السعودية</option><option value="United Arab Emirates">الإمارات</option><option value="Kuwait">الكويت</option><option value="Qatar">قطر</option><option value="Jordan">الأردن</option><option value="Palestine">فلسطين</option><option value="Morocco">المغرب</option><option value="Algeria">الجزائر</option><option value="Tunisia">تونس</option><option value="Turkey">تركيا</option><option value="United Kingdom">بريطانيا</option><option value="United States">الولايات المتحدة</option><option value="Germany">ألمانيا</option><option value="Other">دولة أخرى</option></select></label>
+        <label>المدينة<input id="prayerCity" list="prayerCitySuggestions" value="Ismailia" placeholder="اكتب اسم المدينة" autocomplete="address-level2"><datalist id="prayerCitySuggestions"><option value="Ismailia"><option value="Cairo"><option value="Alexandria"><option value="Giza"><option value="Mansoura"><option value="Tanta"><option value="Suez"><option value="Port Said"><option value="Luxor"><option value="Aswan"></datalist></label>
+        <label id="prayerOtherCountryWrap" hidden>اسم الدولة<input id="prayerOtherCountry" placeholder="اكتب اسم الدولة"></label>
+        <button class="btn green" id="prayerLoadButton" type="button">عرض المواقيت</button>
+      </div>
+      <div class="prayer-next-panel">
+        <div class="prayer-next-name"><small>الصلاة القادمة</small><strong id="prayerNextName">—</strong><span id="prayerNextTime">—</span></div>
+        <div class="prayer-countdown"><small>الوقت المتبقي</small><strong id="prayerCountdown" dir="ltr">--:--:--</strong></div>
+      </div>
+      <div class="prayer-times-grid" id="prayerTimesGrid" aria-live="polite">
+        <div class="prayer-time-cell"><span>الفجر</span><strong>--:--</strong></div><div class="prayer-time-cell"><span>الظهر</span><strong>--:--</strong></div><div class="prayer-time-cell"><span>العصر</span><strong>--:--</strong></div><div class="prayer-time-cell"><span>المغرب</span><strong>--:--</strong></div><div class="prayer-time-cell"><span>العشاء</span><strong>--:--</strong></div>
+      </div>
+      <p class="prayer-widget-status" id="prayerWidgetStatus" role="status">اختر المدينة ثم اضغط «عرض المواقيت».</p>
+    </div>
+  </section>
+  <style id="compact-prayer-widget-style">
+  .prayer-widget{padding:17px;border:1px solid #d9e5d9;border-radius:19px;background:linear-gradient(145deg,#fff 0%,#f5f8f2 100%);box-shadow:0 10px 28px #12372b0c}
+  .prayer-widget-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}
+  .prayer-location-title{display:flex;align-items:center;gap:10px;min-width:0}.prayer-mosque{width:39px;height:39px;flex:0 0 39px;display:grid;place-items:center;border-radius:13px;background:#eaf1e8;color:#b28d4b;font-size:25px}.prayer-location-title strong,.prayer-location-title small{display:block}.prayer-location-title strong{color:#164536;font-size:16px}.prayer-location-title small{color:#71817b;font-size:11px}
+  .prayer-live-tag{padding:5px 9px;border-radius:20px;background:#edf4eb;color:#286147;font-size:11px;white-space:nowrap}
+  .prayer-location-controls{display:grid;grid-template-columns:1fr 1fr auto;gap:9px;align-items:end}.prayer-location-controls label{display:grid;gap:5px;color:#49685a;font-size:12px;font-weight:700;min-width:0}.prayer-location-controls input,.prayer-location-controls select{width:100%;height:41px;min-width:0;padding:8px 10px;border:1px solid #dce6dc;border-radius:10px;background:#fff;color:#183c30;font-size:14px}.prayer-location-controls button{height:41px;padding:7px 14px;white-space:nowrap}
+  .prayer-next-panel{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:center;margin-top:13px;padding:13px 15px;border-radius:15px;background:radial-gradient(circle at 10% 0%,#ffffff18,transparent 38%),linear-gradient(120deg,#0b352a,#1b6049);color:#fff}.prayer-next-name,.prayer-countdown{display:grid;gap:2px}.prayer-next-name small,.prayer-countdown small{font-size:11px;color:#e6d29e}.prayer-next-name strong{font-size:20px;color:#fff}.prayer-next-name span{font-size:12px;color:#e7eee8}.prayer-countdown{border-right:1px solid #ffffff30;padding-right:13px}.prayer-countdown strong{font-size:clamp(22px,5vw,31px);letter-spacing:1px;color:#f4dda1;font-variant-numeric:tabular-nums}
+  .prayer-times-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:11px}.prayer-time-cell{display:grid;gap:3px;justify-items:center;padding:10px 4px;border:1px solid #e3ebe2;border-radius:12px;background:#fff}.prayer-time-cell span{font-size:11px;color:#71817b}.prayer-time-cell strong{font-size:17px;color:#174b3a;direction:ltr;font-variant-numeric:tabular-nums}
+  .prayer-widget-status{margin:8px 2px 0;color:#77867e;font-size:11px;min-height:18px}
+  @media(max-width:600px){.prayer-widget{padding:13px}.prayer-location-controls{grid-template-columns:1fr 1fr}.prayer-location-controls button{grid-column:1/-1}.prayer-next-panel{padding:11px}.prayer-next-name strong{font-size:18px}.prayer-times-grid{gap:5px}.prayer-time-cell{padding:8px 2px}.prayer-time-cell span{font-size:10px}.prayer-time-cell strong{font-size:15px}}
+  </style>
+  <script id="compact-prayer-widget-script">
+  (function(){
+    const $=id=>document.getElementById(id);
+    const country=$('prayerCountry'),city=$('prayerCity'),otherWrap=$('prayerOtherCountryWrap'),otherCountry=$('prayerOtherCountry'),button=$('prayerLoadButton'),status=$('prayerWidgetStatus');
+    if(!country||!city||!button||button.dataset.ready)return;button.dataset.ready='1';
+    const prayers=[['الفجر','Fajr'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']];
+    let schedule=[],tickHandle=null;
+    const say=t=>status.textContent=t;
+    const formatTime=t=>{const m=String(t||'').match(/^(\d{1,2}):(\d{2})/);return m?String(m[1]).padStart(2,'0')+':'+m[2]:'--:--'};
+    function updateCountdown(){
+      if(!schedule.length)return;
+      const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+      let next=null;
+      for(const p of schedule){const [h,m]=p.time.split(':').map(Number),at=new Date(today);at.setHours(h,m,0,0);if(at>now){next={...p,at};break}}
+      if(!next){const [h,m]=schedule[0].time.split(':').map(Number),at=new Date(today);at.setDate(at.getDate()+1);at.setHours(h,m,0,0);next={...schedule[0],at}}
+      const seconds=Math.max(0,Math.floor((next.at-now)/1000)),hh=String(Math.floor(seconds/3600)).padStart(2,'0'),mm=String(Math.floor(seconds%3600/60)).padStart(2,'0'),ss=String(seconds%60).padStart(2,'0');
+      $('prayerNextName').textContent=next.name;$('prayerNextTime').textContent='موعدها '+next.time;$('prayerCountdown').textContent=hh+':'+mm+':'+ss;
+    }
+    async function load(){
+      const c=country.value==='Other'?otherCountry.value.trim():country.options[country.selectedIndex].text;
+      const apiCountry=country.value==='Other'?otherCountry.value.trim():country.value;
+      const town=city.value.trim();if(!town||!apiCountry){say('اكتب الدولة والمدينة أولًا.');return}
+      button.disabled=true;button.textContent='جارٍ التحميل...';say('جارٍ جلب مواقيت الصلاة للمدينة المحددة...');
+      try{
+        const url='https://api.aladhan.com/v1/timingsByCity?city='+encodeURIComponent(town)+'&country='+encodeURIComponent(apiCountry)+'&method=5';
+        const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error('تعذر الاتصال بمصدر المواقيت');
+        const json=await response.json();if(json.code!==200||!json.data||!json.data.timings)throw Error('لم يتم العثور على مواقيت لهذه المدينة');
+        const data=json.data, timings=data.timings;
+        schedule=prayers.map(([name,key])=>({name,time:formatTime(timings[key])})).filter(x=>x.time!=='--:--');
+        if(schedule.length!==5)throw Error('بيانات المواقيت غير مكتملة لهذه المدينة');
+        $('prayerLocationLabel').textContent=town+'، '+c;
+        $('prayerHijriDate').textContent=(data.date&&data.date.hijri?data.date.hijri.day+' '+data.date.hijri.month.ar+' '+data.date.hijri.year+' هـ':'مواقيت اليوم');
+        $('prayerTimesGrid').replaceChildren();
+        schedule.forEach(p=>{const cell=document.createElement('div');cell.className='prayer-time-cell';const name=document.createElement('span'),time=document.createElement('strong');name.textContent=p.name;time.textContent=p.time;cell.append(name,time);$('prayerTimesGrid').append(cell)});
+        updateCountdown();if(tickHandle)clearInterval(tickHandle);tickHandle=setInterval(updateCountdown,1000);
+        try{localStorage.setItem('zad_prayer_location_v1',JSON.stringify({country:apiCountry,city:town,label:c}))}catch(e){}
+        say('تم تحديث المواقيت بنجاح. تُحسب الصلاة القادمة والعدّ التنازلي تلقائيًا.');
+      }catch(error){say((error&&error.message)||'تعذر تحميل المواقيت. تحقق من اسم المدينة واتصال الإنترنت.');}
+      finally{button.disabled=false;button.textContent='عرض المواقيت'}
+    }
+    country.addEventListener('change',()=>{otherWrap.hidden=country.value!=='Other';});
+    button.addEventListener('click',load);
+    try{const saved=JSON.parse(localStorage.getItem('zad_prayer_location_v1')||'null');if(saved){if([...country.options].some(o=>o.value===saved.country))country.value=saved.country;else if(saved.country){country.value='Other';otherWrap.hidden=false;otherCountry.value=saved.country}city.value=saved.city||city.value}}catch(e){}
+    load();
+  })();
+  </script>
   <div class="date-strip">
     <div><strong id="gregDate">اليوم</strong><br><span id="hijriDate">جارٍ تحميل التاريخ الهجري...</span></div>
     
