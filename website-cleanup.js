@@ -7,7 +7,7 @@ const selectors=[
  '#daily-reminder-settings',
  '.prayer-tracker','.adhan-settings','#zadAudioSettingsSlot',
  '.tasbeeh-float','#tasbeehPanel','#tasbeehFab','#zad-page-tasbeeh',
- '#qibla','#zad-page-qibla','.bottom-nav','.zad-bottom-nav',
+ '#qibla','#zad-page-qibla',
  '#adhan','#adhan-settings'
 ];
 const linkPattern=/#(?:reminders|daily-reminder-settings|qibla|tasbeeh(?:Fab)?|adhan(?:-settings)?|prayer-tracker)(?:$|[?#])/i;
@@ -34,8 +34,6 @@ body.zad-public-website #tasbeehFab,
 body.zad-public-website #zad-page-tasbeeh,
 body.zad-public-website #qibla,
 body.zad-public-website #zad-page-qibla,
-body.zad-public-website .bottom-nav,
-body.zad-public-website .zad-bottom-nav,
 body.zad-public-website #adhan,
 body.zad-public-website #adhan-settings{
 display:none!important;visibility:hidden!important;pointer-events:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important
@@ -43,7 +41,51 @@ display:none!important;visibility:hidden!important;pointer-events:none!important
 `;
 document.head.append(style);
 clean();
-// All website-only controls are present by the time this footer script runs.
-// A document-wide observer only repeats full-page scans during content updates.
 
+// كرر اختصارات الشريط العلوي نفسها أسفل الموقع، دون إنشاء روابط مختلفة.
+function addBottomShortcuts(){
+ const source=document.querySelector('.top nav');
+ if(!source || document.querySelector('.zad-bottom-nav'))return;
+ const bottom=document.createElement('nav');
+ bottom.className='zad-bottom-nav';
+ bottom.setAttribute('aria-label','اختصارات الموقع السفلية');
+ source.querySelectorAll('a[href]').forEach(link=>{
+  const item=link.cloneNode(true);
+  item.classList.remove('is-current-tab');
+  bottom.appendChild(item);
+ });
+ if(!bottom.children.length)return;
+ document.body.appendChild(bottom);
+ document.body.style.paddingBottom='76px';
+}
+addBottomShortcuts();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addBottomShortcuts,{once:true});
+
+const bottomStyle=document.createElement('style');
+bottomStyle.id='zad-bottom-shortcuts-style';
+bottomStyle.textContent=`
+body.zad-public-website{padding-bottom:76px!important}
+body.zad-public-website .zad-bottom-nav{
+ position:fixed!important;right:0!important;left:0!important;bottom:0!important;
+ z-index:99999!important;display:flex!important;flex-direction:row!important;
+ align-items:stretch!important;gap:7px!important;width:100%!important;
+ padding:9px 10px calc(9px + env(safe-area-inset-bottom))!important;
+ overflow-x:auto!important;overflow-y:hidden!important;white-space:nowrap!important;
+ background:#fff!important;border-top:1px solid #dce6dc!important;
+ box-shadow:0 -5px 20px rgba(20,55,40,.12)!important;
+ scrollbar-width:thin!important;overscroll-behavior-x:contain!important;
+}
+body.zad-public-website .zad-bottom-nav a{
+ display:flex!important;flex:0 0 auto!important;align-items:center!important;
+ justify-content:center!important;min-height:42px!important;padding:8px 13px!important;
+ border:1px solid #dce6dc!important;border-radius:11px!important;
+ background:#f3f7f2!important;color:#285747!important;
+ font:700 13px/1.4 Tahoma,Arial,sans-serif!important;text-decoration:none!important;
+}
+body.zad-public-website .zad-bottom-nav a:active,
+body.zad-public-website .zad-bottom-nav a:focus{background:#e5efe6!important;color:#173b30!important}
+`;
+document.head.append(bottomStyle);
+
+// All website-only controls are present by the time this footer script runs.
 })();
