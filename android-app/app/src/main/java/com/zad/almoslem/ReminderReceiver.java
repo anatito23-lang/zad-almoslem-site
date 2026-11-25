@@ -12,13 +12,13 @@ import android.os.Build;
 import java.util.Calendar;
 
 public class ReminderReceiver extends BroadcastReceiver {
-    public static final String CHANNEL_ID = "zad_reminders";
-    private static final String PRAYER_CHANNEL_ID = "zad_prayer_alerts_v3";
-    private static final String PRAYER_TONE_CHANNEL_ID = "zad_prayer_tone";
-    private static final String GENTLE_CHANNEL_ID = "zad_gentle_reminders_v3";
-    private static final String AUDIO_FALLBACK_CHANNEL_ID = "zad_reminder_audio_fallback_v3";
-    private static final String POWER_SAVER_CHANNEL_ID = "zad_power_saver_visual_v1";
-    private static final String POWER_SAVER_PRAYER_CHANNEL_ID = "zad_power_saver_prayer_visual_v1";
+    public static final String CHANNEL_ID = "zad_reminders_sakina_v2";
+    private static final String PRAYER_CHANNEL_ID = "zad_prayer_alerts_sakina_v4";
+    private static final String PRAYER_TONE_CHANNEL_ID = "zad_prayer_tone_sakina_v2";
+    private static final String GENTLE_CHANNEL_ID = "zad_gentle_reminders_sakina_v4";
+    private static final String AUDIO_FALLBACK_CHANNEL_ID = "zad_reminder_audio_fallback_sakina_v4";
+    private static final String POWER_SAVER_CHANNEL_ID = "zad_power_saver_visual_sakina_v2";
+    private static final String POWER_SAVER_PRAYER_CHANNEL_ID = "zad_power_saver_prayer_visual_sakina_v2";
 
     public static void scheduleDaily(Context context, String key, int hour, int minute, String title) {
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders", Context.MODE_PRIVATE);
