@@ -1808,16 +1808,45 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
   </div>
 </div>
 
-<nav class="bottom-nav" aria-label="اختصارات الأقسام الرئيسية">
-  <a href="#prayer-times"><span>🕌</span><b>مواقيت الصلاة</b></a>
-  <a href="#quran"><span>🎧</span><b>استماع القرآن</b></a>
-  <a href="#zad-mushaf"><span>📖</span><b>مصحف زاد</b></a>
+<nav id="zad-bottom-tabs" aria-label="التبويبات الرئيسية السفلية">
+  <a href="#prayer-times"><span>🕌</span><b>مواقيت</b></a>
+  <a href="#quran"><span>🎧</span><b>استماع</b></a>
   <a href="./khutbahs.html"><span>📜</span><b>خطب زاد</b></a>
-  <a href="./awqaf-khutbah.html"><span>🕌</span><b>خطب وزارة الأوقاف المصرية</b></a>
-  <a href="#azkar"><span>🤲</span><b>أذكار زاد</b></a>
-  <a href="#books-library"><span>📚</span><b>المكتبة الإسلامية</b></a>
-  <a href="#qalbi-itmaann"><span>💚</span><b>قلبي اطمأن</b></a>
+  <a href="./awqaf-khutbah.html"><span>🕌</span><b>خطب وزارة الأوقاف</b></a>
+  <a href="#books-library"><span>📚</span><b>مكتبة زاد الإسلامية</b></a>
+  <a href="#azkar"><span>🤲</span><b>الذكر</b></a>
 </nav>
+<style id="zad-bottom-tabs-final-style">
+/* شريط سفلي مستقل بأسماء الأقسام المطلوبة */
+.top nav{display:none!important}
+#zad-bottom-tabs{
+ display:flex!important;visibility:visible!important;opacity:1!important;
+ pointer-events:auto!important;position:fixed!important;z-index:2147483647!important;
+ right:0!important;left:0!important;bottom:0!important;
+ flex-direction:row!important;align-items:stretch!important;justify-content:space-between!important;
+ gap:3px!important;width:100%!important;box-sizing:border-box!important;
+ padding:8px 5px calc(8px + env(safe-area-inset-bottom))!important;
+ overflow-x:auto!important;overflow-y:hidden!important;white-space:nowrap!important;
+ background:#073f32!important;border-top:3px solid #d6b66f!important;
+ box-shadow:0 -5px 20px rgba(0,0,0,.24)!important;
+ scrollbar-width:none!important;-webkit-overflow-scrolling:touch!important
+}
+#zad-bottom-tabs::-webkit-scrollbar{display:none!important}
+#zad-bottom-tabs a{
+ display:flex!important;visibility:visible!important;opacity:1!important;
+ flex:1 0 auto!important;min-width:0!important;max-width:none!important;
+ flex-direction:column!important;align-items:center!important;justify-content:center!important;
+ gap:4px!important;padding:5px 7px!important;margin:0!important;
+ border:1px solid #d9c18c!important;border-radius:10px!important;
+ background:#145b49!important;color:#fff!important;
+ text-decoration:none!important;text-align:center!important;
+ font:700 11px/1.3 Tahoma,Arial,sans-serif!important
+}
+#zad-bottom-tabs a span{display:block!important;color:#f4d99b!important;font-size:19px!important;line-height:1.1!important}
+#zad-bottom-tabs a b{display:block!important;color:#fff!important;font-size:11px!important;font-weight:800!important;white-space:nowrap!important}
+body{padding-bottom:82px!important}
+@media(max-width:390px){#zad-bottom-tabs{gap:2px!important;padding-inline:3px!important}#zad-bottom-tabs a{padding-inline:5px!important;font-size:10px!important}#zad-bottom-tabs a b{font-size:10px!important}}
+</style>
  
   <section class="section" id="islamic-knowledge">
     <div class="section-head"><div><h2>زاد العلم والإيمان</h2><p>وقفات مختصرة من القرآن والسنة، تفتح أبواب العمل وتعين على الثبات</p></div></div>
