@@ -186,10 +186,6 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 @media(max-width:600px){.mushaf-page-frame{padding:3px}.mushaf-page-frame img{max-height:calc(100dvh - 245px)}}
 .mushaf-swipe-hint{text-align:center;margin:8px 0 0;color:var(--muted);font-size:12px}
 .mushaf-source{margin-top:14px}
-.mushaf-floating-button{position:fixed;left:12px;bottom:92px;z-index:1300;display:flex;align-items:center;gap:8px;padding:12px 15px;border:1px solid #ffffff70;border-radius:999px;background:linear-gradient(135deg,#123f32,#1d7055);color:#fff;font:inherit;font-weight:800;box-shadow:0 8px 24px #082d2740;cursor:pointer}
-.mushaf-floating-button span:first-child{font-size:21px;color:#f3d99b}
-.mushaf-floating-button:focus-visible{outline:3px solid #d6b76f;outline-offset:3px}
-@media(max-width:600px){.mushaf-floating-button{left:10px;bottom:86px;padding:10px 12px;font-size:13px}}
 @media(max-width:600px){
  .mushaf-card{padding:13px}
  .mushaf-controls{grid-template-columns:1fr}
@@ -1698,10 +1694,6 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
     <iframe id="bookReaderFrame" title="قارئ الكتاب" loading="lazy" allowfullscreen></iframe>
   </div>
 </div>
-
-<button type="button" id="mushafFloatingButton" class="mushaf-floating-button" aria-controls="mushafContent" aria-expanded="false" title="فتح المصحف">
-  <span aria-hidden="true">۞</span><span id="mushafFloatingLabel">المصحف</span>
-</button>
 
 <nav class="bottom-nav" aria-label="التنقل السفلي">
   <a href="#daily-wird"><span>◷</span>وردي</a>
