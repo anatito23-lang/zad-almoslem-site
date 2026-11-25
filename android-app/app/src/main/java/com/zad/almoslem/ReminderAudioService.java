@@ -20,7 +20,7 @@ public class ReminderAudioService extends Service {
     public static final String ACTION_STOP = "com.zad.almoslem.STOP_REMINDER_AUDIO";
     public static final String ACTION_TOGGLE = "com.zad.almoslem.TOGGLE_REMINDER_AUDIO";
     public static final String ACTION_SET_VOLUME = "com.zad.almoslem.SET_REMINDER_AUDIO_VOLUME";
-    private static final String CHANNEL = "zad_reminder_audio";
+    private static final String CHANNEL = "zad_reminder_audio_sakina_v2";
     private static final int NOTIFICATION_ID = 7520;
     private MediaPlayer player;
     private String activeKind;
