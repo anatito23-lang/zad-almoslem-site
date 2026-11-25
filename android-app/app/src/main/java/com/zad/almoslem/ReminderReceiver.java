@@ -179,6 +179,15 @@ public class ReminderReceiver extends BroadcastReceiver {
         if(key==null)return;
         boolean prayer=key.startsWith("prayer_");
         android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
+        // A duplicate/stale delivery can arrive after the first receiver has already
+        // advanced this prayer alarm to tomorrow. Do not replay today's adhan or dua.
+        if (prayer) {
+            long scheduledPrayerAt=prefs.getLong(key,0L);
+            if (scheduledPrayerAt>System.currentTimeMillis()+60_000L) {
+                android.util.Log.i("ZadAlmoslem","Ignoring duplicate or stale prayer alarm: "+key);
+                return;
+            }
+        }
         if ("gentle_reminder".equals(key)) {
             if(!prefs.getBoolean("gentle_enabled",false)) return;
             String[] messages={
