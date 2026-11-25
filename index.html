@@ -1807,7 +1807,9 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
 
 <style id="zad-home-clean-layout">
 main > section:not(#prayer-times):not(#quran){display:none!important}
-main > #zad-section-menu{display:flex!important}
+main > #zad-section-menu{display:flex!important;order:3!important}
+main > #prayer-times{order:1!important}
+main > #quran{order:2!important}
 main > #zad-section-menu a{display:flex}
 </style>
 <script id="zad-home-section-navigation">
