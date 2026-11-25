@@ -25,6 +25,8 @@ public class ReminderAudioService extends Service {
     private MediaPlayer player;
     private TextToSpeech tts;
     private String activeKind;
+    private boolean finishHandled;
+    private static final long DUA_DUPLICATE_WINDOW_MS = 3L * 60L * 1000L;
 
     public static void play(Context context, String kind) {
         play(context, kind, null);
@@ -63,6 +65,22 @@ public class ReminderAudioService extends Service {
         String kind = intent == null ? "qiyam" : intent.getStringExtra("kind");
         if (!"morning".equals(kind) && !"evening".equals(kind) && !"dua".equals(kind)
                 && !"approach".equals(kind) && !"gentle".equals(kind)) kind = "qiyam";
+        // Post-adhan dua is a one-shot sound. Ignore duplicate service intents while
+        // the same playback is active and for a short window after it was requested,
+        // including service recreation after the recording has already completed.
+        if ("dua".equals(kind)) {
+            android.content.SharedPreferences prefs = getSharedPreferences("zad_reminders", MODE_PRIVATE);
+            long now = System.currentTimeMillis();
+            long lastDuaRequest = prefs.getLong("dua_after_adhan_last_request", 0L);
+            if ((activeKind != null && "dua".equals(activeKind) && !finishHandled)
+                    || (lastDuaRequest > 0L && now >= lastDuaRequest
+                        && now - lastDuaRequest < DUA_DUPLICATE_WINDOW_MS)) {
+                android.util.Log.i("ZadAlmoslem", "Ignoring duplicate post-adhan dua start");
+                return START_NOT_STICKY;
+            }
+            prefs.edit().putLong("dua_after_adhan_last_request", now).commit();
+        }
+        finishHandled = false;
         activeKind = kind;
         String reminderMessage = intent == null ? null : intent.getStringExtra("message");
         String requestedAudioFile = intent == null ? null : intent.getStringExtra("audio_file");
@@ -189,6 +207,8 @@ public class ReminderAudioService extends Service {
     }
 
     private void finishPlayback() {
+        if (finishHandled) return;
+        finishHandled = true;
         boolean resumeRadio = "dua".equals(activeKind);
         stopCurrentPlayers();
         // Start/resume the radio while this playback service is still foreground.
