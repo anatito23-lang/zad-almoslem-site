@@ -1238,7 +1238,7 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
   </section>
 
   <nav id="zad-section-menu" aria-label="الأقسام الأخرى في زاد المسلم">
-    <a href="#zad-mushaf"><span>📖</span><b>مصحف زاد</b><small>اقرأ المصحف الشريف صفحةً صفحةً</small></a>
+    <a href="#zad-mushaf" onclick="event.preventDefault();const m=document.getElementById('zad-mushaf');if(m){m.scrollIntoView({behavior:'smooth',block:'start'});history.replaceState(null,'','#zad-mushaf');}" aria-label="افتح مصحف زاد"><span>📖</span><b>مصحف زاد</b><small>اضغط لفتح المصحف الشريف</small></a>
     <a href="./khutbahs.html"><span>📜</span><b>خطب زاد</b><small>تصفح خطب زاد المسلم</small></a>
     <a href="./awqaf-khutbah.html"><span>🕌</span><b>خطب وزارة الأوقاف</b><small>خطب وزارة الأوقاف المصرية</small></a>
     <a href="#books-library"><span>📚</span><b>مكتبة زاد الإسلامية</b><small>كتب ومراجع إسلامية</small></a>
