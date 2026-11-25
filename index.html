@@ -1037,23 +1037,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
   
 
 
-  <section class="section" id="nasheed">
-  <div class="section-head"><div><h2>الابتهالات والتواشيح</h2><p>مشغل داخلي للابتهالات المصرية — اختر الشيخ ثم التسجيل، واستمع من داخل الموقع.</p></div></div>
-  <div class="card ibt-player">
-    <div class="ibt-head"><span class="ibt-symbol">۞</span><div><strong>مشغل الابتهالات</strong><small>تراث الابتهال المصري</small></div><span class="ibt-live">● المصادر غير مؤكدة</span></div>
-    <div class="nasheed-artist-tabs" role="group" aria-label="اختر المبتهل">
-      <button type="button" class="nasheed-artist-btn active" data-munshid="tobar" aria-pressed="true">نصر الدين طوبار</button>
-      <button type="button" class="nasheed-artist-btn" data-munshid="naqshbandi" aria-pressed="false">سيد النقشبندي</button>
-    </div>
-    <div class="ibt-now"><span class="ibt-cover">♫</span><div><small id="nasheedArtistName">الشيخ نصر الدين طوبار</small><strong id="nasheedNowTitle">اختر ابتهالًا</strong><p id="nasheedStatus" role="status" aria-live="polite">اختر المبتهل ثم التسجيل من القائمة.</p></div></div>
-    <div class="ibt-time"><span id="ibtCurrent">00:00</span><input id="ibtSeek" type="range" min="0" max="1000" value="0" aria-label="موضع الصوت"><span id="ibtDuration">00:00</span></div>
-    <div class="ibt-controls"><button type="button" id="ibtPrev" aria-label="السابق">⏮</button><button type="button" class="ibt-play" id="ibtPlay" aria-label="تشغيل">▶</button><button type="button" id="ibtStop" aria-label="إيقاف">■</button><button type="button" id="ibtNext" aria-label="التالي">⏭</button></div>
-    <div class="ibt-volume"><span>🔉</span><input id="ibtVolume" type="range" min="0" max="100" value="85" aria-label="مستوى الصوت"></div>
-    <audio id="nasheedAudio" preload="none"></audio>
-    <details class="nasheed-list-disclosure" open><summary>قائمة التسجيلات</summary><div id="nasheedTracks" class="list"></div></details>
-    <div class="notice">الاستماع من داخل زاد المسلم فقط. بعض روابط التسجيلات لم يتم التحقق من صلاحيتها بعد؛ لن نعرضها على أنها تعمل قبل اختبار الصوت.</div>
-  </div>
-</section>
+  
 
 
 
@@ -1848,79 +1832,7 @@ bookModal.addEventListener('click',event=>{if(event.target===bookModal)closeBook
 document.addEventListener('keydown',event=>{if(event.key==='Escape'&&bookModal.classList.contains('active'))closeBookReader();});
 
 // مشغل الابتهالات الجديد — تحكم داخلي وانتقال تلقائي
-const nasheedTracks={
- tobar:[
-  {title:'جل المنادي',url:'https://archive.org/download/20201209_20201209_0854/%D8%AC%D9%84%20%D8%A7%D9%84%D9%85%D9%86%D8%A7%D8%AF%D9%89.mp3'},
-  {title:'يا مالك الملك',url:'https://archive.org/download/20201209_20201209_0854/%D9%8A%D8%A7%20%D9%85%D8%A7%D9%84%D9%83%20%D8%A7%D9%84%D9%85%D9%84%D9%83.mp3'},
-  {title:'حين يهدي الصبح إشراق سناه',url:'https://archive.org/download/20201209_20201209_0854/%D8%AD%D9%8A%D9%86%20%D9%8A%D9%87%D8%AF%D9%8A%20%D8%A7%D9%84%D8%B5%D8%A8%D8%AD%20%D8%A5%D8%B4%D8%B1%D8%A7%D9%82%20%D8%B3%D9%86%D8%A7%D9%87.mp3'},
-  {title:'يارب عدت إلى رحابك',url:'https://www.nourelquran.com/force_download.php?id=5690'},
-  {title:'تواشيح وابتهالات',url:'https://www.nourelquran.com/force_download.php?id=5691'},
-  {title:'سبحانك',url:'https://www.nourelquran.com/force_download.php?id=5692'},
-  {title:'يا من رضيت لنا',url:'https://www.nourelquran.com/force_download.php?id=5693'},
-  {title:'بك أستجير',url:'https://www.nourelquran.com/force_download.php?id=5694'},
-  {title:'يا بارئ الكون',url:'https://www.nourelquran.com/force_download.php?id=5695'},
-  {title:'تواشيح',url:'https://www.nourelquran.com/force_download.php?id=5696'},
-  {title:'الحوت والعنكبوت',url:'https://www.nourelquran.com/force_download.php?id=5697'},
-  {title:'يا ليلة القدر',url:'https://www.nourelquran.com/force_download.php?id=5698'},
-  {title:'يا من ملكت قلوبنا',url:'https://www.nourelquran.com/force_download.php?id=5699'},
-  {title:'يا منقذي في شدتي',url:'https://www.nourelquran.com/force_download.php?id=5700'},
-  {title:'يا ودودا',url:'https://www.nourelquran.com/force_download.php?id=5701'},
-  {title:'الواحد المعبود',url:'https://www.nourelquran.com/force_download.php?id=5702'},
-  {title:'الله رب الوجود',url:'https://www.nourelquran.com/force_download.php?id=5703'},
-  {title:'الأمر أمرك',url:'https://www.nourelquran.com/force_download.php?id=5704'}
- ],
- naqshbandi:[
-  {title:'مولاي إني ببابك',file:'01 - مولاي.mp3'},
-  {title:'لحظات يزهى بهن الزمان',file:'02 - لحظات يزهى بهن الزمان -ابتهال للشيخ سيد النقشبندى.mp3'},
-  {title:'الله يا الله',file:'03 - الله يا الله.mp3'},
-  {title:'نفسي يا رب',file:'04 - نفسي يا رب.mp3'},
-  {title:'يا رب كرمك علينا',file:'05 - يا رب كرمك علينا.mp3'},
-  {title:'رباه ارفع مقتك عنا',file:'06 - رباه ارفع مقتك عنا.mp3'},
-  {title:'في حبك ربي نتفانى',file:'07 - في حبك ربي نتفاني.mp3'},
-  {title:'أقول أمتي',file:'08 - أقول امتي.mp3'},
-  {title:'الكون صلاة وخشوع',file:'09 - الكون صلاة وخشوع.mp3'},
-  {title:'ندخل بيتك',file:'10 - ندخل بيتك.mp3'},
-  {title:'دعاء السائل المحروم',file:'11 - دعاء السائل المحروم.mp3'},
-  {title:'يا من يعلم',file:'12 - يا من يعلم.mp3'},
-  {title:'سبحانك يا كريم',file:'12 - سبحانك يا كريم.mp3'},
-  {title:'أيها الناس',file:'13 - أيها الناس.mp3'},
-  {title:'ربنا',file:'14 - ربنا.mp3'},
-  {title:'أيها الساهر',file:'15 - أيها الساهر.mp3'},
-  {title:'أتيت إليك يا رب العباد',file:'أتيت إليك يارب العباد.mp3'},
-  {title:'أدعوك في غمضي',file:'أدعوك في غمضي.mp3'},
-  {title:'إذا ما تلاقى الأفق بالأرض في المدى',file:'إذا ماتلاقى الأفق بالأرض في المدى.mp3'},
-  {title:'أسعى لخلاقي',file:'أسعى لخلاقي.mp3'}
- ]
-};
-(function(){
- const audio=$('nasheedAudio'),list=$('nasheedTracks'),title=$('nasheedNowTitle'),status=$('nasheedStatus'),artistLabel=$('nasheedArtistName'),playBtn=$('ibtPlay'),seek=$('ibtSeek');
- let artist='tobar',index=-1,queue=[];
- const artists={tobar:'الشيخ نصر الدين طوبار',naqshbandi:'الشيخ سيد النقشبندي'};
- const fmt=t=>!Number.isFinite(t)||t<0?'00:00':String(Math.floor(t/60)).padStart(2,'0')+':'+String(Math.floor(t%60)).padStart(2,'0');
- function trackUrl(t){return t.url||('https://archive.org/download/qr_20201208/'+encodeURIComponent(t.file))}
- function paint(){
-  queue=nasheedTracks[artist]||[];artistLabel.textContent=artists[artist];title.textContent=artists[artist]+' — اختر تسجيلًا';
-  status.textContent='عدد التسجيلات: '+queue.length+' — اختر من القائمة للبدء.';
-  list.innerHTML=queue.map((t,i)=>'<button type="button" class="surah-item nasheed-track-btn" data-index="'+i+'"><span><b>'+t.title+'</b><span class="small" style="display:block">تشغيل داخل المشغل</span></span><strong>▶</strong></button>').join('');
-  list.querySelectorAll('[data-index]').forEach(b=>b.addEventListener('click',()=>start(Number(b.dataset.index))));
- }
- function start(i){
-  if(i<0||i>=queue.length)return;index=i;const t=queue[i];audio.pause();audio.src=trackUrl(t);audio.load();title.textContent=t.title;status.textContent='جارٍ تحميل: '+t.title;seek.value=0;
-  list.querySelectorAll('.nasheed-track-btn').forEach((b,n)=>b.classList.toggle('active',n===i));
-  audio.play().then(()=>{status.textContent='يعمل الآن: '+t.title;playBtn.textContent='Ⅱ'}).catch(()=>{status.textContent='لم يبدأ الصوت تلقائيًا؛ اضغط تشغيل في المشغل.';playBtn.textContent='▶'});
- }
- function move(d){if(!queue.length)return;let n=index<0?(d>0?0:queue.length-1):Math.max(0,Math.min(queue.length-1,index+d));if(n===index){status.textContent=d>0?'وصلت لآخر تسجيل.':'هذا أول تسجيل.';return}start(n)}
- document.querySelectorAll('[data-munshid]').forEach(b=>b.addEventListener('click',()=>{artist=b.dataset.munshid;index=-1;audio.pause();audio.removeAttribute('src');audio.load();document.querySelectorAll('[data-munshid]').forEach(x=>{let active=x.dataset.munshid===artist;x.classList.toggle('active',active);x.setAttribute('aria-pressed',String(active))});paint()}));
- $('ibtPlay').addEventListener('click',()=>{if(index<0){start(0);return}if(audio.paused)audio.play().then(()=>{playBtn.textContent='Ⅱ'}).catch(()=>status.textContent='تعذر تشغيل الصوت.');else audio.pause()});
- $('ibtPrev').addEventListener('click',()=>move(-1));$('ibtNext').addEventListener('click',()=>move(1));$('ibtStop').addEventListener('click',()=>{audio.pause();audio.currentTime=0;seek.value=0;status.textContent='تم إيقاف التسجيل.';playBtn.textContent='▶'});
- $('ibtVolume').addEventListener('input',e=>audio.volume=Number(e.target.value)/100);audio.volume=.85;
- seek.addEventListener('input',()=>{if(audio.duration>0)audio.currentTime=Number(seek.value)/1000*audio.duration});
- audio.addEventListener('timeupdate',()=>{$('ibtCurrent').textContent=fmt(audio.currentTime);if(audio.duration>0)seek.value=Math.round(audio.currentTime/audio.duration*1000)});
- audio.addEventListener('loadedmetadata',()=>$('ibtDuration').textContent=fmt(audio.duration));audio.addEventListener('play',()=>playBtn.textContent='Ⅱ');audio.addEventListener('pause',()=>playBtn.textContent='▶');
- audio.addEventListener('ended',()=>{if(index<queue.length-1){status.textContent='انتهى '+queue[index].title+' — ينتقل تلقائيًا للتالي.';start(index+1)}else{status.textContent='انتهت قائمة الابتهالات المتاحة لهذا الشيخ.';seek.value=1000;playBtn.textContent='▶'}});
- audio.addEventListener('error',()=>status.textContent='تعذر تشغيل التسجيل الحالي. جرّب تسجيلًا آخر؛ قد يكون المصدر لا يسمح بالتشغيل المباشر.');
- paint();
-})();</script>
+;</script>
 
 
 <script>
