@@ -1019,6 +1019,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
         const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error('تعذر الاتصال بمصدر المواقيت');
         const json=await response.json();if(json.code!==200||!json.data||!json.data.timings)throw Error('لم يتم العثور على مواقيت لهذه المدينة');
         const data=json.data, timings=data.timings;
+        prayerTimezone=(data.meta&&data.meta.timezone)||Intl.DateTimeFormat().resolvedOptions().timeZone;
         schedule=prayers.map(([name,key])=>({name,time:formatTime(timings[key])})).filter(x=>x.time!=='--:--');
         if(schedule.length!==5)throw Error('بيانات المواقيت غير مكتملة لهذه المدينة');
         $('prayerLocationLabel').textContent=town+'، '+c;
