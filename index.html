@@ -1804,6 +1804,27 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
     </div>
   </section>
 
+
+<style id="zad-home-clean-layout">
+main > section:not(#prayer-times):not(#quran){display:none!important}
+main > #zad-section-menu{display:flex!important}
+main > #zad-section-menu a{display:flex}
+</style>
+<script id="zad-home-section-navigation">
+(function(){
+ const menu=document.getElementById('zad-section-menu');
+ if(!menu)return;
+ menu.addEventListener('click',function(e){
+  const link=e.target.closest('a[href^="#"]');
+  if(!link)return;
+  const target=document.querySelector(link.getAttribute('href'));
+  if(!target)return;
+  e.preventDefault();
+  target.style.setProperty('display','block','important');
+  target.scrollIntoView({behavior:'smooth',block:'start'});
+ });
+})();
+</script>
 </main>
 
 
