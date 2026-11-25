@@ -984,7 +984,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
     const country=$('prayerCountry'),city=$('prayerCity'),otherWrap=$('prayerOtherCountryWrap'),otherCountry=$('prayerOtherCountry'),button=$('prayerLoadButton'),status=$('prayerWidgetStatus');
     if(!country||!city||!button||button.dataset.ready)return;button.dataset.ready='1';
     const prayers=[['الفجر','Fajr'],['الظهر','Dhuhr'],['العصر','Asr'],['المغرب','Maghrib'],['العشاء','Isha']];
-    let schedule=[],tickHandle=null;
+    let schedule=[],tickHandle=null,loadedDateKey='';
     const say=t=>status.textContent=t;
     const formatTime=t=>{const m=String(t||'').match(/^(\d{1,2}):(\d{2})/);return m?String(m[1]).padStart(2,'0')+':'+m[2]:'--:--'};
     let prayerTimezone=Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -1002,6 +1002,8 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
     function updateCountdown(){
       if(!schedule.length)return;
       const now=new Date(),p=zonedParts(now);
+      const dateKey=p.year+'-'+p.month+'-'+p.day;
+      if(loadedDateKey&&dateKey!==loadedDateKey&&!button.disabled){load();return}
       const today=new Date(Date.UTC(p.year,p.month-1,p.day));
       let next=null;
       for(const item of schedule){const [h,m]=item.time.split(':').map(Number),at=zonedInstant(p.year,p.month,p.day,h,m);if(at>now){next={...item,at};break}}
@@ -1015,11 +1017,14 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
       const town=city.value.trim();if(!town||!apiCountry){say('اكتب الدولة والمدينة أولًا.');return}
       button.disabled=true;button.textContent='جارٍ التحميل...';say('جارٍ جلب مواقيت الصلاة للمدينة المحددة...');
       try{
-        const url='https://api.aladhan.com/v1/timingsByCity?city='+encodeURIComponent(town)+'&country='+encodeURIComponent(apiCountry)+'&method=5';
+        const methodByCountry={'Egypt':5,'Saudi Arabia':4,'United Arab Emirates':8,'Kuwait':9,'Qatar':10,'Turkey':13,'United Kingdom':3,'United States':2,'Germany':3,'Morocco':3,'Algeria':3,'Tunisia':3,'Jordan':3,'Palestine':3};
+        const method=methodByCountry[apiCountry]||3;
+        const url='https://api.aladhan.com/v1/timingsByCity?city='+encodeURIComponent(town)+'&country='+encodeURIComponent(apiCountry)+'&method='+method;
         const response=await fetch(url,{cache:'no-store'});if(!response.ok)throw Error('تعذر الاتصال بمصدر المواقيت');
         const json=await response.json();if(json.code!==200||!json.data||!json.data.timings)throw Error('لم يتم العثور على مواقيت لهذه المدينة');
         const data=json.data, timings=data.timings;
         prayerTimezone=(data.meta&&data.meta.timezone)||Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const currentLocal=zonedParts(new Date());loadedDateKey=currentLocal.year+'-'+currentLocal.month+'-'+currentLocal.day;
         schedule=prayers.map(([name,key])=>({name,time:formatTime(timings[key])})).filter(x=>x.time!=='--:--');
         if(schedule.length!==5)throw Error('بيانات المواقيت غير مكتملة لهذه المدينة');
         $('prayerLocationLabel').textContent=town+'، '+c;
