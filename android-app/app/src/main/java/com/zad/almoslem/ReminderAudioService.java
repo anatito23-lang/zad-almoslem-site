@@ -85,6 +85,13 @@ public class ReminderAudioService extends Service {
         String kind = intent == null ? "qiyam" : intent.getStringExtra("kind");
         if (!"morning".equals(kind) && !"evening".equals(kind) && !"dua".equals(kind)
                 && !"approach".equals(kind) && !"gentle".equals(kind)) kind = "qiyam";
+        // The adhan service may hand off the same dua more than once if Android
+        // redelivers a start request. Keep the current playback instead of resetting
+        // the queue and replaying Sheikh Al-Shaarawy from the beginning.
+        if ("dua".equals(kind) && "dua".equals(activeKind) && player != null) {
+            android.util.Log.i("ZadAlmoslem","Ignoring duplicate post-adhan dua start");
+            return START_NOT_STICKY;
+        }
         activeKind = kind;
         if("dua".equals(kind)){postAdhanQueueIndex=0;userStopped=false;sharawyPlayed=false;currentTrackTitle="دعاء ما بعد الأذان";}
         if (!"dua".equals(kind) && !getSharedPreferences("zad_reminders", MODE_PRIVATE).getBoolean("reminder_audio_master_enabled", true)) {
