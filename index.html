@@ -1132,90 +1132,7 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
       <div class="notice" style="margin-top:12px">تُحمّل قائمة القراء والروايات من مكتبة MP3Quran، ولا تُنزّل الملفات إلا عند اختيار الاستماع أو التحميل؛ لتوفير مساحة الهاتف. يلزم اتصال بالإنترنت.</div>
     </div>
   </section>
-  <style id="zad-quran-library-style">
-    .zad-all-readers{border:1px solid #d8e5dc;border-radius:18px;padding:12px;background:linear-gradient(180deg,#fbfcf8,#f1f6f0);margin:10px 0 16px}
-    .zad-all-readers-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;color:#174638;font-weight:800;padding:5px 2px}
-    .zad-all-readers-summary::-webkit-details-marker{display:none}
-    .zad-all-readers-summary span{font-size:17px}
-    .zad-all-readers-summary small{font-size:11px;color:#71817b;font-weight:500}
-    .zad-all-readers[open] .zad-all-readers-summary{padding-bottom:12px;border-bottom:1px solid #dce7df}
-    .zad-reciter-select-wrap{display:none!important}
-    .zad-reciter-catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:9px;margin:14px 0}
-    .zad-reciter-catalog:empty{display:none}
-    .zad-reciter-card{display:flex;align-items:center;gap:9px;text-align:right;width:100%;min-height:62px;padding:10px;border:1px solid #dfe8e2;border-radius:13px;background:#fff;color:#18332d;cursor:pointer}
-    .zad-reciter-card:active,.zad-reciter-card.active{border-color:#155b49;background:#edf5ef}
-    .zad-reciter-avatar{flex:0 0 38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#e8dfc9;color:#174638;font-size:20px}
-    .zad-reciter-card strong{display:block;font-size:13px;line-height:1.5}
-    .zad-reciter-card small{display:block;color:#71817b;font-size:11px;margin-top:2px}
-    .zad-quran-track-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
-    .zad-quran-track-actions button,.zad-quran-track-actions a{white-space:nowrap}
-    @media(max-width:420px){.zad-reciter-catalog{grid-template-columns:repeat(2,minmax(0,1fr))}.zad-reciter-card{padding:8px;gap:7px}}
-    .zad-player{position:sticky;bottom:10px;z-index:40;background:linear-gradient(145deg,#102f28 0%,#174638 58%,#244f40 100%)!important;color:#f8f3e7!important;border:1px solid rgba(218,190,125,.48);border-radius:24px;padding:16px;margin:18px 0;display:grid;grid-template-columns:76px minmax(0,1fr);gap:13px;align-items:center;box-shadow:0 14px 36px rgba(8,35,27,.28);overflow:hidden;isolation:isolate}
-    .zad-player:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.13;background:repeating-radial-gradient(circle at 88% 10%,transparent 0 13px,#e7d7ae 14px 15px,transparent 16px 27px)}
-    .zad-player-cover{position:relative;width:76px;height:76px;border-radius:19px;border:1px solid rgba(224,199,139,.65);background:linear-gradient(145deg,#e9dcb8,#bda875)!important;color:#174638!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;font-weight:800;box-shadow:inset 0 0 0 4px rgba(255,255,255,.2),0 5px 14px rgba(0,0,0,.15)}
-    .zad-player-cover .zad-player-ornament{font-size:39px;line-height:1;color:#174638!important}
-    .zad-player-cover span:last-of-type{font-size:10px;color:#174638!important;letter-spacing:.5px}
-    .zad-player-cover i{position:absolute;inset:6px;border:1px solid rgba(23,70,56,.28);border-radius:14px;pointer-events:none}
-    .zad-player-info{min-width:0;display:grid;gap:4px}
-    .zad-player-live{font-size:10px;color:#dfc98e!important;font-weight:800;letter-spacing:.3px}
-    .zad-player-info strong{font-size:15px;line-height:1.5;color:#fff8e9!important;overflow-wrap:anywhere}
-    .zad-player-info span:not(.zad-player-live){font-size:12px;color:#d3ddcf!important}
-    .zad-player-info small{font-size:10px;color:#d9c995!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .zad-player-timeline{grid-column:1/-1;display:grid;grid-template-columns:42px minmax(0,1fr) 42px;gap:8px;align-items:center;font-size:11px;color:#e4e8dc!important;font-variant-numeric:tabular-nums}
-    .zad-player-timeline input{width:100%;accent-color:#ddc58a;cursor:pointer}
-    .zad-player-controls{grid-column:1/-1;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}
-    .zad-player-controls button{border:1px solid rgba(226,211,171,.25);background:rgba(255,255,255,.08);color:#f6efd9!important;font-size:21px;padding:9px 12px;border-radius:14px;cursor:pointer;min-width:43px}
-    .zad-player-controls button:active{transform:scale(.96)}
-    .zad-player-controls .zad-player-main{background:linear-gradient(145deg,#ead9ad,#c8ae73)!important;color:#173d32!important;border:0;border-radius:50%;width:58px;height:58px;font-size:23px;box-shadow:0 6px 17px rgba(0,0,0,.22)}
-    .zad-player-controls #zadPlayerPause,.zad-player-controls #zadPlayerStop{font-size:12px;background:rgba(255,255,255,.09);color:#f6efd9;border:1px solid rgba(226,211,171,.3);border-radius:12px;padding:10px}
-    .zad-player-controls #zadPlayerStop{background:rgba(132,62,48,.3);color:#ffe5dc;border-color:rgba(234,170,150,.35)}
-    .zad-player-controls a{background:#e8d8b1!important;color:#173d32!important;text-decoration:none;border-radius:12px;padding:10px 13px;font-size:12px;font-weight:800}
-    @media(max-width:430px){.zad-player{padding:13px;grid-template-columns:64px minmax(0,1fr);gap:10px}.zad-player-cover{width:64px;height:64px}.zad-player-cover .zad-player-ornament{font-size:32px}.zad-player-controls{gap:7px}.zad-player-controls button{padding:8px;min-width:39px}.zad-player-controls #zadPlayerPause,.zad-player-controls #zadPlayerStop{font-size:11px;padding:8px}}
-    .zad-player-cover{width:68px;height:68px;border-radius:16px;background:#e8dfc9!important;color:#174638!important;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:30px;font-weight:800}
-    .zad-player-cover span{font-size:10px;color:#174638!important}
-    .zad-player-info{min-width:0;display:grid;gap:5px}
-    .zad-player-info strong{font-size:15px;line-height:1.5;color:#173d32!important;overflow-wrap:anywhere}
-    .zad-player-info span{font-size:12px;color:#63736c!important}
-    .zad-player-timeline{grid-column:1/-1;display:grid;grid-template-columns:42px minmax(0,1fr) 42px;gap:8px;align-items:center;font-size:11px;color:#64736d!important;font-variant-numeric:tabular-nums}
-    .zad-player-timeline input{width:100%;accent-color:#47745d}
-    .zad-player-controls{grid-column:1/-1;display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap}
-    .zad-player-controls button{border:0;background:transparent;color:#315b49!important;font-size:23px;padding:8px;cursor:pointer}
-    .zad-player-controls .zad-player-main{background:#315f4a!important;color:#fff!important;border-radius:50%;width:56px;height:56px;font-size:22px;box-shadow:0 5px 12px rgba(25,70,50,.18)}
-    .zad-player-controls #zadPlayerPause,.zad-player-controls #zadPlayerStop{font-size:13px;background:#e8eee8;color:#214b3d;border:1px solid #d6e1d8;border-radius:11px;padding:10px 12px}
-    .zad-player-controls #zadPlayerStop{background:#f7e9e5;color:#873f32;border-color:#ead4ce}
-    .zad-quran-library .zad-quran-search-grid label:has(#zadMoshafSelect){display:none!important}
-    #zadReciterCatalog{display:grid;grid-template-columns:1fr;gap:8px;margin:12px 0}
-    #zadReloadReciters,.zad-quran-library .quran-tools,#zadQuranLibraryTracks,#zadMoshafSelect{display:none!important}
-    .zad-quran-library .zad-quran-search-grid label:has(#zadSurahSearch){grid-column:1/-1}
-
-    #zadReciterCatalog .zad-reader-accordion{border:1px solid #dce5dc;border-radius:13px;background:#fff;overflow:hidden}
-    #zadReciterCatalog .zad-reader-accordion[open]{border-color:#9db9a6;background:#fbfdfb}
-    #zadReciterCatalog .zad-reader-accordion summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;cursor:pointer;list-style:none;color:#173d32;font-weight:800}
-    #zadReciterCatalog .zad-reader-accordion summary::-webkit-details-marker{display:none}
-    #zadReciterCatalog .zad-reader-accordion summary:after{content:"＋";color:#987b43;font-size:18px}
-    #zadReciterCatalog .zad-reader-accordion[open] summary:after{content:"−"}
-    #zadReciterCatalog .zad-reader-meta{display:block;color:#71817b;font-size:11px;font-weight:400}
-    #zadReciterCatalog .zad-reader-content{padding:0 11px 11px}
-    #zadReciterCatalog .zad-reader-content select{width:100%;margin:0 0 8px;padding:9px;border:1px solid #dce5dc;border-radius:10px;background:#fff;font:inherit}
-    #zadReciterCatalog .zad-reader-surahs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
-    #zadReciterCatalog .zad-reader-surah{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:8px;border:1px solid #e5ebe5;border-radius:10px;background:#fff;font-size:12px}
-    #zadReciterCatalog .zad-reader-surah button{flex:0 0 auto;border:0;border-radius:8px;background:#315f4a;color:#fff;padding:6px 9px;font:inherit}
-    #zadReciterCatalog .zad-reader-surah a{color:#315f4a;text-decoration:none;font-weight:700;white-space:nowrap}
-    @media(max-width:420px){#zadReciterCatalog .zad-reader-surahs{grid-template-columns:1fr}}
-
-    .zad-player-controls a{background:#e8dfc9!important;color:#174638!important;text-decoration:none;border-radius:13px;padding:11px 16px;font-size:13px;font-weight:800}
-    #audio{display:none}
-    .zad-quran-search-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
-    .zad-quran-search-grid label{display:grid;gap:5px}
-    .zad-quran-search-grid input,.zad-quran-search-grid select{width:100%;min-width:0;border:1px solid #dce5dc;border-radius:12px;padding:11px;background:#fff;color:#18332d;font:inherit}
-    .zad-quran-library-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:18px 0 8px;color:#174638}
-    .zad-quran-track{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-    .zad-quran-track-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-    .zad-quran-track-actions button,.zad-quran-track-actions a{border:0;border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer}
-    .zad-quran-play{background:#174638;color:#fff}.zad-quran-download{background:#edf4ee;color:#174638}
-    .zad-quran-track-actions a{display:inline-block}
-    @media(max-width:520px){.zad-quran-track{align-items:flex-start}.zad-quran-track-actions{width:100%}.zad-quran-track-actions button,.zad-quran-track-actions a{flex:1;text-align:center}}
-  </style>
+  
 
 
   <section class="section" id="nasheed">
@@ -2005,13 +1922,6 @@ const reciterMatches={
 };
 const normalizeReciterName=s=>(s||'').replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/[\u064B-\u065F\u0670]/g,'').replace(/[^\u0621-\u064A]/g,'');
 window.zadReciterData={};
-async function loadSurahs(){
- try{
-  const r=await zadFetchTimeout('https://api.alquran.cloud/v1/surah',{},8000);if(!r.ok)throw new Error('surah list');const j=await r.json();if(!j.data||!Array.isArray(j.data))throw new Error('surah data');surahs=j.data;
-  $('surahSelect').innerHTML=surahs.map(s=>`<option value="${s.number}">${s.number}. ${s.name}</option>`).join('');
-  
- }catch(e){$('surahSelect').innerHTML='<option value="">تعذر تحميل السور</option>';}
-}
 let mushafSurahs=[];
 let mushafCurrentPage=1;
 let mushafRequestNumber=0;
@@ -3054,21 +2964,15 @@ $('zqDownload').addEventListener('click',async()=>{let t=queue.find(x=>String(x.
 window.zadReloadQuranCatalog=load;load();
 })();
 </script>
+
+
 <style id="zq-player-clean-style">
 .zq-player{margin:15px 0;padding:16px;border:1px solid #bda66f;border-radius:20px;background:linear-gradient(145deg,#0b352b,#14513e 68%,#1b6049);color:#fff;box-shadow:0 12px 28px #08231b30;overflow:hidden}
 .zq-player-heading{display:flex;align-items:center;gap:10px;margin-bottom:14px}.zq-mark,.zq-cover{display:grid;place-items:center;border:1px solid #d9c48f;background:linear-gradient(145deg,#f5e6bd,#c7a85f);color:#164334}.zq-mark{width:42px;height:42px;border-radius:13px;font-size:25px}.zq-player-heading strong,.zq-player-heading small{display:block}.zq-player-heading strong{color:#fff;font-size:17px}.zq-player-heading small{color:#e4e9df;font-size:11px}.zq-live{margin-right:auto;color:#f6dfa4;font-size:12px}
 .zq-picker-grid{display:grid;gap:9px;margin-bottom:15px}.zq-picker-grid label{display:grid;gap:5px;color:#fff;font-size:13px;font-weight:800}.zq-picker-grid select,.zq-picker-grid input,.zq-reader-tools input{width:100%;min-width:0;height:43px;padding:8px 11px;border:1px solid #d9c99f;border-radius:11px;background:#fff;color:#173d32;font:inherit;font-size:14px}.zq-picker-grid select:disabled{background:#e9ece8;color:#68766f}
 .zq-now-playing{display:flex;align-items:center;gap:12px;margin:4px 0 14px}.zq-cover{flex:0 0 58px;width:58px;height:58px;border-radius:15px;font-size:35px}.zq-track-info{min-width:0;display:grid;gap:2px}.zq-track-info span{font-size:11px;color:#f1d995}.zq-track-info strong{font-size:16px;color:#fff;overflow-wrap:anywhere}.zq-track-info small{font-size:12px;color:#edf1e9;overflow-wrap:anywhere}
 .zq-timeline{display:grid;grid-template-columns:42px minmax(0,1fr) 42px;align-items:center;gap:8px;color:#fff;font-size:11px;direction:ltr}.zq-timeline input{width:100%;accent-color:#f0d58e}.zq-controls{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:13px}.zq-controls button{min-width:42px;min-height:43px;padding:8px 10px;border:1px solid #9db7a6;border-radius:12px;background:#285b49;color:#fff;font:inherit;font-weight:800}.zq-controls button:disabled{opacity:.45}.zq-controls .zq-main-control{width:57px;height:57px;border:2px solid #fff0c9;border-radius:50%;background:#f4d994;color:#123e31;font-size:23px}.zq-controls .zq-download{background:#f0dba9;color:#173d32}
-.zq-reader-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin:12px 0}#zadReciterCatalog{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}#zadReciterCatalog .zad-reciter-card{display:flex;align-items:center;gap:8px;min-height:60px;padding:9px;border:1px solid #dfe8e2;border-radius:12px;background:#fff;color:#18332d;text-align:right}#zadReciterCatalog .zad-reciter-card.active{border:2px solid #47745d;background:#f0f5f0}#zadReciterCatalog .zad-reciter-card strong{display:block;font-size:12px}#zadReciterCatalog .zad-reciter-card small{display:block;color:#71817b;font-size:10px}#zadReciterCatalog .zad-reciter-avatar{flex:0 0 34px;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#e8dfc9;color:#174638}
-@media(max-width:430px){.zq-controls{gap:5px}.zq-controls button{min-width:38px;padding:7px}.zq-controls .zq-main-control{width:53px;height:53px}.zq-reader-tools{grid-template-columns:1fr}#zadReciterCatalog{grid-template-columns:1fr}}
-</style>
-<style id="zq-player-clean-style">
-.zq-player{margin:15px 0;padding:16px;border:1px solid #bda66f;border-radius:20px;background:linear-gradient(145deg,#0b352b,#14513e 68%,#1b6049);color:#fff;box-shadow:0 12px 28px #08231b30;overflow:hidden}
-.zq-player-heading{display:flex;align-items:center;gap:10px;margin-bottom:14px}.zq-mark,.zq-cover{display:grid;place-items:center;border:1px solid #d9c48f;background:linear-gradient(145deg,#f5e6bd,#c7a85f);color:#164334}.zq-mark{width:42px;height:42px;border-radius:13px;font-size:25px}.zq-player-heading strong,.zq-player-heading small{display:block}.zq-player-heading strong{color:#fff;font-size:17px}.zq-player-heading small{color:#e4e9df;font-size:11px}.zq-live{margin-right:auto;color:#f6dfa4;font-size:12px}
-.zq-picker-grid{display:grid;gap:9px;margin-bottom:15px}.zq-picker-grid label{display:grid;gap:5px;color:#fff;font-size:13px;font-weight:800}.zq-picker-grid select,.zq-picker-grid input,.zq-reader-tools input{width:100%;min-width:0;height:43px;padding:8px 11px;border:1px solid #d9c99f;border-radius:11px;background:#fff;color:#173d32;font:inherit;font-size:14px}.zq-picker-grid select:disabled{background:#e9ece8;color:#68766f}
-.zq-now-playing{display:flex;align-items:center;gap:12px;margin:4px 0 14px}.zq-cover{flex:0 0 58px;width:58px;height:58px;border-radius:15px;font-size:35px}.zq-track-info{min-width:0;display:grid;gap:2px}.zq-track-info span{font-size:11px;color:#f1d995}.zq-track-info strong{font-size:16px;color:#fff;overflow-wrap:anywhere}.zq-track-info small{font-size:12px;color:#edf1e9;overflow-wrap:anywhere}
-.zq-timeline{display:grid;grid-template-columns:42px minmax(0,1fr) 42px;align-items:center;gap:8px;color:#fff;font-size:11px;direction:ltr}.zq-timeline input{width:100%;accent-color:#f0d58e}.zq-controls{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:13px}.zq-controls button{min-width:42px;min-height:43px;padding:8px 10px;border:1px solid #9db7a6;border-radius:12px;background:#285b49;color:#fff;font:inherit;font-weight:800}.zq-controls button:disabled{opacity:.45}.zq-controls .zq-main-control{width:57px;height:57px;border:2px solid #fff0c9;border-radius:50%;background:#f4d994;color:#123e31;font-size:23px}.zq-controls .zq-download{background:#f0dba9;color:#173d32}
+.zad-all-readers{border:1px solid #d8e5dc;border-radius:16px;padding:12px;background:#f8faf6;margin:10px 0 16px}.zad-all-readers-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;color:#174638;font-weight:800;padding:5px 2px}.zad-all-readers-summary::-webkit-details-marker{display:none}.zad-all-readers-summary small{font-size:11px;color:#71817b;font-weight:500}.zad-all-readers[open] .zad-all-readers-summary{padding-bottom:12px;border-bottom:1px solid #dce7df}
 .zq-reader-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin:12px 0}#zadReciterCatalog{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}#zadReciterCatalog .zad-reciter-card{display:flex;align-items:center;gap:8px;min-height:60px;padding:9px;border:1px solid #dfe8e2;border-radius:12px;background:#fff;color:#18332d;text-align:right}#zadReciterCatalog .zad-reciter-card.active{border:2px solid #47745d;background:#f0f5f0}#zadReciterCatalog .zad-reciter-card strong{display:block;font-size:12px}#zadReciterCatalog .zad-reciter-card small{display:block;color:#71817b;font-size:10px}#zadReciterCatalog .zad-reciter-avatar{flex:0 0 34px;width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#e8dfc9;color:#174638}
 @media(max-width:430px){.zq-controls{gap:5px}.zq-controls button{min-width:38px;padding:7px}.zq-controls .zq-main-control{width:53px;height:53px}.zq-reader-tools{grid-template-columns:1fr}#zadReciterCatalog{grid-template-columns:1fr}}
 </style>
