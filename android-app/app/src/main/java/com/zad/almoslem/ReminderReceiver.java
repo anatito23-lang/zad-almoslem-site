@@ -62,7 +62,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
         long at=next.getTimeInMillis();
         p.edit().putLong("gentle_next_at",at).apply();
-        schedule(context,"gentle_reminder",at,"تذكير لطيف من سكينة",false);
+        schedule(context,"gentle_reminder",at,"تذكير من سكينة ودعاء وصلاة ودعاء وصلاة",false);
     }
 
     public static void ensureDefaultDailyReminders(Context context) {
@@ -80,7 +80,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         for(String key:new String[]{"morning","evening","qiyam"}) {
             if(p.getBoolean(key+"_enabled",false)) {
                 scheduleDaily(context,key,p.getInt(key+"_hour",7),p.getInt(key+"_minute",0),
-                        p.getString(key+"_title","تذكير من سكينة"));
+                        p.getString(key+"_title","تذكير من سكينة ودعاء وصلاة"));
             }
         }
         if(p.getBoolean("gentle_enabled",false)) scheduleGentleReminder(context);
@@ -319,22 +319,22 @@ public class ReminderReceiver extends BroadcastReceiver {
         if(Build.VERSION.SDK_INT>=26){
             NotificationChannel ch;
             if(prayer && powerSaverEnabled) {
-                ch=new NotificationChannel(POWER_SAVER_PRAYER_CHANNEL_ID,"إشعارات الصلاة — توفير الطاقة",NotificationManager.IMPORTANCE_HIGH);
+                ch=new NotificationChannel(POWER_SAVER_PRAYER_CHANNEL_ID,"سكينة ودعاء وصلاة",NotificationManager.IMPORTANCE_HIGH);
                 ch.setDescription("تنبيه مرئي عند دخول وقت الصلاة دون صوت أو اهتزاز");
                 ch.setSound(null,null);
                 ch.enableVibration(false);
             } else if(prayer){
-                ch=new NotificationChannel(PRAYER_CHANNEL_ID,"إشعارات الصلاة الصامتة",NotificationManager.IMPORTANCE_HIGH);
+                ch=new NotificationChannel(PRAYER_CHANNEL_ID,"سكينة ودعاء وصلاة",NotificationManager.IMPORTANCE_HIGH);
                 ch.setDescription("إشعار دخول وقت الصلاة بدون صوت");
                 ch.setSound(null,null);
                 ch.enableVibration(true);
                 nm.createNotificationChannel(ch);
-                NotificationChannel toneCh=new NotificationChannel(PRAYER_TONE_CHANNEL_ID,"تنبيه صوتي للصلاة",NotificationManager.IMPORTANCE_HIGH);
+                NotificationChannel toneCh=new NotificationChannel(PRAYER_TONE_CHANNEL_ID,"سكينة ودعاء وصلاة",NotificationManager.IMPORTANCE_HIGH);
                 toneCh.setDescription("نغمة قصيرة عند دخول وقت الصلاة");
                 toneCh.enableVibration(true);
                 nm.createNotificationChannel(toneCh);
             } else if(powerSaverEnabled) {
-                ch=new NotificationChannel(POWER_SAVER_CHANNEL_ID,"إشعارات توفير الطاقة",NotificationManager.IMPORTANCE_LOW);
+                ch=new NotificationChannel(POWER_SAVER_CHANNEL_ID,"سكينة ودعاء وصلاة",NotificationManager.IMPORTANCE_LOW);
                 ch.setDescription("إشعارات مرئية فقط دون صوت أو اهتزاز عند تفعيل وضع توفير الطاقة");
                 ch.setSound(null,null);
                 ch.enableVibration(false);
@@ -342,7 +342,7 @@ public class ReminderReceiver extends BroadcastReceiver {
                 // If exact alarms are unavailable, Android may reject the background
                 // audio foreground-service launch. Use a distinct audible notification
                 // channel so the reminder is not silently lost.
-                ch=new NotificationChannel(AUDIO_FALLBACK_CHANNEL_ID,"تنبيهات صوتية احتياطية من زاد وطمأنينة",NotificationManager.IMPORTANCE_DEFAULT);
+                ch=new NotificationChannel(AUDIO_FALLBACK_CHANNEL_ID,"سكينة ودعاء وصلاة",NotificationManager.IMPORTANCE_DEFAULT);
                 ch.setDescription("صوت إشعار بديل للتذكيرات عند عدم توفر إذن تشغيل الصوت في الخلفية");
                 ch.setSound(android.provider.Settings.System.DEFAULT_NOTIFICATION_URI,
                         new android.media.AudioAttributes.Builder()
@@ -351,12 +351,12 @@ public class ReminderReceiver extends BroadcastReceiver {
                                 .build());
                 ch.enableVibration(true);
             } else if(gentle) {
-                ch=new NotificationChannel(GENTLE_CHANNEL_ID,"تذكيرات إيمانية خفيفة",NotificationManager.IMPORTANCE_LOW);
+                ch=new NotificationChannel(GENTLE_CHANNEL_ID,"سكينة ودعاء وصلاة",NotificationManager.IMPORTANCE_LOW);
                 ch.setDescription("تذكيرات قصيرة بالصلاة على النبي والذكر والاستغفار، دون صوت أو اهتزاز");
                 ch.setSound(null,null);
                 ch.enableVibration(false);
             } else {
-                ch=new NotificationChannel(CHANNEL_ID,"تنبيهات زاد وطمأنينة",NotificationManager.IMPORTANCE_HIGH);
+                ch=new NotificationChannel(CHANNEL_ID,"سكينة ودعاء وصلاة",NotificationManager.IMPORTANCE_HIGH);
                 ch.setDescription("تنبيهات الأذكار وقيام الليل");
             }
             nm.createNotificationChannel(ch);
@@ -373,9 +373,9 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
         Notification.Builder b=Build.VERSION.SDK_INT>=26?new Notification.Builder(context,channelId):new Notification.Builder(context);
         String startError = prayer ? prefs.getString("adhan_last_start_error", "") : "";
-        String notificationText = title==null?"تذكير من سكينة":title;
+        String notificationText = title==null?"تذكير من سكينة ودعاء وصلاة":title;
         if (!startError.isEmpty()) notificationText = "تعذر بدء الأذان: " + startError;
-        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle(gentle?"تذكير لطيف من سكينة":"سكينة – أذان وصلاة وقرآن").setContentText(notificationText).setAutoCancel(true).setContentIntent(content);
+        b.setSmallIcon(android.R.drawable.ic_lock_idle_alarm).setContentTitle(gentle?"تذكير من سكينة ودعاء وصلاة ودعاء وصلاة":"سكينة ودعاء وصلاة").setContentText(notificationText).setAutoCancel(true).setContentIntent(content);
         if(prayer) {
             b.setCategory(Notification.CATEGORY_ALARM)
              .setVisibility(Notification.VISIBILITY_PUBLIC)
@@ -390,7 +390,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         if(!prayer || (adhanEnabled && thisPrayerEnabled)) nm.notify(key.hashCode(),b.build());
         if(intent.getBooleanExtra("daily",false)){
             String k=key.replace("daily_","");
-            if(prefs.getBoolean(k+"_enabled",false)) scheduleDaily(context,k,prefs.getInt(k+"_hour",7),prefs.getInt(k+"_minute",0),prefs.getString(k+"_title","تذكير من سكينة"));
+            if(prefs.getBoolean(k+"_enabled",false)) scheduleDaily(context,k,prefs.getInt(k+"_hour",7),prefs.getInt(k+"_minute",0),prefs.getString(k+"_title","تذكير من سكينة ودعاء وصلاة"));
         }
     }
 }
