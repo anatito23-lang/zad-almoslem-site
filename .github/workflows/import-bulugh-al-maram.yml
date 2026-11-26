@@ -1,0 +1,51 @@
+name: Import Bulugh al-Maram public-domain scan
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-bulugh-al-maram.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-book:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Download and validate the scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p books
+          curl --fail --location --retry 3 --user-agent 'ZadAlMoslemLibrary/1.0' 'https://upload.wikimedia.org/wikisource/ar/2/2b/%D8%A8%D9%84%D9%88%D8%BA_%D8%A7%D9%84%D9%85%D8%B1%D8%A7%D9%85.pdf' --output books/bulugh-al-maram.pdf
+          test "$(head -c 5 books/bulugh-al-maram.pdf)" = '%PDF-'
+          test "$(stat -c '%s' books/bulugh-al-maram.pdf)" -gt 1000000
+          python -m pip install --quiet pypdf
+          python - <<'PY'
+          from pypdf import PdfReader
+          r=PdfReader("books/bulugh-al-maram.pdf", strict=True)
+          n=len(r.pages)
+          print(f"Validated Bulugh al-Maram: {n} pages")
+          if n < 200: raise SystemExit(f"Unexpected page count: {n}")
+          PY
+      - name: Commit book and source record
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > books/bulugh-al-maram-source.txt <<'EOF'
+          بلوغ المرام من أدلة الأحكام — الحافظ أحمد بن علي ابن حجر العسقلاني.
+          نسخة مصوّرة: طبعة مصر 1330هـ / 1912م، ويكي مصدر.
+          المصدر يصف الملف بأنه من الملكية العامة. هذه نسخة مصوّرة وليست تحقيقًا حديثًا.
+          EOF
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add books/bulugh-al-maram.pdf books/bulugh-al-maram-source.txt
+          git commit -m 'Add public-domain Bulugh al-Maram scan'
+          git pull --rebase origin main
+          git push origin HEAD:main
