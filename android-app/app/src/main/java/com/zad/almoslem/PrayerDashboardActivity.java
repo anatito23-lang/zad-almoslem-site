@@ -20,12 +20,52 @@ import java.util.*;
 public class PrayerDashboardActivity extends Activity {
     private static final String[] PRAYERS={"الفجر","الظهر","العصر","المغرب","العشاء"};
     private static final String[] KEYS={"fajr","dhuhr","asr","maghrib","isha"};
-    private static final String[] COUNTRIES={"مصر","السعودية","الإمارات","الكويت","قطر","الأردن","لبنان","فلسطين","المغرب","الجزائر","تونس","تركيا","باكستان","الهند","إندونيسيا","ماليزيا","المملكة المتحدة","الولايات المتحدة","كندا","ألمانيا","فرنسا","البحرين","عُمان","العراق","سوريا","اليمن","ليبيا","السودان","بنغلاديش","سنغافورة","اليابان","أستراليا","جنوب أفريقيا","نيجيريا","روسيا","إسبانيا","إيطاليا","هولندا","السويد","النرويج"};
-    private static final String[] COUNTRY_CODES={"Egypt","Saudi Arabia","United Arab Emirates","Kuwait","Qatar","Jordan","Lebanon","Palestine","Morocco","Algeria","Tunisia","Turkey","Pakistan","India","Indonesia","Malaysia","United Kingdom","United States","Canada","Germany","France","Bahrain","Oman","Iraq","Syria","Yemen","Libya","Sudan","Bangladesh","Singapore","Japan","Australia","South Africa","Nigeria","Russia","Spain","Italy","Netherlands","Sweden","Norway"};
-    private static final String[] METHODS={"5","4","8","9","10","23","3","3","21","19","18","13","1","1","20","17","3","2","2","3","12","8","8","3","3","3","3","3","1","11","3","3","3","3","14","3","3","3","3","3"};
-    // Hanafi Asr is used by default in South Asian countries; other listed countries use standard Shafi Asr.
-    private static final String[] SCHOOLS={"0","0","0","0","0","0","0","0","0","0","0","0","1","1","0","0","0","0","0","0","0","0","0","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","0"};
-    private static final String[] DEFAULT_CITIES={"Cairo","Riyadh","Dubai","Kuwait City","Doha","Amman","Beirut","Jerusalem","Rabat","Algiers","Tunis","Istanbul","Islamabad","New Delhi","Jakarta","Kuala Lumpur","London","New York","Toronto","Berlin","Paris","Manama","Muscat","Baghdad","Damascus","Sanaa","Tripoli","Khartoum","Dhaka","Singapore","Tokyo","Sydney","Johannesburg","Lagos","Moscow","Madrid","Rome","Amsterdam","Stockholm","Oslo"};
+    private static final String[] COUNTRIES;
+    private static final String[] COUNTRY_CODES;
+    private static final String[] METHODS;
+    private static final String[] SCHOOLS;
+    private static final String[] DEFAULT_CITIES;
+    static {
+        // Build the selector from the complete ISO country list, not a fixed shortlist.
+        Locale arabic = new Locale("ar");
+        Locale english = Locale.ENGLISH;
+        TreeMap<String, String> sorted = new TreeMap<>();
+        for (String iso : Locale.getISOCountries()) {
+            Locale countryLocale = new Locale("", iso);
+            String arabicName = countryLocale.getDisplayCountry(arabic);
+            if (arabicName == null || arabicName.trim().isEmpty()) arabicName = countryLocale.getDisplayCountry(english);
+            String apiName = countryLocale.getDisplayCountry(english);
+            if ("PS".equals(iso)) apiName = "Palestine";
+            sorted.put(arabicName, apiName);
+        }
+        // Keep familiar Arabic country labels and API names for the countries already offered.
+        String[] preferredIso = {"EG","SA","AE","KW","QA","JO","LB","PS","MA","DZ","TN","TR","PK","IN","ID","MY","GB","US","CA","DE","FR","BH","OM","IQ","SY","YE","LY","SD","BD","SG","JP","AU","ZA","NG","RU","ES","IT","NL","SE","NO"};
+        String[] preferredArabic = {"مصر","السعودية","الإمارات","الكويت","قطر","الأردن","لبنان","فلسطين","المغرب","الجزائر","تونس","تركيا","باكستان","الهند","إندونيسيا","ماليزيا","المملكة المتحدة","الولايات المتحدة","كندا","ألمانيا","فرنسا","البحرين","عُمان","العراق","سوريا","اليمن","ليبيا","السودان","بنغلاديش","سنغافورة","اليابان","أستراليا","جنوب أفريقيا","نيجيريا","روسيا","إسبانيا","إيطاليا","هولندا","السويد","النرويج"};
+        String[] preferredApi = {"Egypt","Saudi Arabia","United Arab Emirates","Kuwait","Qatar","Jordan","Lebanon","Palestine","Morocco","Algeria","Tunisia","Turkey","Pakistan","India","Indonesia","Malaysia","United Kingdom","United States","Canada","Germany","France","Bahrain","Oman","Iraq","Syria","Yemen","Libya","Sudan","Bangladesh","Singapore","Japan","Australia","South Africa","Nigeria","Russia","Spain","Italy","Netherlands","Sweden","Norway"};
+        for (int i=0;i<preferredIso.length;i++) sorted.put(preferredArabic[i],preferredApi[i]);
+        COUNTRIES = sorted.keySet().toArray(new String[0]);
+        COUNTRY_CODES = sorted.values().toArray(new String[0]);
+        METHODS = new String[COUNTRY_CODES.length];
+        SCHOOLS = new String[COUNTRY_CODES.length];
+        DEFAULT_CITIES = new String[COUNTRY_CODES.length];
+        Arrays.fill(METHODS,"3"); // Muslim World League default for countries without a country-specific preset.
+        Arrays.fill(SCHOOLS,"0");
+        Map<String,String> methodByIso = new HashMap<>();
+        String[] isoMethod={"EG:5","SA:4","AE:8","KW:9","QA:10","JO:23","MA:21","DZ:19","TN:18","TR:13","PK:1","IN:1","ID:20","MY:17","US:2","CA:2","FR:12","BH:8","OM:8","BD:1","SG:11","RU:14"};
+        for(String item:isoMethod){String[] pair=item.split(":");methodByIso.put(pair[0],pair[1]);}
+        Set<String> hanafi = new HashSet<>(Arrays.asList("PK","IN","BD"));
+        Map<String,String> cities = new HashMap<>();
+        String[] cityPairs={"EG:Cairo","SA:Riyadh","AE:Dubai","KW:Kuwait City","QA:Doha","JO:Amman","LB:Beirut","PS:Jerusalem","MA:Rabat","DZ:Algiers","TN:Tunis","TR:Istanbul","PK:Islamabad","IN:New Delhi","ID:Jakarta","MY:Kuala Lumpur","GB:London","US:New York","CA:Toronto","DE:Berlin","FR:Paris","BH:Manama","OM:Muscat","IQ:Baghdad","SY:Damascus","YE:Sanaa","LY:Tripoli","SD:Khartoum","BD:Dhaka","SG:Singapore","JP:Tokyo","AU:Sydney","ZA:Johannesburg","NG:Lagos","RU:Moscow","ES:Madrid","IT:Rome","NL:Amsterdam","SE:Stockholm","NO:Oslo"};
+        Map<String,String> isoCities=new HashMap<>();
+        for(String item:cityPairs){String[] pair=item.split(":",2);isoCities.put(pair[0],pair[1]);}
+        for(int i=0;i<COUNTRY_CODES.length;i++){
+            String api=COUNTRY_CODES[i], iso="";
+            for(String code:Locale.getISOCountries()) if(new Locale("",code).getDisplayCountry(english).equals(api) || ("PS".equals(code)&&"Palestine".equals(api))){iso=code;break;}
+            METHODS[i]=methodByIso.getOrDefault(iso,"3");
+            if(hanafi.contains(iso)) SCHOOLS[i]="1";
+            DEFAULT_CITIES[i]=isoCities.getOrDefault(iso,"");
+        }
+    }
     private static final String[] EGYPT_GOVERNORATES={"القاهرة","الجيزة","الإسكندرية","القليوبية","الشرقية","الدقهلية","البحيرة","الغربية","المنوفية","كفر الشيخ","دمياط","بورسعيد","الإسماعيلية","السويس","شمال سيناء","جنوب سيناء","بني سويف","الفيوم","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان","البحر الأحمر","الوادي الجديد","مطروح"};
     private static final String[] EGYPT_CITIES={"Cairo","Giza","Alexandria","Banha","Zagazig","Mansoura","Damanhur","Tanta","Shebin El-Kom","Kafr El Sheikh","Damietta","Port Said","Ismailia","Suez","Arish","El Tor","Beni Suef","Fayoum","Minya","Asyut","Sohag","Qena","Luxor","Aswan","Hurghada","Kharga","Marsa Matruh"};
     private android.content.SharedPreferences prefs;
@@ -194,7 +234,7 @@ public class PrayerDashboardActivity extends Activity {
             String sunriseRaw=timings.getString("Sunrise").split(" ")[0];String[] sunriseHm=sunriseRaw.split(":");prefs.edit().putInt("native_sunrise_hour",Integer.parseInt(sunriseHm[0])).putInt("native_sunrise_minute",Integer.parseInt(sunriseHm[1])).apply();
             for(int i=0;i<5;i++){String raw=timings.getString(api[i]).split(" ")[0];String[] hm=raw.split(":");int h=Integer.parseInt(hm[0]),m=Integer.parseInt(hm[1]);prefs.edit().putInt("native_time_hour_"+PRAYERS[i],h).putInt("native_time_minute_"+PRAYERS[i],m).apply();Calendar next=Calendar.getInstance(TimeZone.getTimeZone(cityTimezone));next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,m);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);if(prefs.getBoolean("prayer_enabled_"+PRAYERS[i],true))ReminderReceiver.schedulePrayer(this,PRAYERS[i],next.getTimeInMillis());}
             prefs.edit().putString("native_times_date",todayInCityZone()).putInt("native_times_utc_offset",TimeZone.getTimeZone(cityTimezone).getOffset(System.currentTimeMillis())/60000).apply();RamadanReminderReceiver.scheduleAll(this);
-            runOnUiThread(()->{result.setText(pos==0?"تم تحديث المواقيت بطريقة الحساب المصرية رقم 5؛ وقد تختلف دقائق عن جدول الهيئة الرسمي المنشور.":"تم تحديث مواقيت "+COUNTRIES[pos]+" — "+city+" بطريقة الحساب المعتمدة لهذه الدولة.");refreshTracker();refreshCountdowns();});
+            runOnUiThread(()->{result.setText("تم تحديث مواقيت "+COUNTRIES[pos]+" — "+city+" بطريقة الحساب رقم "+method+"؛ وقد تختلف الدقائق حسب الجهة المحلية المعتمدة.");refreshTracker();refreshCountdowns();});
         }catch(Exception e){runOnUiThread(()->result.setText("تعذر تحديث المواقيت: "+(e.getMessage()==null?"تحقق من اسم المدينة والإنترنت":e.getMessage())));}
         finally{if(c!=null)c.disconnect();runOnUiThread(()->button.setEnabled(true));}}).start();
     }
