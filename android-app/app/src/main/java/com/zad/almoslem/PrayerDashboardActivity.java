@@ -26,8 +26,10 @@ public class PrayerDashboardActivity extends Activity {
     // Hanafi Asr is used by default in South Asian countries; other listed countries use standard Shafi Asr.
     private static final String[] SCHOOLS={"0","0","0","0","0","0","0","0","0","0","0","0","1","1","0","0","0","0","0","0","0","0","0","0","0","0","0","0","1","0","0","0","0","0","0","0","0","0","0","0"};
     private static final String[] DEFAULT_CITIES={"Cairo","Riyadh","Dubai","Kuwait City","Doha","Amman","Beirut","Jerusalem","Rabat","Algiers","Tunis","Istanbul","Islamabad","New Delhi","Jakarta","Kuala Lumpur","London","New York","Toronto","Berlin","Paris","Manama","Muscat","Baghdad","Damascus","Sanaa","Tripoli","Khartoum","Dhaka","Singapore","Tokyo","Sydney","Johannesburg","Lagos","Moscow","Madrid","Rome","Amsterdam","Stockholm","Oslo"};
+    private static final String[] EGYPT_GOVERNORATES={"القاهرة","الجيزة","الإسكندرية","القليوبية","الشرقية","الدقهلية","البحيرة","الغربية","المنوفية","كفر الشيخ","دمياط","بورسعيد","الإسماعيلية","السويس","شمال سيناء","جنوب سيناء","بني سويف","الفيوم","المنيا","أسيوط","سوهاج","قنا","الأقصر","أسوان","البحر الأحمر","الوادي الجديد","مطروح"};
+    private static final String[] EGYPT_CITIES={"Cairo","Giza","Alexandria","Banha","Zagazig","Mansoura","Damanhur","Tanta","Shebin El-Kom","Kafr El Sheikh","Damietta","Port Said","Ismailia","Suez","Arish","El Tor","Beni Suef","Fayoum","Minya","Asyut","Sohag","Qena","Luxor","Aswan","Hurghada","Kharga","Marsa Matruh"};
     private android.content.SharedPreferences prefs;
-    private Spinner countrySpinner;
+    private Spinner countrySpinner, egyptGovernorateSpinner;
     private Button updateButton;
     private EditText cityInput;
     private String selectedCountryCode;
@@ -68,8 +70,26 @@ public class PrayerDashboardActivity extends Activity {
         TextView locationTitle=label("الدولة والمدينة",18,AppThemeColors.text(this),true);locationTitle.setPadding(0,dp(16),0,dp(6));root.addView(locationTitle);
         countrySpinner=new Spinner(this);countrySpinner.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_spinner_dropdown_item,COUNTRIES));
         String savedCountry=prefs.getString("native_country","Egypt");int countryIndex=Arrays.asList(COUNTRY_CODES).indexOf(savedCountry);if(countryIndex<0)countryIndex=0;countrySpinner.setSelection(countryIndex);selectedCountryCode=COUNTRY_CODES[countryIndex];root.addView(countrySpinner,full());
-        cityInput=new EditText(this);cityInput.setSingleLine(true);cityInput.setHint("اكتب اسم المدينة بالإنجليزية مثل Cairo أو Zagazig");cityInput.setText(prefs.getString("native_prayer_city",DEFAULT_CITIES[countryIndex]));cityInput.setTextDirection(View.TEXT_DIRECTION_LTR);root.addView(cityInput,full());
-        countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){}public void onItemSelected(AdapterView<?> p,View v,int pos,long id){if(!COUNTRY_CODES[pos].equals(selectedCountryCode)){cityInput.setText(DEFAULT_CITIES[pos]);selectedCountryCode=COUNTRY_CODES[pos];}}});
+        egyptGovernorateSpinner=new Spinner(this);
+        ArrayAdapter<String> governorateAdapter=new ArrayAdapter<>(this,android.R.layout.simple_spinner_item,EGYPT_GOVERNORATES);
+        governorateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        egyptGovernorateSpinner.setAdapter(governorateAdapter);
+        root.addView(egyptGovernorateSpinner,full());
+        cityInput=new EditText(this);cityInput.setSingleLine(true);cityInput.setHint("اكتب اسم المدينة بالإنجليزية مثل Riyadh أو Dubai");cityInput.setText(prefs.getString("native_prayer_city",DEFAULT_CITIES[countryIndex]));cityInput.setTextDirection(View.TEXT_DIRECTION_LTR);root.addView(cityInput,full());
+        boolean isEgypt="Egypt".equals(selectedCountryCode);
+        egyptGovernorateSpinner.setVisibility(isEgypt?View.VISIBLE:View.GONE);
+        cityInput.setVisibility(isEgypt?View.GONE:View.VISIBLE);
+        String savedPrayerCity=prefs.getString("native_prayer_city",DEFAULT_CITIES[countryIndex]);
+        if(isEgypt){int governorateIndex=0;for(int i=0;i<EGYPT_CITIES.length;i++)if(EGYPT_CITIES[i].equalsIgnoreCase(savedPrayerCity)){governorateIndex=i;break;}egyptGovernorateSpinner.setSelection(governorateIndex);}
+        countrySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){public void onNothingSelected(AdapterView<?> p){}public void onItemSelected(AdapterView<?> p,View v,int pos,long id){
+            if(!COUNTRY_CODES[pos].equals(selectedCountryCode)){
+                selectedCountryCode=COUNTRY_CODES[pos];
+                boolean egypt="Egypt".equals(selectedCountryCode);
+                egyptGovernorateSpinner.setVisibility(egypt?View.VISIBLE:View.GONE);
+                cityInput.setVisibility(egypt?View.GONE:View.VISIBLE);
+                if(egypt)egyptGovernorateSpinner.setSelection(0);else cityInput.setText(DEFAULT_CITIES[pos]);
+            }
+        }});
         updateButton=new Button(this);updateButton.setText("تحديث مواقيت الصلاة");root.addView(updateButton,full());
         result=label("اختر الدولة والمدينة ثم حدّث المواقيت.",12,AppThemeColors.muted(this),false);root.addView(result,full());updateButton.setOnClickListener(v->fetchTimes(updateButton));
 
@@ -160,7 +180,9 @@ public class PrayerDashboardActivity extends Activity {
     }
     private String format(long seconds){long h=seconds/3600,m=(seconds%3600)/60,s=seconds%60;return String.format(Locale.getDefault(),"%02d:%02d:%02d",h,m,s);}
     private void fetchTimes(Button button){
-        int pos=countrySpinner.getSelectedItemPosition();String country=COUNTRY_CODES[pos],city=cityInput.getText().toString().trim();if(city.isEmpty()){result.setText("اكتب اسم المدينة أولاً.");return;}
+        int pos=countrySpinner.getSelectedItemPosition();String country=COUNTRY_CODES[pos];
+        String city="Egypt".equals(country)?EGYPT_CITIES[Math.max(0,Math.min(egyptGovernorateSpinner.getSelectedItemPosition(),EGYPT_CITIES.length-1))]:cityInput.getText().toString().trim();
+        if(city.isEmpty()){result.setText("اكتب اسم المدينة أولاً.");return;}
         String method=METHODS[pos];prefs.edit().putString("native_country",country).putString("native_prayer_city",city).putString("native_prayer_method",method).apply();
         button.setEnabled(false);result.setText("جارٍ جلب المواقيت...");
         new Thread(()->{HttpURLConnection c=null;try{
