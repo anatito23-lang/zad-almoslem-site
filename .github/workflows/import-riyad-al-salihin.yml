@@ -1,0 +1,58 @@
+name: Import Riyad Al-Salihin PDF
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-riyad-al-salihin.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-book:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+
+      - name: Download and validate public-domain scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p books
+          URL='https://upload.wikimedia.org/wikisource/ar/0/06/%D8%B1%D9%8A%D8%A7%D8%B6_%D8%A7%D9%84%D8%B5%D8%A7%D9%84%D8%AD%D9%8A%D9%86.pdf'
+          curl --fail --location --retry 3 --retry-delay 2 --user-agent 'ZadAlMoslemLibrary/1.0 (public-domain book import)' "$URL" --output books/riyad-al-salihin.pdf
+          test "$(head -c 5 books/riyad-al-salihin.pdf)" = '%PDF-'
+          SIZE="$(stat -c '%s' books/riyad-al-salihin.pdf)"
+          test "$SIZE" -gt 1000000
+          test "$SIZE" -lt 30000000
+          python -m pip install --quiet pypdf
+          python - <<'PY'
+          from pypdf import PdfReader
+          reader = PdfReader("books/riyad-al-salihin.pdf", strict=True)
+          pages = len(reader.pages)
+          if pages < 300:
+              raise SystemExit(f"Unexpected page count: {pages}")
+          print(f"Validated PDF: {pages} pages")
+          PY
+
+      - name: Record source and commit the book
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > books/riyad-al-salihin-source.txt <<'EOF'
+          رياض الصالحين — الإمام يحيى بن شرف النووي
+          النسخة المختارة: نسخة دار الريان للتراث المصوّرة، كما نُشرت في ويكي مصدر.
+          المصدر: https://upload.wikimedia.org/wikisource/ar/0/06/%D8%B1%D9%8A%D8%A7%D8%B6_%D8%A7%D9%84%D8%B5%D8%A7%D9%84%D8%AD%D9%8A%D9%86.pdf
+          ملاحظة: هذه نسخة مصوّرة محفوظة كما وردت من المصدر؛ لا ندّعي تحقيقًا نصيًا أو مقابلة على طبعة أخرى.
+          EOF
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add books/riyad-al-salihin.pdf books/riyad-al-salihin-source.txt
+          git commit -m 'Add public-domain Riyad al-Salihin scan'
+          git push origin HEAD:main
