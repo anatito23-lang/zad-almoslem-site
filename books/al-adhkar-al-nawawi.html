@@ -21,11 +21,11 @@ button,input{font:inherit;border-radius:9px;padding:10px 12px;border:1px solid #
 <div class="controls"><button id="prev" disabled>الصفحة السابقة</button><label for="page">رقم الصفحة</label><input id="page" type="number" min="3" max="413" value="3"><button id="go">اذهب</button><button id="next" disabled>الصفحة التالية</button></div>
 <div id="status">جارٍ تحميل نص الكتاب من مستودع OpenITI المفتوح...</div>
 <article id="pageContent" hidden></article><div class="pageNo" id="pageNo"></div>
-<p class="note">النص الكامل مأخوذ من ملف OpenITI: 0676Nawawi.Adhkar.Shamela0001956-ara1، بترخيص CC BY-NC-SA 4.0. تم إعداد القارئ لعرض النص داخل موقع زاد دون تضمين صفحة خارجية. قد يختلف تقسيم النص الرقمي عن شكل الصفحات المصورة، مع الاحتفاظ بعلامات صفحات المصدر. <a href="https://github.com/OpenITI/0700AH" target="_blank" rel="noopener">المصدر والترخيص</a>.</p>
+<p class="note">النص الكامل مأخوذ من ملف OpenITI: 0676Nawawi.Adhkar.Shamela0010639-ara1، بترخيص CC BY-NC-SA 4.0. تم إعداد القارئ لعرض النص داخل موقع زاد دون تضمين صفحة خارجية. قد يختلف تقسيم النص الرقمي عن شكل الصفحات المصورة، مع الاحتفاظ بعلامات صفحات المصدر. <a href="https://github.com/OpenITI/0700AH" target="_blank" rel="noopener">المصدر والترخيص</a>.</p>
 </main>
 <script>
 (async function(){
-const raw='https://raw.githubusercontent.com/OpenITI/0700AH/master/data/0676Nawawi/0676Nawawi.Adhkar/0676Nawawi.Adhkar.Shamela0001956-ara1';
+const raw='https://raw.githubusercontent.com/OpenITI/0700AH/master/data/0676Nawawi/0676Nawawi.Adhkar/0676Nawawi.Adhkar.Shamela0010639-ara1';
 const status=document.getElementById('status'),content=document.getElementById('pageContent'),field=document.getElementById('page'),prev=document.getElementById('prev'),next=document.getElementById('next'),pageNo=document.getElementById('pageNo');
 let pages=[],current=0;
 function clean(s){return s.split('\n').map(x=>x.replace(/^~~\s?/,'').replace(/^#{1,6}\s?/,'').trim()).filter(x=>x&&!/^#META#/.test(x)&&x!=='#META#Header#End#').join('\n\n').trim()}
