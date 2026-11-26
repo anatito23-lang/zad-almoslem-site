@@ -1,0 +1,49 @@
+name: Import Sahih al-Bukhari public-domain scan
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-sahih-al-bukhari.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import-book:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Download and validate the scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p books
+          curl --fail --location --retry 3 --user-agent 'ZadAlMoslemLibrary/1.0' 'https://upload.wikimedia.org/wikisource/ar/c/c0/%D8%B5%D8%AD%D9%8A%D8%AD_%D8%A7%D9%84%D8%A8%D8%AE%D8%A7%D8%B1%D9%8A.pdf' --output books/sahih-al-bukhari.pdf
+          test "$(head -c 5 books/sahih-al-bukhari.pdf)" = '%PDF-'
+          test "$(stat -c '%s' books/sahih-al-bukhari.pdf)" -gt 40000000
+          python -m pip install --quiet pypdf
+          python - <<'PY'
+          from pypdf import PdfReader
+          r=PdfReader("books/sahih-al-bukhari.pdf", strict=True)
+          n=len(r.pages)
+          print(f"Validated Sahih al-Bukhari: {n} pages")
+          if n < 1900: raise SystemExit(f"Unexpected page count: {n}")
+          PY
+      - name: Commit the scan and source note
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > books/sahih-al-bukhari-source.txt <<'EOF'
+          صحيح البخاري — الجامع الصحيح للإمام محمد بن إسماعيل البخاري.
+          النسخة المصوّرة: طبعة وزارة الأوقاف المصرية، 2048 صفحة، 51.96 ميجابايت.
+          المصدر: ويكي مصدر، وصف الملف يذكر أنه في الملكية العامة.
+          هذه نسخة مصوّرة؛ لا يُدّعى أنها تحقيق جديد أو نسخة نصية قابلة للبحث.
+          EOF
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add books/sahih-al-bukhari.pdf books/sahih-al-bukhari-source.txt
+          git commit -m 'Add public-domain Sahih al-Bukhari scan'
+          git pull --rebase origin main
+          git push origin HEAD:main
