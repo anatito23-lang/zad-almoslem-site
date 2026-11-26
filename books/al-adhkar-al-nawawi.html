@@ -18,7 +18,7 @@ button,input{font:inherit;border-radius:9px;padding:10px 12px;border:1px solid #
 <body>
 <header><h1>الأذكار</h1><p>الإمام يحيى بن شرف النووي · النص الكامل · عرض صفحة صفحة</p></header>
 <main>
-<div class="controls"><button id="prev" disabled>الصفحة السابقة</button><label for="page">رقم الصفحة</label><input id="page" type="number" min="1" max="413" value="1"><button id="go">اذهب</button><button id="next" disabled>الصفحة التالية</button></div>
+<div class="controls"><button id="prev" disabled>الصفحة السابقة</button><label for="page">رقم الصفحة</label><input id="page" type="number" min="1" max="1" value="1"><button id="go">اذهب</button><button id="next" disabled>الصفحة التالية</button></div>
 <div id="status">جارٍ تحميل نص الكتاب من مستودع OpenITI المفتوح...</div>
 <article id="pageContent" hidden></article><div class="pageNo" id="pageNo"></div>
 <p class="note">النص الكامل مأخوذ من ملف OpenITI: 0676Nawawi.Adhkar.Shamela0010639-ara1، بترخيص CC BY-NC-SA 4.0. تم إعداد القارئ لعرض النص داخل موقع زاد دون تضمين صفحة خارجية. قد يختلف تقسيم النص الرقمي عن شكل الصفحات المصورة، مع الاحتفاظ بعلامات صفحات المصدر. <a href="https://github.com/OpenITI/0700AH" target="_blank" rel="noopener">المصدر والترخيص</a>.</p>
@@ -33,12 +33,12 @@ function render(i){current=Math.max(0,Math.min(pages.length-1,i));const p=pages[
 try{
 const response=await fetch(raw,{cache:'force-cache'});if(!response.ok)throw new Error('تعذر الوصول إلى ملف النص ('+response.status+')');
 const source=await response.text();const lines=source.split(/\r?\n/);let active=null,buffer=[];
-for(const line of lines){const m=line.match(/^# PageV\d+P(\d+)/);if(m){if(active!==null){const t=clean(buffer.join('\n'));if(t)pages.push({num:Number(active),text:t})}else{const front=clean(buffer.join('\n'));if(front)pages.push({num:1,text:front})}active=m[1];buffer=[];}else if(line!=='#META#Header#End#'){buffer.push(line)}}
+for(const line of lines){const m=line.match(/^# PageV\d+P(\d+)/);if(m){if(active!==null){const t=clean(buffer.join('\n'));if(t)pages.push({sourceNum:Number(active),text:t})}else{const front=clean(buffer.join('\n'));if(front)pages.push({sourceNum:null,text:front})}active=m[1];buffer=[];}else if(line!=='#META#Header#End#'){buffer.push(line)}}
 if(active!==null){const t=clean(buffer.join('\n'));if(t)pages.push({num:Number(active),text:t})}
 pages=pages.filter(p=>p.text);if(!pages.length)throw new Error('لم يتم العثور على علامات الصفحات في النص');
-const requested=Number(field.value)||1;let idx=pages.findIndex(p=>p.num>=requested);if(idx<0)idx=pages.length-1;render(idx);
+pages.forEach((p,i)=>p.num=i+1);field.max=String(pages.length);const requested=Number(field.value)||1;render(Math.max(0,Math.min(pages.length-1,requested-1)));
 prev.addEventListener('click',()=>render(current-1));next.addEventListener('click',()=>render(current+1));
-document.getElementById('go').addEventListener('click',()=>{const n=Number(field.value);const i=pages.findIndex(p=>p.num>=n);render(i<0?pages.length-1:i)});
+document.getElementById('go').addEventListener('click',()=>{const n=Number(field.value)||1;render(n-1)});
 field.addEventListener('keydown',e=>{if(e.key==='Enter'){const n=Number(field.value);const i=pages.findIndex(p=>p.num>=n);render(i<0?pages.length-1:i)}});
 }catch(e){status.textContent='تعذر تحميل نص الكتاب. '+e.message+' — تحقق من اتصال الإنترنت ثم أعد تحميل الصفحة.';status.style.color='#9b2c2c'}
 })();
