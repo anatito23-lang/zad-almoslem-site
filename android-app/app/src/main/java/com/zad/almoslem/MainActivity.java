@@ -318,10 +318,10 @@ public class MainActivity extends Activity {
 
         LinearLayout tasbeeh=column();
         tasbeeh.setBackground(shape(Color.rgb(17,65,51),20));
-        tasbeeh.setPadding(dp(12),dp(12),dp(12),dp(12));
-        TextView tasTitle=text("السبحة الإلكترونية",18,Color.WHITE,true);
+        tasbeeh.setPadding(dp(9),dp(9),dp(9),dp(9));
+        TextView tasTitle=text("السبحة الإلكترونية",16,Color.WHITE,true);
         tasTitle.setGravity(Gravity.CENTER);
-        TextView tasDesc=text("وَاذْكُرُوا اللَّهَ كَثِيرًا",14,Color.rgb(224,199,133),true);
+        TextView tasDesc=text("وَاذْكُرُوا اللَّهَ كَثِيرًا",12,Color.rgb(224,199,133),true);
         tasDesc.setGravity(Gravity.CENTER);
         String[] tasbeehDhikr={"سبحان الله","الحمد لله","الله أكبر","لا إله إلا الله","أستغفر الله وأتوب إليه","اللهم صلِّ وسلم على نبينا محمد"};
         int[] tasbeehGoals={33,66,99};
@@ -331,15 +331,15 @@ public class MainActivity extends Activity {
         int goalIndex=savedGoal==66?1:(savedGoal==99?2:0);
         tasbeehGoal.setSelection(goalIndex);
         TextView currentDhikr=text("",17,Color.WHITE,true);currentDhikr.setGravity(Gravity.CENTER);
-        currentDhikr.setPadding(dp(4),dp(20),dp(4),dp(10));
-        TextView count=text("0",34,Color.rgb(232,203,137),true);count.setGravity(Gravity.CENTER);
+        currentDhikr.setPadding(dp(4),dp(8),dp(4),dp(6));
+        TextView count=text("0",28,Color.rgb(232,203,137),true);count.setGravity(Gravity.CENTER);
         android.graphics.drawable.GradientDrawable countRing=new android.graphics.drawable.GradientDrawable();
         countRing.setShape(android.graphics.drawable.GradientDrawable.OVAL);
         countRing.setColor(Color.rgb(10,49,40));countRing.setStroke(dp(3),Color.rgb(218,185,112));
         android.widget.FrameLayout countCircle=new android.widget.FrameLayout(this);
         countCircle.setBackground(countRing);
-        countCircle.addView(count,new android.widget.FrameLayout.LayoutParams(dp(104),dp(104),Gravity.CENTER));
-        LinearLayout circleHolder=row();circleHolder.setGravity(Gravity.CENTER);circleHolder.addView(countCircle,new LinearLayout.LayoutParams(dp(112),dp(112)));
+        countCircle.addView(count,new android.widget.FrameLayout.LayoutParams(dp(80),dp(80),Gravity.CENTER));
+        LinearLayout circleHolder=row();circleHolder.setGravity(Gravity.CENTER);circleHolder.addView(countCircle,new LinearLayout.LayoutParams(dp(88),dp(88)));
         TextView target=text("",13,Color.rgb(225,225,215),false);target.setGravity(Gravity.CENTER);
         TextView tasProgress=text("",13,Color.rgb(225,225,215),false);tasProgress.setGravity(Gravity.CENTER);
         int[] dhikrIndex={prefs.getInt("native_tasbeeh_dhikr",0)};
@@ -356,8 +356,8 @@ public class MainActivity extends Activity {
         LinearLayout actions=row();
         Button add=new Button(this);add.setText("سَبِّح");add.setTextSize(17);
         Button reset=new Button(this);reset.setText("إعادة");
-        actions.addView(add,new LinearLayout.LayoutParams(0,dp(54),2));
-        actions.addView(reset,new LinearLayout.LayoutParams(0,dp(54),1));
+        actions.addView(add,new LinearLayout.LayoutParams(0,dp(44),2));
+        actions.addView(reset,new LinearLayout.LayoutParams(0,dp(44),1));
         tasbeehGoal.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             public void onNothingSelected(AdapterView<?> parent){}
             public void onItemSelected(AdapterView<?> parent,View view,int position,long id){
@@ -366,6 +366,7 @@ public class MainActivity extends Activity {
                     goal[0]=selectedGoal;
                     currentCount[0]=0;
                     prefs.edit().putInt("native_tasbeeh_goal",goal[0]).putInt("native_tasbeeh_count",0).apply();
+                    TasbeehWidget.refreshAll(MainActivity.this);
                 }
                 drawTasbeeh.run();
             }
@@ -375,6 +376,7 @@ public class MainActivity extends Activity {
             if(currentCount[0]>=goal[0]){
                 prefs.edit().putInt("native_tasbeeh_count",0)
                     .putInt("native_tasbeeh_dhikr",(dhikrIndex[0]+1)%tasbeehDhikr.length).apply();
+                TasbeehWidget.refreshAll(MainActivity.this);
                 dhikrIndex[0]=(dhikrIndex[0]+1)%tasbeehDhikr.length;
                 currentCount[0]=0;
                 drawTasbeeh.run();
@@ -382,12 +384,14 @@ public class MainActivity extends Activity {
             }else{
                 prefs.edit().putInt("native_tasbeeh_count",currentCount[0])
                     .putInt("native_tasbeeh_dhikr",dhikrIndex[0]).apply();
+                TasbeehWidget.refreshAll(MainActivity.this);
                 drawTasbeeh.run();
             }
         });
         reset.setOnClickListener(v->{
             currentCount[0]=0;
             prefs.edit().putInt("native_tasbeeh_count",0).apply();
+            TasbeehWidget.refreshAll(MainActivity.this);
             drawTasbeeh.run();
         });
         tasbeeh.addView(tasTitle);tasbeeh.addView(tasDesc);
