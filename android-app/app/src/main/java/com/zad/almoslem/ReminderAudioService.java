@@ -71,9 +71,15 @@ public class ReminderAudioService extends Service {
         // The adhan service may hand off the same dua more than once if Android
         // redelivers a start request. Keep the current playback instead of resetting
         // the queue and replaying Sheikh Al-Shaarawy from the beginning.
-        if ("dua".equals(kind) && "dua".equals(activeKind) && player != null) {
-            android.util.Log.i("ZadAlmoslem","Ignoring duplicate post-adhan dua start");
-            return START_NOT_STICKY;
+        if ("dua".equals(kind)) {
+            android.content.SharedPreferences duaPrefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);
+            long lastDuaStart=duaPrefs.getLong("last_post_adhan_dua_start",0L);
+            long now=System.currentTimeMillis();
+            if (("dua".equals(activeKind) && player != null) || (lastDuaStart>0L && now-lastDuaStart<20*60*1000L)) {
+                android.util.Log.i("ZadAlmoslem","Ignoring duplicate post-adhan dua start within deduplication window");
+                return START_NOT_STICKY;
+            }
+            duaPrefs.edit().putLong("last_post_adhan_dua_start",now).apply();
         }
         activeKind = kind;
         if("dua".equals(kind)){userStopped=false;currentTrackTitle="دعاء الشيخ محمد متولي الشعراوي";}
