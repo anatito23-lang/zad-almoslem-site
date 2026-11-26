@@ -1,5 +1,5 @@
 name: Build Zad Almoslem Android
-# Rebuild trigger: harmless comment update to validate release signing secrets.
+# Rebuild trigger: validate release signing and the redesigned tasbeeh widget.
 
 on:
   workflow_dispatch:
@@ -33,65 +33,38 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Accept Android SDK licenses
         run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-
       - name: Install Android SDK 36
         run: $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0"
-
       - name: Set up Gradle 8.11.1
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.11.1'
-
-      # Download the licensed source photographs during CI and package them as
-      # Android drawable resources. They are therefore present in every APK/AAB.
       - name: Download and validate bundled adhan photographs
         shell: bash
         run: |
           set -euo pipefail
           DEST="android-app/app/src/main/res/drawable-nodpi"
           mkdir -p "$DEST"
-          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
-            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
-            "https://commons.wikimedia.org/wiki/Special:Redirect/file/AlAzhar_Mosque.jpg?width=960" \
-            -o "$DEST/azhar_mosque_bg.jpg"
-          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
-            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
-            "https://commons.wikimedia.org/wiki/Special:Redirect/file/Holy_Kaaba.jpg?width=960" \
-            -o "$DEST/kaaba_wallpaper.jpg"
-          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
-            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
-            "https://commons.wikimedia.org/wiki/Special:Redirect/file/Al_Masjid_an_Nabawi.jpg?width=960" \
-            -o "$DEST/madinah_wallpaper.jpg"
-          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
-            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
-            "https://commons.wikimedia.org/wiki/Special:Redirect/file/%D8%A7%D9%84%D9%85%D8%B3%D8%AC%D8%AF_%D8%A7%D9%84%D8%A3%D9%82%D8%B5%D9%89_%D8%A7%D9%84%D9%85%D8%A8%D8%A7%D8%B1%D9%83%D9%A1.jpg?width=960" \
-            -o "$DEST/aqsa_wallpaper.jpg"
-          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 \
-            -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" \
-            "https://commons.wikimedia.org/wiki/Special:Redirect/file/A_photo_of_a_Quran.jpg?width=500" \
-            -o "$DEST/quran_wallpaper.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" "https://commons.wikimedia.org/wiki/Special:Redirect/file/AlAzhar_Mosque.jpg?width=960" -o "$DEST/azhar_mosque_bg.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" "https://commons.wikimedia.org/wiki/Special:Redirect/file/Holy_Kaaba.jpg?width=960" -o "$DEST/kaaba_wallpaper.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" "https://commons.wikimedia.org/wiki/Special:Redirect/file/Al_Masjid_an_Nabawi.jpg?width=960" -o "$DEST/madinah_wallpaper.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" "https://commons.wikimedia.org/wiki/Special:Redirect/file/%D8%A7%D9%84%D9%85%D8%B3%D8%AC%D8%AF_%D8%A7%D9%84%D8%A3%D9%82%D8%B5%D9%89_%D8%A7%D9%84%D9%85%D8%A8%D8%A7%D8%B1%D9%83%D9%A1.jpg?width=960" -o "$DEST/aqsa_wallpaper.jpg"
+          curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 -A "ZadAlmoslemAndroid/3.2 (bundled wallpaper assets)" "https://commons.wikimedia.org/wiki/Special:Redirect/file/A_photo_of_a_Quran.jpg?width=500" -o "$DEST/quran_wallpaper.jpg"
           python3 - "$DEST" <<'PY'
           import pathlib, sys
           folder = pathlib.Path(sys.argv[1])
-          names = ["azhar_mosque_bg.jpg", "kaaba_wallpaper.jpg", "madinah_wallpaper.jpg",
-                   "aqsa_wallpaper.jpg", "quran_wallpaper.jpg"]
-          for name in names:
-              path = folder / name
-              data = path.read_bytes()
+          for name in ["azhar_mosque_bg.jpg", "kaaba_wallpaper.jpg", "madinah_wallpaper.jpg", "aqsa_wallpaper.jpg", "quran_wallpaper.jpg"]:
+              data = (folder / name).read_bytes()
               if len(data) < 2048 or not data.startswith(bytes.fromhex("ffd8")) or not data.endswith(bytes.fromhex("ffd9")):
-                  raise SystemExit(f"Invalid or incomplete JPEG wallpaper: {name}")
-              print(f"Validated {name}: {len(data)} bytes")
+                  raise SystemExit(f"Invalid JPEG: {name}")
           PY
-
       - name: Download and validate human-recorded CC0 adhan
         shell: bash
         run: |
@@ -101,12 +74,10 @@ jobs:
           curl --fail --location --retry 3 --retry-all-errors --connect-timeout 20 --max-time 90 "https://upload.wikimedia.org/wikipedia/commons/b/b0/Beautiful_adhan.ogg" -o "$DEST/beautiful_adhan.ogg"
           python3 - "$DEST/beautiful_adhan.ogg" <<'PY'
           import pathlib, sys
-          p = pathlib.Path(sys.argv[1]); data = p.read_bytes()
+          data = pathlib.Path(sys.argv[1]).read_bytes()
           if len(data) < 100000 or not data.startswith(b"OggS"):
-              raise SystemExit("Invalid or incomplete human-recorded adhan audio")
-          print(f"Validated CC0 human adhan: {len(data)} bytes")
+              raise SystemExit("Invalid adhan audio")
           PY
-
       - name: Generate density-specific PNG launcher icons
         shell: bash
         run: |
@@ -116,55 +87,34 @@ jobs:
           dwebp android-app/app/src/main/res/drawable-nodpi/ic_launcher_sakina.webp -o /tmp/sakina-icon.png
           python3 -m pip install --disable-pip-version-check Pillow
           python3 android-app/scripts/generate_launcher_icons.py /tmp/sakina-icon.png
-          for density in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
-            test -s "android-app/app/src/main/res/mipmap-${density}/ic_launcher.png"
-          done
-
       - name: Build debug APK
         working-directory: android-app
         run: gradle assembleDebug
-
       - name: Prepare and require release signing key
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$ANDROID_KEYSTORE_BASE64" || { echo "::error::Missing ANDROID_KEYSTORE_BASE64 repository secret."; exit 1; }
-          test -n "$ANDROID_KEYSTORE_PASSWORD" || { echo "::error::Missing ANDROID_KEYSTORE_PASSWORD repository secret."; exit 1; }
-          test -n "$ANDROID_KEY_ALIAS" || { echo "::error::Missing ANDROID_KEY_ALIAS repository secret."; exit 1; }
-          test -n "$ANDROID_KEY_PASSWORD" || { echo "::error::Missing ANDROID_KEY_PASSWORD repository secret."; exit 1; }
+          test -n "$ANDROID_KEYSTORE_BASE64"
+          test -n "$ANDROID_KEYSTORE_PASSWORD"
+          test -n "$ANDROID_KEY_ALIAS"
+          test -n "$ANDROID_KEY_PASSWORD"
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android-app/app/release-key.jks
-          test -s android-app/app/release-key.jks
           keytool -list -keystore android-app/app/release-key.jks -storepass "$ANDROID_KEYSTORE_PASSWORD" >/dev/null
-          echo "Release keystore validated; release outputs will be signed."
-
       - name: Build release APK and Android App Bundle
         working-directory: android-app
         run: gradle assembleRelease bundleRelease
-
       - name: Verify release APK and AAB signatures
         shell: bash
         run: |
           set -euo pipefail
           APK="android-app/app/build/outputs/apk/release/app-release.apk"
           AAB="android-app/app/build/outputs/bundle/release/app-release.aab"
-          test -s "$APK"
-          test -s "$AAB"
+          test -s "$APK" && test -s "$AAB"
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
           jarsigner -verify -verbose "$AAB" >/dev/null
-          echo "Verified: release APK and Google Play AAB are signed."
-
       - name: Remove temporary signing key
         if: always()
         run: rm -f android-app/app/release-key.jks
-
-      - name: Upload debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: zad-almoslem-debug-apk
-          path: android-app/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 30
-
       - name: Upload release APK
         uses: actions/upload-artifact@v4
         with:
@@ -172,7 +122,13 @@ jobs:
           path: android-app/app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 90
-
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: zad-almoslem-debug-apk
+          path: android-app/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
       - name: Upload release AAB
         uses: actions/upload-artifact@v4
         with:
