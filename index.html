@@ -930,12 +930,12 @@ footer .footer-links{display:flex;justify-content:center;flex-wrap:wrap;gap:8px 
 @media(max-width:820px){.site-directory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:520px){.site-directory-grid{grid-template-columns:1fr}}
 </style>
 <style id="zad-five-section-layout">
-/* الصفحة الرئيسية: ستة أقسام أساسية فقط، مع إبقاء ملفات التشغيل والبيانات كما هي */
+/* الصفحة الرئيسية: الأقسام الأساسية ومحتوى الخواطر والطمأنينة */
 main.wrap{display:flex;flex-direction:column;gap:0}
-main.wrap>.section:not(#prayer-times):not(#quran):not(#khutbahs):not(#azkar):not(#books-library):not(#qalbi-itmaann),
+main.wrap>.section:not(#prayer-times):not(#quran):not(#khutbahs):not(#azkar):not(#books-library):not(#khawatir):not(#qalbi-itmaann),
 main.wrap>.date-strip,main.wrap>.site-directory,main.wrap>.section-divider{display:none!important}
-#prayer-times{order:1}#quran{order:2}#khutbahs{order:3}#azkar{order:4}#books-library{order:5}#qalbi-itmaann{order:6}
-#prayer-times,#quran,#khutbahs,#azkar,#books-library,#qalbi-itmaann{display:block;width:100%}
+#prayer-times{order:1}#quran{order:2}#khutbahs{order:3}#azkar{order:4}#books-library{order:5}#khawatir{order:6}#qalbi-itmaann{order:7}
+#prayer-times,#quran,#khutbahs,#azkar,#books-library,#khawatir,#qalbi-itmaann{display:block;width:100%}
 #azkar>.grid>.card:nth-child(n+3){display:none!important}
 #islamic-knowledge{display:none!important}
 .bottom-nav{display:flex!important}
@@ -1043,7 +1043,7 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
   <div class="top">
     <div class="brand"><span class="brand-mark">۞</span><span>قلبي اطمأن</span></div>
     <nav aria-label="التنقل الرئيسي">
-<a href="#prayer-times">مواقيت الصلاة</a><a href="#quran">استماع القرآن</a><a href="#zad-mushaf">مصحف زاد</a><a href="./khutbahs.html">خطب زاد</a><a href="./awqaf-khutbah.html">خطب وزارة الأوقاف المصرية</a><a href="#azkar">أذكار زاد</a><a href="#books-library">المكتبة الإسلامية</a><a href="#qalbi-itmaann">قلبي اطمأن</a>
+<a href="#prayer-times">مواقيت الصلاة</a><a href="#quran">استماع القرآن</a><a href="#zad-mushaf">مصحف زاد</a><a href="./khutbahs.html">خطب زاد</a><a href="./awqaf-khutbah.html">خطب وزارة الأوقاف المصرية</a><a href="#azkar">أذكار زاد</a><a href="#books-library">المكتبة الإسلامية</a><a href="#khawatir">الخواطر</a><a href="#qalbi-itmaann">قلبي اطمأن</a>
 </nav>
   </div>
   <div class="hero-content">
@@ -1192,7 +1192,7 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
 <article class="directory-card"><span>🕌</span><h3>العبادة اليومية</h3><p>الصلاة والذكر والورد.</p><div><a href="#calendar">التقويم</a><a href="#azkar">الأذكار</a><a href="#daily-wird">وردي اليومي</a><a href="#duas">الأدعية</a></div></article>
 <article class="directory-card"><span>📖</span><h3>القرآن والتلاوات</h3><p>استمع واقرأ وتدبر.</p><div><a href="#quran">استماع القرآن</a><a href="#radio-egypt">إذاعات القرآن</a><a href="#ruqyah">الرقية الشرعية</a><a href="#nasheed">الإنشاد والابتهالات</a></div></article>
 <article class="directory-card"><span>📚</span><h3>السنة والعلم</h3><p>زاد معرفتك بالحديث والكتب.</p><div><a href="#hadith-dua">الحديث الشريف</a><a href="#books-library">المكتبة الإسلامية</a><a href="#library">المكتبة الإيمانية</a><a href="#shaaraawi">خواطر الشعراوي</a><a href="#islamic-knowledge">زاد العلم والإيمان</a></div></article>
-<article class="directory-card"><span>💚</span><h3>الخطب والخواطر</h3><p>كلمات إيمانية توقظ القلب.</p><div><a href="#qalbi-itmaann">قلبي اطمئن</a><a href="#khutbahs">خطب الجمعة</a><a href="#friday-live">بث خطبة الجمعة</a></div></article>
+<article class="directory-card"><span>💚</span><h3>الخطب والخواطر</h3><p>كلمات إيمانية توقظ القلب.</p><div><a href="#khawatir">الخواطر</a><a href="#qalbi-itmaann">قلبي اطمئن</a><a href="#khutbahs">خطب الجمعة</a><a href="#friday-live">بث خطبة الجمعة</a></div></article>
 <article class="directory-card"><span>🌱</span><h3>الأسرة والناشئة</h3><p>مساحة مبسطة للتعلم.</p><div><a href="#kids">ركن الأطفال</a><a href="#daily-reminder-settings">التنبيهات اليومية</a></div></article>
 </div></section>
 <section class="section" id="calendar">
@@ -1689,16 +1689,33 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
 
   
 
+
+  <section class="section" id="khawatir">
+    <div class="section-head"><div><h2>الخواطر</h2><p>وقفة إيمانية قصيرة — الجمعة 27 نوفمبر 2026</p></div><span class="small">زاد اليوم</span></div>
+    <article class="card">
+      <div class="icon">✦</div>
+      <h3>الستر خُلُق يحفظ القلوب</h3>
+      <p class="small">خاطرة من صياغة زاد المسلم — الجمعة 27 نوفمبر 2026</p>
+      <p style="font-size:16px;color:var(--ink);line-height:2">قد تعرف عن إنسان زلّة لا يعرفها غيرك. هنا يظهر خُلُقك: أتحفظ عليه كرامته، أم تجعل خطأه حديث المجالس؟ ليس كل ما تعرفه يُقال، ولا كل ما يُقال ينفع. إن رأيت خطأً فانصح صاحبه سرًّا، وادعُ له، ولا تحوّل النصيحة إلى فضيحة. والستر لا يعني تبرير الظلم، ولا إخفاء اعتداء، ولا منع صاحب حق من طلب الإنصاف؛ إنما يعني ألا تتخذ عثرات الناس مادة للتشهير.</p>
+      <div class="ayah" style="margin-top:13px">
+        <div class="ayah-text" style="font-size:20px">«مَن ستر مسلمًا ستره الله في الدنيا والآخرة»</div>
+        <div class="ayah-ref">عن أبي هريرة رضي الله عنه — صحيح مسلم (2699)</div>
+      </div>
+      <p class="small" style="margin-top:9px"><a href="https://dorar.net/h/FrZgScE6/osoul" target="_blank" rel="noopener noreferrer">تخريج الحديث ونصه في صحيح مسلم</a>.</p>
+      <p style="margin-top:12px;color:var(--ink)"><strong>تذكير عملي:</strong> إذا بلغك اليوم خطأ أحد، فلا تنقله للناس. إن قدرت فانصحه برفق، واحفظ في الوقت نفسه حق من تضرر.</p>
+    </article>
+  </section>
+
   <section class="section" id="qalbi-itmaann">
-    <div class="section-head"><div><h2>قلبي اطمأن</h2><p>خاطرة اليوم — الجمعة 20 نوفمبر 2026</p></div><span class="small">تجدد يوميًا</span></div>
+    <div class="section-head"><div><h2>قلبي اطمأن</h2><p>رسالة اليوم — الجمعة 27 نوفمبر 2026</p></div><span class="small">تجدد يوميًا</span></div>
     <div class="card" style="background:linear-gradient(135deg,#fffefa,#f2f7f1);border-color:#e6dcc4">
       <div class="icon">♡</div>
-      <h3>اجعل لك عملًا لا يراه إلا الله</h3>
-      <p class="small">خاطرة من صياغة الموقع — الجمعة 20 نوفمبر 2026</p>
-      <p style="font-size:16px;color:var(--ink);line-height:2">ليس كل خير تفعله يحتاج إلى أن يعرفه الناس. اجعل بينك وبين الله عملًا لا تنتظر عليه مدحًا ولا شكرًا: صدقة لا يعلم بها أحد، أو ركعتين في هدوء، أو دعوة صادقة لإنسان لا يعرف أنك دعوت له، أو مساعدة تقدمها ثم تمضي دون أن تذكّر صاحبها بها. قد يخفى العمل عن العيون، لكنه لا يخفى على الله. والأعمال الخفية تربي القلب على الإخلاص، وتعلّمك أن رضا الله أغلى من ثناء الناس.</p>
-      <div class="ayah" style="margin-top:13px"><div class="ayah-text" style="font-size:21px">﴿وَأَسِرُّوا قَوْلَكُمْ أَوِ اجْهَرُوا بِهِ إِنَّهُ عَلِيمٌ بِذَاتِ الصُّدُورِ ۝ أَلَا يَعْلَمُ مَنْ خَلَقَ وَهُوَ اللَّطِيفُ الْخَبِيرُ﴾</div><div class="ayah-ref">سورة الملك: 13-14</div></div>
-      <p style="margin-top:12px;color:var(--ink)"><strong>تذكير عملي:</strong> اختر اليوم طاعة خفية واحدة، وأتمّها دون أن تخبر بها أحدًا، واحتسبها عند الله.</p>
-      <p class="small" style="margin-top:9px">دعاء: اللهم ارزقني الإخلاص في القول والعمل، واجعل سريرتي خيرًا من علانيتي.</p>
+      <h3>تكلّم مع الله كما أنت</h3>
+      <p class="small">رسالة من صياغة زاد المسلم — الجمعة 27 نوفمبر 2026</p>
+      <p style="font-size:16px;color:var(--ink);line-height:2">قد يمر بك وقت لا تعرف فيه كيف تشرح ما في صدرك؛ تتزاحم الأفكار، وتضيق العبارة، ولا تجد من يفهم كل ما تشعر به. لا تجعل عجزك عن ترتيب الكلام يمنعك من الدعاء. ارفع حاجتك إلى الله كما هي، في سجودك أو في خلوة قصيرة، وقل ما تستطيع. ربك قريب، يسمع دعاءك ويعلم ضعفك. ولا تحصر إجابة الدعاء في صورة واحدة أو موعد واحد؛ اسأل الله الخير، وخذ بالأسباب، وواصل طاعتك وأنت ترجو رحمته.</p>
+      <div class="ayah" style="margin-top:13px"><div class="ayah-text" style="font-size:20px">﴿وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ ۖ أُجِيبُ دَعْوَةَ الدَّاعِ إِذَا دَعَانِ ۖ فَلْيَسْتَجِيبُوا لِي وَلْيُؤْمِنُوا بِي لَعَلَّهُمْ يَرْشُدُونَ﴾</div><div class="ayah-ref">سورة البقرة: 186</div></div>
+      <p style="margin-top:12px;color:var(--ink)"><strong>تذكير عملي:</strong> خصص اليوم دقائق للدعاء، واذكر حاجتك بصدق، ثم خذ بالسبب المتاح ولا تدع القلق يسرق منك عبادة يومك.</p>
+      <p class="small" style="margin-top:9px">دعاء من صياغة زاد المسلم: اللهم أعنّي على دعائك، واملأ قلبي ثقةً برحمتك، واهدني لما فيه خير ديني ودنياي.</p>
     </div>
     <div class="grid" style="margin-top:14px">
       <div class="card"><div class="icon">🌿</div><h3>وقفة إيمانية</h3><p>ليس كل ما فقدته شرًّا، وليس كل ما تأخر عنك حرمانًا؛ سلّم أمرك لله، وخذ بالأسباب، ولا تستعجل حكمتك المحدودة على تدبير الله الواسع.</p></div>
@@ -1708,6 +1725,14 @@ if(window.ZadAndroid&&typeof window.ZadAndroid.isNativeApp==='function'&&window.
     </div>
     <details class="card" style="margin-top:14px">
       <summary style="cursor:pointer;color:var(--green);font-weight:700">أرشيف الخواطر السابقة</summary>
+      <article class="card" style="margin-top:10px">
+        <p class="small">الجمعة 20 نوفمبر 2026</p>
+        <h3>اجعل لك عملًا لا يراه إلا الله</h3>
+        <p>ليس كل خير تفعله يحتاج إلى أن يعرفه الناس. اجعل بينك وبين الله عملًا لا تنتظر عليه مدحًا ولا شكرًا: صدقة لا يعلم بها أحد، أو ركعتين في هدوء، أو دعوة صادقة لإنسان لا يعرف أنك دعوت له، أو مساعدة تقدمها ثم تمضي دون أن تذكّر صاحبها بها. قد يخفى العمل عن العيون، لكنه لا يخفى على الله. والأعمال الخفية تربي القلب على الإخلاص، وتعلّمك أن رضا الله أغلى من ثناء الناس.</p>
+        <div class="ayah"><div class="ayah-text" style="font-size:21px">﴿وَأَسِرُّوا قَوْلَكُمْ أَوِ اجْهَرُوا بِهِ إِنَّهُ عَلِيمٌ بِذَاتِ الصُّدُورِ ۝ أَلَا يَعْلَمُ مَنْ خَلَقَ وَهُوَ اللَّطِيفُ الْخَبِيرُ﴾</div><div class="ayah-ref">سورة الملك: 13-14</div></div>
+        <p><strong>تذكير عملي:</strong> اختر اليوم طاعة خفية واحدة، وأتمّها دون أن تخبر بها أحدًا، واحتسبها عند الله.</p>
+        <p class="small">دعاء: اللهم ارزقني الإخلاص في القول والعمل، واجعل سريرتي خيرًا من علانيتي.</p>
+      </article>
       <article class="card" style="margin-top:10px">
         <p class="small">الخميس 19 نوفمبر 2026</p>
         <h3>لا تُطفئ فرحة النعمة بالمقارنة</h3>
@@ -2675,7 +2700,7 @@ if ("serviceWorker" in navigator) { window.addEventListener("load", () => naviga
 <script id="zad-site-content-renderer-20261122">
 (function(){
  if(!['zad-almoslem.github.io','anatito23-lang.github.io'].includes(location.hostname))return;
- const sectionNames={calendar:"التقويم الشهري",nasheed:"الإنشاد الديني والابتهالات",ruqyah:"الرقية الشرعية","radio-egypt":"إذاعة القرآن الكريم",azkar:"الأذكار اليومية","books-library":"مكتبة الكتب الإسلامية","hadith-dua":"الحديث الشريف",duas:"الأدعية","daily-wird":"وردي اليومي","qalbi-itmaann":"قلبي اطمأن",library:"المكتبة الإيمانية","friday-live":"بث خطبة الجمعة",khutbahs:"خطب الجمعة",shaaraawi:"خواطر الشعراوي","islamic-knowledge":"زاد العلم والإيمان",ramadan:"زادك في رمضان"};
+ const sectionNames={calendar:"التقويم الشهري",nasheed:"الإنشاد الديني والابتهالات",ruqyah:"الرقية الشرعية","radio-egypt":"إذاعة القرآن الكريم",azkar:"الأذكار اليومية","books-library":"مكتبة الكتب الإسلامية","hadith-dua":"الحديث الشريف",duas:"الأدعية","daily-wird":"وردي اليومي","qalbi-itmaann":"قلبي اطمأن",library:"المكتبة الإيمانية",khawatir:"الخواطر","friday-live":"بث خطبة الجمعة",khutbahs:"خطب الجمعة",shaaraawi:"خواطر الشعراوي","islamic-knowledge":"زاد العلم والإيمان",ramadan:"زادك في رمضان"};
  const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
  const escId=/^[A-Za-z][A-Za-z0-9_-]{0,59}$/;
  function addText(parent,tag,text,cls){const el=document.createElement(tag);el.textContent=text||"";if(cls)el.className=cls;parent.append(el);return el;}
