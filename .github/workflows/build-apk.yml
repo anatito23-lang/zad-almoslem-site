@@ -180,3 +180,5 @@ jobs:
           path: android-app/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
           retention-days: 90
+
+# Build verification for the post-adhan dua playback fix.
