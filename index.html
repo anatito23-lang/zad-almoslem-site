@@ -159,6 +159,12 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 
 
 /* مكتبة الكتب وقارئها داخل الموقع */
+.book-reader-epub{height:min(72vh,850px);overflow:auto;background:#fff;color:#202820;padding:18px;direction:rtl}
+.book-reader-epub[hidden]{display:none}
+.book-reader-epub-nav{display:flex;justify-content:space-between;gap:12px;position:sticky;bottom:0;background:#fff;padding:10px;border-top:1px solid #ddd}
+.book-docx-content{max-width:850px;margin:auto;line-height:2;font-size:17px}
+.book-docx-content img{max-width:100%;height:auto}
+
 .book-empty{grid-column:1/-1;padding:12px 14px;margin:0;color:var(--muted);background:#f8faf7;border:1px dashed var(--line);border-radius:12px}
 #books-library .book-category-groups{gap:10px}
 #books-library .book-category-group>summary{font-size:16px}
@@ -1805,6 +1811,7 @@ main > #zad-section-menu a{display:flex}
       <div><strong id="bookReaderTitle">قارئ الكتب</strong><span>القراءة داخل موقع زاد المسلم</span></div>
       <button type="button" class="btn light" id="closeBookReader">إغلاق ✕</button>
     </div>
+    <div id="bookReaderEpub" class="book-reader-epub" hidden></div>
     <iframe id="bookReaderFrame" title="قارئ الكتاب" loading="lazy" allowfullscreen></iframe>
   </div>
 </div>
@@ -1982,16 +1989,39 @@ function updateBookCategoryCount(root,category){
  if(count)count.textContent=total+" كتاب";
  const empty=group.querySelector(".book-empty");if(empty&&total)empty.remove();
 }
-function openBookInSite(url,title,fileType){
- const modal=document.getElementById("bookReaderModal"),frame=document.getElementById("bookReaderFrame");
- const heading=document.getElementById("bookReaderTitle");if(!modal||!frame)return;
- const type=String(fileType||"").toLowerCase();
- const readable=type.includes("pdf")||type.includes("text")||type.includes("rtf")||/\.(pdf|txt|rtf)(?:$|\?)/i.test(url);
+let activeEpubBook=null;
+function loadLibraryScript(src){
+ return new Promise((resolve,reject)=>{const existing=document.querySelector('script[data-library-reader="'+src+'"]');if(existing){if(existing.dataset.loaded==="true")return resolve();existing.addEventListener("load",resolve,{once:true});existing.addEventListener("error",reject,{once:true});return;}
+ const s=document.createElement("script");s.src=src;s.dataset.libraryReader=src;s.onload=()=>{s.dataset.loaded="true";resolve();};s.onerror=reject;document.head.append(s);});
+}
+async function openBookInSite(url,title,fileType){
+ const modal=document.getElementById("bookReaderModal"),frame=document.getElementById("bookReaderFrame"),epubHost=document.getElementById("bookReaderEpub");
+ const heading=document.getElementById("bookReaderTitle");if(!modal||!frame||!epubHost)return;
+ const type=String(fileType||"").toLowerCase(),isEpub=type.includes("epub")||/\.epub(?:$|\?)/i.test(url),isDocx=type.includes("wordprocessingml")||/\.docx(?:$|\?)/i.test(url);
  const old=modal.querySelector(".book-reader-notice");if(old)old.remove();
+ if(activeEpubBook){try{activeEpubBook.destroy();}catch(e){}activeEpubBook=null;}
+ epubHost.hidden=true;epubHost.replaceChildren();frame.hidden=false;frame.src="about:blank";
  heading.textContent=title||"قارئ الكتب";
- if(!readable){frame.src="about:blank";const note=document.createElement("div");note.className="book-reader-notice notice";note.textContent="هذه الصيغة لا يدعمها عارض المتصفح مباشرة. يمكنك تنزيل الكتاب من زر التحميل دون مغادرة موقع زاد.";modal.querySelector(".book-reader-dialog").append(note);}
- else{frame.src=url;frame.title="قراءة "+(title||"الكتاب");}
  modal.classList.add("active");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
+ if(isEpub){
+  frame.hidden=true;epubHost.hidden=false;epubHost.textContent="جارٍ تجهيز الكتاب...";
+  try{await loadLibraryScript("https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js");if(!window.ePub)throw new Error("تعذر تحميل قارئ EPUB");
+   epubHost.replaceChildren();activeEpubBook=window.ePub(url);const rendition=activeEpubBook.renderTo(epubHost,{width:"100%",height:"100%",flow:"paginated",spread:"none"});await rendition.display();
+   const nav=document.createElement("div");nav.className="book-reader-epub-nav";
+   const prev=document.createElement("button");prev.className="btn light";prev.textContent="السابق";prev.onclick=()=>rendition.prev();
+   const next=document.createElement("button");next.className="btn green";next.textContent="التالي";next.onclick=()=>rendition.next();nav.append(prev,next);epubHost.append(nav);
+  }catch(e){epubHost.textContent="تعذر فتح الكتاب بصيغة EPUB داخل المتصفح. يمكنك تنزيل الملف من زر التحميل.";}
+  return;
+ }
+ if(isDocx){
+  frame.hidden=true;epubHost.hidden=false;epubHost.textContent="جارٍ تجهيز مستند Word...";
+  try{await loadLibraryScript("https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js");const response=await fetch(url);if(!response.ok)throw new Error("download failed");const buffer=await response.arrayBuffer();const result=await window.mammoth.convertToHtml({arrayBuffer:buffer});epubHost.replaceChildren();const article=document.createElement("article");article.className="book-docx-content";article.dir="auto";article.innerHTML=result.value;epubHost.append(article);}
+  catch(e){epubHost.textContent="تعذر عرض ملف Word داخل الموقع. يمكنك تنزيل الكتاب من زر التحميل.";}
+  return;
+ }
+ const readable=type.includes("pdf")||type.includes("text")||type.includes("rtf")||/\.(pdf|txt|rtf)(?:$|\?)/i.test(url);
+ if(readable){frame.src=url;frame.title="قراءة "+(title||"الكتاب");}
+ else{frame.hidden=true;epubHost.hidden=false;epubHost.textContent="هذه الصيغة لا يدعمها المتصفح للقراءة المباشرة. يمكنك تنزيل الكتاب من زر التحميل.";}
 }
 (async()=>{
  const grid=document.getElementById("bookLibraryGrid"),status=document.getElementById("dynamicLibraryStatus");if(!grid)return;
