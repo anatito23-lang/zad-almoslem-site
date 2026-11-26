@@ -39,23 +39,37 @@ canvas{display:block;background:white;max-width:100%;height:auto;box-shadow:0 2p
  }
  if(!window.pdfjsLib){status.textContent='تعذر تحميل قارئ PDF. تأكد من اتصال الإنترنت ثم أعد تحميل الصفحة.';return;}
  pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
- const repositoryCopy='https://raw.githubusercontent.com/zad-almoslem/zad-almoslem.github.io/main/books/bulugh-al-maram.pdf';
+ const repositoryCopies=[
+  'https://raw.githubusercontent.com/zad-almoslem/zad-almoslem.github.io/main/books/bulugh-al-maram.pdf',
+  'https://cdn.jsdelivr.net/gh/zad-almoslem/zad-almoslem.github.io@main/books/bulugh-al-maram.pdf'
+ ];
  async function loadPdf(){
+  let localError=null;
   try {
-   const localDoc=await pdfjsLib.getDocument({url:url}).promise;
-   return localDoc;
-  } catch(localError) {
-   console.warn('تعذر تحميل نسخة Pages، تتم تجربة نسخة المستودع.',localError);
-   status.textContent='جارٍ استعادة نسخة الكتاب من مستودع المكتبة…';
-   const response=await fetch(repositoryCopy,{cache:'no-store'});
-   if(!response.ok) throw new Error('تعذر الوصول إلى ملف الكتاب من المستودع (HTTP '+response.status+').');
-   const bytes=await response.arrayBuffer();
-   if(bytes.byteLength<1000000) throw new Error('ملف PDF المسترجع أصغر من الحجم المتوقع.');
-   return await pdfjsLib.getDocument({data:new Uint8Array(bytes)}).promise;
+   return await pdfjsLib.getDocument({url:url}).promise;
+  } catch(e) {
+   localError=e;
+   console.warn('تعذر تحميل نسخة الموقع، تتم تجربة مصادر المستودع.',e);
   }
+  let lastError=localError;
+  for(const source of repositoryCopies){
+   try {
+    status.textContent='جارٍ تحميل نسخة احتياطية من الكتاب…';
+    const response=await fetch(source,{cache:'no-store',mode:'cors'});
+    if(!response.ok) throw new Error('HTTP '+response.status);
+    const bytes=await response.arrayBuffer();
+    if(bytes.byteLength<1000000 || String.fromCharCode(...new Uint8Array(bytes.slice(0,5)))!=='%PDF-')
+     throw new Error('الملف المسترجع ليس PDF صالحًا أو حجمه غير متوقع.');
+    return await pdfjsLib.getDocument({data:new Uint8Array(bytes)}).promise;
+   } catch(e) {
+    lastError=e;
+    console.warn('فشل مصدر احتياطي:',source,e);
+   }
+  }
+  throw new Error('فشلت جميع مصادر تحميل الكتاب: '+(lastError&&lastError.message||'خطأ غير معروف'));
  }
  loadPdf().then(doc=>{pdf=doc;buttons();renderPage(1);}).catch(e=>{
-  status.textContent='تعذر تحميل ملف الكتاب حتى من نسخة المستودع. قد تكون نسخة النشر لم تكتمل بعد. أعد المحاولة بعد قليل.';
+  status.textContent='تعذر تحميل الكتاب من جميع المصادر. تحقق من اتصال الإنترنت ثم أعد المحاولة، أو افتح الصفحة في Chrome.';
   console.error('PDF load failed:',e);
  });
  prev.addEventListener('click',()=>{if(page>1)renderPage(page-1);});
