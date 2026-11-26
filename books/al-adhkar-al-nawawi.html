@@ -29,7 +29,7 @@ const raw='https://raw.githubusercontent.com/OpenITI/0700AH/master/data/0676Nawa
 const status=document.getElementById('status'),content=document.getElementById('pageContent'),field=document.getElementById('page'),prev=document.getElementById('prev'),next=document.getElementById('next'),pageNo=document.getElementById('pageNo');
 let pages=[],current=0;
 function clean(s){return s.split('\n').map(x=>x.replace(/^~~\s?/,'').replace(/^#{1,6}\s?/,'').trim()).filter(x=>x&&!/^#META#/.test(x)&&x!=='#META#Header#End#').join('\n\n').trim()}
-function render(i){current=Math.max(0,Math.min(pages.length-1,i));const p=pages[current];content.textContent=p.text;content.hidden=false;status.hidden=true;field.value=p.num;prev.disabled=current===0;next.disabled=current===pages.length-1;pageNo.textContent='صفحة المصدر رقم '+p.num+' · '+(current+1)+' من '+pages.length;window.scrollTo({top:0,behavior:'smooth'})}
+function render(i){current=Math.max(0,Math.min(pages.length-1,i));const p=pages[current];content.textContent=p.text;content.hidden=false;status.hidden=true;field.value=current+1;prev.disabled=current===0;next.disabled=current===pages.length-1;pageNo.textContent='صفحة القراءة رقم '+(current+1)+' من '+pages.length+(p.sourceNum?' · علامة المصدر: '+p.sourceNum:'');window.scrollTo({top:0,behavior:'smooth'})}
 try{
 const response=await fetch(raw,{cache:'force-cache'});if(!response.ok)throw new Error('تعذر الوصول إلى ملف النص ('+response.status+')');
 const source=await response.text();const lines=source.split(/\r?\n/);let active=null,buffer=[];
