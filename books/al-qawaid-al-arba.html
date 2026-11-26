@@ -23,7 +23,16 @@ mark{background:#ffec9b;padding:0 2px}
 @media(max-width:520px){.book p{font-size:18px}.tools{top:0}}
 @media print{header{background:#fff;color:#000;padding:10px}.tools{display:none}body{background:#fff}.book{box-shadow:none;border:0}.book p{font-size:17px}}
 </style>
-</head>
+<style>
+body.zad-night{background:#151b19!important;color:#e6e8e4!important}
+body.zad-night main,body.zad-night .book{background:#202925!important;color:#e6e8e4!important;border-color:#3b4941!important}
+body.zad-night .hadith,body.zad-night .book-paragraph p{border-color:#3b4941!important}
+body.zad-night .hadith h2,body.zad-night .book-paragraph h2,body.zad-night .notes h2{color:#d7bd80!important}
+body.zad-night .notice,body.zad-night .toc,body.zad-night .index,body.zad-night .meta,body.zad-night .notes{background:#29352f!important;color:#e1e6df!important;border-color:#56634f!important}
+body.zad-night .tools{background:#202925!important}
+body.zad-night input{background:#151b19!important;color:#fff!important;border-color:#56634f!important}
+body.zad-night .source,body.zad-night footer{color:#b8c2ba!important}
+</style></head>
 <body>
 <header><h1>القواعد الأربع</h1><p>للإمام محمد بن عبد الوهاب رحمه الله</p></header>
 <main>
@@ -103,4 +112,24 @@ document.getElementById('print').onclick=()=>window.print();
   });
 })();
 </script>
-</body></html>
+<script>
+(function(){
+ const key='zad-library-night:'+location.pathname;
+ const button=document.createElement('button');
+ button.type='button';
+ button.textContent='🌙 وضع القراءة الليلي';
+ button.setAttribute('aria-pressed','false');
+ button.style.cssText='position:fixed;left:14px;bottom:16px;z-index:9998;border:1px solid #b28a3b;border-radius:999px;padding:10px 14px;background:#174c3c;color:#fff;font:bold 13px Tahoma,Arial,sans-serif;box-shadow:0 4px 16px #0003;cursor:pointer';
+ function apply(on){
+  document.body.classList.toggle('zad-night',on);
+  button.textContent=on?'☀️ وضع القراءة النهاري':'🌙 وضع القراءة الليلي';
+  button.setAttribute('aria-pressed',String(on));
+  try{localStorage.setItem(key,on?'1':'0')}catch(e){}
+ }
+ let initial=false;
+ try{initial=localStorage.getItem(key)==='1'}catch(e){}
+ document.body.appendChild(button);
+ apply(initial);
+ button.addEventListener('click',function(){apply(!document.body.classList.contains('zad-night'))});
+})();
+</script></body></html>

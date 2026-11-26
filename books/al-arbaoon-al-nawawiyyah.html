@@ -2,6 +2,15 @@
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="متن الأربعين النووية كاملًا، 42 حديثًا، للقراءة داخل موقع زاد المسلم."><title>الأربعون النووية كاملة | زاد المسلم</title>
 <style>
 :root{--green:#174c3c;--gold:#b28a3b;--ink:#26352e;--paper:#fffdf7}*{box-sizing:border-box}body{margin:0;background:#f0efe8;color:var(--ink);font-family:Tahoma,Arial,sans-serif;line-height:2}header{background:var(--green);color:#fff;padding:24px 16px;text-align:center}header h1{margin:0;font-size:27px}header p{margin:4px 0;color:#e6eee8}main{max-width:900px;margin:20px auto;padding:20px;background:var(--paper);border-radius:16px;box-shadow:0 5px 24px #0001}.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}.tools input{flex:1;min-width:180px;padding:10px;border:1px solid #c9cfc8;border-radius:9px;font:inherit}.tools button,.index button{border:0;background:var(--green);color:#fff;padding:8px 13px;border-radius:8px;font:inherit;cursor:pointer}.index{display:flex;gap:6px;flex-wrap:wrap;padding:12px;background:#edf3ed;border-radius:10px;margin:14px 0}.index button{background:#e4ebe4;color:var(--green);border:1px solid #d3dfd4;padding:4px 10px}.hadith{padding:18px 8px;border-bottom:1px solid #e6dfcf;scroll-margin-top:12px}.hadith h2{color:var(--green);font-size:20px;margin:0 0 8px}.hadith p{font-size:19px;line-height:2.2;margin:0}.num{display:inline-flex;align-items:center;justify-content:center;background:#f1e8d5;color:#6f5424;border-radius:50%;width:34px;height:34px;margin-left:8px;font-size:15px}.source{font-size:12px;color:#737b73;margin-top:8px}.notice{background:#fff6df;border-right:4px solid var(--gold);padding:12px;border-radius:8px;font-size:14px}footer{text-align:center;color:#70786f;font-size:12px;padding:20px}@media(max-width:600px){main{margin:0;border-radius:0;padding:14px}header h1{font-size:23px}.hadith p{font-size:17px}}
+</style><style>
+body.zad-night{background:#151b19!important;color:#e6e8e4!important}
+body.zad-night main,body.zad-night .book{background:#202925!important;color:#e6e8e4!important;border-color:#3b4941!important}
+body.zad-night .hadith,body.zad-night .book-paragraph p{border-color:#3b4941!important}
+body.zad-night .hadith h2,body.zad-night .book-paragraph h2,body.zad-night .notes h2{color:#d7bd80!important}
+body.zad-night .notice,body.zad-night .toc,body.zad-night .index,body.zad-night .meta,body.zad-night .notes{background:#29352f!important;color:#e1e6df!important;border-color:#56634f!important}
+body.zad-night .tools{background:#202925!important}
+body.zad-night input{background:#151b19!important;color:#fff!important;border-color:#56634f!important}
+body.zad-night .source,body.zad-night footer{color:#b8c2ba!important}
 </style></head><body>
 <header><h1>الأربعون النووية</h1><p>الإمام يحيى بن شرف النووي رحمه الله</p><p>المتن كاملًا — اثنان وأربعون حديثًا</p></header>
 <main><div class="notice">هذه الصفحة تعرض متن الأحاديث الـ42 مع العزو الوارد في النص المنقول. لا تتضمن شرحًا منسوبًا للإمام النووي. راجع مصادر التخريج عند الاستشهاد العلمي.</div>
@@ -49,4 +58,24 @@ search.addEventListener('input',()=>render(search.value.trim()));document.getEle
   });
 })();
 </script>
-</body></html>
+<script>
+(function(){
+ const key='zad-library-night:'+location.pathname;
+ const button=document.createElement('button');
+ button.type='button';
+ button.textContent='🌙 وضع القراءة الليلي';
+ button.setAttribute('aria-pressed','false');
+ button.style.cssText='position:fixed;left:14px;bottom:16px;z-index:9998;border:1px solid #b28a3b;border-radius:999px;padding:10px 14px;background:#174c3c;color:#fff;font:bold 13px Tahoma,Arial,sans-serif;box-shadow:0 4px 16px #0003;cursor:pointer';
+ function apply(on){
+  document.body.classList.toggle('zad-night',on);
+  button.textContent=on?'☀️ وضع القراءة النهاري':'🌙 وضع القراءة الليلي';
+  button.setAttribute('aria-pressed',String(on));
+  try{localStorage.setItem(key,on?'1':'0')}catch(e){}
+ }
+ let initial=false;
+ try{initial=localStorage.getItem(key)==='1'}catch(e){}
+ document.body.appendChild(button);
+ apply(initial);
+ button.addEventListener('click',function(){apply(!document.body.classList.contains('zad-night'))});
+})();
+</script></body></html>
