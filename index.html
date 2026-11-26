@@ -2063,7 +2063,9 @@ const bookFrame=document.getElementById("bookReaderFrame");
 function closeBookReader(){
  if(!bookModal)return;
  bookModal.classList.remove("active");bookModal.setAttribute("aria-hidden","true");
- if(bookFrame)bookFrame.src="about:blank";
+ if(bookFrame){bookFrame.src="about:blank";bookFrame.hidden=false;}
+ const epubHost=document.getElementById("bookReaderEpub");if(epubHost){epubHost.replaceChildren();epubHost.hidden=true;}
+ if(typeof activeEpubBook!=="undefined"&&activeEpubBook){try{activeEpubBook.destroy();}catch(e){}activeEpubBook=null;}
  const note=bookModal.querySelector(".book-reader-notice");if(note)note.remove();
  document.body.style.overflow="";
 }
