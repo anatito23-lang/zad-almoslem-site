@@ -104,6 +104,34 @@ public class ReminderReceiver extends BroadcastReceiver {
         cancel(context,"approach_"+name);
         context.getSharedPreferences(SILENT_PREFS,Context.MODE_PRIVATE).edit().remove(key).apply();
     }
+    public static void ensurePrayerAlarms(Context context,String[] names) {
+        android.content.SharedPreferences prefs=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
+        String zoneId=prefs.getString("native_city_timezone","");
+        if(zoneId.isEmpty() && "Egypt".equals(prefs.getString("native_country","Egypt"))) zoneId="Africa/Cairo";
+        if(zoneId.isEmpty()) zoneId=java.util.TimeZone.getDefault().getID();
+        java.util.TimeZone zone=java.util.TimeZone.getTimeZone(zoneId);
+        long now=System.currentTimeMillis();
+        for(String name:names) {
+            if(!prefs.getBoolean("prayer_enabled_"+name,true)) continue;
+            int hour=prefs.getInt("native_time_hour_"+name,-1);
+            int minute=prefs.getInt("native_time_minute_"+name,0);
+            if(hour<0 || hour>23 || minute<0 || minute>59) continue;
+            long savedAt=prefs.getLong("prayer_"+name,0L);
+            if(savedAt>0L && savedAt>=now-60L*60L*1000L) {
+                Calendar saved=Calendar.getInstance(zone);
+                saved.setTimeInMillis(savedAt);
+                if(saved.get(Calendar.HOUR_OF_DAY)==hour && saved.get(Calendar.MINUTE)==minute) continue;
+            }
+            Calendar next=Calendar.getInstance(zone);
+            next.set(Calendar.HOUR_OF_DAY,hour);
+            next.set(Calendar.MINUTE,minute);
+            next.set(Calendar.SECOND,0);
+            next.set(Calendar.MILLISECOND,0);
+            if(next.getTimeInMillis()<=now) next.add(Calendar.DAY_OF_YEAR,1);
+            schedulePrayer(context,name,next.getTimeInMillis());
+        }
+    }
+
     public static void schedulePrayer(Context context,String name,long at) {
         if(at<=System.currentTimeMillis()) return;
         String key="prayer_"+name;
@@ -248,14 +276,11 @@ public class ReminderReceiver extends BroadcastReceiver {
             audio.putExtra("voice", selectedVoice);
             audio.putExtra("play_dua_after",prefs.getBoolean("dua_after_adhan_enabled",true));
             try {
-                if (!exactAlarmAudioAllowed) {
-                    prefs.edit().putString("adhan_last_start_error",
-                            "فعّل إذن المنبهات الدقيقة من إعدادات التذكيرات لتشغيل الأذان صوتيًا").apply();
-                } else {
-                    prefs.edit().remove("adhan_last_start_error").apply();
-                    if(Build.VERSION.SDK_INT>=26) context.startForegroundService(audio);
-                    else context.startService(audio);
-                }
+                // If an alarm was delivered, attempt playback even when Android
+                // delivered it through the inexact fallback alarm.
+                prefs.edit().remove("adhan_last_start_error").apply();
+                if(Build.VERSION.SDK_INT>=26) context.startForegroundService(audio);
+                else context.startService(audio);
             } catch(Exception error) {
                 String detail = error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage();
                 prefs.edit().putString("adhan_last_start_error", detail).apply();

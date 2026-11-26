@@ -941,18 +941,6 @@ public class MainActivity extends Activity {
             int minute=prefs.getInt("native_time_minute_"+PRAYERS[i],0);
             if(homePrayerTimeViews[i]!=null)homePrayerTimeViews[i].setText(h<0?"--:--":String.format(Locale.getDefault(),"%02d:%02d",h,minute));
         }
-        {
-            android.app.AlarmManager alarms=(android.app.AlarmManager)getSystemService(ALARM_SERVICE);
-            if(alarms!=null){
-                for(String prayer:PRAYERS){
-                    int h=prefs.getInt("native_time_hour_"+prayer,-1);
-                    if(h>=0&&prefs.getBoolean("prayer_enabled_"+prayer,true)){
-                        Calendar next=Calendar.getInstance();next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,prefs.getInt("native_time_minute_"+prayer,0));next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);
-                        if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);
-                        ReminderReceiver.schedulePrayer(this,prayer,next.getTimeInMillis());
-                    }
-                }
-            }
-        }
+        ReminderReceiver.ensurePrayerAlarms(this,PRAYERS);
     }
 }
