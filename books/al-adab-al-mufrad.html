@@ -30,14 +30,14 @@ a{color:#174c3c}
 <button id="go" type="button">اذهب</button>
 <button id="next" type="button">الصفحة التالية</button>
 </div>
-<div class="viewer"><iframe id="reader" title="الأدب المفرد صفحة صفحة" src="https://www.khizanat.com/read/al-adab-al-mufrad/1/3" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-<p class="note">يعرض هذا القارئ صفحات الكتاب الأصلية الرقمية مرقمة كما في الطبعة المشار إليها، مع فهرس الأبواب والانتقال بين الصفحات. مصدر النص: مدوّنة OpenITI عبر مكتبة خِزانة، بترخيص المشاع الإبداعي: نسب المصنّف، غير تجاري، الترخيص بالمثل 4.0 (CC BY-NC-SA 4.0). النص والصفحات مستضافة لدى المصدر؛ يعرضها زاد داخل صفحة القراءة دون نقلها أو الادعاء بأنها مستضافة محليًا. <a href="https://www.khizanat.com/book/al-adab-al-mufrad" target="_blank" rel="noopener">بيانات الكتاب والترخيص</a>.</p>
+<div class="viewer"><iframe id="reader" title="الأدب المفرد صفحة صفحة" src="https://khizanat.com/read/al-adab-al-mufrad/1/3" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<p class="note">يعرض هذا القارئ صفحات الكتاب الأصلية الرقمية مرقمة كما في الطبعة المشار إليها، مع فهرس الأبواب والانتقال بين الصفحات. مصدر النص: مدوّنة OpenITI عبر مكتبة خِزانة، بترخيص المشاع الإبداعي: نسب المصنّف، غير تجاري، الترخيص بالمثل 4.0 (CC BY-NC-SA 4.0). النص والصفحات مستضافة لدى المصدر؛ يعرضها زاد داخل صفحة القراءة دون نقلها أو الادعاء بأنها مستضافة محليًا. <a href="https://khizanat.com/book/al-adab-al-mufrad" target="_blank" rel="noopener">بيانات الكتاب والترخيص</a>.</p>
 </main>
 <script>
 (function(){
 const frame=document.getElementById('reader'),field=document.getElementById('page');
 let page=3;const first=3,last=729;
-function show(n){page=Math.max(first,Math.min(last,Math.floor(Number(n)||first)));field.value=page;frame.src='https://www.khizanat.com/read/al-adab-al-mufrad/1/'+page}
+function show(n){page=Math.max(first,Math.min(last,Math.floor(Number(n)||first)));field.value=page;frame.src='https://khizanat.com/read/al-adab-al-mufrad/1/'+page}
 document.getElementById('go').addEventListener('click',()=>show(field.value));
 document.getElementById('prev').addEventListener('click',()=>show(page-1));
 document.getElementById('next').addEventListener('click',()=>show(page+1));
