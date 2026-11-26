@@ -159,6 +159,14 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 
 
 /* مكتبة الكتب وقارئها داخل الموقع */
+.book-empty{grid-column:1/-1;padding:12px 14px;margin:0;color:var(--muted);background:#f8faf7;border:1px dashed var(--line);border-radius:12px}
+#books-library .book-category-groups{gap:10px}
+#books-library .book-category-group>summary{font-size:16px}
+#books-library .book-category-count{white-space:nowrap;font-size:12px;color:#8a6b32}
+#books-library .book-card .btn{width:100%;text-align:center}
+#books-library .book-card img{border-radius:10px;box-shadow:0 5px 18px #102d2418}
+.book-reader-notice{margin:10px 15px}
+
 /* المكتبة الإسلامية: تصنيف الكتب حسب التخصص */
 .book-category-groups{display:flex;flex-direction:column;gap:12px;margin-top:14px}
 .book-category-group{border:1px solid var(--line);border-radius:16px;background:var(--paper);overflow:hidden}
@@ -1413,31 +1421,36 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
             <article class="card book-card" data-book-category="aqeedah"><div class="icon">📗</div><h3>القواعد الأربع</h3><div class="book-author">الإمام محمد بن عبد الوهاب</div><p>متن القواعد الأربع كاملًا، مع البحث وتكبير وتصغير الخط والطباعة.</p><div class="book-level">متن عقدي كامل</div><a class="btn light" href="./books/al-qawaid-al-arba/" target="_blank" rel="noopener">اقرأ الكتاب كاملًا داخل الموقع</a></article>
           </div>
         </details>
+        <details class="book-category-group" data-book-group="quran"><summary><span>📗 القرآن وعلومه</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="quran"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
+        <details class="book-category-group" data-book-group="tafsir"><summary><span>📖 التفسير وعلوم القرآن</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="tafsir"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
+        <details class="book-category-group" data-book-group="fiqh"><summary><span>⚖️ الفقه وأصوله</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="fiqh"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
+        <details class="book-category-group" data-book-group="seerah"><summary><span>🌙 السيرة النبوية والشمائل</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="seerah"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
+        <details class="book-category-group" data-book-group="akhlaq"><summary><span>🌿 الأخلاق والآداب</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="akhlaq"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
+        <details class="book-category-group" data-book-group="history"><summary><span>🏛️ التاريخ والحضارة الإسلامية</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="history"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
+        <details class="book-category-group" data-book-group="biography"><summary><span>👤 التراجم وسير العلماء</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="biography"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
+        <details class="book-category-group" data-book-group="women"><summary><span>🌸 المرأة والأسرة المسلمة</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="women"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
+        <details class="book-category-group" data-book-group="children"><summary><span>🧒 كتب الناشئة والأطفال</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="children"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
+        <details class="book-category-group" data-book-group="dawah"><summary><span>📣 الدعوة والفكر الإسلامي</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="dawah"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
+        <details class="book-category-group" data-book-group="fatwa"><summary><span>🧾 الفتاوى والنوازل</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="fatwa"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
+        <details class="book-category-group" data-book-group="spirituality"><summary><span>🤍 الرقائق والتزكية</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="spirituality"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
+        <details class="book-category-group" data-book-group="arabic"><summary><span>✒️ اللغة العربية وعلومها</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="arabic"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
+        <details class="book-category-group" data-book-group="other"><summary><span>📚 كتب متنوعة</span><span class="book-category-count">0 كتاب</span></summary><div class="book-grid" data-book-category-container="other"><p class="book-empty small">سيُضاف هنا كتاب موثّق بعد مراجعة مصدره وإتاحة ملفه.</p></div></details>
       </div>
       <p class="notice" style="margin-top:14px">المعروض هنا الآن هو المتون الكاملة فقط. أزلنا من فهرس الكتب العناوين التي كانت صفحاتها مداخل أو مختصرات، حتى لا يظن القارئ أنها كتب كاملة. ستُعاد أي مادة إلى فهرس الكتب بعد استكمال نصها كاملًا ومراجعة مصدرها. النسخ الأصلية المحمية بحقوق النشر لا تُنسخ دون إذن.</p>
     </div>
     <script>
     (function(){
-      const input=document.getElementById('zadBookSearch');
-      const grid=document.getElementById('bookLibraryGrid');
-      const count=document.getElementById('zadBookCount');
+      const input=document.getElementById('zadBookSearch'),grid=document.getElementById('bookLibraryGrid'),count=document.getElementById('zadBookCount');
       if(!input||!grid)return;
-      function filterBooks(){
-        const q=input.value.trim().toLocaleLowerCase('ar');
-        let visible=0;
+      window.zadFilterBooks=function(){
+        const q=input.value.trim().toLocaleLowerCase('ar');let visible=0;
         grid.querySelectorAll('.book-category-group').forEach(group=>{
-          let groupVisible=0;
-          group.querySelectorAll('.book-card').forEach(card=>{
-            const match=!q||card.textContent.toLocaleLowerCase('ar').includes(q);
-            card.hidden=!match;
-            if(match){visible++;groupVisible++;}
-          });
-          group.hidden=groupVisible===0;
-          if(q&&groupVisible)group.open=true;
+          let n=0;group.querySelectorAll('.book-card').forEach(card=>{const ok=!q||card.textContent.toLocaleLowerCase('ar').includes(q);card.hidden=!ok;if(ok){visible++;n++;}});
+          group.hidden=!!q&&n===0;if(q&&n)group.open=true;
         });
-        count.textContent='يظهر '+visible+' من 4 كتب كاملة';
-      }
-      input.addEventListener('input',filterBooks);
+        if(count)count.textContent='عدد الكتب الظاهرة: '+visible;
+      };
+      input.addEventListener('input',window.zadFilterBooks);window.zadFilterBooks();
     })();
     </script>
   </section>
@@ -1943,111 +1956,78 @@ function notifyUser(title,body){
  
 
  
- // تنظيم كتب المكتبة حسب التصنيف، بما فيها الكتب التي تضاف من لوحة الإدارة
+ // مكتبة زاد الإسلامية: تصنيفات موسعة، قراءة داخل الموقع، وتنزيل مباشر
 const bookCategoryMeta={
- fiqh:{label:"كتب الفقه",icon:"⚖️"},hadith:{label:"كتب الحديث",icon:"📜"},
- tafsir:{label:"كتب التفسير",icon:"📖"},seerah:{label:"كتب السيرة",icon:"🌙"},
- aqeedah:{label:"كتب العقيدة",icon:"🕌"},akhlaq:{label:"كتب الأخلاق والآداب",icon:"🌿"},
- other:{label:"كتب متنوعة",icon:"📚"}
+ hadith:{label:"الحديث الشريف",icon:"📜"},aqeedah:{label:"العقيدة والتوحيد",icon:"🕌"},
+ quran:{label:"القرآن وعلومه",icon:"📗"},tafsir:{label:"التفسير وعلوم القرآن",icon:"📖"},
+ fiqh:{label:"الفقه وأصوله",icon:"⚖️"},seerah:{label:"السيرة النبوية والشمائل",icon:"🌙"},
+ akhlaq:{label:"الأخلاق والآداب",icon:"🌿"},history:{label:"التاريخ والحضارة الإسلامية",icon:"🏛️"},
+ biography:{label:"التراجم وسير العلماء",icon:"👤"},women:{label:"المرأة والأسرة المسلمة",icon:"🌸"},
+ children:{label:"كتب الناشئة والأطفال",icon:"🧒"},dawah:{label:"الدعوة والفكر الإسلامي",icon:"📣"},
+ fatwa:{label:"الفتاوى والنوازل",icon:"🧾"},spirituality:{label:"الرقائق والتزكية",icon:"🤍"},
+ arabic:{label:"اللغة العربية وعلومها",icon:"✒️"},other:{label:"كتب متنوعة",icon:"📚"}
 };
 function ensureBookCategoryGrid(root,category){
  const key=bookCategoryMeta[category]?category:"other",meta=bookCategoryMeta[key];
- let group=[...root.querySelectorAll("[data-book-group]")].find(node=>node.dataset.bookGroup===key);
- if(!group){
-  group=document.createElement("details");group.className="book-category-group";group.dataset.bookGroup=key;
+ let group=[...root.querySelectorAll("[data-book-group]")].find(n=>n.dataset.bookGroup===key);
+ if(!group){group=document.createElement("details");group.className="book-category-group";group.dataset.bookGroup=key;
   const summary=document.createElement("summary"),label=document.createElement("span"),count=document.createElement("span");
-  label.textContent=meta.icon+" "+meta.label;count.className="book-category-count";count.textContent="0 كتب";
-  summary.append(label,count);
-  const cards=document.createElement("div");cards.className="book-grid";cards.dataset.bookCategoryContainer=key;
-  group.append(summary,cards);root.append(group);
- }
+  label.textContent=meta.icon+" "+meta.label;count.className="book-category-count";count.textContent="0 كتاب";summary.append(label,count);
+  const cards=document.createElement("div");cards.className="book-grid";cards.dataset.bookCategoryContainer=key;group.append(summary,cards);root.append(group);}
  return group.querySelector(".book-grid");
 }
 function updateBookCategoryCount(root,category){
- const group=[...root.querySelectorAll("[data-book-group]")].find(node=>node.dataset.bookGroup===category);
- if(!group)return;
+ const group=[...root.querySelectorAll("[data-book-group]")].find(n=>n.dataset.bookGroup===category);if(!group)return;
  const count=group.querySelector(".book-category-count"),total=group.querySelectorAll(".book-card").length;
- if(count)count.textContent=total+" كتب";
+ if(count)count.textContent=total+" كتاب";
+ const empty=group.querySelector(".book-empty");if(empty&&total)empty.remove();
 }
-// الكتب المحلية المنشورة من لوحة الإدارة — يجب أن يكون مسار الملف داخل /books/
+function openBookInSite(url,title,fileType){
+ const modal=document.getElementById("bookReaderModal"),frame=document.getElementById("bookReaderFrame");
+ const heading=document.getElementById("bookReaderTitle");if(!modal||!frame)return;
+ const type=String(fileType||"").toLowerCase();
+ const readable=type.includes("pdf")||type.includes("text")||type.includes("rtf")||/\.(pdf|txt|rtf)(?:$|\?)/i.test(url);
+ const old=modal.querySelector(".book-reader-notice");if(old)old.remove();
+ heading.textContent=title||"قارئ الكتب";
+ if(!readable){frame.src="about:blank";const note=document.createElement("div");note.className="book-reader-notice notice";note.textContent="هذه الصيغة لا يدعمها عارض المتصفح مباشرة. يمكنك تنزيل الكتاب من زر التحميل دون مغادرة موقع زاد.";modal.querySelector(".book-reader-dialog").append(note);}
+ else{frame.src=url;frame.title="قراءة "+(title||"الكتاب");}
+ modal.classList.add("active");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
+}
 (async()=>{
- const grid=document.getElementById("bookLibraryGrid"),status=document.getElementById("dynamicLibraryStatus");
- if(!grid)return;
+ const grid=document.getElementById("bookLibraryGrid"),status=document.getElementById("dynamicLibraryStatus");if(!grid)return;
  try{
-  const [{initializeApp,getApps},{getFirestore,collection,getDocs,query,where},{createClient}]=await Promise.all([
+  const [{initializeApp,getApps},{getFirestore,collection,getDocs,query,where}]=await Promise.all([
    import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
-   import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
-   import("https://esm.sh/@supabase/supabase-js@2")
+   import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")
   ]);
   const cfg={apiKey:"AIzaSyAezfJxlPIlreW_iKuCmk7skF5eQ59nC2s",authDomain:"zad-almoslem.firebaseapp.com",projectId:"zad-almoslem",storageBucket:"zad-almoslem.firebasestorage.app",messagingSenderId:"138327285052",appId:"1:138327285052:web:2024f2f17aba593fa2d239"};
   const app=getApps().length?getApps()[0]:initializeApp(cfg),db=getFirestore(app);
-  const supabase=createClient("https://gjgrnnxkthrbpabpwiqk.supabase.co","sb_publishable_ChZfzdbq9uEacXNFatrLzQ_Uf8L3my6");
   const snap=await getDocs(query(collection(db,"library_books"),where("published","==",true)));
   const books=snap.docs.map(d=>({id:d.id,...d.data()}));
-  const labels={aqeedah:"العقيدة",tafsir:"التفسير",hadith:"الحديث",fiqh:"الفقه",seerah:"السيرة",akhlaq:"الأخلاق والآداب",other:"كتب متنوعة"};
   for(const b of books){
-   let url=b.localPath||b.fileUrl||"";
-   if(!url.startsWith("/books/")||url.startsWith("//"))continue;
-   const card=document.createElement("article");card.className="card book-card";card.dataset.bookCategory=b.category||"other";
+   const url=b.localPath||b.fileUrl||"",local=url.startsWith("/books/")&&!url.startsWith("//"),remote=/^https:\/\//i.test(url);
+   if(!local&&!remote)continue;
+   const category=bookCategoryMeta[b.category]?b.category:"other",card=document.createElement("article");
+   card.className="card book-card";card.dataset.bookCategory=category;
    const icon=document.createElement("div");icon.className="icon";icon.textContent="📚";card.append(icon);
-   if(b.coverUrl){const cover=document.createElement("img");cover.src=b.coverUrl;cover.alt="غلاف "+(b.title||"الكتاب");cover.loading="lazy";cover.style.cssText="width:110px;height:150px;object-fit:contain;display:block;margin:0 auto 12px";card.append(cover)}
+   if(b.coverUrl&&/^https:\/\//i.test(b.coverUrl)){const cover=document.createElement("img");cover.src=b.coverUrl;cover.alt="غلاف "+(b.title||"الكتاب");cover.loading="lazy";cover.style.cssText="width:110px;height:150px;object-fit:contain;display:block;margin:0 auto 12px";card.append(cover);}
    const h=document.createElement("h3");h.textContent=b.title||"كتاب إسلامي";card.append(h);
    const author=document.createElement("div");author.className="book-author";author.textContent=b.author||"";card.append(author);
-   if(b.summary){const p=document.createElement("p");p.textContent=b.summary;card.append(p)}
-   const meta=document.createElement("div");meta.className="book-level";meta.textContent=[labels[b.category]||"كتب متنوعة",b.publisher,b.edition].filter(Boolean).join(" · ");card.append(meta);
-   const source=document.createElement("p");source.className="small";source.textContent="المصدر: "+(b.source||"بيانات النشر غير مضافة");card.append(source);
-   if((b.fileType||"").includes("pdf")){
-    const open=document.createElement("button");open.type="button";open.className="btn green";open.textContent="اقرأ داخل الموقع";open.addEventListener("click",()=>{const modal=document.getElementById("bookReaderModal"),frame=document.getElementById("bookReaderFrame"),title=document.getElementById("bookReaderTitle");if(modal&&frame){title.textContent=b.title||"قارئ الكتب";frame.src=url;modal.classList.add("active");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden"}});card.append(open);
-   }
-   const download=document.createElement("a");download.className="btn light";download.href=url;download.textContent="فتح النسخة المحلية";download.style.display="inline-block";download.style.marginTop="8px";download.setAttribute("download","");card.append(download);
-   ensureBookCategoryGrid(grid,b.category||"other").append(card);
-   updateBookCategoryCount(grid,bookCategoryMeta[b.category]?b.category:"other");
+   if(b.summary){const p=document.createElement("p");p.textContent=b.summary;card.append(p);}
+   const meta=document.createElement("div");meta.className="book-level";meta.textContent=[bookCategoryMeta[category].label,b.publisher,b.edition].filter(Boolean).join(" · ");card.append(meta);
+   if(b.source){const source=document.createElement("p");source.className="small";source.textContent="المصدر: "+b.source;card.append(source);}
+   const read=document.createElement("button");read.type="button";read.className="btn green";read.textContent="اقرأ داخل الموقع";read.addEventListener("click",()=>openBookInSite(url,b.title,b.fileType||""));card.append(read);
+   const download=document.createElement("a");download.className="btn light";download.textContent="تحميل الكتاب";download.style.display="inline-block";download.style.marginTop="8px";
+   if(local){download.href=url;download.setAttribute("download",b.fileName||"book");}
+   else{const downloadUrl=new URL(url);downloadUrl.searchParams.set("download",b.fileName||"book");download.href=downloadUrl.toString();}
+   card.append(download);
+   ensureBookCategoryGrid(grid,category).append(card);updateBookCategoryCount(grid,category);
   }
-  if(status)status.textContent=books.length?"الكتب المضافة من لوحة الإدارة: "+books.length:"لا توجد كتب جديدة منشورة حاليًا.";
-  const filters=[...document.querySelectorAll("[data-book-filter]")];
-  filters.forEach(btn=>btn.addEventListener("click",()=>{const category=btn.dataset.bookFilter;grid.querySelectorAll(".book-card").forEach(card=>{card.hidden=category!=="all"&&card.dataset.bookCategory!==category})}));
- }catch(e){if(status)status.textContent="تعذر تحميل الكتب الجديدة حاليًا."}
+  grid.querySelectorAll("[data-book-group]").forEach(group=>{const n=group.querySelectorAll(".book-card").length;if(!n&&!group.querySelector(".book-empty")){const empty=document.createElement("p");empty.className="book-empty small";empty.textContent="سيُضاف هنا كتاب موثّق بعد مراجعته وإتاحة ملفه.";group.querySelector(".book-grid")?.append(empty);}if(n)updateBookCategoryCount(grid,group.dataset.bookGroup);});
+  if(status)status.textContent="تم تحميل "+books.filter(b=>(b.localPath||b.fileUrl||"").startsWith("/books/")||/^https:\/\//i.test(b.localPath||b.fileUrl||"")).length+" كتاب منشور من لوحة الإدارة.";
+  if(window.zadFilterBooks)window.zadFilterBooks();
+ }catch(e){if(status)status.textContent="تعذر تحميل الكتب المنشورة: "+(e.message||"خطأ في الاتصال");console.error("Islamic library",e);}
 })();
-
-// فتح قارئ الكتب داخل الموقع
-const bookModal=document.getElementById('bookReaderModal');
-const bookFrame=document.getElementById('bookReaderFrame');
-function closeBookReader(){
- if(!bookModal)return;
- bookModal.classList.remove('active');
- bookModal.setAttribute('aria-hidden','true');
- if(bookFrame)bookFrame.src='about:blank';
- document.body.style.overflow='';
-}
-document.querySelectorAll('.book-open[data-local-book]').forEach(button=>{
- const path=button.dataset.localBook||'';
- if(path.startsWith('/books/')&&!path.startsWith('//')){
-  const card=button.closest('.book-card')||button.parentElement;
-  if(card&&!card.querySelector('.book-download')){
-   const link=document.createElement('a');
-   link.className='btn light book-download';
-   link.href=path;
-   link.setAttribute('download','');
-   link.textContent='تحميل الكتاب';
-   link.setAttribute('aria-label','تحميل '+(button.dataset.bookTitle||'الكتاب')+' على الجهاز');
-   button.insertAdjacentElement('afterend',link);
-  }
- }
- button.addEventListener('click',()=>{
-  const path=button.dataset.localBook||'';
-  if(!path.startsWith('/books/')||path.startsWith('//')||!bookModal||!bookFrame)return;
-  document.getElementById('bookReaderTitle').textContent=button.dataset.bookTitle||'قارئ الكتب';
-  bookFrame.src=path;
-  bookFrame.title='قراءة '+(button.dataset.bookTitle||'الكتاب');
-  bookModal.classList.add('active');
-  bookModal.setAttribute('aria-hidden','false');
-  document.body.style.overflow='hidden';
- });
-});
-document.getElementById('closeBookReader').addEventListener('click',closeBookReader);
-bookModal.addEventListener('click',event=>{if(event.target===bookModal)closeBookReader();});
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&bookModal.classList.contains('active'))closeBookReader();});
-
 // مشغل الابتهالات الجديد — تحكم داخلي وانتقال تلقائي
 ;</script>
 
