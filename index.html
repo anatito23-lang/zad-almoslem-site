@@ -2028,6 +2028,18 @@ function openBookInSite(url,title,fileType){
   if(window.zadFilterBooks)window.zadFilterBooks();
  }catch(e){if(status)status.textContent="تعذر تحميل الكتب المنشورة: "+(e.message||"خطأ في الاتصال");console.error("Islamic library",e);}
 })();
+const bookModal=document.getElementById("bookReaderModal");
+const bookFrame=document.getElementById("bookReaderFrame");
+function closeBookReader(){
+ if(!bookModal)return;
+ bookModal.classList.remove("active");bookModal.setAttribute("aria-hidden","true");
+ if(bookFrame)bookFrame.src="about:blank";
+ const note=bookModal.querySelector(".book-reader-notice");if(note)note.remove();
+ document.body.style.overflow="";
+}
+document.getElementById("closeBookReader")?.addEventListener("click",closeBookReader);
+bookModal?.addEventListener("click",event=>{if(event.target===bookModal)closeBookReader();});
+document.addEventListener("keydown",event=>{if(event.key==="Escape"&&bookModal?.classList.contains("active"))closeBookReader();});
 // مشغل الابتهالات الجديد — تحكم داخلي وانتقال تلقائي
 ;</script>
 
