@@ -48,6 +48,10 @@ public class TasbeehWidget extends AppWidgetProvider {
         views.setTextViewText(R.id.tasbeeh_widget_phrase, DHIKR[index]);
         views.setTextViewText(R.id.tasbeeh_widget_count, count + " / " + goal);
         views.setTextViewText(R.id.tasbeeh_widget_button, count >= goal ? "اكتمل الورد" : "سبّح +١");
+
+        // Rotate the bead ring one small step after each tap, while keeping the text fixed.
+        views.setInt(R.id.tasbeeh_widget_beads, "setRotation", (count % 12) * 30);
+
         Intent increment = new Intent(context, TasbeehWidget.class).setAction(ACTION_INCREMENT);
         PendingIntent add = PendingIntent.getBroadcast(context, id, increment,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);

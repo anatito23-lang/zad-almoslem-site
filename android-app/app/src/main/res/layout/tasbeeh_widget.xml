@@ -1,58 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/tasbeeh_widget_root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="3dp"
     android:background="@android:color/transparent">
-    <ImageView
+    <FrameLayout
         android:layout_width="164dp"
-        android:layout_height="164dp"
-        android:layout_gravity="center"
-        android:src="@drawable/tasbeeh_beads_ring"
-        android:contentDescription="سبحة دائرية" />
-    <LinearLayout
-        android:layout_width="126dp"
-        android:layout_height="126dp"
-        android:layout_gravity="center"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="5dp">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="زاد وطمأنينة"
-            android:textColor="#F4E6C4"
-            android:textStyle="bold"
-            android:textSize="13sp" />
-        <TextView
-            android:id="@+id/tasbeeh_widget_phrase"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+        android:layout_height="164dp">
+        <ImageView
+            android:id="@+id/tasbeeh_widget_beads"
+            android:layout_width="164dp"
+            android:layout_height="164dp"
+            android:src="@drawable/tasbeeh_beads_ring"
+            android:contentDescription="حبات سبحة دائرية" />
+        <LinearLayout
+            android:layout_width="126dp"
+            android:layout_height="126dp"
+            android:layout_gravity="center"
+            android:orientation="vertical"
             android:gravity="center"
-            android:paddingTop="3dp"
-            android:text="سبحان الله"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:textSize="14sp" />
-        <TextView
-            android:id="@+id/tasbeeh_widget_count"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0 / 33"
-            android:textColor="#F4E6C4"
-            android:textStyle="bold"
-            android:textSize="22sp" />
-        <Button
-            android:id="@+id/tasbeeh_widget_button"
-            android:layout_width="wrap_content"
-            android:layout_height="34dp"
-            android:minWidth="94dp"
-            android:layout_marginTop="2dp"
-            android:backgroundTint="#D7B66A"
-            android:text="سبّح +١"
-            android:textColor="#083028"
-            android:textStyle="bold"
-            android:textSize="12sp"
-            android:textAllCaps="false" />
-    </LinearLayout>
-</FrameLayout>
+            android:padding="5dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="زاد وطمأنينة"
+                android:textColor="#F4E6C4"
+                android:textStyle="bold"
+                android:textSize="13sp" />
+            <TextView
+                android:id="@+id/tasbeeh_widget_phrase"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingTop="3dp"
+                android:text="سبحان الله"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="14sp" />
+            <TextView
+                android:id="@+id/tasbeeh_widget_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0 / 33"
+                android:textColor="#F4E6C4"
+                android:textStyle="bold"
+                android:textSize="22sp" />
+        </LinearLayout>
+    </FrameLayout>
+    <Button
+        android:id="@+id/tasbeeh_widget_button"
+        android:layout_width="116dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="3dp"
+        android:minWidth="0dp"
+        android:minHeight="0dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:backgroundTint="#D7B66A"
+        android:text="سبّح +١"
+        android:textColor="#083028"
+        android:textStyle="bold"
+        android:textSize="12sp"
+        android:textAllCaps="false" />
+</LinearLayout>

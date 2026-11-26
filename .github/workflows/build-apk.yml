@@ -1,5 +1,5 @@
 name: Build Zad Almoslem Android
-# Rebuild trigger: harmless comment update to validate release signing secrets.
+# Rebuild trigger: validate release signing and the redesigned tasbeeh widget.
 
 on:
   workflow_dispatch:
