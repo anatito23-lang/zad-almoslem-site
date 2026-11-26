@@ -14,4 +14,29 @@ const book=document.getElementById('book'),index=document.getElementById('index'
 let font=19;
 function render(q=''){book.textContent='';index.textContent='';let count=0;hadiths.forEach((h,i)=>{const n=h.hadithnumber;const match=String(n).includes(q)||h.text.includes(q);if(!match)return;count++;const b=document.createElement('button');b.textContent=n;b.onclick=()=>document.getElementById('hadith-'+n).scrollIntoView({behavior:'smooth'});index.appendChild(b);const a=document.createElement('article');a.className='hadith';a.id='hadith-'+n;const title=document.createElement('h2');const badge=document.createElement('span');badge.className='num';badge.textContent=n;title.append(badge,document.createTextNode('الحديث رقم '+n));const p=document.createElement('p');p.textContent=h.text;a.append(title,p);book.appendChild(a)});if(!count)book.textContent='لا توجد نتائج مطابقة.'}
 search.addEventListener('input',()=>render(search.value.trim()));document.getElementById('larger').onclick=()=>{font=Math.min(30,font+1);document.querySelectorAll('.hadith p').forEach(p=>p.style.fontSize=font+'px')};document.getElementById('smaller').onclick=()=>{font=Math.max(14,font-1);document.querySelectorAll('.hadith p').forEach(p=>p.style.fontSize=font+'px')};document.getElementById('print').onclick=()=>window.print();render();
-</script></body></html>
+</script>
+<script>
+(function(){
+  const key='zad-library-progress:'+location.pathname;
+  const saved=Number(localStorage.getItem(key)||0);
+  const resume=document.createElement('button');
+  resume.type='button';
+  resume.textContent='استكمال القراءة من آخر موضع';
+  resume.setAttribute('aria-label','استكمال القراءة من آخر موضع محفوظ');
+  resume.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9999;border:0;border-radius:999px;padding:11px 16px;background:#174c3c;color:#fff;font: bold 14px Tahoma,Arial,sans-serif;box-shadow:0 4px 16px #0003;cursor:pointer;display:'+(saved>250?'block':'none');
+  resume.addEventListener('click',function(){window.scrollTo({top:saved,behavior:'smooth'});});
+  document.body.appendChild(resume);
+  let pending=false;
+  window.addEventListener('scroll',function(){
+    if(pending)return;
+    pending=true;
+    window.setTimeout(function(){
+      const y=window.scrollY||window.pageYOffset||0;
+      if(y>250){localStorage.setItem(key,String(Math.round(y)));resume.style.display='block';}
+      else{resume.style.display=saved>250?'block':'none';}
+      pending=false;
+    },500);
+  },{passive:true});
+})();
+</script>
+</body></html>
