@@ -1,6 +1,15 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="قراءة متن الأصول الثلاثة كاملًا داخل مكتبة زاد المسلم"><title>الأصول الثلاثة | زاد المسلم</title><style>
 :root{--g:#174c3c;--gold:#b28a3b;--ink:#26352e;--paper:#fffdf7}*{box-sizing:border-box}body{margin:0;background:#f0efe8;color:var(--ink);font-family:Tahoma,Arial,sans-serif;line-height:2}header{background:var(--g);color:white;text-align:center;padding:25px 15px}header h1{margin:0;font-size:27px}main{max-width:900px;margin:20px auto;padding:20px;background:var(--paper);border-radius:16px;box-shadow:0 5px 24px #0001}.notice{background:#edf5ee;border-right:4px solid var(--g);padding:12px;border-radius:8px;font-size:14px}.tools{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.tools input{flex:1;min-width:160px;padding:9px;border:1px solid #ccc;border-radius:8px;font:inherit}.tools button{background:var(--g);color:white;border:0;border-radius:8px;padding:8px 12px;font:inherit}.toc{display:flex;gap:7px;flex-wrap:wrap;background:#edf3ed;padding:12px;border-radius:9px}.toc button{border:1px solid #cbd9cc;background:white;color:var(--g);border-radius:7px;padding:6px 10px;font:inherit}.book-paragraph{margin-top:9px}.book-paragraph p{font-size:19px;line-height:2.25;margin:10px 0;padding:8px 4px;border-bottom:1px solid #eee8dc}.book-paragraph h2{color:var(--g)}.hidden{display:none!important}.notes{margin-top:30px;border-top:2px solid #ddd4c1;padding-top:15px}.notes h2{color:var(--g)}.notes li{padding:3px 0;font-size:14px}footer{text-align:center;font-size:12px;color:#68736b;margin:28px 0 8px}@media(max-width:600px){main{margin:0;border-radius:0;padding:14px}header h1{font-size:23px}.book-paragraph p{font-size:17px}}
 @media print{body{background:white}main{max-width:none;margin:0;padding:0;box-shadow:none}.tools,.toc{display:none!important}header{background:white;color:black;border-bottom:1px solid #aaa}.book-paragraph p{font-size:16px;break-inside:avoid}.notice{border:1px solid #aaa;background:white}}
+</style><style>
+body.zad-night{background:#151b19!important;color:#e6e8e4!important}
+body.zad-night main,body.zad-night .book{background:#202925!important;color:#e6e8e4!important;border-color:#3b4941!important}
+body.zad-night .hadith,body.zad-night .book-paragraph p{border-color:#3b4941!important}
+body.zad-night .hadith h2,body.zad-night .book-paragraph h2,body.zad-night .notes h2{color:#d7bd80!important}
+body.zad-night .notice,body.zad-night .toc,body.zad-night .index,body.zad-night .meta,body.zad-night .notes{background:#29352f!important;color:#e1e6df!important;border-color:#56634f!important}
+body.zad-night .tools{background:#202925!important}
+body.zad-night input{background:#151b19!important;color:#fff!important;border-color:#56634f!important}
+body.zad-night .source,body.zad-night footer{color:#b8c2ba!important}
 </style></head><body><header><h1>الأصول الثلاثة</h1><div>للإمام محمد بن عبد الوهاب رحمه الله</div><div>نص منقول قيد المقابلة والمراجعة</div></header><main>
 <div class="notice">هذه صفحة قراءة داخلية لنص منقول يحتاج إلى مقابلة حرفية على مصدر موثوق قبل اعتماده نسخة كاملة. لا تعتبر هذه النسخة حاليًا طبعة محققة أو نصًا نهائيًا.</div>
 <div class="tools"><input id="find" placeholder="ابحث في نص الكتاب"><button id="minus" type="button">تصغير الخط</button><button id="plus" type="button">تكبير الخط</button><button id="print" type="button">طباعة / حفظ PDF</button></div><nav class="toc" id="toc"></nav>
@@ -91,4 +100,24 @@
   });
 })();
 </script>
-</body></html>
+<script>
+(function(){
+ const key='zad-library-night:'+location.pathname;
+ const button=document.createElement('button');
+ button.type='button';
+ button.textContent='🌙 وضع القراءة الليلي';
+ button.setAttribute('aria-pressed','false');
+ button.style.cssText='position:fixed;left:14px;bottom:16px;z-index:9998;border:1px solid #b28a3b;border-radius:999px;padding:10px 14px;background:#174c3c;color:#fff;font:bold 13px Tahoma,Arial,sans-serif;box-shadow:0 4px 16px #0003;cursor:pointer';
+ function apply(on){
+  document.body.classList.toggle('zad-night',on);
+  button.textContent=on?'☀️ وضع القراءة النهاري':'🌙 وضع القراءة الليلي';
+  button.setAttribute('aria-pressed',String(on));
+  try{localStorage.setItem(key,on?'1':'0')}catch(e){}
+ }
+ let initial=false;
+ try{initial=localStorage.getItem(key)==='1'}catch(e){}
+ document.body.appendChild(button);
+ apply(initial);
+ button.addEventListener('click',function(){apply(!document.body.classList.contains('zad-night'))});
+})();
+</script></body></html>
