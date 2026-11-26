@@ -111,7 +111,16 @@ button:disabled{opacity:.55;cursor:wait}.secondary{background:#edf3ee;color:var(
 </form>
 <div id="libraryBookMessage" class="notice hidden" role="status"></div>
 <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
-<h2>الكتب المضافة</h2><div id="libraryBooksAdminList"><p class="small">سجّل الدخول لعرض الكتب.</p></div>
+<h2>الكتب المضافة</h2>
+<div class="row" style="margin:12px 0">
+ <div><label for="libraryBooksAdminSearch">بحث في الكتب</label><input id="libraryBooksAdminSearch" type="search" placeholder="ابحث بالعنوان أو المؤلف أو الناشر أو اسم الملف"></div>
+ <div><label for="libraryBooksAdminCategory">تصفية حسب القسم</label><select id="libraryBooksAdminCategory">
+  <option value="">كل الأقسام</option>
+  <option value="aqeedah">العقيدة والتوحيد</option><option value="quran">القرآن وعلومه</option><option value="tafsir">التفسير وعلوم القرآن</option><option value="hadith">الحديث الشريف</option><option value="fiqh">الفقه وأصوله</option><option value="seerah">السيرة النبوية والشمائل</option><option value="akhlaq">الأخلاق والآداب</option><option value="history">التاريخ والحضارة الإسلامية</option><option value="biography">التراجم وسير العلماء</option><option value="women">المرأة والأسرة المسلمة</option><option value="children">كتب الناشئة والأطفال</option><option value="dawah">الدعوة والفكر الإسلامي</option><option value="fatwa">الفتاوى والنوازل</option><option value="spirituality">الرقائق والتزكية</option><option value="arabic">اللغة العربية وعلومها</option><option value="other">كتب متنوعة</option>
+ </select></div>
+</div>
+<p id="libraryBooksAdminCount" class="small" aria-live="polite"></p>
+<div id="libraryBooksAdminList"><p class="small">سجّل الدخول لعرض الكتب.</p></div>
 </section>
 </main>
 <script type="module">
@@ -320,8 +329,17 @@ async function loadLibraryBooksAdmin(){
  try{
   const snap=await getDocs(collection(db,BOOK_COLLECTION));
   const rows=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.updatedAt?.seconds||0)-(a.updatedAt?.seconds||0));
-  $("libraryBooksAdminList").innerHTML=rows.length?rows.map(b=>'<article class="item"><div class="row"><strong>'+escapeHtml(b.title||"بدون عنوان")+'</strong><span class="tag">'+(isPublished(b)?"منشور":"مسودة")+'</span></div><p class="small">'+escapeHtml(b.author||"")+' · '+escapeHtml(b.category||"")+' · '+escapeHtml(b.fileName||"")+'</p><p>'+escapeHtml((b.source||"").slice(0,220))+'</p><div class="actions">'+(b.fileUrl?'<a class="tag" href="'+escapeHtml(b.fileUrl)+'" target="_blank" rel="noopener">فتح الملف</a>':'')+'<button type="button" class="secondary" data-lib-edit="'+escapeHtml(b.id)+'">تعديل البيانات</button><button type="button" class="gold" data-lib-toggle="'+escapeHtml(b.id)+'" data-published="'+isPublished(b)+'">'+(isPublished(b)?"إخفاء":"نشر")+'</button><button type="button" class="danger" data-lib-delete="'+escapeHtml(b.id)+'">حذف</button></div></article>').join(""):'<p class="small">لم تتم إضافة كتب بعد.</p>';
-  $("libraryBooksAdminList").querySelectorAll("[data-lib-edit]").forEach(btn=>btn.addEventListener("click",()=>{const b=rows.find(x=>x.id===btn.dataset.libEdit);if(!b)return;$("libraryBookId").value=b.id;$("libraryBookTitle").value=b.title||"";$("libraryBookAuthor").value=b.author||"";$("libraryBookCategory").value=b.category||"other";$("libraryBookPublisher").value=b.publisher||"";$("libraryBookEdition").value=b.edition||"";$("libraryBookSource").value=b.source||"";$("libraryBookSummary").value=b.summary||"";$("libraryBookPublished").checked=isPublished(b);$("libraryBookRights").checked=true;$("libraryBookFile").required=false;$("libraryBookSave").textContent="حفظ التعديلات";window.scrollTo({top:$("booksAdminCard").offsetTop,behavior:"smooth"})}));
+  $("libraryBooksAdminList").innerHTML=rows.length?rows.map(b=>'<article class="item" data-category="'+escapeHtml(b.category||"other")+'"><div class="row"><strong>'+escapeHtml(b.title||"بدون عنوان")+'</strong><span class="tag">'+(isPublished(b)?"منشور":"مسودة")+'</span></div><p class="small">'+escapeHtml(b.author||"")+' · '+escapeHtml(b.category||"")+' · '+escapeHtml(b.fileName||"")+'</p><p>'+escapeHtml((b.source||"").slice(0,220))+'</p><div class="actions">'+(b.fileUrl?'<a class="tag" href="'+escapeHtml(b.fileUrl)+'" target="_blank" rel="noopener">فتح الملف</a>':'')+'<button type="button" class="secondary" data-lib-edit="'+escapeHtml(b.id)+'">تعديل البيانات</button><button type="button" class="gold" data-lib-toggle="'+escapeHtml(b.id)+'" data-published="'+isPublished(b)+'">'+(isPublished(b)?"إخفاء":"نشر")+'</button><button type="button" class="danger" data-lib-delete="'+escapeHtml(b.id)+'">حذف</button></div></article>').join(""):'<p class="small">لم تتم إضافة كتب بعد.</p>';
+  const applyLibraryAdminFilters=()=>{
+   const query=$("libraryBooksAdminSearch").value.trim().toLocaleLowerCase("ar"),category=$("libraryBooksAdminCategory").value;
+   const cards=[...$("libraryBooksAdminList").querySelectorAll("article.item")];let visible=0;
+   cards.forEach(card=>{const matchesText=!query||card.textContent.toLocaleLowerCase("ar").includes(query),matchesCategory=!category||card.dataset.category===category;const show=matchesText&&matchesCategory;card.hidden=!show;if(show)visible++});
+   $("libraryBooksAdminCount").textContent=cards.length?("عرض "+visible+" من "+cards.length+" كتابًا"):"لا توجد كتب مسجلة.";
+  };
+  $("libraryBooksAdminSearch").oninput=applyLibraryAdminFilters;
+  $("libraryBooksAdminCategory").onchange=applyLibraryAdminFilters;
+  applyLibraryAdminFilters();
+  $("libraryBooksAdminList").querySelectorAll("[data-lib-edit]").forEach(btn=>btn.addEventListener("click",()=>{const b=rows.find(x=>x.id===btn.dataset.libEdit);if(!b)return;$("libraryBookId").value=b.id;$("libraryBookTitle").value=b.title||"";$("libraryBookAuthor").value=b.author||"";$("libraryBookCategory").value=b.category||"other";$("libraryBookPublisher").value=b.publisher||"";$("libraryBookEdition").value=b.edition||"";$("libraryBookSource").value=b.source||"";$("libraryBookSummary").value=b.summary||"";$("libraryBookPublished").checked=isPublished(b);$("libraryBookRights").checked=false;$("libraryBookFile").required=false;$("libraryBookSave").textContent="حفظ التعديلات";window.scrollTo({top:$("booksAdminCard").offsetTop,behavior:"smooth"})}));
   $("libraryBooksAdminList").querySelectorAll("[data-lib-toggle]").forEach(btn=>btn.addEventListener("click",async()=>{const next=btn.dataset.published!=="true";try{await updateDoc(doc(db,BOOK_COLLECTION,btn.dataset.libToggle),{published:next,"تم النشر":next,"النشر":next,updatedAt:serverTimestamp()});bookMsg(next?"تم نشر الكتاب.":"تم إخفاء الكتاب.");await loadLibraryBooksAdmin()}catch(e){bookMsg("تعذر تحديث حالة النشر: "+e.message,true)}}));
   $("libraryBooksAdminList").querySelectorAll("[data-lib-delete]").forEach(btn=>btn.addEventListener("click",async()=>{if(!confirm("سيُحذف سجل الكتاب وملفاته المرفوعة نهائيًا. هل تريد المتابعة؟"))return;try{const b=rows.find(x=>x.id===btn.dataset.libDelete);if(b.storageProvider==="supabase"){await removeLibraryFile(b.storagePath);if(b.coverPath)await removeLibraryFile(b.coverPath)}await deleteDoc(doc(db,BOOK_COLLECTION,b.id));bookMsg("تم حذف سجل الكتاب وملفاته.");await loadLibraryBooksAdmin()}catch(e){bookMsg("تعذر حذف الكتاب: "+e.message,true)}}));
  }catch(e){$("libraryBooksAdminList").textContent="تعذر تحميل الكتب: "+e.message}
@@ -338,7 +356,7 @@ $("bookAdminForm").addEventListener("submit",async e=>{
   if(file.type&&file.type!==expected){bookMsg("نوع الملف لا يطابق امتداده.",true);return}
  }
  const title=$("libraryBookTitle").value.trim(),author=$("libraryBookAuthor").value.trim(),source=$("libraryBookSource").value.trim();
- if(!title||!author||!source||!$("libraryBookRights").checked){bookMsg("أكمل العنوان والمؤلف والمصدر وأكد حقك في إتاحة الملف.",true);return}
+ if(!title||!author||!source||(file&&!$("libraryBookRights").checked)){bookMsg("أكمل العنوان والمؤلف والمصدر، وأكد حقك في إتاحة الملف عند رفع ملف جديد أو استبداله.",true);return}
  const button=$("libraryBookSave");button.disabled=true;button.textContent="جارٍ رفع الملف والحفظ…";
  let uploadedBook=null,uploadedCover=null;
  try{
