@@ -24,25 +24,8 @@ public class ReminderAudioService extends Service {
     private static final int NOTIFICATION_ID = 7520;
     private MediaPlayer player;
     private String activeKind;
-    private int postAdhanQueueIndex;
     private boolean userStopped;
-    private boolean sharawyPlayed;
     private String currentTrackTitle="";
-    private static final String[][] POST_ADHAN_DUAS = {
-        {"alsayed_abdalzez_1","https://www.ourquraan.com/audio/prayers/Alsayed.Abdalzez.Alzadany%201.mp3"},
-        {"alsayed_abdalzez_2","https://www.ourquraan.com/audio/prayers/Alsayed.Abdalzez.Alzadany%202.mp3"},
-        {"muhammed_alasyouty","https://www.ourquraan.com/audio/prayers/Muhammed.Alasyouty.mp3"},
-        {"salah_algamal","https://www.ourquraan.com/audio/prayers/Salah.Algamal%20-%20Doaa.Alanbiaa.mp3"},
-        {"muhammad_jibril","https://www.ourquraan.com/audio/qdr/Muahmmed.Jebreel.mp3"},
-        {"hany_alrefaey","https://www.ourquraan.com/audio/quraan-completion/Hany.Alrefaey.mp3"},
-        {"edres_abkar","https://www.ourquraan.com/audio/prayers/Edres.Abkar.mp3"},
-        {"khalid_aljalil","https://www.ourquraan.com/audio/prayers/Khalid.Aljalil.mp3"},
-        {"maher_m3equly","https://www.ourquraan.com/audio/prayers/Maher.M3equly.mp3"},
-        {"naser_alqutamy","https://www.ourquraan.com/audio/prayers/Naser.Alqutamy%201.mp3"},
-        {"yaser_aldosy","https://www.ourquraan.com/audio/prayers/Yaser.Aldosy.mp3"},
-        {"mashary_rashed","https://www.ourquraan.com/audio/prayers/Mashary.Rashed.mp3"}
-    };
-
     public static void play(Context context, String kind) {
         play(context, kind, null);
     }
@@ -93,7 +76,7 @@ public class ReminderAudioService extends Service {
             return START_NOT_STICKY;
         }
         activeKind = kind;
-        if("dua".equals(kind)){postAdhanQueueIndex=0;userStopped=false;sharawyPlayed=false;currentTrackTitle="دعاء ما بعد الأذان";}
+        if("dua".equals(kind)){userStopped=false;currentTrackTitle="دعاء الشيخ محمد متولي الشعراوي";}
         if (!"dua".equals(kind) && !getSharedPreferences("zad_reminders", MODE_PRIVATE).getBoolean("reminder_audio_master_enabled", true)) {
             finishPlayback();
             return START_NOT_STICKY;
@@ -233,36 +216,6 @@ public class ReminderAudioService extends Service {
         return "https://everyayah.com/data/"+folder+"/"+ayah+".mp3";
     }
 
-    private void playNextPostAdhanTrack(){
-        if(userStopped||postAdhanQueueIndex>=POST_ADHAN_DUAS.length){finishPlayback();return;}
-        if(!sharawyPlayed){
-            sharawyPlayed=true;
-            File sharawy=new File(new File(getFilesDir(),"reminders"),"dua.mp3");
-            if(sharawy.isFile()&&sharawy.length()>10000){
-                currentTrackTitle="دعاء الشيخ محمد متولي الشعراوي";
-                playPostAdhanFile(sharawy);
-                return;
-            }
-            android.util.Log.w("ZadAlmoslem","Sheikh Al-Shaarawy dua is not downloaded; continuing with the available recitations");
-        }
-        String[] item=POST_ADHAN_DUAS[postAdhanQueueIndex++];
-        currentTrackTitle=postAdhanTitle(item[0]);
-        updatePlaybackNotification();
-        try{
-            stopCurrentPlayers();
-            File local=new File(new File(getFilesDir(),"duas"),item[0]+".mp3");
-            player=new MediaPlayer();player.setWakeMode(getApplicationContext(),PowerManager.PARTIAL_WAKE_LOCK);
-            player.setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).setContentType(AudioAttributes.CONTENT_TYPE_SPEECH).build());
-            int volume=getSharedPreferences("zad_reminders",MODE_PRIVATE).getInt("dua_after_adhan_volume",80);
-            player.setVolume(volume/100f,volume/100f);
-            player.setOnCompletionListener(mp->finishPlayback());
-            player.setOnErrorListener((mp,what,extra)->{android.util.Log.w("ZadAlmoslem","Post-adhan dua skipped after playback error: "+item[0]);finishPlayback();return true;});
-            player.setOnPreparedListener(mp->{mp.start();updatePlaybackNotification();});
-            if(local.isFile()&&local.length()>10000)player.setDataSource(local.getAbsolutePath());else player.setDataSource(item[1]);
-            player.prepareAsync();
-        }catch(Exception error){android.util.Log.w("ZadAlmoslem","Could not start post-adhan dua "+item[0],error);finishPlayback();}
-    }
-
     private void playPostAdhanFile(File file){
         try{
             stopCurrentPlayers();
@@ -279,24 +232,6 @@ public class ReminderAudioService extends Service {
         }catch(Exception error){android.util.Log.w("ZadAlmoslem","Could not play downloaded Al-Shaarawy dua",error);finishPlayback();}
     }
 
-    private String postAdhanTitle(String key){
-        switch(key){
-            case "alsayed_abdalzez_1": return "الشيخ السيد عبدالعزيز السعدني";
-            case "alsayed_abdalzez_2": return "الشيخ السيد عبدالعزيز السعدني";
-            case "muhammed_alasyouty": return "الشيخ محمد الأسيوطي";
-            case "salah_algamal": return "الشيخ صلاح الجمل";
-            case "muhammad_jibril": return "الشيخ محمد جبريل";
-            case "hany_alrefaey": return "الشيخ هاني الرفاعي";
-            case "edres_abkar": return "الشيخ إدريس أبكر";
-            case "khalid_aljalil": return "الشيخ خالد الجليل";
-            case "maher_m3equly": return "الشيخ ماهر المعيقلي";
-            case "naser_alqutamy": return "الشيخ ناصر القطامي";
-            case "yaser_aldosy": return "الشيخ ياسر الدوسري";
-            case "mashary_rashed": return "الشيخ مشاري راشد";
-            default: return "دعاء صوتي";
-        }
-    }
-
     private void stopCurrentPlayers() {
         if (player != null) {
             try { player.stop(); } catch (Exception ignored) {}
@@ -306,7 +241,6 @@ public class ReminderAudioService extends Service {
     }
 
     private void finishPlayback() {
-        if("dua".equals(activeKind)&&!userStopped&&postAdhanQueueIndex<POST_ADHAN_DUAS.length){stopCurrentPlayers();playNextPostAdhanTrack();return;}
         boolean resumeRadio = "dua".equals(activeKind);
         stopCurrentPlayers();
         // Start/resume the radio while this playback service is still foreground.
