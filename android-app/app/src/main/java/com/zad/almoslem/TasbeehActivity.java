@@ -88,20 +88,20 @@ public class TasbeehActivity extends Activity {
         LinearLayout hero = new LinearLayout(this);
         hero.setOrientation(LinearLayout.VERTICAL);
         hero.setGravity(Gravity.CENTER);
-        hero.setPadding(dp(18), dp(20), dp(18), dp(20));
+        hero.setPadding(dp(12), dp(12), dp(12), dp(12));
         GradientDrawable heroBg = bg(AppThemeColors.primary(this), 26);
         heroBg.setStroke(dp(1), Color.rgb(194, 163, 101));
         hero.setBackground(heroBg);
 
-        TextView title = label("سُبْحَتِي", 25, Color.WHITE, true);
+        TextView title = label("سُبْحَتِي", 22, Color.WHITE, true);
         hero.addView(title);
         TextView subtitle = label("لحظات ذكر… وطمأنينة للقلب", 13,
                 Color.rgb(231, 215, 178), false);
-        subtitle.setPadding(0, dp(5), 0, dp(13));
+        subtitle.setPadding(0, dp(3), 0, dp(7));
         hero.addView(subtitle);
 
-        phrase = label("", 19, Color.WHITE, true);
-        phrase.setPadding(dp(4), dp(5), dp(4), dp(13));
+        phrase = label("", 17, Color.WHITE, true);
+        phrase.setPadding(dp(4), dp(2), dp(4), dp(7));
         hero.addView(phrase);
 
         FrameLayout ring = new FrameLayout(this);
@@ -110,15 +110,15 @@ public class TasbeehActivity extends Activity {
         circle.setColor(Color.rgb(10, 39, 34));
         circle.setStroke(dp(3), Color.rgb(211, 177, 105));
         ring.setBackground(circle);
-        number = label("", 43, Color.rgb(239, 211, 151), true);
-        ring.addView(number, new FrameLayout.LayoutParams(dp(142), dp(142), Gravity.CENTER));
+        number = label("", 35, Color.rgb(239, 211, 151), true);
+        ring.addView(number, new FrameLayout.LayoutParams(dp(108), dp(108), Gravity.CENTER));
         LinearLayout ringHolder = new LinearLayout(this);
         ringHolder.setGravity(Gravity.CENTER);
-        ringHolder.addView(ring, new LinearLayout.LayoutParams(dp(158), dp(158)));
+        ringHolder.addView(ring, new LinearLayout.LayoutParams(dp(122), dp(122)));
         hero.addView(ringHolder);
 
         target = label("", 13, Color.rgb(235, 235, 221), false);
-        target.setPadding(0, dp(13), 0, dp(3));
+        target.setPadding(0, dp(7), 0, dp(2));
         hero.addView(target);
         progress = label("", 12, Color.rgb(220, 228, 218), false);
         hero.addView(progress);
@@ -176,7 +176,7 @@ public class TasbeehActivity extends Activity {
         addButton.setTextColor(Color.WHITE);
         addButton.setAllCaps(false);
         addButton.setBackground(bg(Color.rgb(20, 105, 76), 18));
-        LinearLayout.LayoutParams addLp = new LinearLayout.LayoutParams(-1, dp(60));
+        LinearLayout.LayoutParams addLp = new LinearLayout.LayoutParams(-1, dp(52));
         addLp.topMargin = dp(18);
         root.addView(addButton, addLp);
         addButton.setOnClickListener(v -> {
@@ -185,7 +185,12 @@ public class TasbeehActivity extends Activity {
                 save();
                 render();
                 if (count == goal) {
-                    Toast.makeText(this, "اكتمل وردك، تقبّل الله ذكرك", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "اكتمل الورد، ننتقل تلقائيًا إلى الذكر التالي", Toast.LENGTH_SHORT).show();
+                    index = (index + 1) % dhikr.length;
+                    count = 0;
+                    dhikrPicker.setSelection(index);
+                    save();
+                    render();
                 }
             }
         });
