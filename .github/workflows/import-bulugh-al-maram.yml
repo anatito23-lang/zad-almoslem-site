@@ -23,7 +23,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p books
-          curl --fail --location --retry 3 --user-agent 'ZadAlMoslemLibrary/1.0' 'https://upload.wikimedia.org/wikisource/ar/2/2b/%D8%A8%D9%84%D9%88%D8%BA_%D8%A7%D9%84%D9%85%D8%B1%D8%A7%D9%85.pdf' --output books/bulugh-al-maram.pdf
+          curl --fail --location --retry 3 --user-agent 'ZadAlMoslemLibrary/1.0' 'https://upload.wikimedia.org/wikisource/ar/d/db/%D8%A8%D9%84%D9%88%D8%BA_%D8%A7%D9%84%D9%85%D8%B1%D8%A7%D9%85.pdf' --output books/bulugh-al-maram.pdf
           test "$(head -c 5 books/bulugh-al-maram.pdf)" = '%PDF-'
           test "$(stat -c '%s' books/bulugh-al-maram.pdf)" -gt 1000000
           python -m pip install --quiet pypdf
