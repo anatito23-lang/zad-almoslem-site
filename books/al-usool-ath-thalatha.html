@@ -56,4 +56,29 @@
 <footer>المؤلف: محمد بن عبد الوهاب (ت 1206هـ). مصدر النص: ويكي مصدر، صفحة «الأصول الثلاثة»، والنص منشور وفق رخصة المشاع الإبداعي الموضحة في صفحة المصدر. أُدرج النص هنا للمراجعة الداخلية، ولا يُعتمد بوصفه نصًا كاملًا حتى تتم مقابلته.</footer>
 </main><script>
 (()=>{const content=document.getElementById('content'),items=[...content.querySelectorAll('.book-paragraph')],toc=document.getElementById('toc'),sections=["المقدمة","الأصل الأول","الأصل الثاني","الأصل الثالث"];sections.forEach((name,i)=>{const b=document.createElement('button');b.type='button';b.textContent=name;b.addEventListener('click',()=>{const el=items.find(x=>x.dataset.section===name);if(el)el.scrollIntoView({behavior:'smooth',block:'start'})});toc.append(b)});let size=19;document.getElementById('plus').onclick=()=>{size=Math.min(28,size+1);document.querySelectorAll('.book-paragraph p').forEach(p=>p.style.fontSize=size+'px')};document.getElementById('minus').onclick=()=>{size=Math.max(14,size-1);document.querySelectorAll('.book-paragraph p').forEach(p=>p.style.fontSize=size+'px')};document.getElementById('print').onclick=()=>window.print();document.getElementById('find').addEventListener('input',e=>{const q=e.target.value.trim().toLocaleLowerCase('ar');items.forEach(x=>{x.classList.toggle('hidden',!!q&&!x.textContent.toLocaleLowerCase('ar').includes(q))})})})();
-</script></body></html>
+</script>
+<script>
+(function(){
+  const key='zad-library-progress:'+location.pathname;
+  const saved=Number(localStorage.getItem(key)||0);
+  const resume=document.createElement('button');
+  resume.type='button';
+  resume.textContent='استكمال القراءة من آخر موضع';
+  resume.setAttribute('aria-label','استكمال القراءة من آخر موضع محفوظ');
+  resume.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9999;border:0;border-radius:999px;padding:11px 16px;background:#174c3c;color:#fff;font: bold 14px Tahoma,Arial,sans-serif;box-shadow:0 4px 16px #0003;cursor:pointer;display:'+(saved>250?'block':'none');
+  resume.addEventListener('click',function(){window.scrollTo({top:saved,behavior:'smooth'});});
+  document.body.appendChild(resume);
+  let pending=false;
+  window.addEventListener('scroll',function(){
+    if(pending)return;
+    pending=true;
+    window.setTimeout(function(){
+      const y=window.scrollY||window.pageYOffset||0;
+      if(y>250){localStorage.setItem(key,String(Math.round(y)));resume.style.display='block';}
+      else{resume.style.display=saved>250?'block':'none';}
+      pending=false;
+    },500);
+  },{passive:true});
+})();
+</script>
+</body></html>
