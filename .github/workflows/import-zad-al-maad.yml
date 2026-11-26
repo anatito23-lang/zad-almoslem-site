@@ -1,0 +1,55 @@
+name: Import Zad Al-Maad public-domain volumes
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-zad-al-maad.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-volumes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Download and validate both volumes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p books
+          curl --fail --location --retry 3 --user-agent 'ZadAlMoslemLibrary/1.0' 'https://upload.wikimedia.org/wikisource/ar/6/6d/%D8%B2%D8%A7%D8%AF%D8%A7%D9%84%D9%85%D8%B9%D8%A7%D8%AF1.pdf' --output books/zad-al-maad-part1.pdf
+          curl --fail --location --retry 3 --user-agent 'ZadAlMoslemLibrary/1.0' 'https://upload.wikimedia.org/wikisource/ar/7/79/%D8%B2%D8%A7%D8%AF%D8%A7%D9%84%D9%85%D8%B9%D8%A7%D8%AF2.pdf' --output books/zad-al-maad-part2.pdf
+          for f in books/zad-al-maad-part1.pdf books/zad-al-maad-part2.pdf; do
+            test "$(head -c 5 "$f")" = '%PDF-'
+            test "$(stat -c '%s' "$f")" -gt 1000000
+          done
+          python -m pip install --quiet pypdf
+          python - <<'PY'
+          from pypdf import PdfReader
+          for name in ("books/zad-al-maad-part1.pdf","books/zad-al-maad-part2.pdf"):
+              r=PdfReader(name, strict=True)
+              n=len(r.pages)
+              print(f"{name}: {n} pages")
+              if n < 300: raise SystemExit(f"Unexpected page count for {name}: {n}")
+          PY
+      - name: Commit the volumes and source record
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > books/zad-al-maad-source.txt <<'EOF'
+          زاد المعاد في هدي خير العباد — الإمام محمد بن أبي بكر ابن قيم الجوزية.
+          النسخة: طبعة المطبع النظامي، كانبور، 1298هـ، مجزأة في ملفين مصورين.
+          المصدر: ويكي مصدر، ملفا زاد المعاد1.pdf وزاد المعاد2.pdf، وكلاهما موصوف بالملكية العامة.
+          هذه نسخة مصورة كما وردت من المصدر؛ لا ندعي تحقيقًا نصيًا حديثًا.
+          EOF
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add books/zad-al-maad-part1.pdf books/zad-al-maad-part2.pdf books/zad-al-maad-source.txt
+          git commit -m 'Add public-domain Zad al-Maad volumes'
+          git push origin HEAD:main
