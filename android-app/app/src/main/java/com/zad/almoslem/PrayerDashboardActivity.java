@@ -42,7 +42,11 @@ public class PrayerDashboardActivity extends Activity {
         String[] preferredIso = {"EG","SA","AE","KW","QA","JO","LB","PS","MA","DZ","TN","TR","PK","IN","ID","MY","GB","US","CA","DE","FR","BH","OM","IQ","SY","YE","LY","SD","BD","SG","JP","AU","ZA","NG","RU","ES","IT","NL","SE","NO"};
         String[] preferredArabic = {"مصر","السعودية","الإمارات","الكويت","قطر","الأردن","لبنان","فلسطين","المغرب","الجزائر","تونس","تركيا","باكستان","الهند","إندونيسيا","ماليزيا","المملكة المتحدة","الولايات المتحدة","كندا","ألمانيا","فرنسا","البحرين","عُمان","العراق","سوريا","اليمن","ليبيا","السودان","بنغلاديش","سنغافورة","اليابان","أستراليا","جنوب أفريقيا","نيجيريا","روسيا","إسبانيا","إيطاليا","هولندا","السويد","النرويج"};
         String[] preferredApi = {"Egypt","Saudi Arabia","United Arab Emirates","Kuwait","Qatar","Jordan","Lebanon","Palestine","Morocco","Algeria","Tunisia","Turkey","Pakistan","India","Indonesia","Malaysia","United Kingdom","United States","Canada","Germany","France","Bahrain","Oman","Iraq","Syria","Yemen","Libya","Sudan","Bangladesh","Singapore","Japan","Australia","South Africa","Nigeria","Russia","Spain","Italy","Netherlands","Sweden","Norway"};
-        for (int i=0;i<preferredIso.length;i++) sorted.put(preferredArabic[i],preferredApi[i]);
+        for (int i=0;i<preferredIso.length;i++) {
+            String localized = new Locale("", preferredIso[i]).getDisplayCountry(arabic);
+            sorted.remove(localized);
+            sorted.put(preferredArabic[i],preferredApi[i]);
+        }
         COUNTRIES = sorted.keySet().toArray(new String[0]);
         COUNTRY_CODES = sorted.values().toArray(new String[0]);
         METHODS = new String[COUNTRY_CODES.length];
