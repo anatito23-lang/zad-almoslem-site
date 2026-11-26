@@ -1,5 +1,5 @@
 name: Build Zad Almoslem Android
-# Rebuild trigger: validate release signing and the redesigned tasbeeh widget.
+# Rebuild trigger: validate RemoteViews-compatible tasbeeh widget loading fix.
 
 on:
   workflow_dispatch:
