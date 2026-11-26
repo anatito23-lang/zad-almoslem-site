@@ -1408,7 +1408,8 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
     </div>
     <div class="card">
       <div class="library-search-row" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
-        <input id="zadBookSearch" type="search" placeholder="ابحث باسم الكتاب أو موضوعه..." aria-label="ابحث في مكتبة زاد" style="flex:1;min-width:210px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff">
+        <input id="zadBookSearch" type="search" placeholder="ابحث باسم الكتاب أو موضوعه أو المؤلف..." aria-label="ابحث في مكتبة زاد" style="flex:1;min-width:210px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff">
+        <select id="zadBookCategoryFilter" aria-label="تصفية الكتب حسب القسم" style="min-width:180px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:#fff"><option value="">كل الأقسام</option><option value="hadith">الحديث الشريف</option><option value="aqeedah">العقيدة والتوحيد</option><option value="quran">القرآن وعلومه</option><option value="tafsir">التفسير وعلوم القرآن</option><option value="fiqh">الفقه وأصوله</option><option value="seerah">السيرة النبوية</option><option value="akhlaq">الأخلاق والآداب</option><option value="history">التاريخ والحضارة</option><option value="biography">التراجم والسير</option><option value="women">المرأة والأسرة</option><option value="children">الناشئة والأطفال</option><option value="dawah">الدعوة والفكر</option><option value="fatwa">الفتاوى والنوازل</option><option value="spirituality">الرقائق والتزكية</option><option value="arabic">اللغة العربية</option><option value="other">كتب متنوعة</option></select>
         <span id="zadBookCount" class="small" style="align-self:center">5 كتب كاملة متاحة</span>
       </div>
       <div class="book-category-groups" id="bookLibraryGrid">
@@ -1446,17 +1447,21 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
     </div>
     <script>
     (function(){
-      const input=document.getElementById('zadBookSearch'),grid=document.getElementById('bookLibraryGrid'),count=document.getElementById('zadBookCount');
+      const input=document.getElementById('zadBookSearch'),category=document.getElementById('zadBookCategoryFilter'),grid=document.getElementById('bookLibraryGrid'),count=document.getElementById('zadBookCount');
       if(!input||!grid)return;
       window.zadFilterBooks=function(){
-        const q=input.value.trim().toLocaleLowerCase('ar');let visible=0;
+        const q=input.value.trim().toLocaleLowerCase('ar'),selected=category?category.value:'';let visible=0;
         grid.querySelectorAll('.book-category-group').forEach(group=>{
-          let n=0;group.querySelectorAll('.book-card').forEach(card=>{const ok=!q||card.textContent.toLocaleLowerCase('ar').includes(q);card.hidden=!ok;if(ok){visible++;n++;}});
-          group.hidden=!!q&&n===0;if(q&&n)group.open=true;
+          let n=0;const groupMatch=!selected||group.dataset.bookGroup===selected;
+          group.querySelectorAll('.book-card').forEach(card=>{const ok=groupMatch&&(!q||card.textContent.toLocaleLowerCase('ar').includes(q));card.hidden=!ok;if(ok){visible++;n++;}});
+          group.hidden=n===0;
+          if(n&&(q||selected))group.open=true;
         });
         if(count)count.textContent='عدد الكتب الظاهرة: '+visible;
       };
-      input.addEventListener('input',window.zadFilterBooks);window.zadFilterBooks();
+      input.addEventListener('input',window.zadFilterBooks);
+      if(category)category.addEventListener('change',window.zadFilterBooks);
+      window.zadFilterBooks();
     })();
     </script>
   </section>
