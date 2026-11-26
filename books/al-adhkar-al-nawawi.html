@@ -30,14 +30,14 @@ a{color:#174c3c}
 <button id="go" type="button">اذهب</button>
 <button id="next" type="button">الصفحة التالية</button>
 </div>
-<div class="viewer"><iframe id="reader" title="كتاب الأذكار صفحة صفحة" src="https://www.khizanat.com/read/al-adhkar/1/3" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-<p class="note">يعرض القارئ النص الكامل للكتاب مع فهرس الأبواب والتنقل بين الصفحات. المؤلف: الإمام النووي، والمحقق: عبد القادر الأرنؤوط، والناشر: دار الفكر. مصدر النص: مدونة OpenITI عبر مكتبة خِزانة، بترخيص المشاع الإبداعي: نسب المصنف، غير تجاري، الترخيص بالمثل 4.0 (CC BY-NC-SA 4.0). الصفحات تعرض داخل واجهة زاد، لكن النص مستضاف لدى المصدر وليس مخزنًا محليًا على الموقع. <a href="https://www.khizanat.com/book/al-adhkar" target="_blank" rel="noopener">بيانات الكتاب والترخيص والفهرس</a>.</p>
+<div class="viewer"><iframe id="reader" title="كتاب الأذكار صفحة صفحة" src="https://khizanat.com/read/al-adhkar/1/3" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<p class="note">يعرض القارئ النص الكامل للكتاب مع فهرس الأبواب والتنقل بين الصفحات. المؤلف: الإمام النووي، والمحقق: عبد القادر الأرنؤوط، والناشر: دار الفكر. مصدر النص: مدونة OpenITI عبر مكتبة خِزانة، بترخيص المشاع الإبداعي: نسب المصنف، غير تجاري، الترخيص بالمثل 4.0 (CC BY-NC-SA 4.0). الصفحات تعرض داخل واجهة زاد، لكن النص مستضاف لدى المصدر وليس مخزنًا محليًا على الموقع. <a href="https://khizanat.com/book/al-adhkar" target="_blank" rel="noopener">بيانات الكتاب والترخيص والفهرس</a>.</p>
 </main>
 <script>
 (function(){
 const frame=document.getElementById('reader'),field=document.getElementById('page');
 let page=3;const first=3,last=413;
-function show(n){page=Math.max(first,Math.min(last,Math.floor(Number(n)||first)));field.value=page;frame.src='https://www.khizanat.com/read/al-adhkar/1/'+page}
+function show(n){page=Math.max(first,Math.min(last,Math.floor(Number(n)||first)));field.value=page;frame.src='https://khizanat.com/read/al-adhkar/1/'+page}
 document.getElementById('go').addEventListener('click',()=>show(field.value));
 document.getElementById('prev').addEventListener('click',()=>show(page-1));
 document.getElementById('next').addEventListener('click',()=>show(page+1));
