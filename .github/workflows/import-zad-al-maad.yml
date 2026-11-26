@@ -23,8 +23,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p books
-          curl --fail --location --retry 3 --user-agent 'ZadAlMoslemLibrary/1.0' 'https://upload.wikimedia.org/wikisource/ar/6/6d/%D8%B2%D8%A7%D8%AF%D8%A7%D9%84%D9%85%D8%B9%D8%A7%D8%AF1.pdf' --output books/zad-al-maad-part1.pdf
-          curl --fail --location --retry 3 --user-agent 'ZadAlMoslemLibrary/1.0' 'https://upload.wikimedia.org/wikisource/ar/7/79/%D8%B2%D8%A7%D8%AF%D8%A7%D9%84%D9%85%D8%B9%D8%A7%D8%AF2.pdf' --output books/zad-al-maad-part2.pdf
+          curl --fail --location --retry 3 --user-agent 'ZadAlMoslemLibrary/1.0' 'https://ar.wikisource.org/wiki/Special:Redirect/file/%D8%B2%D8%A7%D8%AF%D8%A7%D9%84%D9%85%D8%B9%D8%A7%D8%AF1.pdf' --output books/zad-al-maad-part1.pdf
+          curl --fail --location --retry 3 --user-agent 'ZadAlMoslemLibrary/1.0' 'https://ar.wikisource.org/wiki/Special:Redirect/file/%D8%B2%D8%A7%D8%AF%D8%A7%D9%84%D9%85%D8%B9%D8%A7%D8%AF2.pdf' --output books/zad-al-maad-part2.pdf
           for f in books/zad-al-maad-part1.pdf books/zad-al-maad-part2.pdf; do
             test "$(head -c 5 "$f")" = '%PDF-'
             test "$(stat -c '%s' "$f")" -gt 1000000
