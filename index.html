@@ -165,6 +165,9 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 .book-reader-pdf-search{display:flex;align-items:center;justify-content:center;gap:7px;flex-wrap:wrap;padding:8px;background:#f5f7f5;border-radius:10px;margin:8px 0 12px}
 .book-reader-pdf-search input{flex:1;min-width:150px;max-width:360px;padding:9px;border:1px solid #ccd5cf;border-radius:9px;font:inherit}
 #pdfSearchStatus{font-size:12px;color:#40574b}
+.book-reader-pdf-outline{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:9px;background:#fff;border-radius:10px;margin:8px 0}
+.book-reader-pdf-outline select{flex:1;min-width:180px;max-width:460px;padding:9px;border:1px solid #ccd5cf;border-radius:9px;font:inherit}
+#pdfOutlineStatus{font-size:12px;color:#40574b}
 .book-reader-pdf-stage{display:flex;justify-content:center;align-items:flex-start;min-height:240px}
 #bookPdfCanvas{max-width:100%;height:auto;background:#fff;box-shadow:0 4px 18px #0004}
 .book-reader-epub{height:min(72vh,850px);overflow:auto;background:#fff;color:#202820;padding:18px;direction:rtl}
@@ -1857,6 +1860,12 @@ main > #zad-section-menu a{display:flex}
     <div id="bookReaderPdf" class="book-reader-pdf" hidden>
       <div class="book-reader-pdf-nav"><button type="button" class="btn light" id="pdfPrevPage">السابق</button><span id="pdfPageStatus" aria-live="polite">صفحة 1</span><button type="button" class="btn light" id="pdfNextPage">التالي</button><button type="button" class="btn light" id="pdfZoomOut">−</button><button type="button" class="btn light" id="pdfZoomIn">＋</button></div>
       <div class="book-reader-pdf-search"><input id="pdfSearchInput" type="search" placeholder="ابحث داخل الكتاب..." aria-label="البحث داخل الكتاب"><button type="button" class="btn light" id="pdfSearchButton">بحث</button><button type="button" class="btn light" id="pdfSearchPrev" disabled>السابق</button><button type="button" class="btn light" id="pdfSearchNext" disabled>التالي</button><span id="pdfSearchStatus" aria-live="polite"></span></div>
+      <div class="book-reader-pdf-outline">
+        <label for="pdfOutlineSelect">فهرس الكتاب</label>
+        <select id="pdfOutlineSelect"><option value="">تحميل فهرس الكتاب...</option></select>
+        <button type="button" class="btn light" id="pdfOutlineGo">انتقال إلى الباب</button>
+        <span id="pdfOutlineStatus" aria-live="polite"></span>
+      </div>
       <div class="book-reader-pdf-stage"><canvas id="bookPdfCanvas"></canvas></div>
     </div>
     <iframe id="bookReaderFrame" title="قارئ الكتاب" loading="lazy" allowfullscreen></iframe>
@@ -2049,6 +2058,31 @@ document.getElementById("pdfPrevPage")?.addEventListener("click",()=>{if(activeP
 document.getElementById("pdfNextPage")?.addEventListener("click",()=>{if(activePdfDocument&&activePdfPage<activePdfDocument.numPages){activePdfPage++;renderLibraryPdfPage();}});
 document.getElementById("pdfZoomIn")?.addEventListener("click",()=>{activePdfScale=Math.min(2.5,activePdfScale+.15);renderLibraryPdfPage();});
 document.getElementById("pdfZoomOut")?.addEventListener("click",()=>{activePdfScale=Math.max(.65,activePdfScale-.15);renderLibraryPdfPage();});
+let activePdfOutlineEntries=[];
+async function loadLibraryPdfOutline(){
+ const select=document.getElementById("pdfOutlineSelect"),status=document.getElementById("pdfOutlineStatus");
+ if(!select)return;
+ select.innerHTML='<option value="">تحميل فهرس الكتاب...</option>';activePdfOutlineEntries=[];
+ try{
+  const outline=await activePdfDocument.getOutline();
+  if(!outline||!outline.length){select.innerHTML='<option value="">لا يوجد فهرس مضمّن في هذا الملف</option>';if(status)status.textContent="يمكن إضافة فهرس يدوي للكتاب من بيانات المكتبة لاحقًا.";return;}
+  const flatten=(items,depth=0)=>{for(const item of items||[]){const index=activePdfOutlineEntries.length;activePdfOutlineEntries.push({title:item.title||"باب دون عنوان",dest:item.dest,depth});if(item.items?.length)flatten(item.items,depth+1);}};
+  flatten(outline);
+  select.innerHTML='<option value="">اختر بابًا أو فصلًا ('+activePdfOutlineEntries.length+')</option>';
+  activePdfOutlineEntries.forEach((entry,index)=>{const option=document.createElement("option");option.value=String(index);option.textContent="　".repeat(Math.min(entry.depth,5))+entry.title;select.appendChild(option);});
+  if(status)status.textContent="فهرس مضمّن من "+activePdfOutlineEntries.length+" عنوانًا.";
+ }catch(e){select.innerHTML='<option value="">تعذر قراءة فهرس الملف</option>';if(status)status.textContent="يمكن متابعة القراءة والبحث دون الفهرس.";}
+}
+document.getElementById("pdfOutlineGo")?.addEventListener("click",async()=>{
+ const select=document.getElementById("pdfOutlineSelect"),status=document.getElementById("pdfOutlineStatus"),entry=activePdfOutlineEntries[Number(select?.value)];
+ if(!entry){if(status)status.textContent="اختر عنوانًا من الفهرس أولًا.";return;}
+ try{
+  let dest=entry.dest;if(typeof dest==="string")dest=await activePdfDocument.getDestination(dest);
+  if(!Array.isArray(dest)||!dest[0])throw new Error("Invalid PDF outline destination");
+  activePdfPage=(await activePdfDocument.getPageIndex(dest[0]))+1;
+  await renderLibraryPdfPage();if(status)status.textContent="تم الانتقال إلى: "+entry.title;
+ }catch(e){if(status)status.textContent="هذا العنوان لا يحتوي على موضع انتقال صالح في الملف.";}
+});
 let activePdfSearchResults=[],activePdfSearchIndex=-1,activePdfSearchToken=0;
 function normalizePdfSearchText(value){return String(value||"").normalize("NFKC").replace(/[\u064B-\u065F\u0670ـ]/g,"").replace(/[أإآ]/g,"ا").replace(/ى/g,"ي").toLocaleLowerCase("ar");}
 async function searchLibraryPdf(){
@@ -2134,7 +2168,7 @@ async function openBookInSite(url,title,fileType){
  const type=String(fileType||"").toLowerCase(),isEpub=type.includes("epub")||/\.epub(?:$|\?)/i.test(url),isDocx=type.includes("wordprocessingml")||/\.docx(?:$|\?)/i.test(url);
  const old=modal.querySelector(".book-reader-notice");if(old)old.remove();
  if(activeEpubBook){try{activeEpubBook.destroy();}catch(e){}activeEpubBook=null;}
- epubHost.hidden=true;epubHost.replaceChildren();pdfHost.hidden=true;activePdfDocument=null;activePdfSearchResults=[];activePdfSearchIndex=-1;activePdfSearchToken++;const pdfSearchStatus=document.getElementById("pdfSearchStatus");if(pdfSearchStatus)pdfSearchStatus.textContent="";const pdfSearchInput=document.getElementById("pdfSearchInput");if(pdfSearchInput)pdfSearchInput.value="";frame.hidden=false;frame.src="about:blank";
+ epubHost.hidden=true;epubHost.replaceChildren();pdfHost.hidden=true;activePdfDocument=null;activePdfOutlineEntries=[];const pdfOutlineSelect=document.getElementById("pdfOutlineSelect");if(pdfOutlineSelect)pdfOutlineSelect.innerHTML='<option value="">فهرس الكتاب</option>';const pdfOutlineStatus=document.getElementById("pdfOutlineStatus");if(pdfOutlineStatus)pdfOutlineStatus.textContent="";activePdfSearchResults=[];activePdfSearchIndex=-1;activePdfSearchToken++;const pdfSearchStatus=document.getElementById("pdfSearchStatus");if(pdfSearchStatus)pdfSearchStatus.textContent="";const pdfSearchInput=document.getElementById("pdfSearchInput");if(pdfSearchInput)pdfSearchInput.value="";frame.hidden=false;frame.src="about:blank";
  heading.textContent=title||"قارئ الكتب";
  activeLibraryBookKey=String(url||title||"book").split("?")[0];
  renderLibraryBookmarks();
@@ -2161,7 +2195,7 @@ async function openBookInSite(url,title,fileType){
   frame.hidden=true;pdfHost.hidden=false;pdfHost.scrollTop=0;
   try{await loadLibraryScript("https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js");if(!window.pdfjsLib)throw new Error("PDF.js unavailable");
    window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-   activePdfDocument=await window.pdfjsLib.getDocument({url}).promise;activePdfPage=1;activePdfScale=1.15;await renderLibraryPdfPage();
+   activePdfDocument=await window.pdfjsLib.getDocument({url}).promise;activePdfPage=1;activePdfScale=1.15;await renderLibraryPdfPage();await loadLibraryPdfOutline();
   }catch(e){pdfHost.hidden=true;frame.hidden=false;frame.src=url;const note=document.createElement("p");note.className="book-reader-notice small";note.textContent="تعذر تشغيل القارئ المخصص لهذا الملف؛ فُتح باستخدام عارض المتصفح.";modal.querySelector(".book-reader-dialog").append(note);}
   return;
  }
