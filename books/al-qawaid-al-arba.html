@@ -72,25 +72,35 @@ document.getElementById('print').onclick=()=>window.print();
 <script>
 (function(){
   const key='zad-library-progress:'+location.pathname;
-  const saved=Number(localStorage.getItem(key)||0);
   const resume=document.createElement('button');
   resume.type='button';
   resume.textContent='استكمال القراءة من آخر موضع';
   resume.setAttribute('aria-label','استكمال القراءة من آخر موضع محفوظ');
-  resume.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9999;border:0;border-radius:999px;padding:11px 16px;background:#174c3c;color:#fff;font: bold 14px Tahoma,Arial,sans-serif;box-shadow:0 4px 16px #0003;cursor:pointer;display:'+(saved>250?'block':'none');
-  resume.addEventListener('click',function(){window.scrollTo({top:saved,behavior:'smooth'});});
+  resume.style.cssText='position:fixed;bottom:16px;right:16px;z-index:9999;border:0;border-radius:999px;padding:11px 16px;background:#174c3c;color:#fff;font:bold 14px Tahoma,Arial,sans-serif;box-shadow:0 4px 16px #0003;cursor:pointer;display:none';
+  resume.addEventListener('click',function(){
+    const saved=Number(localStorage.getItem(key)||0);
+    if(saved>0)window.scrollTo({top:saved,behavior:'smooth'});
+  });
   document.body.appendChild(resume);
   let pending=false;
+  function updateButton(){
+    resume.style.display=Number(localStorage.getItem(key)||0)>250?'block':'none';
+  }
+  updateButton();
   window.addEventListener('scroll',function(){
     if(pending)return;
     pending=true;
     window.setTimeout(function(){
       const y=window.scrollY||window.pageYOffset||0;
-      if(y>250){localStorage.setItem(key,String(Math.round(y)));resume.style.display='block';}
-      else{resume.style.display=saved>250?'block':'none';}
+      if(y>250)localStorage.setItem(key,String(Math.round(y)));
+      updateButton();
       pending=false;
-    },500);
+    },400);
   },{passive:true});
+  window.addEventListener('pagehide',function(){
+    const y=window.scrollY||window.pageYOffset||0;
+    if(y>250)localStorage.setItem(key,String(Math.round(y)));
+  });
 })();
 </script>
 </body></html>
