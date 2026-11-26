@@ -1452,12 +1452,18 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
       window.zadFilterBooks=function(){
         const q=input.value.trim().toLocaleLowerCase('ar'),selected=category?category.value:'';let visible=0;
         grid.querySelectorAll('.book-category-group').forEach(group=>{
-          let n=0;const groupMatch=!selected||group.dataset.bookGroup===selected;
-          group.querySelectorAll('.book-card').forEach(card=>{const ok=groupMatch&&(!q||card.textContent.toLocaleLowerCase('ar').includes(q));card.hidden=!ok;if(ok){visible++;n++;}});
+          let n=0,total=group.querySelectorAll('.book-card').length;
+          const groupMatch=!selected||group.dataset.bookGroup===selected;
+          group.querySelectorAll('.book-card').forEach(card=>{
+            const ok=groupMatch&&(!q||card.textContent.toLocaleLowerCase('ar').includes(q));
+            card.hidden=!ok;if(ok){visible++;n++;}
+          });
           group.hidden=n===0;
+          const badge=group.querySelector('.book-category-count');
+          if(badge)badge.textContent=total===0?'لا توجد كتب بعد':(''+total+' '+(total===1?'كتاب':total===2?'كتابان':'كتب'));
           if(n&&(q||selected))group.open=true;
         });
-        if(count)count.textContent='عدد الكتب الظاهرة: '+visible;
+        if(count)count.textContent='عدد المواد المطابقة: '+visible+' من '+grid.querySelectorAll('.book-card').length;
       };
       input.addEventListener('input',window.zadFilterBooks);
       if(category)category.addEventListener('change',window.zadFilterBooks);
