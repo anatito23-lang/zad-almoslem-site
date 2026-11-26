@@ -1,0 +1,52 @@
+name: Import Tafsir al-Jalalayn public-domain scan
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-tafsir-al-jalalayn.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-tafsir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: true
+      - name: Download and validate the complete scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p books
+          curl --fail --location --retry 3 --user-agent 'ZadAlMoslemLibrary/1.0' 'https://upload.wikimedia.org/wikisource/ar/f/f3/%D8%AA%D9%81%D8%B3%D9%8A%D8%B1_%D8%A7%D9%84%D8%AC%D9%84%D8%A7%D9%84%D9%8A%D9%86.pdf' --output books/tafsir-al-jalalayn.pdf
+          test "$(head -c 5 books/tafsir-al-jalalayn.pdf)" = '%PDF-'
+          test "$(stat -c '%s' books/tafsir-al-jalalayn.pdf)" -gt 10000000
+          test "$(stat -c '%s' books/tafsir-al-jalalayn.pdf)" -lt 80000000
+          python -m pip install --quiet pypdf
+          python - <<'PY'
+          from pypdf import PdfReader
+          r=PdfReader("books/tafsir-al-jalalayn.pdf", strict=True)
+          n=len(r.pages)
+          print(f"Validated Tafsir al-Jalalayn: {n} pages")
+          if n < 700: raise SystemExit(f"Unexpected page count: {n}")
+          PY
+      - name: Commit the book and source record
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > books/tafsir-al-jalalayn-source.txt <<'EOF'
+          تفسير الجلالين — جلال الدين المحلي وجلال الدين السيوطي.
+          تصحيح رضوان بن حسن بن علي الحفناوي، طبعة القاهرة 1278هـ، 788 صفحة.
+          المصدر: ويكي مصدر، ملف تفسير الجلالين.pdf، موصوف بالملكية العامة.
+          هذه نسخة مصوّرة كما وردت من المصدر؛ لا ندّعي تحقيقًا نصيًا حديثًا.
+          EOF
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add books/tafsir-al-jalalayn.pdf books/tafsir-al-jalalayn-source.txt
+          git commit -m 'Add public-domain Tafsir al-Jalalayn scan'
+          git push origin HEAD:main
