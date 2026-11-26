@@ -6,42 +6,40 @@
 <title>الأذكار للإمام النووي | مكتبة زاد المسلم</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f2f4ef;color:#24372f;font-family:Tahoma,Arial,sans-serif}
-header{background:#123f35;color:#fff;padding:18px 14px;text-align:center}
-header h1{margin:0;font-size:25px}header p{margin:7px 0 0;color:#e3eee7;font-size:14px}
-main{max-width:1100px;margin:14px auto;padding:0 12px}
-.controls{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;background:#fff;padding:12px;border:1px solid #dfe7df;border-radius:13px;margin-bottom:10px}
-button,input{font:inherit;border-radius:9px;padding:9px 12px;border:1px solid #d4ded5}
-button{background:#174c3c;color:#fff;border:0;font-weight:700}
-input{width:90px;text-align:center;direction:ltr}
-.viewer{background:#fff;border:1px solid #dfe7df;border-radius:13px;overflow:hidden}
-iframe{width:100%;height:calc(100dvh - 250px);min-height:600px;border:0;background:#fff}
+header{background:#123f35;color:#fff;padding:18px 14px;text-align:center}header h1{margin:0;font-size:25px}header p{margin:7px 0 0;color:#e3eee7;font-size:14px}
+main{max-width:900px;margin:14px auto;padding:0 12px}.controls{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;background:#fff;padding:12px;border:1px solid #dfe7df;border-radius:13px;margin-bottom:10px}
+button,input{font:inherit;border-radius:9px;padding:10px 12px;border:1px solid #d4ded5}button{background:#174c3c;color:#fff;border:0;font-weight:700}button:disabled{opacity:.45}input{width:85px;text-align:center;direction:ltr}
+#status{padding:13px;text-align:center;color:#52665a;background:#fff;border-radius:10px;margin:10px 0}
+#pageContent{background:#fff;border:1px solid #dfe7df;border-radius:13px;padding:22px 20px;min-height:55vh;font-size:19px;line-height:2.15;white-space:pre-wrap;overflow-wrap:anywhere}
+#pageContent p{margin:0 0 12px}.pageNo{text-align:center;color:#718176;font-size:13px;margin:12px}
 .note{font-size:12px;line-height:1.9;color:#52665a;padding:12px 14px;background:#edf4ed;border-radius:10px;margin:10px 0 20px}
-a{color:#174c3c}
-@media(max-width:600px){header h1{font-size:21px}iframe{height:calc(100dvh - 285px);min-height:520px}}
-</style>
-</head>
+@media(max-width:600px){header h1{font-size:21px}#pageContent{padding:17px 14px;font-size:18px}}
+</style></head>
 <body>
-<header><h1>الأذكار</h1><p>الإمام يحيى بن شرف النووي · النص الكامل بحسب صفحات الطبعة الرقمية · 411 صفحة</p></header>
+<header><h1>الأذكار</h1><p>الإمام يحيى بن شرف النووي · النص الكامل · عرض صفحة صفحة</p></header>
 <main>
-<div class="controls">
-<button id="prev" type="button">الصفحة السابقة</button>
-<label for="page">رقم الصفحة</label>
-<input id="page" type="number" min="3" max="413" value="3">
-<button id="go" type="button">اذهب</button>
-<button id="next" type="button">الصفحة التالية</button>
-</div>
-<div class="viewer"><iframe id="reader" title="كتاب الأذكار صفحة صفحة" src="https://khizanat.com/read/al-adhkar/1/3" loading="eager" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
-<p class="note">يعرض القارئ النص الكامل للكتاب مع فهرس الأبواب والتنقل بين الصفحات. المؤلف: الإمام النووي، والمحقق: عبد القادر الأرنؤوط، والناشر: دار الفكر. مصدر النص: مدونة OpenITI عبر مكتبة خِزانة، بترخيص المشاع الإبداعي: نسب المصنف، غير تجاري، الترخيص بالمثل 4.0 (CC BY-NC-SA 4.0). الصفحات تعرض داخل واجهة زاد، لكن النص مستضاف لدى المصدر وليس مخزنًا محليًا على الموقع. <a href="https://khizanat.com/book/al-adhkar" target="_blank" rel="noopener">بيانات الكتاب والترخيص والفهرس</a>.</p>
+<div class="controls"><button id="prev" disabled>الصفحة السابقة</button><label for="page">رقم الصفحة</label><input id="page" type="number" min="3" max="413" value="3"><button id="go">اذهب</button><button id="next" disabled>الصفحة التالية</button></div>
+<div id="status">جارٍ تحميل نص الكتاب من مستودع OpenITI المفتوح...</div>
+<article id="pageContent" hidden></article><div class="pageNo" id="pageNo"></div>
+<p class="note">النص الكامل مأخوذ من ملف OpenITI: 0676Nawawi.Adhkar.Shamela0001956-ara1، بترخيص CC BY-NC-SA 4.0. تم إعداد القارئ لعرض النص داخل موقع زاد دون تضمين صفحة خارجية. قد يختلف تقسيم النص الرقمي عن شكل الصفحات المصورة، مع الاحتفاظ بعلامات صفحات المصدر. <a href="https://github.com/OpenITI/0700AH" target="_blank" rel="noopener">المصدر والترخيص</a>.</p>
 </main>
 <script>
-(function(){
-const frame=document.getElementById('reader'),field=document.getElementById('page');
-let page=3;const first=3,last=413;
-function show(n){page=Math.max(first,Math.min(last,Math.floor(Number(n)||first)));field.value=page;frame.src='https://khizanat.com/read/al-adhkar/1/'+page}
-document.getElementById('go').addEventListener('click',()=>show(field.value));
-document.getElementById('prev').addEventListener('click',()=>show(page-1));
-document.getElementById('next').addEventListener('click',()=>show(page+1));
-field.addEventListener('keydown',e=>{if(e.key==='Enter')show(field.value)});
+(async function(){
+const raw='https://raw.githubusercontent.com/OpenITI/0700AH/master/data/0676Nawawi/0676Nawawi.Adhkar/0676Nawawi.Adhkar.Shamela0001956-ara1';
+const status=document.getElementById('status'),content=document.getElementById('pageContent'),field=document.getElementById('page'),prev=document.getElementById('prev'),next=document.getElementById('next'),pageNo=document.getElementById('pageNo');
+let pages=[],current=0;
+function clean(s){return s.split('\n').map(x=>x.replace(/^~~\s?/,'').replace(/^#{1,6}\s?/,'').trim()).filter(x=>x&&!/^#META#/.test(x)&&x!=='#META#Header#End#').join('\n\n').trim()}
+function render(i){current=Math.max(0,Math.min(pages.length-1,i));const p=pages[current];content.textContent=p.text;content.hidden=false;status.hidden=true;field.value=p.num;prev.disabled=current===0;next.disabled=current===pages.length-1;pageNo.textContent='صفحة المصدر رقم '+p.num+' · '+(current+1)+' من '+pages.length;window.scrollTo({top:0,behavior:'smooth'})}
+try{
+const response=await fetch(raw,{cache:'force-cache'});if(!response.ok)throw new Error('تعذر الوصول إلى ملف النص ('+response.status+')');
+const source=await response.text();const lines=source.split(/\r?\n/);let active=null,buffer=[];
+for(const line of lines){const m=line.match(/^# PageV\d+P(\d+)/);if(m){if(active!==null)pages.push({num:Number(active),text:clean(buffer.join('\n'))});active=m[1];buffer=[];}else if(active!==null&&line!=='#META#Header#End#'){buffer.push(line)}}
+if(active!==null)pages.push({num:Number(active),text:clean(buffer.join('\n'))});
+pages=pages.filter(p=>p.text);if(!pages.length)throw new Error('لم يتم العثور على علامات الصفحات في النص');
+const requested=Number(field.value)||3;let idx=pages.findIndex(p=>p.num>=requested);if(idx<0)idx=pages.length-1;render(idx);
+prev.addEventListener('click',()=>render(current-1));next.addEventListener('click',()=>render(current+1));
+document.getElementById('go').addEventListener('click',()=>{const n=Number(field.value);const i=pages.findIndex(p=>p.num>=n);render(i<0?pages.length-1:i)});
+field.addEventListener('keydown',e=>{if(e.key==='Enter'){const n=Number(field.value);const i=pages.findIndex(p=>p.num>=n);render(i<0?pages.length-1:i)}});
+}catch(e){status.textContent='تعذر تحميل نص الكتاب. '+e.message+' — تحقق من اتصال الإنترنت ثم أعد تحميل الصفحة.';status.style.color='#9b2c2c'}
 })();
-</script>
-</body></html>
+</script></body></html>
