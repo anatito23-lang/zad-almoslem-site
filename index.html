@@ -192,6 +192,9 @@ input:focus,select:focus,button:focus-visible,a:focus-visible,summary:focus-visi
 .book-reader-modal.active{display:flex}
 .book-reader-dialog{width:min(1120px,100%);height:min(92dvh,900px);display:flex;flex-direction:column;overflow:hidden;background:#fff;border-radius:18px;box-shadow:0 20px 70px #0005}
 .book-reader-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 15px;background:var(--paper);border-bottom:1px solid var(--line)}
+.book-reader-bookmarks{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--paper)}
+.book-reader-bookmarks select{max-width:min(48vw,320px);padding:8px;border:1px solid var(--line);border-radius:9px;background:#fff;color:#24352c;font:inherit}
+#bookBookmarkStatus{font-size:12px;color:var(--muted)}
 .book-reader-tools{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--paper);color:var(--ink)}
 .book-reader-tools .btn{min-width:42px;padding:7px 11px}
 .book-reader-tools span{font-size:12px;font-weight:700}
@@ -1830,6 +1833,12 @@ main > #zad-section-menu a{display:flex}
       <div><strong id="bookReaderTitle">قارئ الكتب</strong><span>القراءة داخل موقع زاد المسلم</span></div>
       <button type="button" class="btn light" id="closeBookReader">إغلاق ✕</button>
     </div>
+    <div class="book-reader-bookmarks" aria-label="العلامات المرجعية">
+      <button type="button" class="btn light" id="bookAddBookmark">＋ حفظ علامة</button>
+      <select id="bookBookmarkList" aria-label="العلامات المحفوظة"><option value="">العلامات المحفوظة</option></select>
+      <button type="button" class="btn light" id="bookGoBookmark">انتقال</button>
+      <span id="bookBookmarkStatus" aria-live="polite"></span>
+    </div>
     <div class="book-reader-tools" role="toolbar" aria-label="إعدادات القراءة">
       <button type="button" class="btn light" id="bookFontDecrease" aria-label="تصغير الخط">A−</button>
       <span id="bookFontSizeLabel" aria-live="polite">حجم الخط 18</span>
@@ -2019,6 +2028,34 @@ function loadLibraryScript(src){
  return new Promise((resolve,reject)=>{const existing=document.querySelector('script[data-library-reader="'+src+'"]');if(existing){if(existing.dataset.loaded==="true")return resolve();existing.addEventListener("load",resolve,{once:true});existing.addEventListener("error",reject,{once:true});return;}
  const s=document.createElement("script");s.src=src;s.dataset.libraryReader=src;s.onload=()=>{s.dataset.loaded="true";resolve();};s.onerror=reject;document.head.append(s);});
 }
+let activeLibraryBookKey="";
+function libraryBookmarksKey(){return "zadLibraryBookmarks:"+activeLibraryBookKey;}
+function readLibraryBookmarks(){try{return JSON.parse(localStorage.getItem(libraryBookmarksKey())||"[]");}catch(e){return [];}}
+function saveLibraryBookmarks(items){try{localStorage.setItem(libraryBookmarksKey(),JSON.stringify(items));return true;}catch(e){return false;}}
+function renderLibraryBookmarks(){
+ const select=document.getElementById("bookBookmarkList");if(!select)return;
+ const items=readLibraryBookmarks();select.innerHTML='<option value="">العلامات المحفوظة ('+items.length+')</option>';
+ items.forEach((item,i)=>{const option=document.createElement("option");option.value=String(i);option.textContent=item.label||("علامة "+(i+1));select.appendChild(option);});
+}
+function currentLibraryReaderPosition(){
+ const frame=document.getElementById("bookReaderFrame");
+ try{if(frame&&frame.contentWindow&&frame.contentWindow.location.origin===location.origin)return {type:"frame",url:frame.contentWindow.location.href};}catch(e){}
+ const host=document.getElementById("bookReaderEpub");
+ if(host&&!host.hidden){return {type:"content",top:host.scrollTop};}
+ return null;
+}
+document.getElementById("bookAddBookmark")?.addEventListener("click",()=>{
+ const pos=currentLibraryReaderPosition(),status=document.getElementById("bookBookmarkStatus");
+ if(!activeLibraryBookKey||!pos){if(status)status.textContent="هذا العارض لا يتيح حفظ موضع دقيق حاليًا.";return;}
+ const items=readLibraryBookmarks();items.push({label:"موضع "+new Date().toLocaleString("ar"),position:pos,createdAt:Date.now()});
+ if(saveLibraryBookmarks(items)){renderLibraryBookmarks();document.getElementById("bookBookmarkList").value=String(items.length-1);if(status)status.textContent="تم حفظ العلامة لهذا الكتاب.";}else if(status)status.textContent="تعذر الحفظ؛ تحقق من مساحة التخزين.";
+});
+document.getElementById("bookGoBookmark")?.addEventListener("click",()=>{
+ const select=document.getElementById("bookBookmarkList"),status=document.getElementById("bookBookmarkStatus"),item=readLibraryBookmarks()[Number(select?.value)];
+ if(!item){if(status)status.textContent="اختر علامة محفوظة أولًا.";return;}
+ if(item.position.type==="frame"&&item.position.url){document.getElementById("bookReaderFrame").src=item.position.url;if(status)status.textContent="تم فتح موضع العلامة.";}
+ else if(item.position.type==="content"){document.getElementById("bookReaderEpub").scrollTo({top:item.position.top||0,behavior:"smooth"});if(status)status.textContent="تم الانتقال إلى العلامة.";}
+});
 let libraryReaderFontSize=18,libraryReaderTheme="light";
 function applyLibraryReaderPreferences(){
  const host=document.getElementById("bookReaderEpub"),label=document.getElementById("bookFontSizeLabel"),themeButton=document.getElementById("bookReaderTheme");
@@ -2039,6 +2076,8 @@ async function openBookInSite(url,title,fileType){
  if(activeEpubBook){try{activeEpubBook.destroy();}catch(e){}activeEpubBook=null;}
  epubHost.hidden=true;epubHost.replaceChildren();frame.hidden=false;frame.src="about:blank";
  heading.textContent=title||"قارئ الكتب";
+ activeLibraryBookKey=String(url||title||"book").split("?")[0];
+ renderLibraryBookmarks();
  applyLibraryReaderPreferences();
  modal.classList.add("active");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
  if(isEpub){
