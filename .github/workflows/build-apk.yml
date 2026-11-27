@@ -124,6 +124,14 @@ jobs:
         working-directory: android-app
         run: gradle assembleDebug
 
+      - name: Upload debug APK (available even without release signing secrets)
+        uses: actions/upload-artifact@v4
+        with:
+          name: zad-almoslem-debug-apk
+          path: android-app/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Prepare and require release signing key
         shell: bash
         run: |
@@ -156,14 +164,6 @@ jobs:
       - name: Remove temporary signing key
         if: always()
         run: rm -f android-app/app/release-key.jks
-
-      - name: Upload debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: zad-almoslem-debug-apk
-          path: android-app/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 30
 
       - name: Upload release APK
         uses: actions/upload-artifact@v4
