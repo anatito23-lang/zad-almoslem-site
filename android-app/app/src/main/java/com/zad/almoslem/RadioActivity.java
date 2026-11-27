@@ -216,7 +216,8 @@ public class RadioActivity extends Activity {
             final JSONArray result = radios;
             final String error = failure;
             runOnUiThread(() -> {
-                target.removeAllViews();
+                // Keep the Egypt and Saudi Arabia stations at the top; remove only the loading message.
+                loading.setVisibility(View.GONE);
                 if (result == null) {
                     TextView problem = new TextView(this);
                     problem.setText("تعذر تحميل إذاعات MP3Quran. تحقق من الإنترنت وأعد فتح التبويب. " + (error == null ? "" : error));
