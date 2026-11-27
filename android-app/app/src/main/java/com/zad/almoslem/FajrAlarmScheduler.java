@@ -45,5 +45,8 @@ public final class FajrAlarmScheduler {
         Intent intent=new Intent(context,FajrAlarmReceiver.class).setAction("com.zad.almoslem.FAJR_ALARM");
         PendingIntent pi=PendingIntent.getBroadcast(context,REQUEST_CODE,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
         manager.cancel(pi);pi.cancel();
+        Intent snoozeIntent=new Intent(context,FajrAlarmReceiver.class).setAction("com.zad.almoslem.FAJR_ALARM");
+        PendingIntent snooze=PendingIntent.getBroadcast(context,REQUEST_CODE+1,snoozeIntent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+        manager.cancel(snooze);snooze.cancel();
     }
 }
