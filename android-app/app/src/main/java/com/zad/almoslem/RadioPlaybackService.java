@@ -250,9 +250,9 @@ public class RadioPlaybackService extends Service {
     private void playNextQuranSurah() { playQuranSurah(1,true); }
     private void playQuranSurah(int direction) { playQuranSurah(direction,false); }
     private void skipPlayback(boolean forward) {
+        if(player==null)return;
         String kind=getSharedPreferences("zad_audio",MODE_PRIVATE).getString("active_kind","");
         if("quran".equals(kind)){playQuranSurah(forward?1:-1);return;}
-        if(player==null)return;
         boolean resume=player.getPlayWhenReady()||resumeOnAudioFocusGain;
         if(forward){
             if(player.hasNextMediaItem())player.seekToNextMediaItem();
