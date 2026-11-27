@@ -70,7 +70,7 @@ public class QuranTextActivity extends Activity {
         repeat.setOnClickListener(v->{if(currentIndex>=0)playAyah(currentIndex,false);});
         status=label("جارٍ تحميل الآيات...",12,Color.DKGRAY,false);status.setPadding(0,dp(8),0,dp(8));root.addView(status);
         verses=new LinearLayout(this);verses.setOrientation(LinearLayout.VERTICAL);root.addView(verses);
-        setContentView(AppTabs.wrap(this,contentScroll,"mushaf"));
+        setContentView(AppTabs.wrap(this,contentScroll,getIntent().getBooleanExtra("from_ramadan",false)?"ramadan":"mushaf"));
     }
     private void loadContent(){
         if(busy)return;busy=true;status.setText("جارٍ تحميل نص الآيات...");
