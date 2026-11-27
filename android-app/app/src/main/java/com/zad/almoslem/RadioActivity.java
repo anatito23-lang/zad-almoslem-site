@@ -12,11 +12,21 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
 import android.graphics.drawable.GradientDrawable;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class RadioActivity extends Activity {
     private static final String GREEN = "#083028";
     private TextView status;
     private final Handler handler = new Handler();
+    private final ExecutorService radioLoader = Executors.newSingleThreadExecutor();
     private final Runnable statusTicker = new Runnable() {
         @Override public void run() { refreshStatus(); handler.postDelayed(this, 1000); }
     };
@@ -89,12 +99,22 @@ public class RadioActivity extends Activity {
         deckLp.bottomMargin = dp(16);
         root.addView(deck, deckLp);
 
+        TextView listTitle = new TextView(this);
+        listTitle.setText("📻 إذاعات MP3Quran المباشرة");
+        listTitle.setTextSize(19);
+        listTitle.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        listTitle.setTextColor(AppThemeColors.text(this));
+        root.addView(listTitle, match());
+        LinearLayout stationsList = new LinearLayout(this);
+        stationsList.setOrientation(LinearLayout.VERTICAL);
+        root.addView(stationsList, match());
         addStation(root, "🇪🇬 إذاعة القرآن الكريم من القاهرة",
                 "البث المصري", "https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8",
                 "إذاعة القرآن الكريم من القاهرة", "egypt", "https://misrquran.gov.eg/home");
         addStation(root, "🇸🇦 إذاعة القرآن الكريم السعودية",
                 "هيئة الإذاعة والتلفزيون السعودية", "https://live.kwikmotion.com/sbrksaquranradiolive/srpksaquranradio/playlist.m3u8",
                 "إذاعة القرآن الكريم السعودية", "saudi", "https://radioplus.sba.sa/ar/live/4");
+        loadMp3QuranRadios(stationsList);
 
         Button stop = new Button(this);
         stop.setText("■ إيقاف الإذاعة");
@@ -164,6 +184,67 @@ public class RadioActivity extends Activity {
         });
     }
 
+
+    private void loadMp3QuranRadios(LinearLayout target) {
+        TextView loading = new TextView(this);
+        loading.setText("جارٍ تحميل الإذاعات من MP3Quran...");
+        loading.setTextColor(AppThemeColors.muted(this));
+        target.addView(loading, match());
+        radioLoader.execute(() -> {
+            JSONArray radios = null;
+            String failure = null;
+            HttpURLConnection connection = null;
+            try {
+                connection = (HttpURLConnection) new URL("https://www.mp3quran.net/api/v3/radios?language=ar").openConnection();
+                connection.setRequestMethod("GET");
+                connection.setConnectTimeout(12000);
+                connection.setReadTimeout(15000);
+                connection.setRequestProperty("Accept", "application/json");
+                connection.connect();
+                if (connection.getResponseCode() != 200) throw new Exception("HTTP " + connection.getResponseCode());
+                InputStream in = connection.getInputStream();
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                byte[] buffer = new byte[8192];
+                int count;
+                while ((count = in.read(buffer)) != -1) out.write(buffer, 0, count);
+                in.close();
+                JSONObject response = new JSONObject(new String(out.toByteArray(), StandardCharsets.UTF_8));
+                radios = response.optJSONArray("radios");
+                if (radios == null) throw new Exception("لم تصل قائمة الإذاعات");
+            } catch (Exception e) { failure = e.getMessage(); }
+            finally { if (connection != null) connection.disconnect(); }
+            final JSONArray result = radios;
+            final String error = failure;
+            runOnUiThread(() -> {
+                target.removeAllViews();
+                if (result == null) {
+                    TextView problem = new TextView(this);
+                    problem.setText("تعذر تحميل إذاعات MP3Quran. تحقق من الإنترنت وأعد فتح التبويب. " + (error == null ? "" : error));
+                    problem.setTextColor(AppThemeColors.muted(this));
+                    target.addView(problem, match());
+                    return;
+                }
+                int added = 0;
+                for (int index = 0; index < result.length(); index++) {
+                    JSONObject item = result.optJSONObject(index);
+                    if (item == null) continue;
+                    String name = item.optString("name", "").trim();
+                    String stream = item.optString("url", "").trim();
+                    if (name.isEmpty() || !(stream.startsWith("https://") || stream.startsWith("http://"))) continue;
+                    addStation(target, "📻 " + name, "بث مباشر عبر MP3Quran", stream,
+                            name, "mp3quran_" + item.optString("id", String.valueOf(index)), "https://www.mp3quran.net/");
+                    added++;
+                }
+                if (added == 0) {
+                    TextView empty = new TextView(this);
+                    empty.setText("لا توجد إذاعات متاحة حاليًا من المصدر.");
+                    empty.setTextColor(AppThemeColors.muted(this));
+                    target.addView(empty, match());
+                }
+            });
+        });
+    }
+
     private void styleAction(Button button, int color) {
         GradientDrawable shape = new GradientDrawable();
         shape.setColor(color);
@@ -201,6 +282,7 @@ public class RadioActivity extends Activity {
 
     @Override protected void onDestroy() {
         handler.removeCallbacks(statusTicker);
+        radioLoader.shutdownNow();
         super.onDestroy();
     }
 
