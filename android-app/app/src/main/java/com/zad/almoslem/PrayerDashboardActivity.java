@@ -171,6 +171,15 @@ public class PrayerDashboardActivity extends Activity {
         });
         Button refreshWidget=new Button(this);refreshWidget.setText("تحديث الويدج الآن");root.addView(refreshWidget,full());
         refreshWidget.setOnClickListener(v->{NextPrayerWidget.refreshAll(this);Toast.makeText(this,"تم تحديث بيانات الويدج",Toast.LENGTH_SHORT).show();});
+        Button addWidget=new Button(this);addWidget.setText("إضافة ويدج الصلاة إلى الشاشة الرئيسية");root.addView(addWidget,full());
+        addWidget.setOnClickListener(v->{
+            if(android.os.Build.VERSION.SDK_INT>=26){
+                android.appwidget.AppWidgetManager manager=android.appwidget.AppWidgetManager.getInstance(this);
+                if(manager.isRequestPinAppWidgetSupported()){
+                    manager.requestPinAppWidget(new android.content.ComponentName(this,NextPrayerWidget.class),null,null);
+                }else Toast.makeText(this,"افتح قائمة الويدج من الشاشة الرئيسية وأضف ويدج الصلاة يدويًا.",Toast.LENGTH_LONG).show();
+            }else Toast.makeText(this,"اضغط مطولًا على الشاشة الرئيسية ثم اختر الويدج وأضف الصلاة القادمة.",Toast.LENGTH_LONG).show();
+        });
 
         TextView fajrAlarmTitle=label("منبه الفجر",19,AppThemeColors.text(this),true);
         fajrAlarmTitle.setPadding(0,dp(18),0,dp(5));root.addView(fajrAlarmTitle,full());
