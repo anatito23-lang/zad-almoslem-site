@@ -172,6 +172,36 @@ public class PrayerDashboardActivity extends Activity {
         Button refreshWidget=new Button(this);refreshWidget.setText("تحديث الويدج الآن");root.addView(refreshWidget,full());
         refreshWidget.setOnClickListener(v->{NextPrayerWidget.refreshAll(this);Toast.makeText(this,"تم تحديث بيانات الويدج",Toast.LENGTH_SHORT).show();});
 
+        TextView fajrAlarmTitle=label("منبه الفجر",19,AppThemeColors.text(this),true);
+        fajrAlarmTitle.setPadding(0,dp(18),0,dp(5));root.addView(fajrAlarmTitle,full());
+        TextView fajrAlarmHint=label("يرن المنبه على موعد الفجر المسجل لمدينتك، ولا يتوقف إلا بعد الإجابة الصحيحة عن سؤال بسيط. ويمكنك طلب غفوة 5 دقائق.",12,AppThemeColors.muted(this),false);
+        root.addView(fajrAlarmHint,full());
+        Switch fajrAlarmEnabled=new Switch(this);fajrAlarmEnabled.setText("تفعيل منبه الفجر");
+        fajrAlarmEnabled.setChecked(prefs.getBoolean("fajr_alarm_enabled",false));root.addView(fajrAlarmEnabled,full());
+        TextView fajrAlarmStatus=label("",12,AppThemeColors.muted(this),false);root.addView(fajrAlarmStatus,full());
+        Runnable updateFajrAlarmStatus=()->{
+            int fh=prefs.getInt("native_time_hour_الفجر",-1),fm=prefs.getInt("native_time_minute_الفجر",0);
+            if(fh<0)fajrAlarmStatus.setText("حدّث مواقيت الصلاة أولًا حتى نضبط المنبه على موعد الفجر.");
+            else fajrAlarmStatus.setText("موعد المنبه حسب مواقيت مدينتك: "+String.format(Locale.getDefault(),"%02d:%02d",fh,fm));
+        };
+        updateFajrAlarmStatus.run();
+        fajrAlarmEnabled.setOnCheckedChangeListener((button,enabled)->{
+            prefs.edit().putBoolean("fajr_alarm_enabled",enabled).apply();
+            if(enabled){
+                if(prefs.getInt("native_time_hour_الفجر",-1)<0){
+                    fajrAlarmEnabled.setOnCheckedChangeListener(null);fajrAlarmEnabled.setChecked(false);
+                    prefs.edit().putBoolean("fajr_alarm_enabled",false).apply();
+                    fajrAlarmEnabled.setOnCheckedChangeListener((b,on)->{prefs.edit().putBoolean("fajr_alarm_enabled",on).apply();if(on){if(!FajrAlarmScheduler.scheduleNext(this)){Toast.makeText(this,"تعذر ضبط المنبه؛ حدّث مواقيت الصلاة وتأكد من إذن المنبهات الدقيقة.",Toast.LENGTH_LONG).show();b.setChecked(false);prefs.edit().putBoolean("fajr_alarm_enabled",false).apply();}}else FajrAlarmScheduler.cancel(this);});
+                    Toast.makeText(this,"حدّث مواقيت الصلاة أولًا",Toast.LENGTH_LONG).show();return;
+                }
+                if(!FajrAlarmScheduler.scheduleNext(this)){
+                    Toast.makeText(this,"تعذر ضبط المنبه. اسمح للتطبيق بالمنبهات الدقيقة من إعدادات الهاتف.",Toast.LENGTH_LONG).show();
+                    prefs.edit().putBoolean("fajr_alarm_enabled",false).apply();button.setChecked(false);
+                }else Toast.makeText(this,"تم تفعيل منبه الفجر",Toast.LENGTH_SHORT).show();
+            }else{FajrAlarmScheduler.cancel(this);Toast.makeText(this,"تم إيقاف منبه الفجر",Toast.LENGTH_SHORT).show();}
+            updateFajrAlarmStatus.run();
+        });
+
         String[] icons={"🌅","☀️","🌤️","🌇","🌙"};
         for(int i=0;i<5;i++){
             LinearLayout card=col();card.setPadding(dp(14),dp(10),dp(14),dp(10));card.setBackground(bg(AppThemeColors.surface(this),15));
