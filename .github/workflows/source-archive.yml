@@ -1,4 +1,5 @@
 name: Export full source project
+# Keep a downloadable backup of the complete source tree.
 on:
   push:
     paths:
