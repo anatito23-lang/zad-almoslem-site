@@ -50,6 +50,8 @@ public class RamadanActivity extends Activity {
         TextView subtitle=text("أهلًا بشهر الصيام والقرآن • جدّد نيتك واملأ أيامك بالطاعة",12,0xFFFFE9BE,false);subtitle.setGravity(Gravity.CENTER);hero.addView(subtitle,full());
         root.addView(hero,full());
 
+        addRamadanScheduleCard();
+
         LinearLayout fast=new LinearLayout(this);
         fast.setOrientation(LinearLayout.VERTICAL);
         fast.setPadding(dp(14),dp(14),dp(14),dp(14));
@@ -306,6 +308,53 @@ public class RamadanActivity extends Activity {
         else if(downloaded)suhoorNasheedStatus.setText("✓ تم حفظ «"+title+"» على الهاتف — سيعمل دون إنترنت.");
         else suhoorNasheedStatus.setText("الابتهال المختار: "+title+" — "+artist+" | لم تُحفظ النسخة دون إنترنت بعد.");
     }
+
+    private void addRamadanScheduleCard(){
+        LinearLayout schedule=card("🌙 مواقيت الصيام والعد التنازلي");
+        SharedPreferences prayer=getSharedPreferences("zad_reminders",MODE_PRIVATE);
+        String zoneId=prayer.getString("native_city_timezone","Africa/Cairo");
+        TimeZone zone=TimeZone.getTimeZone(zoneId);
+        Calendar now=Calendar.getInstance(zone);
+        Calendar today=(Calendar)now.clone();today.set(Calendar.HOUR_OF_DAY,0);today.set(Calendar.MINUTE,0);today.set(Calendar.SECOND,0);today.set(Calendar.MILLISECOND,0);
+        long start=prefs.getLong("start_at",0L);
+        if(start<=0){Calendar expected=Calendar.getInstance(zone);expected.set(2027,Calendar.FEBRUARY,8,0,0,0);expected.set(Calendar.MILLISECOND,0);start=expected.getTimeInMillis();}
+        Calendar first=Calendar.getInstance(zone);first.setTimeInMillis(start);first.set(Calendar.HOUR_OF_DAY,0);first.set(Calendar.MINUTE,0);first.set(Calendar.SECOND,0);first.set(Calendar.MILLISECOND,0);
+        long dayMs=24L*60L*60L*1000L;
+        long daysUntil=Math.max(0,(first.getTimeInMillis()-today.getTimeInMillis()+dayMs-1)/dayMs);
+        long diffDays=Math.floorDiv(today.getTimeInMillis()-first.getTimeInMillis(),dayMs);
+        boolean before=today.before(first),inRamadan=!before&&diffDays<30;
+        TextView countdown=text("",18,0xFFFFE2A3,true);countdown.setGravity(Gravity.CENTER);countdown.setPadding(0,dp(8),0,dp(10));
+        if(before)countdown.setText("باقي على رمضان "+daysUntil+" يومًا");
+        else if(inRamadan)countdown.setText("رمضان كريم • اليوم "+(diffDays+1)+" من رمضان");
+        else countdown.setText("نسأل الله أن يبلغنا رمضان ويتقبل منا");
+        schedule.addView(countdown,full());
+
+        int fajrH=prayer.getInt("native_time_hour_الفجر",-1),fajrM=prayer.getInt("native_time_minute_الفجر",0);
+        int magH=prayer.getInt("native_time_hour_المغرب",-1),magM=prayer.getInt("native_time_minute_المغرب",0);
+        if(fajrH<0||magH<0){
+            TextView missing=text("اضبط مواقيت الصلاة والمدينة أولًا لعرض موعد الإمساك والإفطار ومدة الصيام.",13,AppThemeColors.muted(this),false);
+            schedule.addView(missing,full());
+            return;
+        }
+        Calendar imsak=Calendar.getInstance(zone);imsak.set(Calendar.HOUR_OF_DAY,fajrH);imsak.set(Calendar.MINUTE,fajrM);imsak.set(Calendar.SECOND,0);imsak.set(Calendar.MILLISECOND,0);imsak.add(Calendar.MINUTE,-10);
+        Calendar iftar=(Calendar)imsak.clone();iftar.set(Calendar.HOUR_OF_DAY,magH);iftar.set(Calendar.MINUTE,magM);iftar.set(Calendar.SECOND,0);iftar.set(Calendar.MILLISECOND,0);
+        long fastingMinutes=(iftar.getTimeInMillis()-imsak.getTimeInMillis())/60000L;
+        if(fastingMinutes<=0)fastingMinutes+=24*60;
+        String imsakTime=String.format(java.util.Locale.getDefault(),"%02d:%02d",imsak.get(Calendar.HOUR_OF_DAY),imsak.get(Calendar.MINUTE));
+        String iftarTime=String.format(java.util.Locale.getDefault(),"%02d:%02d",magH,magM);
+        String duration=(fastingMinutes/60)+" ساعة و"+(fastingMinutes%60)+" دقيقة";
+        addScheduleLine(schedule,"موعد الإمساك","🌅  "+imsakTime+"  (قبل الفجر بـ10 دقائق)");
+        addScheduleLine(schedule,"موعد الإفطار","🌇  "+iftarTime+"  (أذان المغرب)");
+        addScheduleLine(schedule,"مدة الصيام","⏳  "+duration);
+        String city=prayer.getString("native_prayer_city",prayer.getString("native_city",""));
+        if(!city.isEmpty())schedule.addView(text("المواقيت حسب مدينة: "+city,11,AppThemeColors.muted(this),false),full());
+        schedule.addView(text("تُحدّث المواعيد يوميًا وفق مواقيت الصلاة المحفوظة. بداية رمضان المتوقعة فلكيًا وليست إعلانًا رسميًا.",11,AppThemeColors.muted(this),false),full());
+    }
+    private void addScheduleLine(LinearLayout box,String label,String value){
+        TextView line=text(label+" : "+value,15,AppThemeColors.text(this),true);
+        line.setPadding(0,dp(5),0,dp(5));box.addView(line,full());
+    }
+
     private void updateStartLabel(TextView label){long at=prefs.getLong("start_at",0L);if(at<=0){label.setText("الموعد الفلكي المتوقع: الاثنين 8 فبراير 2027 (1 رمضان 1448). انتظر إعلان دار الإفتاء المصرية لتأكيد بداية الشهر.");return;}Calendar c=Calendar.getInstance(TimeZone.getTimeZone("Africa/Cairo"));c.setTimeInMillis(at);label.setText("بداية الشهر المحددة: "+c.get(Calendar.DAY_OF_MONTH)+"/"+(c.get(Calendar.MONTH)+1)+"/"+c.get(Calendar.YEAR)+" — تنتهي التنبيهات تلقائيًا بعد 30 يومًا.");}
     private void addDua(LinearLayout box,String heading,String body){TextView h=text(heading,14,AppThemeColors.accent(this),true);h.setPadding(0,dp(9),0,dp(2));box.addView(h,full());box.addView(text(body,14,AppThemeColors.text(this),false),full());}
     private void updateFastCount(){
