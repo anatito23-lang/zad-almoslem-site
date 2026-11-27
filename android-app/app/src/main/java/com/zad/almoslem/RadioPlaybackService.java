@@ -447,6 +447,16 @@ public class RadioPlaybackService extends Service {
                     }
                     String detail = error.getErrorCodeName() + ": " +
                             (error.getMessage() == null ? error.toString() : error.getMessage());
+                    String failedKind = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("active_kind", "");
+                    // A bad or removed recording must not kill the rest of the sheikh playlist.
+                    if ("nasheed".equals(failedKind) && player != null && player.hasNextMediaItem()) {
+                        android.util.Log.w("ZadAlmoslem", "Skipping unavailable ibtihal and trying the next track: " + detail);
+                        player.seekToNextMediaItem();
+                        player.prepare();
+                        if (!adhanPauseRequested && requestAudioFocus()) player.play();
+                        updateRadioNotification(playbackTitle(), "تعذر هذا التسجيل؛ جارٍ تشغيل الابتهال التالي");
+                        return;
+                    }
                     getSharedPreferences("zad_audio", MODE_PRIVATE).edit()
                             .putBoolean("radio_ready", false).putBoolean("radio_playing", false)
                             .putString("radio_last_error", detail).apply();
