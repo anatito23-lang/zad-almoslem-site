@@ -65,15 +65,13 @@ public class MushafPageActivity extends Activity {
 
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
-        // The scanned-page image cannot identify an individual verse touch accurately.
-        // Open the readable page text instead, where every verse has a real audio action.
-        int selectedPage=Math.max(1,Math.min(604,getIntent().getIntExtra("page",
-                getSharedPreferences("zad_mushaf",MODE_PRIVATE).getInt("last_page",1))));
-        Intent open=new Intent(this,QuranTextActivity.class);
-        open.putExtra("page_number",selectedPage);
-        open.putExtra("from_ramadan",getIntent().getBooleanExtra("from_ramadan",false));
-        startActivity(open);
-        finish();
+        green=AppThemeColors.primary(this);
+        AppThemeColors.apply(this);
+        openedFromRamadan = getIntent().getBooleanExtra("from_ramadan", false);
+        page = Math.max(1, Math.min(604, getIntent().getIntExtra("page",
+                getSharedPreferences("zad_mushaf", MODE_PRIVATE).getInt("last_page", 1))));
+        build();
+        showPage(page);
     }
 
     private int dp(float n) { return (int)(n * getResources().getDisplayMetrics().density + .5f); }
