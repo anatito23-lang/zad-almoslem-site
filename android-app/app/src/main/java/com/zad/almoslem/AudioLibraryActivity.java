@@ -61,7 +61,7 @@ public class AudioLibraryActivity extends Activity {
     private boolean naqshCatalogFailed=false;
     private String selectedKind="nasheed";
 
-    @Override public void onCreate(Bundle state){super.onCreate(state);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);loadCachedNaqshbandiCatalog();build();loadNaqshbandiCatalog();}
+    @Override public void onCreate(Bundle state){super.onCreate(state);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);build();}
     private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
     private TextView label(String s,int size,int color,boolean bold){
         TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.RIGHT);t.setTextDirection(View.TEXT_DIRECTION_RTL);
@@ -78,7 +78,7 @@ public class AudioLibraryActivity extends Activity {
         trackPicker=new Spinner(this);root.addView(trackPicker);
         artistPicker.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             public void onNothingSelected(AdapterView<?> p){}
-            public void onItemSelected(AdapterView<?> p,View v,int pos,long id){fillTracks(pos);if(pos==1&&naqshDynamicFiles.isEmpty()&&!naqshCatalogLoading)loadNaqshbandiCatalog();}
+            public void onItemSelected(AdapterView<?> p,View v,int pos,long id){fillTracks(pos);}
         });
         fillTracks(0);
         Button play=new Button(this);play.setText("تشغيل الابتهال المختار");root.addView(play);
@@ -96,26 +96,20 @@ public class AudioLibraryActivity extends Activity {
         LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,-2);lp.bottomMargin=dp(9);root.addView(card,lp);
     }
     private int activeTrackCount(int artist){
-        if(artist==0)return tobar.length;
-        return naqshDynamicFiles.size();
+        return artist==0?tobar.length:naqshTitles.length;
     }
     private String activeTrackName(int artist,int track){
-        if(artist==0)return tobar[track][0];
-        return naqshDynamicTitles.get(track);
+        return artist==0?tobar[track][0]:naqshTitles[track];
     }
     private String activeTrackUrl(int artist,int track){
-        if(artist==0)return tobar[track][1];
-        String file=naqshDynamicFiles.get(track);
-        try{return "https://archive.org/download/qr_20201208/"+URLEncoder.encode(file,"UTF-8").replace("+","%20");}
-        catch(Exception e){return "";}
+        return getTrackUrl(artist,track);
     }
     private void fillTracks(int artist){
         ArrayList<String> names=new ArrayList<>();
         if(artist==0){for(String[] t:tobar)names.add(t[0]);}
-        else if(!naqshDynamicTitles.isEmpty())names.addAll(naqshDynamicTitles);
-        else names.add(naqshCatalogLoading?"جارٍ تحميل ابتهالات الشيخ...":"تعذر تحميل قائمة ابتهالات الشيخ");
+        else names.addAll(Arrays.asList(naqshTitles));
         trackPicker.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,names));
-        if(artist==1&&naqshCatalogLoading&&status!=null)status.setText("جارٍ تحميل قائمة التسجيلات الصحيحة للشيخ سيد النقشبندي...");
+        if(status!=null)status.setText("اختر الابتهال؛ سيكمل المشغّل بقية قائمة الشيخ نفسه.");
     }
     private void loadCachedNaqshbandiCatalog(){
         android.content.SharedPreferences prefs=getSharedPreferences("zad_ibtihalat",MODE_PRIVATE);
@@ -170,11 +164,6 @@ public class AudioLibraryActivity extends Activity {
     }
     private void playSelected(){
         int artist=artistPicker.getSelectedItemPosition(),index=trackPicker.getSelectedItemPosition();
-        if(artist==1&&naqshDynamicFiles.isEmpty()){
-            if(!naqshCatalogLoading)loadNaqshbandiCatalog();
-            status.setText("انتظر تحميل قائمة ابتهالات الشيخ سيد النقشبندي ثم اختر الابتهال.");
-            return;
-        }
         if(artist<0||index<0||index>=activeTrackCount(artist)){
             status.setText("اختر الشيخ والابتهال أولًا.");
             return;
