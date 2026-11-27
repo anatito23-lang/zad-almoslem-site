@@ -58,6 +58,7 @@ public class AudioLibraryActivity extends Activity {
     private final ArrayList<String> naqshDynamicFiles=new ArrayList<>();
     private final ArrayList<String> naqshDynamicTitles=new ArrayList<>();
     private boolean naqshCatalogLoading=false;
+    private boolean naqshCatalogFailed=false;
     private String selectedKind="nasheed";
 
     @Override public void onCreate(Bundle state){super.onCreate(state);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);build();loadNaqshbandiCatalog();}
@@ -96,15 +97,15 @@ public class AudioLibraryActivity extends Activity {
     }
     private int activeTrackCount(int artist){
         if(artist==0)return tobar.length;
-        return naqshDynamicFiles.isEmpty()?naqshTitles.length:naqshDynamicFiles.size();
+        return naqshDynamicFiles.size();
     }
     private String activeTrackName(int artist,int track){
         if(artist==0)return tobar[track][0];
-        return naqshDynamicFiles.isEmpty()?naqshTitles[track]:naqshDynamicTitles.get(track);
+        return naqshDynamicTitles.get(track);
     }
     private String activeTrackUrl(int artist,int track){
         if(artist==0)return tobar[track][1];
-        String file=naqshDynamicFiles.isEmpty()?naqshFiles[track]:naqshDynamicFiles.get(track);
+        String file=naqshDynamicFiles.get(track);
         try{return "https://archive.org/download/qr_20201208/"+URLEncoder.encode(file,"UTF-8").replace("+","%20");}
         catch(Exception e){return "";}
     }
@@ -112,13 +113,13 @@ public class AudioLibraryActivity extends Activity {
         ArrayList<String> names=new ArrayList<>();
         if(artist==0){for(String[] t:tobar)names.add(t[0]);}
         else if(!naqshDynamicTitles.isEmpty())names.addAll(naqshDynamicTitles);
-        else names.addAll(Arrays.asList(naqshTitles));
+        else names.add(naqshCatalogLoading?"جارٍ تحميل ابتهالات الشيخ...":"تعذر تحميل قائمة ابتهالات الشيخ");
         trackPicker.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,names));
         if(artist==1&&naqshCatalogLoading&&status!=null)status.setText("جارٍ تحميل قائمة التسجيلات الصحيحة للشيخ سيد النقشبندي...");
     }
     private void loadNaqshbandiCatalog(){
         if(naqshCatalogLoading||!naqshDynamicFiles.isEmpty())return;
-        naqshCatalogLoading=true;
+        naqshCatalogLoading=true;naqshCatalogFailed=false;
         new Thread(()->{
             HttpURLConnection connection=null;
             try{
@@ -150,12 +151,17 @@ public class AudioLibraryActivity extends Activity {
                     naqshCatalogLoading=false;
                 });
             }catch(Exception error){
-                runOnUiThread(()->{naqshCatalogLoading=false;if(artistPicker!=null&&artistPicker.getSelectedItemPosition()==1&&status!=null)status.setText("تعذر تحميل قائمة النقشبندي من المصدر. تحقق من الإنترنت ثم أعد المحاولة.");});
+                runOnUiThread(()->{naqshCatalogLoading=false;naqshCatalogFailed=true;if(artistPicker!=null&&artistPicker.getSelectedItemPosition()==1){fillTracks(1);if(status!=null)status.setText("تعذر تحميل قائمة النقشبندي من المصدر. اضغط على اسم الشيخ لإعادة المحاولة.");}});
             }finally{if(connection!=null)connection.disconnect();}
         }).start();
     }
     private void playSelected(){
         int artist=artistPicker.getSelectedItemPosition(),index=trackPicker.getSelectedItemPosition();
+        if(artist==1&&naqshDynamicFiles.isEmpty()){
+            if(!naqshCatalogLoading)loadNaqshbandiCatalog();
+            status.setText("انتظر تحميل قائمة ابتهالات الشيخ سيد النقشبندي ثم اختر الابتهال.");
+            return;
+        }
         if(artist<0||index<0||index>=activeTrackCount(artist)){
             status.setText("اختر الشيخ والابتهال أولًا.");
             return;
