@@ -27,7 +27,9 @@ public final class FajrAlarmScheduler {
         return scheduleAt(context,at.getTimeInMillis(),REQUEST_CODE);
     }
 
-    public static boolean scheduleSnooze(Context context,long when) { return scheduleAt(context,when,REQUEST_CODE+1); }\n\n    private static boolean scheduleAt(Context context,long when,int requestCode) {
+    public static boolean scheduleSnooze(Context context,long when) { return scheduleAt(context,when,REQUEST_CODE+1); }
+
+    private static boolean scheduleAt(Context context,long when,int requestCode) {
         try {
             AlarmManager manager=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
             Intent intent=new Intent(context,FajrAlarmReceiver.class).setAction("com.zad.almoslem.FAJR_ALARM");
