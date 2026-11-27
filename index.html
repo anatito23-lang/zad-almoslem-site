@@ -1298,6 +1298,24 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
           <label>رقم الصفحة <input id="zmPage" type="number" min="1" max="604" value="1" inputmode="numeric"></label>
           <button type="button" id="zmNext" class="btn light" aria-label="الصفحة التالية">التالي</button>
         </div>
+      <div id="zmCorrectionPanel" class="zm-correction-panel" aria-label="الاستماع وتصحيح التلاوة">
+        <div class="zm-correction-title">🎧 الاستماع وتصحيح التلاوة</div>
+        <div class="zm-correction-controls">
+          <label for="zmReciter">القارئ</label>
+          <select id="zmReciter">
+            <option value="Husary_128kbps">الشيخ محمود خليل الحصري</option>
+            <option value="Abdul_Basit_Murattal_192kbps">الشيخ عبد الباسط عبد الصمد — مرتل</option>
+            <option value="Abdul_Basit_Mujawwad_128kbps">الشيخ عبد الباسط عبد الصمد — مجوّد</option>
+            <option value="Minshawy_Murattal_128kbps">الشيخ محمد صديق المنشاوي — مرتل</option>
+            <option value="Minshawy_Mujawwad_192kbps">الشيخ محمد صديق المنشاوي — مجوّد</option>
+            <option value="Mahmoud_Ali_Al-Banna_32kbps">الشيخ محمود علي البنا</option>
+          </select>
+          <button type="button" class="btn light" id="zmPlayPage">تشغيل الصفحة</button>
+          <button type="button" class="btn light" id="zmStopAudio">إيقاف</button>
+        </div>
+        <audio id="zmAyahAudio" controls preload="none" playsinline></audio>
+        <p id="zmCorrectionStatus" class="small" role="status" aria-live="polite">اضغط على أي آية للاستماع إليها، أو شغّل الصفحة من أولها.</p>
+      </div>
       <div class="zad-mushaf-meta"><span id="zmSurah">سورة الفاتحة</span><span id="zmJuz">الجزء ١</span></div>
       <article class="zad-mushaf-page" id="zmPageContent" aria-live="polite" aria-label="نص صفحة المصحف">
         <div class="zad-mushaf-bism">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
@@ -1309,6 +1327,14 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
     </div>
   </section>
   <style id="zad-mushaf-styles">
+    .zm-correction-panel{margin:10px 0 14px;padding:12px;border:1px solid #c9bea2;border-radius:12px;background:#fffdf5;color:#30483d}
+    .zm-correction-title{font-weight:800;margin-bottom:9px;color:#174b39}
+    .zm-correction-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    #zmReciter{min-width:190px;max-width:100%;padding:9px;border:1px solid #c9bea2;border-radius:9px;background:#fff;color:#243e30;font:600 13px Tahoma,Arial}
+    #zmAyahAudio{display:block;width:100%;height:40px;margin-top:10px}
+    #zmCorrectionStatus{margin:8px 0 0}
+    .zad-mushaf-ayah{cursor:pointer;border-radius:5px;transition:background .15s}
+    .zad-mushaf-ayah.zm-ayah-active{background:#f5e6a8;outline:1px solid #c7a34d}
     .zad-mushaf-controls{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
     .zm-surah-label{display:flex;align-items:center;gap:8px;color:#365541;font-weight:700;font-size:14px}
     #zmSurahSelect{max-width:220px;min-width:170px;padding:10px;border:1px solid #c9bea2;border-radius:10px;background:#fffdf5;color:#243e30;font:600 14px Tahoma,Arial}
@@ -1333,13 +1359,13 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
   (function(){
    const $=id=>document.getElementById(id),pageInput=$('zmPage'),content=$('zmPageContent'),status=$('zmStatus');
    if(!pageInput||!content||pageInput.dataset.ready)return;pageInput.dataset.ready='1';
-   let current=Number(localStorage.getItem('zadMushafPage')||1),busy=false;
+   let current=Number(localStorage.getItem('zadMushafPage')||1),busy=false, pageVerses=[], autoStartAfterLoad=false, activeAyah=-1;\n   const audio=$('zmAyahAudio'),reciter=$('zmReciter'),correctionStatus=$('zmCorrectionStatus');
    const ar=n=>new Intl.NumberFormat('ar-EG').format(n);
    const surahSelect=$('zmSurahSelect'),readerBody=$('zmReaderBody'),toggle=$('zmToggle');
    toggle.addEventListener('click',()=>{const closed=!readerBody.hidden;readerBody.hidden=closed;toggle.textContent=closed?'فتح المصحف':'إغلاق المصحف';toggle.setAttribute('aria-expanded',String(!closed));});
    fetch('https://api.quran.com/api/v4/chapters?language=ar').then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{surahSelect.innerHTML='<option value="">اختر اسم السورة</option>';(data.chapters||[]).forEach(ch=>{const o=document.createElement('option');o.value=ch.id;o.textContent=ch.name_arabic;surahSelect.append(o);});}).catch(()=>{surahSelect.innerHTML='<option value="">تعذر تحميل السور</option>';});
    surahSelect.addEventListener('change',async()=>{if(!surahSelect.value)return;try{const r=await fetch('https://api.quran.com/api/v4/verses/by_chapter/'+surahSelect.value+'?fields=page_number&per_page=1');if(!r.ok)throw Error();const d=await r.json();if(d.verses&&d.verses[0]){readerBody.hidden=false;toggle.textContent='إغلاق المصحف';toggle.setAttribute('aria-expanded','true');setPage(d.verses[0].page_number);}}catch(e){status.textContent='تعذر الانتقال إلى السورة. تحقق من الإنترنت.';}});
-   function setPage(n){current=Math.max(1,Math.min(604,Number(n)||1));pageInput.value=current;$('zmPageLabel').textContent='صفحة '+ar(current)+' من ٦٠٤';localStorage.setItem('zadMushafPage',String(current));load();}
+   function setPage(n){audio.pause();audio.removeAttribute('src');audio.load();activeAyah=-1;current=Math.max(1,Math.min(604,Number(n)||1));pageInput.value=current;$('zmPageLabel').textContent='صفحة '+ar(current)+' من ٦٠٤';localStorage.setItem('zadMushafPage',String(current));load();}
    async function load(){
     if(busy)return;busy=true;status.textContent='جارٍ تحميل الصفحة...';content.innerHTML='<p>جارٍ تحميل الصفحة...</p>';
     try{
@@ -1347,16 +1373,47 @@ body.zad-public-website main.wrap{padding-bottom:110px!important}
      if(!response.ok)throw new Error('تعذر الوصول إلى مصدر المصحف');
      const data=await response.json(),verses=data.verses||[];
      if(!verses.length)throw new Error('لم تصل آيات لهذه الصفحة');
-     const first=verses[0],last=verses[verses.length-1];
+     const first=verses[0],last=verses[verses.length-1];pageVerses=verses;
      $('zmSurah').textContent=first.chapter_name||('سورة '+first.verse_key.split(':')[0]);
      $('zmJuz').textContent='الجزء '+ar(first.juz_number||1);
      content.innerHTML='';
      const text=document.createElement('p');
-     verses.forEach(v=>{const span=document.createElement('span');span.className='zad-mushaf-ayah';span.textContent=(v.text_uthmani||'')+' ';const mark=document.createElement('span');mark.className='zad-mushaf-marker';mark.textContent='۞'+ar(Number(v.verse_key.split(':')[1]));span.append(mark);text.append(span);});
-     content.append(text);status.textContent='الرسم العثماني · من الآية '+last.verse_key+' · آخر صفحة محفوظة تلقائيًا';
+     verses.forEach(v=>{const span=document.createElement('span');span.className='zad-mushaf-ayah';span.dataset.verseKey=v.verse_key;span.textContent=(v.text_uthmani||'')+' ';const mark=document.createElement('span');mark.className='zad-mushaf-marker';mark.textContent='۞'+ar(Number(v.verse_key.split(':')[1]));span.append(mark);text.append(span);});
+     content.append(text);status.textContent='الرسم العثماني · من الآية '+last.verse_key+' · آخر صفحة محفوظة تلقائيًا';\n     if(autoStartAfterLoad){autoStartAfterLoad=false;playAyah(0);}
     }catch(e){content.innerHTML='<p>تعذر تحميل الصفحة الآن. تحقق من اتصال الإنترنت ثم أعد المحاولة.</p>';status.textContent=e.message||'تعذر تحميل المصحف';}
     finally{busy=false;}
    }
+   function audioUrl(verseKey){
+    const parts=verseKey.split(':').map(Number),folder=reciter.value;
+    return 'https://everyayah.com/data/'+folder+'/'+String(parts[0]).padStart(3,'0')+String(parts[1]).padStart(3,'0')+'.mp3';
+   }
+   function playAyah(index){
+    if(!pageVerses.length)return;
+    if(index<0||index>=pageVerses.length)return;
+    activeAyah=index;
+    content.querySelectorAll('.zm-ayah-active').forEach(el=>el.classList.remove('zm-ayah-active'));
+    const verse=pageVerses[index],target=content.querySelector('[data-verse-key="'+verse.verse_key+'"]');
+    if(target){target.classList.add('zm-ayah-active');target.scrollIntoView({behavior:'smooth',block:'nearest'});}
+    audio.src=audioUrl(verse.verse_key);
+    correctionStatus.textContent='جاري تشغيل الآية '+verse.verse_key+' — اضغط على أي آية أخرى للاستماع إليها.';
+    audio.play().catch(()=>{correctionStatus.textContent='تعذر تشغيل الصوت. تأكد من اتصال الإنترنت ثم اضغط تشغيل مرة أخرى.';});
+   }
+   content.addEventListener('click',e=>{
+    const target=e.target.closest('.zad-mushaf-ayah');
+    if(!target)return;
+    const index=pageVerses.findIndex(v=>v.verse_key===target.dataset.verseKey);
+    if(index>=0)playAyah(index);
+   });
+   $('zmPlayPage').addEventListener('click',()=>playAyah(0));
+   $('zmStopAudio').addEventListener('click',()=>{audio.pause();audio.currentTime=0;correctionStatus.textContent='تم إيقاف التلاوة.';});
+   audio.addEventListener('ended',()=>{
+    if(activeAyah+1<pageVerses.length){playAyah(activeAyah+1);return;}
+    if(current<604){autoStartAfterLoad=true;setPage(current+1);correctionStatus.textContent='انتهت الصفحة، جاري الانتقال للصفحة التالية...';}
+    else{correctionStatus.textContent='تم الانتهاء من آخر صفحة في المصحف.';activeAyah=-1;}
+   });
+   reciter.addEventListener('change',()=>{
+    if(activeAyah>=0){const keep=activeAyah;audio.pause();playAyah(keep);}
+   });
    $('zmPrev').addEventListener('click',()=>setPage(current-1));$('zmNext').addEventListener('click',()=>setPage(current+1));$('zmFirst').addEventListener('click',()=>setPage(1));$('zmLast').addEventListener('click',()=>setPage(604));
    pageInput.addEventListener('change',()=>setPage(pageInput.value));
    let touchX=0;content.addEventListener('touchstart',e=>{touchX=e.changedTouches[0].screenX},{passive:true});content.addEventListener('touchend',e=>{const dx=e.changedTouches[0].screenX-touchX;if(Math.abs(dx)>65)setPage(current+(dx<0?1:-1));},{passive:true});
