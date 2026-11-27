@@ -19,7 +19,7 @@ import java.util.*;
 
 public class AudioLibraryActivity extends Activity {
     private final int green=Color.rgb(8,48,40);
-    private static final String[] artists={"نصر الدين طوبار","سيد النقشبندي"};
+    private static final String[] artists={"الشيخ نصر الدين طوبار","الشيخ سيد النقشبندي"};
     // Direct MP3 download endpoints from the Sheikh's recording catalogue.
     private static final String[][] tobar={
         {"يارب عدت إلى رحابك","https://www.nourelquran.com/force_download.php?id=5690"},
@@ -61,7 +61,7 @@ public class AudioLibraryActivity extends Activity {
     private boolean naqshCatalogFailed=false;
     private String selectedKind="nasheed";
 
-    @Override public void onCreate(Bundle state){super.onCreate(state);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);build();loadNaqshbandiCatalog();}
+    @Override public void onCreate(Bundle state){super.onCreate(state);getWindow().setStatusBarColor(green);getWindow().setNavigationBarColor(green);loadCachedNaqshbandiCatalog();build();loadNaqshbandiCatalog();}
     private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
     private TextView label(String s,int size,int color,boolean bold){
         TextView t=new TextView(this);t.setText(s);t.setTextSize(size);t.setTextColor(color);t.setGravity(Gravity.RIGHT);t.setTextDirection(View.TEXT_DIRECTION_RTL);
@@ -117,6 +117,17 @@ public class AudioLibraryActivity extends Activity {
         trackPicker.setAdapter(new ArrayAdapter<>(this,android.R.layout.simple_spinner_dropdown_item,names));
         if(artist==1&&naqshCatalogLoading&&status!=null)status.setText("جارٍ تحميل قائمة التسجيلات الصحيحة للشيخ سيد النقشبندي...");
     }
+    private void loadCachedNaqshbandiCatalog(){
+        android.content.SharedPreferences prefs=getSharedPreferences("zad_ibtihalat",MODE_PRIVATE);
+        try{
+            org.json.JSONArray files=new org.json.JSONArray(prefs.getString("naqsh_files","[]"));
+            org.json.JSONArray titles=new org.json.JSONArray(prefs.getString("naqsh_titles","[]"));
+            for(int i=0;i<files.length()&&i<titles.length();i++){
+                String file=files.optString(i,""),title=titles.optString(i,"");
+                if(!file.isEmpty()&&!title.isEmpty()){naqshDynamicFiles.add(file);naqshDynamicTitles.add(title);}
+            }
+        }catch(Exception ignored){naqshDynamicFiles.clear();naqshDynamicTitles.clear();}
+    }
     private void loadNaqshbandiCatalog(){
         if(naqshCatalogLoading||!naqshDynamicFiles.isEmpty())return;
         naqshCatalogLoading=true;naqshCatalogFailed=false;
@@ -147,6 +158,8 @@ public class AudioLibraryActivity extends Activity {
                 runOnUiThread(()->{
                     naqshDynamicFiles.clear();naqshDynamicFiles.addAll(actualFiles);
                     naqshDynamicTitles.clear();naqshDynamicTitles.addAll(actualTitles);
+                    android.content.SharedPreferences prefs=getSharedPreferences("zad_ibtihalat",MODE_PRIVATE);
+                    prefs.edit().putString("naqsh_files",new org.json.JSONArray(naqshDynamicFiles).toString()).putString("naqsh_titles",new org.json.JSONArray(naqshDynamicTitles).toString()).apply();
                     if(artistPicker!=null&&artistPicker.getSelectedItemPosition()==1){fillTracks(1);status.setText("تم تحميل "+naqshDynamicFiles.size()+" ابتهالًا للشيخ سيد النقشبندي.");}
                     naqshCatalogLoading=false;
                 });
