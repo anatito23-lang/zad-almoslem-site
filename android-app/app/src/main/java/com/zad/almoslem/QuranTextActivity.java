@@ -182,24 +182,40 @@ public class QuranTextActivity extends Activity {
     }
     private void playAyah(int index,boolean continueAfter){
         if(index<0||index>=ayahs.size())return;
-        stopAudio();currentIndex=index;autoAdvance=false;
+        currentIndex=index;
         JSONObject ayah=ayahs.get(index);
         int global=ayah.optInt("number",0);
         if(global<1){status.setText("تعذر تحديد رقم الآية الصوتي.");return;}
         int selectedReciter=Math.max(0,Math.min(RECITER_IDS.length-1,reciterPicker.getSelectedItemPosition()));
         String edition=RECITER_IDS[selectedReciter];
-        String audioUrl="https://cdn.islamic.network/quran/audio/"+("ar.abdulbasitmurattal".equals(edition)?"192":"128")+"/"+edition+"/"+global+".mp3";
+        String quality="ar.abdulbasitmurattal".equals(edition)?"192":"128";
         int surah=ayah.optJSONObject("surah")==null?surahNumber:ayah.optJSONObject("surah").optInt("number",surahNumber);
+        ArrayList<String> queueUrls=new ArrayList<>();
+        ArrayList<String> queueTitles=new ArrayList<>();
+        for(int i=index;i<ayahs.size();i++){
+            JSONObject item=ayahs.get(i);
+            int number=item.optInt("number",0);
+            if(number<1)continue;
+            JSONObject itemSurah=item.optJSONObject("surah");
+            int itemSurahNumber=itemSurah==null?surah: itemSurah.optInt("number",surah);
+            int itemAyahNumber=item.optInt("numberInSurah",i+1);
+            String url="https://cdn.islamic.network/quran/audio/"+quality+"/"+edition+"/"+number+".mp3";
+            queueUrls.add(url);
+            queueTitles.add("القرآن الكريم — "+names[Math.max(0,Math.min(113,itemSurahNumber-1))]+"، الآية "+itemAyahNumber);
+        }
+        if(queueUrls.isEmpty()){status.setText("تعذر تجهيز صوت الآية.");return;}
         getSharedPreferences("zad_audio",MODE_PRIVATE).edit()
                 .putInt("current_ayah_surah",surah)
                 .putInt("current_ayah_number",ayah.optInt("numberInSurah",index+1)).apply();
-        status.setText("جارٍ تشغيل الآية "+ayah.optInt("numberInSurah",index+1)+" بصوت "+RECITER_NAMES[selectedReciter]+" — سيستمر الصوت في الخلفية.");
+        status.setText("جارٍ تشغيل الآية "+ayah.optInt("numberInSurah",index+1)+" بصوت "+RECITER_NAMES[selectedReciter]+" — وسيكمل الآيات التالية بالترتيب.");
         try{
             android.content.Intent intent=new android.content.Intent(this,RadioPlaybackService.class);
             intent.setAction(RadioPlaybackService.ACTION_PLAY);
-            intent.putExtra("url",audioUrl);
+            intent.putExtra("url",queueUrls.get(0));
             intent.putExtra("kind","quran_ayah");
-            intent.putExtra("label","القرآن الكريم — "+names[surah-1]+"، الآية "+ayah.optInt("numberInSurah",index+1));
+            intent.putExtra("label",queueTitles.get(0));
+            intent.putStringArrayListExtra("queue_urls",queueUrls);
+            intent.putStringArrayListExtra("queue_titles",queueTitles);
             if(android.os.Build.VERSION.SDK_INT>=26)startForegroundService(intent);else startService(intent);
         }catch(Exception error){
             status.setText("تعذر بدء صوت الآية: "+(error.getMessage()==null?"خطأ في التشغيل":error.getMessage()));
