@@ -1,0 +1,29 @@
+name: Export Zad Almoslem Android Project
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/export-android-source.yml'
+  workflow_dispatch:
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact project source
+        uses: actions/checkout@v4
+      - name: Package Android Studio project
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f android-app/settings.gradle
+          test -f android-app/app/build.gradle
+          zip -r zad-almoslem-android-project.zip android-app \
+            -x 'android-app/.gradle/*' 'android-app/**/build/*' 'android-app/app/release-key.jks'
+          unzip -t zad-almoslem-android-project.zip
+      - name: Upload project ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: zad-almoslem-android-project-source
+          path: zad-almoslem-android-project.zip
+          if-no-files-found: error
+          retention-days: 90
