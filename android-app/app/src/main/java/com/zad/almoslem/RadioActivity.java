@@ -108,10 +108,10 @@ public class RadioActivity extends Activity {
         LinearLayout stationsList = new LinearLayout(this);
         stationsList.setOrientation(LinearLayout.VERTICAL);
         root.addView(stationsList, match());
-        addStation(root, "🇪🇬 إذاعة القرآن الكريم من القاهرة",
+        addStation(stationsList, "🇪🇬 إذاعة القرآن الكريم من القاهرة",
                 "البث المصري", "https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8",
                 "إذاعة القرآن الكريم من القاهرة", "egypt", "https://misrquran.gov.eg/home");
-        addStation(root, "🇸🇦 إذاعة القرآن الكريم السعودية",
+        addStation(stationsList, "🇸🇦 إذاعة القرآن الكريم السعودية",
                 "هيئة الإذاعة والتلفزيون السعودية", "https://live.kwikmotion.com/sbrksaquranradiolive/srpksaquranradio/playlist.m3u8",
                 "إذاعة القرآن الكريم السعودية", "saudi", "https://radioplus.sba.sa/ar/live/4");
         loadMp3QuranRadios(stationsList);
