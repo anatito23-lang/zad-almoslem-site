@@ -362,6 +362,14 @@ public class RadioPlaybackService extends Service {
             } else if ("radio".equals(activeKind) && "palestine".equals(station)) {
                 requestHeaders.put("Icy-MetaData", "1");
                 requestHeaders.put("Referer", "https://quran-radio.com/");
+            } else if ("nasheed".equals(activeKind)) {
+                String firstUrl = getSharedPreferences("zad_audio", MODE_PRIVATE).getString("stream_url", "");
+                if (firstUrl != null && firstUrl.contains("nourelquran.com")) {
+                    requestHeaders.put("Referer", "https://www.nourelquran.com/");
+                    requestHeaders.put("Origin", "https://www.nourelquran.com");
+                } else if (firstUrl != null && firstUrl.contains("archive.org")) {
+                    requestHeaders.put("Referer", "https://archive.org/");
+                }
             } else if ("ruqyah".equals(activeKind)) {
                 requestHeaders.put("Referer", "https://archive.org/");
             }
