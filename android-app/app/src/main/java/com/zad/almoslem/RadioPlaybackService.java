@@ -128,12 +128,17 @@ public class RadioPlaybackService extends Service {
         else startForeground(NOTIFICATION,n);
         String url=intent==null?null:intent.getStringExtra("url");
         String kind=intent==null?"radio":intent.getStringExtra("kind");
-        boolean allowedRadio="https://service.webvideocore.net/CL1olYogIrDWvwqiIKK7eCxOS4PStqG9DuEjAr2ZjZQtvS3d4y9r0cvRhvS17SGN/a_7a4vuubc6mo8.m3u8".equals(url) ||
-             "https://qurango.net/radio/tarateel".equals(url) ||
-             "https://stream.radiojar.com/8s5u5tpdtwzuv".equals(url) ||
-             "https://qurango.net/radio/mishary_alafasi".equals(url) ||
-             "https://live.kwikmotion.com/sbrksaquranradiolive/srpksaquranradio/playlist.m3u8".equals(url) ||
-             false;
+        // RadioActivity includes the two fixed national stations and stations returned
+        // by the official MP3Quran API. Do not restrict playback to a tiny hard-coded URL
+        // list: that silently rejects every newly returned MP3Quran station.
+        boolean allowedRadio = false;
+        try {
+            Uri radioUri = Uri.parse(url == null ? "" : url);
+            String radioHost = radioUri.getHost();
+            allowedRadio = "https".equalsIgnoreCase(radioUri.getScheme())
+                    && radioHost != null && !radioHost.trim().isEmpty()
+                    && radioUri.getUserInfo() == null;
+        } catch (Exception ignored) { }
         boolean allowedQuran=false,allowedLocal=false,allowedAudio=false;
         File localFile=null;
         String localPath=intent==null?null:intent.getStringExtra("local_path");
