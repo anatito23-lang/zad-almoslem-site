@@ -252,6 +252,7 @@ public class RadioPlaybackService extends Service {
         String kind=getSharedPreferences("zad_audio",MODE_PRIVATE).getString("active_kind","");
         if("quran".equals(kind)){playQuranSurah(forward?1:-1);return;}
         if(player==null)return;
+        boolean resume=player.getPlayWhenReady()||resumeOnAudioFocusGain;
         if(forward){
             if(player.hasNextMediaItem())player.seekToNextMediaItem();
         }else if(player.hasPreviousMediaItem()){
@@ -259,7 +260,8 @@ public class RadioPlaybackService extends Service {
         }else if(player.getCurrentPosition()>2500L){
             player.seekTo(0L);
         }
-        if(requestAudioFocus())player.play();
+        if(resume&&!adhanPauseRequested&&requestAudioFocus())player.play();
+        else player.pause();
         updateRadioNotification(playbackTitle(),forward?"انتقل إلى المقطع التالي":"انتقل إلى المقطع السابق");
     }
     private void playQuranSurah(int direction) {
@@ -270,6 +272,7 @@ public class RadioPlaybackService extends Service {
         String reciter=prefs.getString("last_quran_reciter","القارئ");
         String storageKey=prefs.getString("last_quran_storage_key","unknown");
         if(current<1||current>114||server==null||server.trim().isEmpty())return;
+        boolean resumePlayback=player!=null&&(player.getPlayWhenReady()||resumeOnAudioFocusGain);
         Set<Integer> surahs=new HashSet<>();
         if(available!=null)for(String part:available.split(",")){try{surahs.add(Integer.parseInt(part.trim()));}catch(Exception ignored){}}
         int target=current+direction;
@@ -293,7 +296,7 @@ public class RadioPlaybackService extends Service {
             QuranHomeWidget.refreshAll(this);
             Uri source=local==null?Uri.parse(nextUrl):Uri.fromFile(local);
             player.setMediaItem(MediaItem.fromUri(source));player.prepare();
-            if(requestAudioFocus())player.play();else player.pause();
+            if(resumePlayback&&!adhanPauseRequested&&requestAudioFocus())player.play();else player.pause();
             updateRadioNotification(title,direction>0?"انتقل إلى السورة التالية":"انتقل إلى السورة السابقة");
         }catch(Exception e){
             android.util.Log.e("ZadAlmoslem","Could not change Quran surah",e);
