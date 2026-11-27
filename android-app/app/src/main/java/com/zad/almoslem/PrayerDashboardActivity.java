@@ -155,6 +155,23 @@ public class PrayerDashboardActivity extends Activity {
         });
         root.addView(clockFormat,full());
 
+        TextView widgetTitle=label("إعدادات ويدج الصلاة على الشاشة",17,AppThemeColors.text(this),true);
+        widgetTitle.setPadding(0,dp(16),0,dp(5));root.addView(widgetTitle,full());
+        TextView widgetHint=label("تحكم في المعلومات التي تظهر في الويدج، واضغط على الويدج لفتح مواقيت الصلاة.",12,AppThemeColors.muted(this),false);
+        root.addView(widgetHint,full());
+        Switch showWidgetCity=new Switch(this);showWidgetCity.setText("إظهار اسم المدينة في الويدج");
+        showWidgetCity.setChecked(prefs.getBoolean("widget_show_city",true));root.addView(showWidgetCity,full());
+        showWidgetCity.setOnCheckedChangeListener((button,checked)->{
+            prefs.edit().putBoolean("widget_show_city",checked).apply();NextPrayerWidget.refreshAll(this);
+        });
+        Switch showWidgetTime=new Switch(this);showWidgetTime.setText("إظهار موعد الصلاة القادمة");
+        showWidgetTime.setChecked(prefs.getBoolean("widget_show_prayer_time",true));root.addView(showWidgetTime,full());
+        showWidgetTime.setOnCheckedChangeListener((button,checked)->{
+            prefs.edit().putBoolean("widget_show_prayer_time",checked).apply();NextPrayerWidget.refreshAll(this);
+        });
+        Button refreshWidget=new Button(this);refreshWidget.setText("تحديث الويدج الآن");root.addView(refreshWidget,full());
+        refreshWidget.setOnClickListener(v->{NextPrayerWidget.refreshAll(this);Toast.makeText(this,"تم تحديث بيانات الويدج",Toast.LENGTH_SHORT).show();});
+
         String[] icons={"🌅","☀️","🌤️","🌇","🌙"};
         for(int i=0;i<5;i++){
             LinearLayout card=col();card.setPadding(dp(14),dp(10),dp(14),dp(10));card.setBackground(bg(AppThemeColors.surface(this),15));
