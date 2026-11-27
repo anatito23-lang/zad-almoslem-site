@@ -25,14 +25,14 @@ public final class FajrAlarmScheduler {
         Calendar at=Calendar.getInstance(TimeZone.getTimeZone(zone));
         at.set(Calendar.HOUR_OF_DAY,hour);at.set(Calendar.MINUTE,minute);at.set(Calendar.SECOND,0);at.set(Calendar.MILLISECOND,0);
         if(at.getTimeInMillis()<=System.currentTimeMillis()) at.add(Calendar.DAY_OF_YEAR,1);
-        return scheduleAt(context,at.getTimeInMillis());
+        return scheduleAt(context,at.getTimeInMillis(),REQUEST_CODE);
     }
 
-    public static boolean scheduleAt(Context context,long when) {
+    public static boolean scheduleSnooze(Context context,long when) { return scheduleAt(context,when,REQUEST_CODE+1); }\n\n    private static boolean scheduleAt(Context context,long when,int requestCode) {
         try {
             AlarmManager manager=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
             Intent intent=new Intent(context,FajrAlarmReceiver.class).setAction("com.zad.almoslem.FAJR_ALARM");
-            PendingIntent pi=PendingIntent.getBroadcast(context,REQUEST_CODE,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
+            PendingIntent pi=PendingIntent.getBroadcast(context,requestCode,intent,PendingIntent.FLAG_UPDATE_CURRENT|PendingIntent.FLAG_IMMUTABLE);
             if(Build.VERSION.SDK_INT>=31 && !manager.canScheduleExactAlarms()) manager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,when,pi);
             else if(Build.VERSION.SDK_INT>=23) manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,when,pi);
             else manager.setExact(AlarmManager.RTC_WAKEUP,when,pi);
