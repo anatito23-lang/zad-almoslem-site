@@ -10,6 +10,7 @@ import androidx.media3.common.C;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.session.MediaSession;
 import android.net.Uri;
 import android.os.*;
 import java.io.IOException;
@@ -38,6 +39,7 @@ public class RadioPlaybackService extends Service {
     private static final String CHANNEL="zad_radio_playback";
     private static final int NOTIFICATION=7410;
     private ExoPlayer player;
+    private MediaSession mediaSession;
     private PowerManager.WakeLock playbackWakeLock;
     private AudioManager audioManager;
     private AudioFocusRequest audioFocusRequest;
@@ -328,6 +330,8 @@ public class RadioPlaybackService extends Service {
                     .setMediaSourceFactory(new DefaultMediaSourceFactory(httpFactory))
                     .setWakeMode(C.WAKE_MODE_NETWORK)
                     .build();
+            // Publish native Android media controls for the lock screen and system UI.
+            mediaSession = new MediaSession.Builder(this, player).build();
             player.setAudioAttributes(new androidx.media3.common.AudioAttributes.Builder()
                     .setUsage(androidx.media3.common.C.USAGE_MEDIA)
                     .setContentType(androidx.media3.common.C.AUDIO_CONTENT_TYPE_MUSIC)
@@ -550,10 +554,17 @@ public class RadioPlaybackService extends Service {
         Notification.Builder b = Build.VERSION.SDK_INT >= 26
                 ? new Notification.Builder(this, CHANNEL) : new Notification.Builder(this);
         b.setSmallIcon(android.R.drawable.ic_media_play)
+                .setCategory(Notification.CATEGORY_TRANSPORT)
+                .setPriority(Notification.PRIORITY_LOW)
                 .setContentTitle(title == null ? "سكينة – أذان وصلاة وقرآن" : title)
                 .setContentText(message == null ? "تشغيل صوتي في الخلفية" : message)
                 .setContentIntent(content).setOngoing(true).setOnlyAlertOnce(true)
                 .setVisibility(Notification.VISIBILITY_PUBLIC)
+                .setStyle(mediaSession != null
+                        ? new Notification.MediaStyle()
+                                .setMediaSession(mediaSession.getPlatformToken())
+                                .setShowActionsInCompactView(0, 1)
+                        : new Notification.MediaStyle().setShowActionsInCompactView(0, 1))
                 .addAction(playing ? android.R.drawable.ic_media_pause : android.R.drawable.ic_media_play,
                         playing ? "إيقاف مؤقت" : "استئناف", toggleAction)
                 .addAction(android.R.drawable.ic_menu_close_clear_cancel, "إيقاف", stopAction);
@@ -621,6 +632,10 @@ public class RadioPlaybackService extends Service {
         if (startupTimeout != null) {
             playbackHandler.removeCallbacks(startupTimeout);
             startupTimeout = null;
+        }
+        if (mediaSession != null) {
+            try { mediaSession.release(); } catch (Exception ignored) {}
+            mediaSession = null;
         }
         if (player != null) {
             try { player.stop(); } catch (Exception ignored) {}
