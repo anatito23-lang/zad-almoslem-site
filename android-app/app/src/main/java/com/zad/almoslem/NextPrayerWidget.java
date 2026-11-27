@@ -39,6 +39,7 @@ public class NextPrayerWidget extends AppWidgetProvider {
     public static void refreshAll(Context context) {
         AppWidgetManager manager = AppWidgetManager.getInstance(context);
         int[] ids = manager.getAppWidgetIds(new ComponentName(context, NextPrayerWidget.class));
+        if (ids.length > 0) scheduleRefresh(context);
         for (int id : ids) updateOne(context, manager, id);
     }
     private static void scheduleRefresh(Context context) {
