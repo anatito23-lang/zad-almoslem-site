@@ -121,7 +121,6 @@ public class QuranTextActivity extends Activity {
                 switch(event.getActionMasked()) {
                     case android.view.MotionEvent.ACTION_DOWN:
                         touchStart[0] = event.getEventTime();
-                        v.getParent().requestDisallowInterceptTouchEvent(true);
                         return true;
                     case android.view.MotionEvent.ACTION_MOVE:
                         return true;
