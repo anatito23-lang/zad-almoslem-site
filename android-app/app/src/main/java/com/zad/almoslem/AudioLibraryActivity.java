@@ -96,20 +96,35 @@ public class AudioLibraryActivity extends Activity {
     }
     private void playSelected(){
         int artist=artistPicker.getSelectedItemPosition(),index=trackPicker.getSelectedItemPosition();
-        if(index<0)return;
-        String url,title;
-        if(artist==0){title=tobar[index][0];url=tobar[index][1];}
-        else{
-            title=naqshTitles[index];
-            try{url="https://archive.org/download/qr_20201208/"+URLEncoder.encode(naqshFiles[index],"UTF-8").replace("+","%20");}
-            catch(Exception e){status.setText("تعذر تجهيز رابط التسجيل.");return;}
+        if(artist<0||index<0||index>=getTrackCount(artist)){
+            status.setText("اختر الشيخ والابتهال أولًا.");
+            return;
         }
-        selectedKind="nasheed";startAudio(url,title);
+        ArrayList<String> queueUrls=new ArrayList<>();
+        ArrayList<String> queueTitles=new ArrayList<>();
+        for(int track=index;track<getTrackCount(artist);track++){
+            String url=getTrackUrl(artist,track);
+            if(url==null||url.trim().isEmpty()){
+                status.setText("تعذر تجهيز رابط الابتهال: "+getTrackName(artist,track));
+                return;
+            }
+            queueUrls.add(url);
+            queueTitles.add(getTrackName(artist,track));
+        }
+        selectedKind="nasheed";
+        startAudio(queueUrls.get(0),queueTitles.get(0),queueUrls,queueTitles);
     }
     private void startAudio(String url,String title){
+        startAudio(url,title,null,null);
+    }
+    private void startAudio(String url,String title,ArrayList<String> queueUrls,ArrayList<String> queueTitles){
         Intent i=new Intent(this,RadioPlaybackService.class);i.setAction(RadioPlaybackService.ACTION_PLAY);
         i.putExtra("url",url);i.putExtra("kind",selectedKind);i.putExtra("label",title);
-        try{if(Build.VERSION.SDK_INT>=26)startForegroundService(i);else startService(i);status.setText("تم إرسال طلب التشغيل: "+title+" — إذا لم يبدأ الصوت فتحقق من الاتصال بالمصدر.");}
+        if(queueUrls!=null&&!queueUrls.isEmpty()){
+            i.putStringArrayListExtra("queue_urls",queueUrls);
+            i.putStringArrayListExtra("queue_titles",queueTitles);
+        }
+        try{if(Build.VERSION.SDK_INT>=26)startForegroundService(i);else startService(i);status.setText("بدأ طلب تشغيل "+title+"، وسيعمل التالي تلقائيًا من قائمة الشيخ نفسه.");}
         catch(Exception e){status.setText("تعذر بدء التشغيل: "+e.getMessage());}
     }
     private void stopAudio(){
