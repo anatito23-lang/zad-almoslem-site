@@ -54,6 +54,7 @@ public class NextPrayerWidget extends AppWidgetProvider {
         String city = p.getString("native_prayer_city", "");
         if (city.isEmpty()) city = "مواقيت الصلاة";
         v.setTextViewText(R.id.next_widget_city, city);
+        v.setViewVisibility(R.id.next_widget_city, p.getBoolean("widget_show_city", true) ? android.view.View.VISIBLE : android.view.View.GONE);
         TimeZone zone = TimeZone.getTimeZone(p.getString("native_city_timezone",
                 "Egypt".equals(p.getString("native_country", "Egypt")) ? "Africa/Cairo" : TimeZone.getDefault().getID()));
         Calendar now = Calendar.getInstance(zone);
@@ -85,7 +86,12 @@ public class NextPrayerWidget extends AppWidgetProvider {
             v.setTextViewText(R.id.next_widget_countdown, "—");
         } else {
             v.setTextViewText(R.id.next_widget_prayer, "الصلاة القادمة: " + nextName);
-            v.setTextViewText(R.id.next_widget_time, String.format(Locale.getDefault(), "موعدها %02d:%02d", nextHour, nextMinute));
+            boolean use24 = p.getBoolean("prayer_time_format_24", true);
+            String prayerTime;
+            if (use24) prayerTime = String.format(Locale.getDefault(), "%02d:%02d", nextHour, nextMinute);
+            else { int displayHour = nextHour % 12; if (displayHour == 0) displayHour = 12; prayerTime = String.format(Locale.getDefault(), "%d:%02d %s", displayHour, nextMinute, nextHour < 12 ? "ص" : "م"); }
+            v.setTextViewText(R.id.next_widget_time, "موعدها " + prayerTime);
+            v.setViewVisibility(R.id.next_widget_time, p.getBoolean("widget_show_prayer_time", true) ? android.view.View.VISIBLE : android.view.View.GONE);
             long left = Math.max(0, best - current);
             long seconds = left / 1000L;
             String countdown = String.format(Locale.getDefault(), "%02d:%02d:%02d",
