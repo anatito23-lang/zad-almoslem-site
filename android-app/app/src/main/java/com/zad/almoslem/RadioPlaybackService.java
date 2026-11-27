@@ -247,7 +247,8 @@ public class RadioPlaybackService extends Service {
         ArrayList<String> result=new ArrayList<>();try{JSONArray a=new JSONArray(raw);for(int i=0;i<a.length();i++)result.add(a.optString(i,""));}catch(Exception ignored){}return result;
     }
     // Move between available surahs for the currently selected reciter.
-    private void playNextQuranSurah() { playQuranSurah(1); }
+    private void playNextQuranSurah() { playQuranSurah(1,true); }
+    private void playQuranSurah(int direction) { playQuranSurah(direction,false); }
     private void skipPlayback(boolean forward) {
         String kind=getSharedPreferences("zad_audio",MODE_PRIVATE).getString("active_kind","");
         if("quran".equals(kind)){playQuranSurah(forward?1:-1);return;}
@@ -264,7 +265,7 @@ public class RadioPlaybackService extends Service {
         else player.pause();
         updateRadioNotification(playbackTitle(),forward?"انتقل إلى المقطع التالي":"انتقل إلى المقطع السابق");
     }
-    private void playQuranSurah(int direction) {
+    private void playQuranSurah(int direction,boolean forceResume) {
         android.content.SharedPreferences prefs=getSharedPreferences("zad_audio",MODE_PRIVATE);
         int current=prefs.getInt("last_quran_surah_id",0);
         String server=prefs.getString("last_quran_server","");
@@ -272,7 +273,7 @@ public class RadioPlaybackService extends Service {
         String reciter=prefs.getString("last_quran_reciter","القارئ");
         String storageKey=prefs.getString("last_quran_storage_key","unknown");
         if(current<1||current>114||server==null||server.trim().isEmpty())return;
-        boolean resumePlayback=player!=null&&(player.getPlayWhenReady()||resumeOnAudioFocusGain);
+        boolean resumePlayback=forceResume||(player!=null&&(player.getPlayWhenReady()||resumeOnAudioFocusGain));
         Set<Integer> surahs=new HashSet<>();
         if(available!=null)for(String part:available.split(",")){try{surahs.add(Integer.parseInt(part.trim()));}catch(Exception ignored){}}
         int target=current+direction;
