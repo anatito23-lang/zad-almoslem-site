@@ -46,7 +46,7 @@ public class FajrAlarmActivity extends Activity {
         feedback=text("",14,Color.WHITE,false);feedback.setPadding(0,dp(10),0,dp(10));root.addView(feedback);
         int[] choices={answer,answer+1,answer-1,answer+2};for(int i=choices.length-1;i>0;i--){int j=random.nextInt(i+1),v=choices[i];choices[i]=choices[j];choices[j]=v;}
         for(int value:choices){Button choice=new Button(this);choice.setText(String.valueOf(value));choice.setTextSize(20);choice.setOnClickListener(v->{if(value==answer)stopAlarm();else feedback.setText("الإجابة غير صحيحة، حاول مرة أخرى.");});LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,dp(56));lp.topMargin=dp(7);root.addView(choice,lp);}
-        Button snooze=new Button(this);snooze.setText("غفوة 5 دقائق");snooze.setOnClickListener(v->{FajrAlarmScheduler.scheduleAt(this,System.currentTimeMillis()+5*60*1000L);stopSound();finish();});LinearLayout.LayoutParams slp=new LinearLayout.LayoutParams(-1,dp(52));slp.topMargin=dp(20);root.addView(snooze,slp);
+        Button snooze=new Button(this);snooze.setText("غفوة 5 دقائق");snooze.setOnClickListener(v->{FajrAlarmScheduler.scheduleSnooze(this,System.currentTimeMillis()+5*60*1000L);stopSound();finish();});LinearLayout.LayoutParams slp=new LinearLayout.LayoutParams(-1,dp(52));slp.topMargin=dp(20);root.addView(snooze,slp);
         setContentView(root);
     }
     private void stopSound(){try{if(ringtone!=null&&ringtone.isPlaying())ringtone.stop();}catch(Exception ignored){}}
