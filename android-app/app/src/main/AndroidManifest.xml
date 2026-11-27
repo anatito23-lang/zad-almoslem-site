@@ -30,6 +30,7 @@
         <activity android:name=".QiblaActivity" android:exported="false" />
         <activity android:name=".QuranTextActivity" android:exported="false" />
         <activity android:name=".PrayerDashboardActivity" android:exported="false" />
+        <activity android:name=".FajrAlarmActivity" android:exported="false" android:showWhenLocked="true" android:turnScreenOn="true" android:excludeFromRecents="true" android:launchMode="singleTop" />
         <activity android:name=".MushafPageActivity" android:exported="false" />
         <activity android:name=".RadioActivity" android:exported="false" />
         <activity android:name=".NowPlayingActivity" android:exported="false" />
@@ -63,6 +64,7 @@
         <service android:name=".ReminderAudioService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
         <service android:name=".RamadanAudioService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
         <receiver android:name=".RamadanReminderReceiver" android:enabled="true" android:exported="false" />
+        <receiver android:name=".FajrAlarmReceiver" android:enabled="true" android:exported="false" />
         <receiver android:name=".ReminderReceiver" android:enabled="true" android:exported="false" />
         <receiver android:name=".BootReceiver" android:enabled="true" android:exported="true">
             <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /><action android:name="android.intent.action.TIME_SET" /><action android:name="android.intent.action.TIMEZONE_CHANGED" /><action android:name="android.intent.action.MY_PACKAGE_REPLACED" /></intent-filter>
