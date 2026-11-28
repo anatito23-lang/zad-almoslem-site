@@ -96,6 +96,19 @@ public class PrayerDashboardActivity extends Activity {
         boolean timezoneOffsetChanged=currentOffset!=prefs.getInt("native_times_utc_offset",Integer.MIN_VALUE);
         if(missing||timezoneOffsetChanged||!today.equals(prefs.getString("native_times_date","")))updateButton.post(()->fetchTimes(updateButton));
     }
+    @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults){
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+        if(requestCode==7412){
+            boolean granted=grantResults.length>0&&grantResults[0]==android.content.pm.PackageManager.PERMISSION_GRANTED;
+            if(granted) PrayerStatusNotification.start(this);
+            else{
+                prefs.edit().putBoolean("prayer_status_notification_enabled",false).apply();
+                PrayerStatusNotification.stop(this);
+                Toast.makeText(this,"اسمح بالإشعارات من إعدادات الهاتف لتشغيل متابعة الصلاة.",Toast.LENGTH_LONG).show();
+                recreate();
+            }
+        }
+    }
     private TimeZone cityTimeZone(){String id=prefs.getString("native_city_timezone","");if(id.isEmpty()&&"Egypt".equals(prefs.getString("native_country","Egypt")))id="Africa/Cairo";if(id.isEmpty())id=TimeZone.getDefault().getID();return TimeZone.getTimeZone(id);}
     private String todayInCityZone(){SimpleDateFormat f=new SimpleDateFormat("yyyyMMdd",Locale.US);f.setTimeZone(cityTimeZone());return f.format(new Date());}
     private int dp(float n){return (int)(n*getResources().getDisplayMetrics().density+.5f);}
