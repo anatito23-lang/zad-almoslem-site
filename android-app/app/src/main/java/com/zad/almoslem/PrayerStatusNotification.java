@@ -111,11 +111,11 @@ public final class PrayerStatusNotification {
                 .setContentIntent(content)
                 .setOngoing(true)
                 .setOnlyAlertOnce(true)
-                .setSilent(true)
                 .setShowWhen(false)
                 .setCategory(Notification.CATEGORY_STATUS)
                 .setVisibility(Notification.VISIBILITY_PRIVATE)
                 .setPriority(Notification.PRIORITY_LOW);
+        if (Build.VERSION.SDK_INT >= 26) builder.setSilent(true);
         NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         if (manager != null) manager.notify(NOTIFICATION_ID, builder.build());
     }
