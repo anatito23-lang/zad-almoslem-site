@@ -89,7 +89,7 @@ public class PrayerDashboardActivity extends Activity {
 
     @Override public void onCreate(Bundle b){
         super.onCreate(b);prefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);green=AppThemeColors.primary(this);AppThemeColors.apply(this);
-        build();handler.post(ticker);NextPrayerWidget.refreshAll(this);
+        build();handler.post(ticker);NextPrayerWidget.refreshAll(this);if(prefs.getBoolean("sunrise_alarm_enabled",false))SunriseAlarmScheduler.scheduleNext(this);
         String today=todayInCityZone();
         boolean missing=false;for(String prayer:PRAYERS)if(prefs.getInt("native_time_hour_"+prayer,-1)<0)missing=true;
         int currentOffset=cityTimeZone().getOffset(System.currentTimeMillis())/60000;
@@ -221,6 +221,40 @@ public class PrayerDashboardActivity extends Activity {
             LinearLayout.LayoutParams cp=full();cp.bottomMargin=dp(9);root.addView(card,cp);
         }
         LinearLayout sunriseCard=col();sunriseCard.setPadding(dp(14),dp(10),dp(14),dp(10));sunriseCard.setBackground(bg(AppThemeColors.surface(this),15));TextView sunriseName=label("🌄  الشروق — دون أذان",18,green,true);sunriseName.setGravity(Gravity.CENTER);sunriseCard.addView(sunriseName,new LinearLayout.LayoutParams(-1,dp(42)));sunriseView=label(savedSunrise(),20,green,true);sunriseView.setGravity(Gravity.CENTER);sunriseCard.addView(sunriseView);LinearLayout.LayoutParams sunriseLp=full();sunriseLp.bottomMargin=dp(9);root.addView(sunriseCard,sunriseLp);
+
+        TextView sunriseAlarmTitle=label("تنبيه الشروق",19,AppThemeColors.text(this),true);
+        sunriseAlarmTitle.setPadding(0,dp(12),0,dp(4));root.addView(sunriseAlarmTitle,full());
+        TextView sunriseAlarmHint=label("تنبيه هادئ وقت الشروق بصوت تغريد العصافير، وليس أذانًا. يُضبط تلقائيًا حسب مواقيت مدينتك.",12,AppThemeColors.muted(this),false);
+        root.addView(sunriseAlarmHint,full());
+        Switch sunriseAlertSwitch=new Switch(this);sunriseAlertSwitch.setText("تشغيل صوت العصافير عند الشروق");
+        sunriseAlertSwitch.setChecked(prefs.getBoolean("sunrise_alarm_enabled",false));root.addView(sunriseAlertSwitch,full());
+        TextView sunriseAlarmStatus=label("",12,AppThemeColors.muted(this),false);root.addView(sunriseAlarmStatus,full());
+        Runnable updateSunriseStatus=()->{
+            int sh=prefs.getInt("native_sunrise_hour",-1),sm=prefs.getInt("native_sunrise_minute",0);
+            if(sh<0)sunriseAlarmStatus.setText("حدّث مواقيت الصلاة أولًا لضبط تنبيه الشروق.");
+            else sunriseAlarmStatus.setText("موعد التنبيه حسب مدينتك: "+String.format(Locale.getDefault(),"%02d:%02d",sh,sm));
+        };
+        updateSunriseStatus.run();
+        sunriseAlertSwitch.setOnCheckedChangeListener((button,enabled)->{
+            prefs.edit().putBoolean("sunrise_alarm_enabled",enabled).apply();
+            if(enabled){
+                if(prefs.getInt("native_sunrise_hour",-1)<0||!SunriseAlarmScheduler.scheduleNext(this)){
+                    prefs.edit().putBoolean("sunrise_alarm_enabled",false).apply();
+                    button.setOnCheckedChangeListener(null);button.setChecked(false);
+                    button.setOnCheckedChangeListener((b,on)->{
+                        prefs.edit().putBoolean("sunrise_alarm_enabled",on).apply();
+                        if(on){
+                            if(prefs.getInt("native_sunrise_hour",-1)<0||!SunriseAlarmScheduler.scheduleNext(this)){
+                                prefs.edit().putBoolean("sunrise_alarm_enabled",false).apply();b.setChecked(false);
+                                Toast.makeText(this,"حدّث مواقيت الصلاة وتأكد من إذن المنبهات الدقيقة.",Toast.LENGTH_LONG).show();
+                            }
+                        }else SunriseAlarmScheduler.cancel(this);
+                    });
+                    Toast.makeText(this,"حدّث مواقيت الصلاة أولًا وتأكد من إذن المنبهات الدقيقة.",Toast.LENGTH_LONG).show();
+                }else Toast.makeText(this,"تم تفعيل تنبيه الشروق بصوت العصافير 🌿",Toast.LENGTH_SHORT).show();
+            }else{SunriseAlarmScheduler.cancel(this);Toast.makeText(this,"تم إيقاف تنبيه الشروق",Toast.LENGTH_SHORT).show();}
+            updateSunriseStatus.run();
+        });
         TextView trackerTitle=label("متتبع الصلوات اليومي",19,AppThemeColors.text(this),true);trackerTitle.setPadding(0,dp(16),0,dp(5));root.addView(trackerTitle);
         TextView trackerHint=label("علّم الصلاة بعد أدائها، وسيُحفظ إنجازك لهذا اليوم على الهاتف.",12,AppThemeColors.muted(this),false);root.addView(trackerHint);
         trackerCount=label("",14,green,true);trackerCount.setPadding(0,dp(7),0,dp(7));root.addView(trackerCount);
@@ -291,7 +325,7 @@ public class PrayerDashboardActivity extends Activity {
             if(c.getResponseCode()!=200)throw new Exception("خدمة المواقيت لم تستجب");
             ByteArrayOutputStream out=new ByteArrayOutputStream();try(InputStream in=c.getInputStream()){byte[] b=new byte[4096];int n;while((n=in.read(b))!=-1)out.write(b,0,n);}
             JSONObject data=new JSONObject(out.toString("UTF-8")).getJSONObject("data");JSONObject timings=data.getJSONObject("timings");String[] api={"Fajr","Dhuhr","Asr","Maghrib","Isha"};String cityTimezone=data.getJSONObject("meta").optString("timezone",TimeZone.getDefault().getID());prefs.edit().putString("native_city_timezone",cityTimezone).apply();
-            String sunriseRaw=timings.getString("Sunrise").split(" ")[0];String[] sunriseHm=sunriseRaw.split(":");prefs.edit().putInt("native_sunrise_hour",Integer.parseInt(sunriseHm[0])).putInt("native_sunrise_minute",Integer.parseInt(sunriseHm[1])).apply();
+            String sunriseRaw=timings.getString("Sunrise").split(" ")[0];String[] sunriseHm=sunriseRaw.split(":");prefs.edit().putInt("native_sunrise_hour",Integer.parseInt(sunriseHm[0])).putInt("native_sunrise_minute",Integer.parseInt(sunriseHm[1])).apply();if(prefs.getBoolean("sunrise_alarm_enabled",false))SunriseAlarmScheduler.scheduleNext(this);
             for(int i=0;i<5;i++){String raw=timings.getString(api[i]).split(" ")[0];String[] hm=raw.split(":");int h=Integer.parseInt(hm[0]),m=Integer.parseInt(hm[1]);prefs.edit().putInt("native_time_hour_"+PRAYERS[i],h).putInt("native_time_minute_"+PRAYERS[i],m).apply();Calendar next=Calendar.getInstance(TimeZone.getTimeZone(cityTimezone));next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,m);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);if(prefs.getBoolean("prayer_enabled_"+PRAYERS[i],true))ReminderReceiver.schedulePrayer(this,PRAYERS[i],next.getTimeInMillis());}
             prefs.edit().putString("native_times_date",todayInCityZone()).putInt("native_times_utc_offset",TimeZone.getTimeZone(cityTimezone).getOffset(System.currentTimeMillis())/60000).apply();NextPrayerWidget.refreshAll(this);RamadanReminderReceiver.scheduleAll(this);if(prefs.getBoolean("fajr_alarm_enabled",false))FajrAlarmScheduler.scheduleNext(this);
             runOnUiThread(()->{result.setText("تم تحديث مواقيت "+COUNTRIES[pos]+" — "+city+" بطريقة الحساب رقم "+method+"؛ وقد تختلف الدقائق حسب الجهة المحلية المعتمدة.");refreshTracker();refreshCountdowns();});
