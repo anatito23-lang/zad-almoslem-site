@@ -9,6 +9,7 @@ public class BootReceiver extends BroadcastReceiver {
     private android.content.SharedPreferences prefs(Context context){return context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);}
     @Override public void onReceive(Context context,Intent intent) {
         ReminderReceiver.ensureDefaultDailyReminders(context);
+        if (prefs(context).getBoolean("prayer_status_notification_enabled", false)) PrayerStatusNotification.start(context);
         RamadanReminderReceiver.scheduleAll(context);
         if(prefs(context).getBoolean("fajr_alarm_enabled",false)) FajrAlarmScheduler.scheduleNext(context);
         if(prefs(context).getBoolean("sunrise_alarm_enabled",false)) SunriseAlarmScheduler.scheduleNext(context);
