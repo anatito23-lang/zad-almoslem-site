@@ -51,10 +51,8 @@ public class NextPrayerWidget extends AppWidgetProvider {
     private static void updateOne(Context context, AppWidgetManager manager, int id) {
         RemoteViews v = new RemoteViews(context.getPackageName(), R.layout.next_prayer_widget);
         SharedPreferences p = context.getSharedPreferences("zad_reminders", Context.MODE_PRIVATE);
-        String city = p.getString("native_prayer_city", "");
-        if (city.isEmpty()) city = "مواقيت الصلاة";
-        v.setTextViewText(R.id.next_widget_city, city);
-        v.setViewVisibility(R.id.next_widget_city, p.getBoolean("widget_show_city", true) ? android.view.View.VISIBLE : android.view.View.GONE);
+        v.setTextViewText(R.id.next_widget_city, "سكينة | أذان وصلاة وقرآن");
+        v.setViewVisibility(R.id.next_widget_city, android.view.View.VISIBLE);
         TimeZone zone = TimeZone.getTimeZone(p.getString("native_city_timezone",
                 "Egypt".equals(p.getString("native_country", "Egypt")) ? "Africa/Cairo" : TimeZone.getDefault().getID()));
         Calendar now = Calendar.getInstance(zone);
