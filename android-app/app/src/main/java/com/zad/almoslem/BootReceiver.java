@@ -11,6 +11,7 @@ public class BootReceiver extends BroadcastReceiver {
         ReminderReceiver.ensureDefaultDailyReminders(context);
         RamadanReminderReceiver.scheduleAll(context);
         if(prefs(context).getBoolean("fajr_alarm_enabled",false)) FajrAlarmScheduler.scheduleNext(context);
+        if(prefs(context).getBoolean("sunrise_alarm_enabled",false)) SunriseAlarmScheduler.scheduleNext(context);
         if(prefs(context).getBoolean("gentle_enabled",false)) ReminderReceiver.scheduleGentleReminder(context);
         android.content.SharedPreferences p=context.getSharedPreferences("zad_reminders",Context.MODE_PRIVATE);
         for(String key:new String[]{"morning","evening","qiyam"}) {
