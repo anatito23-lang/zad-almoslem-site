@@ -89,7 +89,7 @@ public class PrayerDashboardActivity extends Activity {
 
     @Override public void onCreate(Bundle b){
         super.onCreate(b);prefs=getSharedPreferences("zad_reminders",MODE_PRIVATE);green=AppThemeColors.primary(this);AppThemeColors.apply(this);
-        build();handler.post(ticker);NextPrayerWidget.refreshAll(this);if(prefs.getBoolean("sunrise_alarm_enabled",false))SunriseAlarmScheduler.scheduleNext(this);
+        build();handler.post(ticker);if(prefs.getBoolean("prayer_status_notification_enabled",false))PrayerStatusNotification.start(this);if(prefs.getBoolean("sunrise_alarm_enabled",false))SunriseAlarmScheduler.scheduleNext(this);
         String today=todayInCityZone();
         boolean missing=false;for(String prayer:PRAYERS)if(prefs.getInt("native_time_hour_"+prayer,-1)<0)missing=true;
         int currentOffset=cityTimeZone().getOffset(System.currentTimeMillis())/60000;
@@ -155,30 +155,24 @@ public class PrayerDashboardActivity extends Activity {
         });
         root.addView(clockFormat,full());
 
-        TextView widgetTitle=label("إعدادات ويدج الصلاة على الشاشة",17,AppThemeColors.text(this),true);
-        widgetTitle.setPadding(0,dp(16),0,dp(5));root.addView(widgetTitle,full());
-        TextView widgetHint=label("تحكم في المعلومات التي تظهر في الويدج، واضغط على الويدج لفتح مواقيت الصلاة.",12,AppThemeColors.muted(this),false);
-        root.addView(widgetHint,full());
-        Switch showWidgetCity=new Switch(this);showWidgetCity.setText("إظهار اسم المدينة في الويدج");
-        showWidgetCity.setChecked(prefs.getBoolean("widget_show_city",true));root.addView(showWidgetCity,full());
-        showWidgetCity.setOnCheckedChangeListener((button,checked)->{
-            prefs.edit().putBoolean("widget_show_city",checked).apply();NextPrayerWidget.refreshAll(this);
-        });
-        Switch showWidgetTime=new Switch(this);showWidgetTime.setText("إظهار موعد الصلاة القادمة");
-        showWidgetTime.setChecked(prefs.getBoolean("widget_show_prayer_time",true));root.addView(showWidgetTime,full());
-        showWidgetTime.setOnCheckedChangeListener((button,checked)->{
-            prefs.edit().putBoolean("widget_show_prayer_time",checked).apply();NextPrayerWidget.refreshAll(this);
-        });
-        Button refreshWidget=new Button(this);refreshWidget.setText("تحديث الويدج الآن");root.addView(refreshWidget,full());
-        refreshWidget.setOnClickListener(v->{NextPrayerWidget.refreshAll(this);Toast.makeText(this,"تم تحديث بيانات الويدج",Toast.LENGTH_SHORT).show();});
-        Button addWidget=new Button(this);addWidget.setText("إضافة ويدج الصلاة إلى الشاشة الرئيسية");root.addView(addWidget,full());
-        addWidget.setOnClickListener(v->{
-            if(android.os.Build.VERSION.SDK_INT>=26){
-                android.appwidget.AppWidgetManager manager=android.appwidget.AppWidgetManager.getInstance(this);
-                if(manager.isRequestPinAppWidgetSupported()){
-                    manager.requestPinAppWidget(new android.content.ComponentName(this,NextPrayerWidget.class),null,null);
-                }else Toast.makeText(this,"افتح قائمة الويدج من الشاشة الرئيسية وأضف ويدج الصلاة يدويًا.",Toast.LENGTH_LONG).show();
-            }else Toast.makeText(this,"اضغط مطولًا على الشاشة الرئيسية ثم اختر الويدج وأضف الصلاة القادمة.",Toast.LENGTH_LONG).show();
+        TextView statusTitle=label("إشعار الصلاة الثابت",17,AppThemeColors.text(this),true);
+        statusTitle.setPadding(0,dp(16),0,dp(5));root.addView(statusTitle,full());
+        TextView statusHint=label("يعرض الصلاة القادمة والوقت المتبقي في شريط الإشعارات دون ويدج على الشاشة. يمكنك تشغيله أو إيقافه في أي وقت.",12,AppThemeColors.muted(this),false);
+        root.addView(statusHint,full());
+        Switch prayerStatusSwitch=new Switch(this);prayerStatusSwitch.setText("إظهار الصلاة القادمة في الإشعارات");
+        prayerStatusSwitch.setChecked(prefs.getBoolean("prayer_status_notification_enabled",false));root.addView(prayerStatusSwitch,full());
+        prayerStatusSwitch.setOnCheckedChangeListener((button,enabled)->{
+            if(enabled){
+                boolean hasTimes=false;for(String prayer:PRAYERS)if(prefs.getInt("native_time_hour_"+prayer,-1)>=0){hasTimes=true;break;}
+                if(!hasTimes){button.setChecked(false);Toast.makeText(this,"حدّث مواقيت الصلاة أولًا",Toast.LENGTH_LONG).show();return;}
+                prefs.edit().putBoolean("prayer_status_notification_enabled",true).apply();
+                if(android.os.Build.VERSION.SDK_INT>=33 && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)!=android.content.pm.PackageManager.PERMISSION_GRANTED){
+                    requestPermissions(new String[]{android.Manifest.permission.POST_NOTIFICATIONS},7412);
+                }else PrayerStatusNotification.start(this);
+            }else{
+                prefs.edit().putBoolean("prayer_status_notification_enabled",false).apply();
+                PrayerStatusNotification.stop(this);
+            }
         });
 
         TextView fajrAlarmTitle=label("منبه الفجر",19,AppThemeColors.text(this),true);
@@ -327,7 +321,7 @@ public class PrayerDashboardActivity extends Activity {
             JSONObject data=new JSONObject(out.toString("UTF-8")).getJSONObject("data");JSONObject timings=data.getJSONObject("timings");String[] api={"Fajr","Dhuhr","Asr","Maghrib","Isha"};String cityTimezone=data.getJSONObject("meta").optString("timezone",TimeZone.getDefault().getID());prefs.edit().putString("native_city_timezone",cityTimezone).apply();
             String sunriseRaw=timings.getString("Sunrise").split(" ")[0];String[] sunriseHm=sunriseRaw.split(":");prefs.edit().putInt("native_sunrise_hour",Integer.parseInt(sunriseHm[0])).putInt("native_sunrise_minute",Integer.parseInt(sunriseHm[1])).apply();if(prefs.getBoolean("sunrise_alarm_enabled",false))SunriseAlarmScheduler.scheduleNext(this);
             for(int i=0;i<5;i++){String raw=timings.getString(api[i]).split(" ")[0];String[] hm=raw.split(":");int h=Integer.parseInt(hm[0]),m=Integer.parseInt(hm[1]);prefs.edit().putInt("native_time_hour_"+PRAYERS[i],h).putInt("native_time_minute_"+PRAYERS[i],m).apply();Calendar next=Calendar.getInstance(TimeZone.getTimeZone(cityTimezone));next.set(Calendar.HOUR_OF_DAY,h);next.set(Calendar.MINUTE,m);next.set(Calendar.SECOND,0);next.set(Calendar.MILLISECOND,0);if(next.getTimeInMillis()<=System.currentTimeMillis())next.add(Calendar.DAY_OF_YEAR,1);if(prefs.getBoolean("prayer_enabled_"+PRAYERS[i],true))ReminderReceiver.schedulePrayer(this,PRAYERS[i],next.getTimeInMillis());}
-            prefs.edit().putString("native_times_date",todayInCityZone()).putInt("native_times_utc_offset",TimeZone.getTimeZone(cityTimezone).getOffset(System.currentTimeMillis())/60000).apply();NextPrayerWidget.refreshAll(this);RamadanReminderReceiver.scheduleAll(this);if(prefs.getBoolean("fajr_alarm_enabled",false))FajrAlarmScheduler.scheduleNext(this);
+            prefs.edit().putString("native_times_date",todayInCityZone()).putInt("native_times_utc_offset",TimeZone.getTimeZone(cityTimezone).getOffset(System.currentTimeMillis())/60000).apply();PrayerStatusNotification.refreshIfEnabled(this);RamadanReminderReceiver.scheduleAll(this);if(prefs.getBoolean("fajr_alarm_enabled",false))FajrAlarmScheduler.scheduleNext(this);
             runOnUiThread(()->{result.setText("تم تحديث مواقيت "+COUNTRIES[pos]+" — "+city+" بطريقة الحساب رقم "+method+"؛ وقد تختلف الدقائق حسب الجهة المحلية المعتمدة.");refreshTracker();refreshCountdowns();});
         }catch(Exception e){runOnUiThread(()->result.setText("تعذر تحديث المواقيت: "+(e.getMessage()==null?"تحقق من اسم المدينة والإنترنت":e.getMessage())));}
         finally{if(c!=null)c.disconnect();runOnUiThread(()->button.setEnabled(true));}}).start();
